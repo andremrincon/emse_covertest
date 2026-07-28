@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl",
+                System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_SideAZero_ReturnsInvalidTriangle() {
+        given()
+                .when()
+                .get("/api/triangle/0/1/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_SideBZero_ReturnsInvalidTriangle() {
+        given()
+                .when()
+                .get("/api/triangle/1/0/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_SideCZero_ReturnsInvalidTriangle() {
+        given()
+                .when()
+                .get("/api/triangle/1/1/0")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_AllSidesEqual_ReturnsEquilateral() {
+        given()
+                .when()
+                .get("/api/triangle/5/5/5")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_TwoSidesEqual_ReturnsIsosceles() {
+        given()
+                .when()
+                .get("/api/triangle/3/3/4")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_NoSidesEqual_ReturnsScalene() {
+        given()
+                .when()
+                .get("/api/triangle/3/4/5")
+                .then()
+                .statusCode(200);
+    }
+}

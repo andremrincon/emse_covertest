@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("baseUrl");
+        if(cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if(cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithProvidedNameReturnsGreeting() {
+        String unique = "setup-" + UUID.randomUUID().toString();
+        given().param("name", unique).when().get("/").then().statusCode(lessThan(300));
+        given().param("name", "John Smith").when().get("/").then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithoutNameUsesDefaultGuest() {
+        String unique = "setup-" + UUID.randomUUID().toString();
+        given().param("name", unique).when().get("/").then().statusCode(lessThan(300));
+        when().get("/").then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithExplicitDelayReturns200() {
+        String unique = "setup-" + UUID.randomUUID().toString();
+        given().param("name", unique).when().get("/").then().statusCode(lessThan(300));
+        given().param("delay", 1).when().get("/slowApi").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithZeroUsesRandomDelayAndReturns200() {
+        String unique = "setup-" + UUID.randomUUID().toString();
+        given().param("name", unique).when().get("/").then().statusCode(lessThan(300));
+        given().param("delay", 0).when().get("/slowApi").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNegativeDelayProducesServerError() {
+        String unique = "setup-" + UUID.randomUUID().toString();
+        given().param("name", unique).when().get("/").then().statusCode(lessThan(300));
+        given().param("delay", -1).when().get("/slowApi").then().statusCode(500);
+    }
+}

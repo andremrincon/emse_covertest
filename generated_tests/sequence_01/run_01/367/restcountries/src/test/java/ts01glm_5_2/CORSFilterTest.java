@@ -1,0 +1,143 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeaderOnV1Alpha() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeaderOnV1Currency() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1Name() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200)
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAllCORSHeadersOnV1CallingCode() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue())
+                .header("Access-Control-Allow-Methods", nullValue())
+                .header("Access-Control-Allow-Headers", nullValue())
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV1Capital() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV1Region() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV1Subregion() {
+        given()
+            .when()
+                .get("/v1/subregion/Western%20Europe")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV1Lang() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV2Alpha() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV2Name() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+}

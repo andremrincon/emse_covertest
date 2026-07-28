@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_Gser_Normal() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_Gcf_Normal() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/0.001/1000.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_Gser_XZero() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/5.5/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_Gser_MaxIterations() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/1000.0/1000.0").then().statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_InvalidA() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/-1.0/2.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_InvalidX() {
+        given().when().get("/api/gammq/1.0/1.0").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/5.5/-1.0").then().statusCode(400);
+    }
+}

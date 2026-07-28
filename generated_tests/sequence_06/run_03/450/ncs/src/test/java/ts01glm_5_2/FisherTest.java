@@ -1,0 +1,75 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class FisherTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOdd() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/1/1/0.75")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMOddNEven() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/1/2/0.75")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEvenNegativeX() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/2/2/-0.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEvenNegativeXLargeM() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/4/4/-0.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithLoopsA1() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/5/4/0.75")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithLoopsANot1() {
+        RestAssured.given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/fisher/4/5/0.75")
+        .then()
+            .statusCode(200);
+    }
+}

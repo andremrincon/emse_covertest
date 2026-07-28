@@ -1,0 +1,71 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testCostfunsIEquals5() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/5/test")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsILessThanMinus333() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/-333/test")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIGreaterThan555() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/555/test")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsINotEqualsMinus4() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/0/test")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsSCompareToGreaterThan0() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/0/z")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsSCompareToGreaterThanOrEquals0() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/0/ababba")
+        .then()
+            .statusCode(200);
+    }
+}
+```

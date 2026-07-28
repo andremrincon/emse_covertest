@@ -1,0 +1,120 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseHost = System.getProperty("server.host", "localhost");
+        int basePort = Integer.parseInt(System.getProperty("server.port", "8080"));
+        RestAssured.baseURI = "http://" + baseHost;
+        RestAssured.port = basePort;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2ThrowsException() {
+        given()
+            .pathParam("n", 1)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZeroReturnsZero() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", 0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNSmallX() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", 5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNLargeX() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", 10.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualN() {
+        given()
+            .pathParam("n", 5)
+            .pathParam("x", 2.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", -5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+            .pathParam("n", 4)
+            .pathParam("x", -5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeLargeX() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", -10.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeNThrowsException() {
+        given()
+            .pathParam("n", -5)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_returns10_for_nonAbab_input() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 1, "algorithm");
+        assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_returns0_for_i_minus4_and_abab() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        assertEquals("0", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_negative_large_i_with_abab_results_in6() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "abab");
+        assertEquals("6", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_compareTo_greater_branch_executes_and_endpoint_ok() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 0, "abac");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i_equals_5_branch_executes_and_endpoint_ok() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_large_positive_i_triggers_greater_branches_and_endpoint_ok() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 700, "abab");
+        assertEquals(200, resp.getStatusCode());
+    }
+}

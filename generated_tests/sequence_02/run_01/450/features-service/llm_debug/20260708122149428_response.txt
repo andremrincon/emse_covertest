@@ -1,0 +1,86 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnGetRequest() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/products");
+
+        response.then()
+            .statusCode(200)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", containsString("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestHandledByCORSFilter() {
+        String productName = "CORS-Options-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .header("Origin", "http://example.com")
+            .header("Access-Control-Request-Method", "GET")
+            .when()
+            .options("/products/" + productName + "/features");
+
+        response.then()
+            .statusCode(anyOf(is(200), is(204), is(202), is(204)))
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", containsString("OPTIONS"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnDeleteRequest() {
+        String productName = "CORS-Delete-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .delete("/products/" + productName);
+
+        response.then()
+            .statusCode(204)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", containsString("DELETE"));
+    }
+}

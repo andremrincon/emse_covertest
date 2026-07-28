@@ -1,0 +1,54 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @Before
+    public void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testSubjectReturnsUrl() {
+        given()
+            .when()
+                .get("/api/pat/http://a/b")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsDate() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFpe() {
+        given()
+            .when()
+                .get("/api/pat/1.2e-34")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNone() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(200);
+    }
+}

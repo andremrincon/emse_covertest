@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class GammqTest {
+
+    @Test(timeout = 60000)
+    public void testGserXZero() {
+        given()
+            .when()
+            .get("/api/gammq/1.0/0.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormal() {
+        given()
+            .when()
+            .get("/api/gammq/5.5/2.3")
+            .then()
+            .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testGserItmax() {
+        given()
+            .when()
+            .get("/api/gammq/100.0/100.0")
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormal() {
+        given()
+            .when()
+            .get("/api/gammq/0.001/1000.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfDsmall() {
+        given()
+            .when()
+            .get("/api/gammq/100.0/1000.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfCsmall() {
+        given()
+            .when()
+            .get("/api/gammq/100.0/10000.0")
+            .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,72 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+    
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+    
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+    
+    @Test(timeout = 60000)
+    public void testMaleWithValidTitleMr() {
+        given()
+            .when()
+                .get("/api/title/male/mr")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testMaleWithInvalidTitle() {
+        given()
+            .when()
+                .get("/api/title/male/zzz")
+            .then()
+                .statusCode(500);
+    }
+    
+    @Test(timeout = 60000)
+    public void testFemaleWithValidTitleMrs() {
+        given()
+            .when()
+                .get("/api/title/female/mrs")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testFemaleWithInvalidTitle() {
+        given()
+            .when()
+                .get("/api/title/female/zzz")
+            .then()
+                .statusCode(500);
+    }
+    
+    @Test(timeout = 60000)
+    public void testNoneWithValidTitleDr() {
+        given()
+            .when()
+                .get("/api/title/none/dr")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testNoneWithInvalidTitle() {
+        given()
+            .when()
+                .get("/api/title/none/zzz")
+            .then()
+                .statusCode(500);
+    }
+}
+```

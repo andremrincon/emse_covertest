@@ -1,0 +1,386 @@
+
+Do create a white box test suite in JUnit 4 and Java 1.8 using REST Assured to achieve full 
+test coverage, including methods, lines, and all branches with all possible execution paths, 
+according to the instructions delimited by %%%%%, which is part of the REST Java Application 
+code delimited by *****. Use the Swagger documentation delimited by ##### to provide 
+complementary information about the application.
+
+Your responses must contain ONLY valid, compilable Java code in JUnit 4 format.
+NO comments, NO explanations, NO syntax errors.
+
+IMPORTANT CONSTRAINTS:
+- Generate AT MOST 15 @Test methods total
+- Test class name MUST be: CountryRestV1Test
+- Test class package MUST be: ts01qwen3_7_plus
+- Tests CANNOT instantiate business classes directly
+- Tests can ONLY call REST API endpoints via REST Assured
+- Use base URL from environment or configuration
+- Include proper imports for REST Assured and JUnit 4
+- ALL @Test methods MUST explicitly declare a timeout of 60000 milliseconds using @Test(timeout = 60000)
+- Prioritize endpoint-aware request data and parameter examples when available
+- Keep assertions aligned with endpoint response codes when known
+
+TEST DESIGN RULES — SINGLE OBJECTIVE PER TEST:
+- Each @Test method MUST test exactly ONE behavior or scenario (single test objective).
+- Each @Test method should be small and focused; do not combine multiple behaviors in one test.
+- Follow the AAA pattern strictly inside every @Test method:
+    * ARRANGE: REST calls that set up the necessary state (e.g., create a product before adding a feature).
+      - Arrange calls MUST NOT use exact statusCode assertions.
+      - Use: given().when().<call>().then().statusCode(lessThan(300)); (import static org.hamcrest.Matchers.lessThan;)
+      - This prevents setup failures from masking the real test objective.
+    * ACT: The single REST call that exercises the behavior being tested.
+    * ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked.
+- NEVER chain multiple exact statusCode(N) assertions in the same test method with the same importance.
+- If an endpoint is idempotent for setup (e.g., creating a resource), use a unique identifier (UUID) per test to avoid state leakage between tests.
+
+CLASS ROLE NOTE:
+NOTE: This class has no direct REST endpoint. It is exercised TRANSITIVELY by the REST API (e.g., via Spring DI: Resource → Service → DAO → Model). You MUST still write integration tests that call REST API endpoints via REST Assured. Analyse the source code and the available endpoints to identify which endpoints internally exercise the methods listed in UNCOVERED INFO, then write tests that call those endpoints and indirectly cover this class.
+
+UNCOVERED INFO:
+%%%%%
+Uncovered method: getByAlpha - Uncovered Lines: [48]
+Uncovered method: getByAlphaList - Uncovered Lines: [67, 70, 71, 72, 73]
+Uncovered method: getByCurrency - Uncovered Lines: [81, 90, 91, 92]
+Uncovered method: getByName - Uncovered Lines: [106, 107, 108]
+Uncovered method: getByCallingCode - Uncovered Lines: [122, 123, 124]
+Uncovered method: getByCapital - Uncovered Lines: [138, 139, 140]
+Uncovered method: getByRegion - Uncovered Lines: [154, 155, 156]
+Uncovered method: getBySubregion - Uncovered Lines: [170, 171, 172]
+Uncovered method: getByLanguage - Uncovered Lines: [186, 187, 188]
+Uncovered method: isEmpty - Uncovered Lines: [207]
+%%%%%
+
+APPLICATION SOURCE CODE:
+*****
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+package eu.fayder.restcountries.v1.rest;
+
+import java.util.List;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import eu.fayder.restcountries.domain.ResponseEntity;
+import eu.fayder.restcountries.v1.domain.Country;
+import org.apache.log4j.Logger;
+
+import com.google.gson.Gson;
+import org.springframework.stereotype.Component;
+
+@Component
+@Path("/v1")
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+public class CountryRestV1 {
+
+    private static final Logger LOG = Logger.getLogger(CountryRestV1.class);
+
+    @GET
+    @Path("all")
+    public Object getAllCountries() {
+        return this.getCountries();
+    }
+
+    @GET
+    public Object getCountries() {
+        LOG.info("Getting all");
+        return CountryService.getInstance().getAll();
+    }
+
+    @GET
+    @Path("alpha/{alphacode}")
+    public Object getByAlpha(@PathParam("alphacode") String alpha) {
+        LOG.info("Getting by alpha " + alpha);
+        if (isEmpty(alpha) || alpha.length() < 2 || alpha.length() > 3) {
+            return getResponse(Status.BAD_REQUEST);
+        }
+        Country country = CountryService.getInstance().getByAlpha(alpha);
+        if (country != null) {
+            return country;
+        }
+        return getResponse(Status.NOT_FOUND);
+    }
+
+    @GET
+    @Path("alpha/")
+    public Object getByAlphaList(@QueryParam("codes") String codes) {
+        LOG.info("Getting by list " + codes);
+        if (isEmpty(codes) || codes.length() < 2 || (codes.length() > 3 && !codes.contains(";"))) {
+            return getResponse(Status.BAD_REQUEST);
+        }
+        try {
+            List<Country> countries = CountryService.getInstance().getByCodeList(codes);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("currency/{currency}")
+    public Object getByCurrency(@PathParam("currency") String currency) {
+        LOG.info("Getting by currency " + currency);
+        if (isEmpty(currency) || currency.length() != 3) {
+            return getResponse(Status.BAD_REQUEST);
+        }
+        try {
+            List<Country> countries = CountryService.getInstance().getByCurrency(currency);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("name/{name}")
+    public Object getByName(@PathParam("name") String name, @QueryParam("fullText") boolean fullText) {
+        LOG.info("Getting by name " + name);
+        try {
+            List<Country> countries = CountryService.getInstance().getByName(name, fullText);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("callingcode/{callingcode}")
+    public Object getByCallingCode(@PathParam("callingcode") String callingcode) {
+        LOG.info("Getting by calling code " + callingcode);
+        try {
+            List<Country> countries = CountryService.getInstance().getByCallingCode(callingcode);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("capital/{capital}")
+    public Object getByCapital(@PathParam("capital") String capital) {
+        LOG.info("Getting by capital " + capital);
+        try {
+            List<Country> countries = CountryService.getInstance().getByCapital(capital);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("region/{region}")
+    public Object getByRegion(@PathParam("region") String region) {
+        LOG.info("Getting by region " + region);
+        try {
+            List<Country> countries = CountryService.getInstance().getByRegion(region);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("subregion/{subregion}")
+    public Object getBySubregion(@PathParam("subregion") String subregion) {
+        LOG.info("Getting by region " + subregion);
+        try {
+            List<Country> countries = CountryService.getInstance().getBySubregion(subregion);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("lang/{lang}")
+    public Object getByLanguage(@PathParam("lang") String language) {
+        LOG.info("Getting by language " + language);
+        try {
+            List<Country> countries = CountryService.getInstance().getByLanguage(language);
+            if (!countries.isEmpty()) {
+                return countries;
+            }
+            return getResponse(Status.NOT_FOUND);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return getResponse(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @POST
+    public Object doPOST() {
+        LOG.info("Handling POST Request");
+        return getResponse(Status.METHOD_NOT_ALLOWED);
+    }
+
+    private Response getResponse(Status status) {
+        Gson gson = new Gson();
+        return Response
+                .status(status)
+                .entity(gson.toJson(new ResponseEntity(status.getStatusCode(),
+                        status.getReasonPhrase()))).build();
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
+
+}
+
+*****
+
+ENDPOINT CONTEXT (normalized):
+@@@@@
+- POST / | expected status codes: 201, 400, 500
+- GET / | expected status codes: 200, 404, 500
+- GET /v1/all | expected status codes: 200
+- GET /v1/alpha/{alphacode} | expected status codes: 200, 400, 404
+- GET /v1/alpha | expected status codes: 200, 400, 404, 500
+- GET /v1/currency/{currency} | expected status codes: 200, 400, 404, 500
+- GET /v1/name/{name} | expected status codes: 200, 404, 500
+- GET /v1/callingcode/{callingcode} | expected status codes: 200, 404, 500
+- GET /v1/capital/{capital} | expected status codes: 200, 404, 500
+- GET /v1/region/{region} | expected status codes: 200, 404, 500
+@@@@@
+
+PRIORITIZED PARAMETER EXAMPLES (x-parameter-examples when available):
+$$$$$
+- GET /v1/alpha/{alphacode} | status 200 | alphacode: US, GB
+- GET /v1/alpha/{alphacode} | status 400 | alphacode: 123
+- GET /v1/alpha/{alphacode} | status 404 | alphacode: True, XYZ
+- GET /v1/alpha | status 200 | codes: US,CA,MX, AD
+- GET /v1/alpha | status 400 | codes: 123
+- GET /v1/alpha | status 404 | codes: true, XX,YY,ZZ
+- GET /v1/alpha | status 500 | codes: ["US", "CA"], US|CA|MX
+- GET /v1/currency/{currency} | status 200 | currency: USD, XOF
+- GET /v1/currency/{currency} | status 400 | currency: 123
+- GET /v1/currency/{currency} | status 404 | currency: XYZ, 123, @#$
+- GET /v1/currency/{currency} | status 500 | currency: EUR, INVALIDCURRENCYCODE, XyZ
+- GET /v1/name/{name} | status 200 | name: France, United States of America
+- GET /v1/name/{name} | status 200 | fullText: False, True
+- GET /v1/name/{name} | status 404 | name: 123
+- GET /v1/name/{name} | status 404 | fullText: False, True
+- GET /v1/name/{name} | status 500 | name: True, A, Germany
+- GET /v1/name/{name} | status 500 | fullText: yes, 123
+- GET /v1/callingcode/{callingcode} | status 200 | callingcode: 1, 44
+- GET /v1/callingcode/{callingcode} | status 404 | callingcode: abc, 99999
+- GET /v1/callingcode/{callingcode} | status 500 | callingcode: True
+- GET /v1/capital/{capital} | status 200 | capital: London, A
+- GET /v1/capital/{capital} | status 404 | capital: 123
+- GET /v1/region/{region} | status 200 | region: Europe, africa
+- GET /v1/region/{region} | status 404 | region: 123
+- GET /v1/region/{region} | status 500 | region: True, NonExistentRegion
+- GET /v1/subregion/{subregion} | status 200 | subregion: Western Europe, Australia and New Zealand
+- GET /v1/subregion/{subregion} | status 404 | subregion: 123
+- GET /v1/subregion/{subregion} | status 500 | subregion: True,    
+- GET /v1/lang/{lang} | status 200 | lang: es, zh
+- GET /v1/lang/{lang} | status 404 | lang: 123
+- GET /v2/all | status 200 | fields: name;capital;region;population;flag
+- GET /v2/alpha/{alphacode} | status 200 | alphacode: US, XK
+- GET /v2/alpha/{alphacode} | status 200 | fields: name;capital;population
+- GET /v2/alpha/{alphacode} | status 400 | alphacode: 123
+- GET /v2/alpha/{alphacode} | status 400 | fields: name
+- GET /v2/alpha/{alphacode} | status 404 | alphacode: True, ZZZ,   
+- GET /v2/alpha/{alphacode} | status 404 | fields: name
+- GET /v2/alpha | status 200 | codes: US,CA,MX, AD
+- GET /v2/alpha | status 200 | fields: name;capital;population
+- GET /v2/alpha | status 400 | codes: ["US", "CA"]
+- GET /v2/alpha | status 400 | fields: 123, name;capital;population, name
+- GET /v2/alpha | status 404 | codes: 999, XX,YY,ZZ
+- GET /v2/alpha | status 404 | fields: name, name;capital
+- GET /v2/currency/{currency} | status 200 | currency: EUR, XOF
+- GET /v2/currency/{currency} | status 200 | fields: name;capital;population
+- GET /v2/currency/{currency} | status 400 | currency: 123
+- GET /v2/currency/{currency} | status 400 | fields: name
+- GET /v2/currency/{currency} | status 404 | currency: True, XYZ
+- GET /v2/currency/{currency} | status 404 | fields: name
+- GET /v2/currency/{currency} | status 500 | currency: {}, 😀
+- GET /v2/currency/{currency} | status 500 | fields: name
+- GET /v2/name/{name} | status 200 | name: Germany, Côte d'Ivoire
+- GET /v2/name/{name} | status 200 | fields: name;capital;population, name
+- GET /v2/name/{name} | status 200 | fullText: False, True
+- GET /v2/name/{name} | status 404 | name: 123
+- GET /v2/name/{name} | status 404 | fields: name
+- GET /v2/name/{name} | status 404 | fullText: False
+- GET /v2/name/{name} | status 500 | name: True, X, Atlantis
+- GET /v2/name/{name} | status 500 | fields: name
+- GET /v2/name/{name} | status 500 | fullText: yes, False
+- GET /v2/callingcode/{callingcode} | status 200 | callingcode: 1, 44
+- GET /v2/callingcode/{callingcode} | status 200 | fields: name;capital;region
+- GET /v2/callingcode/{callingcode} | status 404 | callingcode: abc, 999999
+- GET /v2/callingcode/{callingcode} | status 404 | fields: name
+- GET /v2/callingcode/{callingcode} | status 500 | callingcode: True, -1
+- GET /v2/callingcode/{callingcode} | status 500 | fields: name
+- GET /v2/capital/{capital} | status 200 | capital: Paris, Nuuk
+- GET /v2/capital/{capital} | status 200 | fields: name;capital;population
+- GET /v2/capital/{capital} | status 404 | capital: 12345
+- GET /v2/capital/{capital} | status 404 | fields: name, name;capital
+- GET /v2/region/{region} | status 200 | region: Europe, Africa
+- GET /v2/region/{region} | status 200 | fields: name;capital;population
+- GET /v2/region/{region} | status 404 | region: 123
+- GET /v2/region/{region} | status 404 | fields: name, name;capital
+- GET /v2/region/{region} | status 500 | region: True,    , Asia
+- GET /v2/region/{region} | status 500 | fields: name, name;capital
+- GET /v2/subregion/{subregion} | status 200 | subregion: Western Europe, Australia and New Zealand
+- GET /v2/subregion/{subregion} | status 200 | fields: name;capital;population
+- GET /v2/subregion/{subregion} | status 404 | subregion: 123
+- GET /v2/subregion/{subregion} | status 404 | fields: name, name;capital
+- GET /v2/lang/{lang} | status 200 | lang: Spanish, English
+- GET /v2/lang/{lang} | status 200 | fields: name;capital;population
+- GET /v2/lang/{lang} | status 404 | lang: 123
+- GET /v2/lang/{lang} | status 404 | fields: name;capital
+- GET /v2/demonym/{demonym} | status 200 | demonym: American, Singaporean
+- GET /v2/demonym/{demonym} | status 200 | fields: name;capital;population
+- GET /v2/demonym/{demonym} | status 404 | demonym: 123
+- GET /v2/demonym/{demonym} | status 404 | fields: name, name;capital
+- GET /v2/demonym/{demonym} | status 500 | demonym: True, A, Australian
+- GET /v2/demonym/{demonym} | status 500 | fields: name;capital, name
+- GET /v2/regionalbloc/{regionalbloc} | status 200 | regionalbloc: EU, NAFTA
+- GET /v2/regionalbloc/{regionalbloc} | status 200 | fields: name;capital;currencies
+- GET /v2/regionalbloc/{regionalbloc} | status 404 | regionalbloc: 123
+- GET /v2/regionalbloc/{regionalbloc} | status 404 | fields: name
+- GET /v2/regionalbloc/{regionalbloc} | status 500 | regionalbloc: True, X, AU
+- GET /v2/regionalbloc/{regionalbloc} | status 500 | fields: name
+- GET /v2 | status 200 | fields: name;capital;population;region, alpha2Code
+$$$$$
+
+SWAGGER DOCUMENTATION:
+#####
+{"openapi":"3.0.0","info":{"title":"REST countries API","description":"REST countries API","version":"v2.0.5"},"servers":[{"url":"http://localhost:8080/rest"}],"paths":{"/v1/all":{"get":{"operationId":"v1All","responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":{"_name":"typical","value":[{"name":{"common":"Germany","official":"Federal Republic of Germany","native":{"deu":{"official":"Bundesrepublik Deutschland","common":"Deutschland"}}},"tld":[".de"],"cca2":"DE","ccn3":"276","cca3":"DEU","cioc":"GER","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"EUR":{"name":"Euro","symbol":"\u20ac"}},"idd":{"root":"+4","suffixes":["9"]},"capital":["Berlin"],"altSpellings":["DE","Federal Republic of Germany","Bundesrepublik Deutschland"],"region":"Europe","subregion":"Western Europe","languages":{"deu":"German"},"translations":{"ara":{"official":"\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0623\u0644\u0645\u0627\u0646\u064a\u0627 \u0627\u0644\u0627\u062a\u062d\u0627\u062f\u064a\u0629","common":"\u0623\u0644\u0645\u0627\u0646\u064a\u0627"},"bre":{"official":"Republik Kevreadel Alamagn","common":"Alamagn"},"ces":{"official":"Spolkov\u00e1 republika N\u011bmecko","common":"N\u011bmecko"},"cym":{"official":"Federal Republic of Germany","common":"Germany"},"deu":{"official":"Bundesrepublik Deutschland","common":"Deutschland"},"est":{"official":"Saksamaa Liitvabariik","common":"Saksamaa"},"fin":{"official":"Saksan liittotasavalta","common":"Saksa"},"fra":{"official":"R\u00e9publique f\u00e9d\u00e9rale d'Allemagne","common":"Allemagne"},"hrv":{"official":"Njema\u010dka Federativna Republika","common":"Njema\u010dka"},"hun":{"official":"N\u00e9met Sz\u00f6vets\u00e9gi K\u00f6zt\u00e1rsas\u00e1g","common":"N\u00e9metorsz\u00e1g"},"ita":{"official":"Repubblica federale di Germania","common":"Germania"},"jpn":{"official":"\u30c9\u30a4\u30c4\u9023\u90a6\u5171\u548c\u56fd","common":"\u30c9\u30a4\u30c4"},"kor":{"official":"\ub3c5\uc77c \uc5f0\ubc29 \uacf5\ud654\uad6d","common":"\ub3c5\uc77c"},"nld":{"official":"Bondsrepubliek Duitsland","common":"Duitsland"},"per":{"official":"\u062c\u0645\u0647\u0648\u0631\u06cc \u0641\u062f\u0631\u0627\u0644 \u0622\u0644\u0645\u0627\u0646","common":"\u0622\u0644\u0645\u0627\u0646"},"pol":{"official":"Republika Federalna Niemiec","common":"Niemcy"},"por":{"official":"Rep\u00fablica Federal da Alemanha","common":"Alemanha"},"rus":{"official":"\u0424\u0435\u0434\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f","common":"\u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f"},"slk":{"official":"Nemeck\u00e1 spolkov\u00e1 republika","common":"Nemecko"},"spa":{"official":"Rep\u00fablica Federal de Alemania","common":"Alemania"},"swe":{"official":"F\u00f6rbundsrepubliken Tyskland","common":"Tyskland"},"urd":{"official":"\u0648\u0641\u0627\u0642\u06cc \u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u062c\u0631\u0645\u0646\u06cc","common":"\u062c\u0631\u0645\u0646\u06cc"},"zho":{"official":"\u5fb7\u610f\u5fd7\u8054\u90a6\u5171\u548c\u56fd","common":"\u5fb7\u56fd"}},"latlng":[51.0,9.0],"landlocked":false,"borders":["AUT","BEL","CZE","DNK","FRA","LUX","NLD","POL","CHE"],"area":357114.0,"demonyms":{"eng":{"f":"German","m":"German"},"fra":{"f":"Allemande","m":"Allemand"}},"flag":"\ud83c\udde9\ud83c\uddea","maps":{"googleMaps":"https://goo.gl/maps/mD9FBnq1nvXUBr5hr","openStreetMaps":"https://www.openstreetmap.org/relation/51477"},"population":83240525,"gini":{"2016":31.9},"fifa":"GER","car":{"signs":["DY"],"side":"right"},"timezones":["UTC+01:00"],"continents":["Europe"],"flags":{"png":"https://flagcdn.com/w320/de.png","svg":"https://flagcdn.com/de.svg","alt":"The flag of Germany is composed of three equal horizontal bands of black, red and gold."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/de.png","svg":"https://mainfacts.com/media/images/coats_of_arms/de.svg"},"startOfWeek":"monday","capitalInfo":{"latlng":[52.52,13.41]},"postalCode":{"format":"#####","regex":"^(\\d{5})$"}},{"name":{"common":"Vatican City","official":"Vatican City State","native":{"ita":{"official":"Stato della Citt\u00e0 del Vaticano","common":"Vaticano"},"lat":{"official":"Status Civitatis Vaticanae","common":"Vaticana"}}},"tld":[".va"],"cca2":"VA","ccn3":"336","cca3":"VAT","independent":true,"status":"officially-assigned","unMember":false,"currencies":{"EUR":{"name":"Euro","symbol":"\u20ac"}},"idd":{"root":"+3","suffixes":["906698","79"]},"capital":["Vatican City"],"altSpellings":["VA","Holy See","Vatican","Vatican City State","Stato della Citt\u00e0 del Vaticano"],"region":"Europe","subregion":"Southern Europe","languages":{"ita":"Italian","lat":"Latin"},"translations":{"ara":{"official":"\u062f\u0648\u0644\u0629 \u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0641\u0627\u062a\u064a\u0643\u0627\u0646","common":"\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0641\u0627\u062a\u064a\u0643\u0627\u0646"},"bre":{"official":"Stad Vatikan","common":"Vatikan"},"ces":{"official":"M\u011bstsk\u00fd st\u00e1t Vatik\u00e1n","common":"Vatik\u00e1n"},"cym":{"official":"Vatican City State","common":"Vatican City"},"deu":{"official":"Staat Vatikanstadt","common":"Vatikanstadt"},"est":{"official":"Vatikani Linnriik","common":"Vatikan"},"fin":{"official":"Vatikaanin kaupunkivaltio","common":"Vatikaani"},"fra":{"official":"Cit\u00e9 du Vatican","common":"Cit\u00e9 du Vatican"},"hrv":{"official":"Vatikanska dr\u017eava","common":"Vatikan"},"hun":{"official":"Vatik\u00e1n \u00c1llam","common":"Vatik\u00e1n"},"ita":{"official":"Stato della Citt\u00e0 del Vaticano","common":"Vaticano"},"jpn":{"official":"\u30d0\u30c1\u30ab\u30f3\u5e02\u56fd","common":"\u30d0\u30c1\u30ab\u30f3"},"kor":{"official":"\ubc14\ud2f0\uce78 \uc2dc\uad6d","common":"\ubc14\ud2f0\uce78"},"nld":{"official":"Vaticaanstad","common":"Vaticaanstad"},"per":{"official":"\u062f\u0648\u0644\u062a \u0634\u0647\u0631 \u0648\u0627\u062a\u06cc\u06a9\u0627\u0646","common":"\u0648\u0627\u062a\u06cc\u06a9\u0627\u0646"},"pol":{"official":"Pa\u0144stwo Watyka\u0144skie","common":"Watykan"},"por":{"official":"Cidade do Vaticano","common":"Vaticano"},"rus":{"official":"\u0413\u043e\u0440\u043e\u0434-\u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u043e \u0412\u0430\u0442\u0438\u043a\u0430\u043d","common":"\u0412\u0430\u0442\u0438\u043a\u0430\u043d"},"slk":{"official":"Vatik\u00e1nsky mestsk\u00fd \u0161t\u00e1t","common":"Vatik\u00e1n"},"spa":{"official":"Ciudad del Vaticano","common":"Ciudad del Vaticano"},"swe":{"official":"Vatikanstaten","common":"Vatikanstaten"},"urd":{"official":"\u0648\u06cc\u0679\u06cc\u06a9\u0646 \u0633\u0679\u06cc","common":"\u0648\u06cc\u0679\u06cc\u06a9\u0646"},"zho":{"official":"\u68b5\u8482\u5188\u57ce\u56fd","common":"\u68b5\u8482\u5188"}},"latlng":[41.9,12.45],"landlocked":true,"borders":["ITA"],"area":0.49,"demonyms":{"eng":{"f":"Vatican","m":"Vatican"},"fra":{"f":"Vaticane","m":"Vatican"}},"flag":"\ud83c\uddfb\ud83c\udde6","maps":{"googleMaps":"https://goo.gl/maps/DTKvw5Bd1QZaDZmE9","openStreetMaps":"https://www.openstreetmap.org/relation/36989"},"population":451,"car":{"signs":["V"],"side":"right"},"timezones":["UTC+01:00"],"continents":["Europe"],"flags":{"png":"https://flagcdn.com/w320/va.png","svg":"https://flagcdn.com/va.svg","alt":"The flag of Vatican City is square shaped. It is composed of two equal vertical bands of yellow and white."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/va.png","svg":"https://mainfacts.com/media/images/coats_of_arms/va.svg"},"startOfWeek":"monday","capitalInfo":{"latlng":[41.9,12.45]}}]}}}}}}}}},"/v1/alpha/{alphacode}":{"get":{"operationId":"v1Alphacode","parameters":[{"name":"alphacode","in":"path","required":true,"schema":{"type":"string"},"example":"US"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":{"name":"United States","alpha2Code":"US","alpha3Code":"USA","capital":"Washington, D.C.","region":"Americas","subregion":"Northern America","population":323947000,"latlng":[40.0,-100.0],"demonym":"American","area":9629091.0,"gini":48.0,"timezones":["UTC-12:00","UTC-11:00","UTC-10:00","UTC-09:00","UTC-08:00","UTC-07:00","UTC-06:00","UTC-05:00","UTC-04:00","UTC+10:00","UTC+12:00"],"borders":["CA","MX"],"nativeName":"United States","numericCode":"840","currencies":[{"code":"USD","name":"United States dollar","symbol":"$"}],"languages":[{"iso639_1":"en","iso639_2":"eng","name":"English","nativeName":"English"}],"translations":{"de":"Vereinigte Staaten von Amerika","es":"Estados Unidos","fr":"\u00c9tats-Unis","ja":"\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd","it":"Stati Uniti D'America","br":"Estados Unidos","pt":"Estados Unidos","nl":"Verenigde Staten","hr":"Sjedinjene Ameri\u010dke Dr\u017eave","fa":"\u0627\u06cc\u0627\u0644\u0627\u062a \u0645\u062a\u062d\u062f\u0647 \u0622\u0645\u0631\u06cc\u06a9\u0627"},"flag":"https://restcountries.com/data/usa.svg","regionalBlocs":[{"acronym":"NAFTA","name":"North American Free Trade Agreement","otherAcronyms":[],"otherNames":["Tratado de Libre Comercio de Am\u00e9rica del Norte","Accord de Libre-\u00e9change Nord-Am\u00e9ricain"]}],"cioc":"USA"}}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"message":"Bad Request","error":"Invalid alpha code format"}}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","error":"Country not found for alpha code"}}}}}}}}},"/v1/alpha":{"get":{"operationId":"v1Alphacodes","parameters":[{"name":"codes","in":"query","required":true,"schema":{"type":"string"},"example":"US,CA,MX"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"United States","alpha2Code":"US","alpha3Code":"USA","capital":"Washington, D.C.","region":"Americas","subregion":"Northern America","population":323947000},{"name":"Canada","alpha2Code":"CA","alpha3Code":"CAN","capital":"Ottawa","region":"Americas","subregion":"Northern America","population":36155487}]}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"message":"Bad Request","details":"Invalid query parameter format"}}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","details":"No countries found for provided codes"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","details":"An unexpected error occurred while processing the request"}}}}}}}}},"/v1/currency/{currency}":{"get":{"operationId":"v1Currency","parameters":[{"name":"currency","in":"path","required":true,"schema":{"type":"string"},"example":"USD"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"United States","topLevelDomain":[".us"],"alpha2Code":"US","alpha3Code":"USA","callingCodes":["1"],"capital":"Washington, D.C.","altSpellings":["US","USA","United States of America"],"region":"Americas","subregion":"Northern America","population":323947000,"latlng":[38.0,-97.0],"demonym":"American","area":9629091.0,"gini":48.0,"timezones":["UTC-12:00","UTC-11:00","UTC-10:00","UTC-09:00","UTC-08:00","UTC-07:00","UTC-06:00","UTC-05:00","UTC-04:00","UTC+10:00","UTC+12:00"],"borders":["CA","MX"],"nativeName":"United States","numericCode":"840","currencies":[{"code":"USD","name":"United States dollar","symbol":"$"}],"languages":[{"iso639_1":"en","iso639_2":"eng","name":"English","nativeName":"English"}],"translations":{"br":"Estados Unidos","pt":"Estados Unidos","nl":"Verenigde Staten","hr":"Sjedinjene Ameri\u010dke Dr\u017eave","fa":"\u0627\u06cc\u0627\u0644\u0627\u062a \u0645\u062a\u062d\u062f\u0647 \u0622\u0645\u0631\u06cc\u06a9\u0627","de":"Vereinigte Staaten von Amerika","es":"Estados Unidos","fr":"\u00c9tats-Unis","ja":"\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd","it":"Stati Uniti D'America","hu":"Amerikai Egyes\u00fclt \u00c1llamok"},"flag":"https://restcountries.eu/data/usa.svg","regionalBlocs":[{"acronym":"NAFTA","name":"North American Free Trade Agreement","otherAcronyms":[],"otherNames":["Tratado de Libre Comercio de Am\u00e9rica del Norte","Accord de Libre-\u00e9change Nord-Am\u00e9ricain"]}],"cioc":"USA"}]}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"message":"Bad Request","error":"Invalid currency parameter"}}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","error":"Currency not found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","error":"An unexpected error occurred"}}}}}}}}},"/v1/name/{name}":{"get":{"operationId":"v1Name","parameters":[{"name":"name","in":"path","required":true,"schema":{"type":"string"},"example":"France"},{"name":"fullText","in":"query","required":false,"schema":{"type":"boolean"},"example":false}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"France","topLevelDomain":[".fr"],"alpha2Code":"FR","alpha3Code":"FRA","callingCodes":["33"],"capital":"Paris","altSpellings":["FR","French Republic","R\u00e9publique fran\u00e7aise"],"region":"Europe","subregion":"Western Europe","population":65273511,"latlng":[46.0,2.0],"demonym":"French","area":551695.0,"gini":32.7,"timezones":["UTC-10:00","UTC-09:30","UTC-09:00","UTC-08:00","UTC-04:00","UTC-03:00","UTC+01:00","UTC+02:00","UTC+03:00","UTC+04:00","UTC+05:00","UTC+10:00","UTC+11:00","UTC+12:00"],"borders":["AND","BEL","DEU","ITA","LUX","MCO","ESP","CHE"],"nativeName":"France","numericCode":"250","currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}],"languages":[{"iso639_1":"fr","iso639_2":"fra","name":"French","nativeName":"fran\u00e7ais"}],"translations":{"de":"Frankreich","es":"Francia","fr":"France","ja":"\u30d5\u30e9\u30f3\u30b9","it":"Francia","br":"Fran\u00e7a","pt":"Fran\u00e7a","nl":"Frankrijk","hr":"Francuska","fa":"\u0641\u0631\u0627\u0646\u0633\u0647"},"flag":"https://restcountries.eu/data/fra.svg","regionalBlocs":[{"acronym":"EU","name":"European Union","otherAcronyms":[],"otherNames":[]}],"cioc":"FRA"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Not Found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v1/callingcode/{callingcode}":{"get":{"operationId":"v1Callingcode","parameters":[{"name":"callingcode","in":"path","required":true,"schema":{"type":"string"},"example":"1"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":{"common":"United States","official":"United States of America"},"tld":[".us"],"cca2":"US","ccn3":"840","cca3":"USA","cioc":"USA","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"USD":{"name":"United States dollar","symbol":"$"}},"idd":{"root":"+1","suffixes":["201","202","203","205","206","207","208","209","210","212","213","214","215","216","217","218","219","224","225","226","227","228","229","231","234","239","240","248","251","252","253","254","256","260","262","267","269","270","276","281","301","302","303","304","305","307","308","309","310","312","313","314","315","316","317","318","319","320","321","323","325","330","331","334","336","337","339","347","351","352","360","361","386","401","402","404","405","406","407","408","409","410","412","413","414","415","417","419","423","424","425","430","432","434","435","440","443","469","470","475","478","479","480","484","501","502","503","504","505","507","508","509","510","512","513","515","516","517","518","520","530","540","541","551","559","561","562","563","567","570","571","573","574","575","580","585","586","601","602","603","605","606","607","608","609","610","612","614","615","616","617","618","619","620","623","626","630","631","636","641","646","650","651","660","661","662","667","678","682","701","702","703","704","706","707","708","712","713","714","715","716","717","718","719","720","724","727","731","732","734","737","740","747","754","757","760","763","765","770","772","773","774","775","781","785","786","801","802","803","804","805","806","808","810","812","813","814","815","816","817","818","828","830","831","832","843","845","847","848","850","856","857","858","859","860","862","863","864","865","870","872","878","901","903","904","906","907","908","909","910","912","913","914","915","916","917","918","919","920","925","928","929","931","936","937","940","941","947","949","951","952","954","956","959","970","971","972","973","978","979","980","984","985","989"]},"capital":["Washington, D.C."],"altSpellings":["US","USA","United States of America"],"region":"Americas","subregion":"Northern America","languages":{"eng":"English"},"translations":{"ara":{"official":"\u0627\u0644\u0648\u0644\u0627\u064a\u0627\u062a \u0627\u0644\u0645\u062a\u062d\u062f\u0629 \u0627\u0644\u0627\u0645\u0631\u064a\u0643\u064a\u0629","common":"\u0627\u0644\u0648\u0644\u0627\u064a\u0627\u062a \u0627\u0644\u0645\u062a\u062d\u062f\u0629"},"bre":{"official":"Stado\u00f9-Unanet Amerika","common":"Stado\u00f9-Unanet"},"ces":{"official":"Spojen\u00e9 st\u00e1ty americk\u00e9","common":"Spojen\u00e9 st\u00e1ty"},"cym":{"official":"United States of America","common":"United States"},"deu":{"official":"Vereinigte Staaten von Amerika","common":"Vereinigte Staaten"},"est":{"official":"Ameerika \u00dchendriigid","common":"Ameerika \u00dchendriigid"},"fin":{"official":"Amerikan yhdysvallat","common":"Yhdysvallat"},"fra":{"official":"Les \u00e9tats-unis d'Am\u00e9rique","common":"\u00c9tats-Unis"},"hrv":{"official":"Sjedinjene Ameri\u010dke Dr\u017eave","common":"Sjedinjene Ameri\u010dke Dr\u017eave"},"hun":{"official":"Amerikai Egyes\u00fclt \u00c1llamok","common":"Amerikai Egyes\u00fclt \u00c1llamok"},"ita":{"official":"Stati Uniti d'America","common":"Stati Uniti d'America"},"jpn":{"official":"\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd","common":"\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd"},"kor":{"official":"\uc544\uba54\ub9ac\uce74 \ud569\uc911\uad6d","common":"\ubbf8\uad6d"},"nld":{"official":"Verenigde Staten van Amerika","common":"Verenigde Staten"},"per":{"official":"\u0627\u06cc\u0627\u0644\u0627\u062a \u0645\u062a\u062d\u062f\u0647 \u0622\u0645\u0631\u06cc\u06a9\u0627","common":"\u0627\u06cc\u0627\u0644\u0627\u062a \u0645\u062a\u062d\u062f\u0647 \u0622\u0645\u0631\u06cc\u06a9\u0627"},"pol":{"official":"Stany Zjednoczone Ameryki","common":"Stany Zjednoczone"},"por":{"official":"Estados Unidos da Am\u00e9rica","common":"Estados Unidos"},"rus":{"official":"\u0421\u043e\u0435\u0434\u0438\u043d\u0451\u043d\u043d\u044b\u0435 \u0428\u0442\u0430\u0442\u044b \u0410\u043c\u0435\u0440\u0438\u043a\u0438","common":"\u0421\u043e\u0435\u0434\u0438\u043d\u0451\u043d\u043d\u044b\u0435 \u0428\u0442\u0430\u0442\u044b"},"slk":{"official":"Spojen\u00e9 \u0161t\u00e1ty americk\u00e9","common":"Spojen\u00e9 \u0161t\u00e1ty"},"spa":{"official":"Estados Unidos de Am\u00e9rica","common":"Estados Unidos"},"swe":{"official":"Amerikas f\u00f6renta stater","common":"USA"},"tur":{"official":"Amerika Birle\u015fik Devletleri","common":"Amerika Birle\u015fik Devletleri"},"urd":{"official":"\u0631\u06cc\u0627\u0633\u062a\u06c1\u0627\u0626\u06d2 \u0645\u062a\u062d\u062f\u06c1 \u0627\u0645\u0631\u06cc\u06a9\u0627","common":"\u0631\u06cc\u0627\u0633\u062a\u06c1\u0627\u0626\u06d2 \u0645\u062a\u062d\u062f\u06c1"},"zho":{"official":"\u7f8e\u5229\u575a\u5408\u4f17\u56fd","common":"\u7f8e\u56fd"}},"latlng":[38.0,-97.0],"landlocked":false,"borders":["CA","MX"],"area":9372610.0,"demonyms":{"eng":{"f":"American","m":"American"},"fra":{"f":"Am\u00e9ricaine","m":"Am\u00e9ricain"}},"flag":"\ud83c\uddfa\ud83c\uddf8","maps":{"googleMaps":"https://goo.gl/maps/e8M2468YvBS5k6xP7","openStreetMaps":"https://www.openstreetmap.org/relation/148838#map=2/20.6/-85.2"},"population":329484123,"gini":{"2018":41.4},"fifa":"USA","car":{"signs":["USA"],"side":"right"},"timezones":["UTC-12:00","UTC-11:00","UTC-10:00","UTC-09:00","UTC-08:00","UTC-07:00","UTC-06:00","UTC-05:00","UTC-04:00","UTC+10:00","UTC+12:00"],"continents":["North America"],"flags":{"png":"https://flagcdn.com/w320/us.png","svg":"https://flagcdn.com/us.svg","alt":"The flag of the United States of America is composed of thirteen equal horizontal bands of red alternating with white. A blue rectangle, bearing fifty small five-pointed white stars arranged in nine rows where rows of six stars alternate with rows of five stars, is superimposed in the canton."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/us.png","svg":"https://mainfacts.com/media/images/coats_of_arms/us.svg"},"startOfWeek":"sunday","capitalInfo":{"latlng":[38.89,-77.05]},"postalCode":{"format":"#####-####","regex":"^\\d{5}(-\\d{4})?$"}},{"name":{"common":"Canada","official":"Canada"},"tld":[".ca"],"cca2":"CA","ccn3":"124","cca3":"CAN","cioc":"CAN","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"CAD":{"name":"Canadian dollar","symbol":"$"}},"idd":{"root":"+1","suffixes":["204","226","236","249","250","289","306","343","365","387","403","416","418","431","437","438","450","506","514","519","548","579","581","587","604","613","639","647","672","705","709","742","778","780","782","807","819","825","867","873","902","905"]},"capital":["Ottawa"],"altSpellings":["CA"],"region":"Americas","subregion":"Northern America","languages":{"eng":"English","fra":"French"},"translations":{"ara":{"official":"\u0643\u0646\u062f\u0627","common":"\u0643\u0646\u062f\u0627"},"bre":{"official":"Kanada","common":"Kanada"},"ces":{"official":"Kanada","common":"Kanada"},"cym":{"official":"Canada","common":"Canada"},"deu":{"official":"Kanada","common":"Kanada"},"est":{"official":"Kanada","common":"Kanada"},"fin":{"official":"Kanada","common":"Kanada"},"fra":{"official":"Canada","common":"Canada"},"hrv":{"official":"Kanada","common":"Kanada"},"hun":{"official":"Kanada","common":"Kanada"},"ita":{"official":"Canada","common":"Canada"},"jpn":{"official":"\u30ab\u30ca\u30c0","common":"\u30ab\u30ca\u30c0"},"kor":{"official":"\uce90\ub098\ub2e4","common":"\uce90\ub098\ub2e4"},"nld":{"official":"Canada","common":"Canada"},"per":{"official":"\u06a9\u0627\u0646\u0627\u062f\u0627","common":"\u06a9\u0627\u0646\u0627\u062f\u0627"},"pol":{"official":"Kanada","common":"Kanada"},"por":{"official":"Canad\u00e1","common":"Canad\u00e1"},"rus":{"official":"\u041a\u0430\u043d\u0430\u0434\u0430","common":"\u041a\u0430\u043d\u0430\u0434\u0430"},"slk":{"official":"Kanada","common":"Kanada"},"spa":{"official":"Canad\u00e1","common":"Canad\u00e1"},"swe":{"official":"Kanada","common":"Kanada"},"tur":{"official":"Kanada","common":"Kanada"},"urd":{"official":"\u06a9\u06cc\u0646\u06cc\u0688\u0627","common":"\u06a9\u06cc\u0646\u06cc\u0688\u0627"},"zho":{"official":"\u52a0\u62ff\u5927","common":"\u52a0\u62ff\u5927"}},"latlng":[60.0,-95.0],"landlocked":false,"borders":["US"],"area":9984670.0,"demonyms":{"eng":{"f":"Canadian","m":"Canadian"},"fra":{"f":"Canadienne","m":"Canadien"}},"flag":"\ud83c\udde8\ud83c\udde6","maps":{"googleMaps":"https://goo.gl/maps/jmEVLugreeqiZXxbA","openStreetMaps":"https://www.openstreetmap.org/relation/1421065"},"population":38005238,"gini":{"2017":33.3},"fifa":"CAN","car":{"signs":["CDN"],"side":"right"},"timezones":["UTC-08:00","UTC-07:00","UTC-06:00","UTC-05:00","UTC-04:00","UTC-03:30","UTC-02:30"],"continents":["North America"],"flags":{"png":"https://flagcdn.com/w320/ca.png","svg":"https://flagcdn.com/ca.svg","alt":"The flag of Canada is composed of a red vertical band on the hoist and fly sides and a central white square that is twice the width of the bands. A large eleven-pointed red maple leaf is centered in the white square."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/ca.png","svg":"https://mainfacts.com/media/images/coats_of_arms/ca.svg"},"startOfWeek":"sunday","capitalInfo":{"latlng":[45.42,-75.7]},"postalCode":{"format":"@#@ #@#","regex":"^([ABCEGHJKLMNPRSTVXY]\\d[ABCEGHJKLMNPRSTVWXYZ])\\s?(\\d[ABCEGHJKLMNPRSTVWXYZ]\\d)$"}}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"error":{"status":404,"message":"Not Found"}}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"error":{"status":500,"message":"Internal Server Error"}}}}}}}}}},"/v1/capital/{capital}":{"get":{"operationId":"v1Capital","parameters":[{"name":"capital","in":"path","required":true,"schema":{"type":"string"},"example":"London"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":{"common":"United Kingdom","official":"United Kingdom of Great Britain and Northern Ireland","nativeName":{"eng":{"official":"United Kingdom of Great Britain and Northern Ireland","common":"United Kingdom"}}},"tld":[".uk"],"cca2":"GB","ccn3":"826","cca3":"GBR","cioc":"GBR","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"GBP":{"name":"British pound","symbol":"\u00a3"}},"idd":{"root":"+4","suffixes":["4"]},"capital":["London"],"altSpellings":["GB","UK","Great Britain"],"region":"Europe","subregion":"Northern Europe","languages":{"eng":"English"},"translations":{"ara":{"official":"\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0645\u062a\u062d\u062f\u0629 \u0644\u0628\u0631\u064a\u0637\u0627\u0646\u064a\u0627 \u0627\u0644\u0639\u0638\u0645\u0649 \u0648\u0627\u064a\u0631\u0644\u0646\u062f\u0627 \u0627\u0644\u0634\u0645\u0627\u0644\u064a\u0629","common":"\u0627\u0644\u0645\u0645\u0644\u0643\u0629 \u0627\u0644\u0645\u062a\u062d\u062f\u0629"},"bre":{"official":"Rouantelezh-Unanet Breizh-Veur ha Norzhiwerzhon","common":"Rouantelezh-Unanet"},"ces":{"official":"Spojen\u00e9 kr\u00e1lovstv\u00ed Velk\u00e9 Brit\u00e1nie a Severn\u00edho Irska","common":"Spojen\u00e9 kr\u00e1lovstv\u00ed"},"cym":{"official":"United Kingdom of Great Britain and Northern Ireland","common":"United Kingdom"},"deu":{"official":"Vereinigtes K\u00f6nigreich Gro\u00dfbritannien und Nordirland","common":"Vereinigtes K\u00f6nigreich"},"est":{"official":"Suurbritannia ja P\u00f5hja-Iiri \u00dchendkuningriik","common":"Suurbritannia"},"fin":{"official":"Ison-Britannian ja Pohjois-Irlannin yhdistynyt kuningaskunta","common":"Yhdistynyt kuningaskunta"},"fra":{"official":"Royaume-Uni de Grande-Bretagne et d'Irlande du Nord","common":"Royaume-Uni"},"hrv":{"official":"Ujedinjeno Kraljevstvo Velike Britanije i Sjeverne Irske","common":"Ujedinjeno Kraljevstvo"},"hun":{"official":"Nagy-Britannia \u00e9s \u00c9szak-\u00cdrorsz\u00e1g Egyes\u00fclt Kir\u00e1lys\u00e1ga","common":"Egyes\u00fclt Kir\u00e1lys\u00e1g"},"ita":{"official":"Regno Unito di Gran Bretagna e Irlanda del Nord","common":"Regno Unito"},"jpn":{"official":"\u30b0\u30ec\u30fc\u30c8\u30d6\u30ea\u30c6\u30f3\u53ca\u3073\u5317\u30a2\u30a4\u30eb\u30e9\u30f3\u30c9\u9023\u5408\u738b\u56fd","common":"\u30a4\u30ae\u30ea\u30b9"},"kor":{"official":"\uadf8\ub808\uc774\ud2b8\ube0c\ub9ac\ud2bc \ubd81\uc544\uc77c\ub79c\ub4dc \uc5f0\ud569 \uc655\uad6d","common":"\uc601\uad6d"},"nld":{"official":"Verenigd Koninkrijk van Groot-Brittanni\u00eb en Noord-Ierland","common":"Verenigd Koninkrijk"},"per":{"official":"\u067e\u0627\u062f\u0634\u0627\u0647\u06cc \u0645\u062a\u062d\u062f \u0628\u0631\u06cc\u062a\u0627\u0646\u06cc\u0627\u06cc \u06a9\u0628\u06cc\u0631 \u0648 \u0627\u06cc\u0631\u0644\u0646\u062f \u0634\u0645\u0627\u0644\u06cc","common":"\u0627\u0646\u06af\u0644\u0633\u062a\u0627\u0646"},"pol":{"official":"Zjednoczone Kr\u00f3lestwo Wielkiej Brytanii i Irlandii P\u00f3\u0142nocnej","common":"Zjednoczone Kr\u00f3lestwo"},"por":{"official":"Reino Unido da Gr\u00e3-Bretanha e Irlanda do Norte","common":"Reino Unido"},"rus":{"official":"\u0421\u043e\u0435\u0434\u0438\u043d\u0451\u043d\u043d\u043e\u0435 \u041a\u043e\u0440\u043e\u043b\u0435\u0432\u0441\u0442\u0432\u043e \u0412\u0435\u043b\u0438\u043a\u043e\u0431\u0440\u0438\u0442\u0430\u043d\u0438\u0438 \u0438 \u0421\u0435\u0432\u0435\u0440\u043d\u043e\u0439 \u0418\u0440\u043b\u0430\u043d\u0434\u0438\u0438","common":"\u0412\u0435\u043b\u0438\u043a\u043e\u0431\u0440\u0438\u0442\u0430\u043d\u0438\u044f"},"slk":{"official":"Spojen\u00e9 kr\u00e1\u013eovstvo Ve\u013ekej Brit\u00e1nie a Severn\u00e9ho \u00cdrska","common":"Spojen\u00e9 kr\u00e1\u013eovstvo"},"spa":{"official":"Reino Unido de Gran Breta\u00f1a e Irlanda del Norte","common":"Reino Unido"},"swe":{"official":"F\u00f6renade konungariket Storbritannien och Nordirland","common":"Storbritannien"},"urd":{"official":"\u0645\u0645\u0644\u06a9\u062a\u0650 \u0645\u062a\u062d\u062f\u06c1 \u0628\u0631\u0637\u0627\u0646\u06cc\u06c1 \u0639\u0638\u0645\u06cc\u0670 \u0648 \u0634\u0645\u0627\u0644\u06cc \u0622\u0626\u0631\u0644\u06cc\u0646\u0688","common":"\u0645\u0645\u0644\u06a9\u062a\u0650 \u0645\u062a\u062d\u062f\u06c1"},"zho":{"official":"\u5927\u4e0d\u5217\u98a0\u53ca\u5317\u7231\u5c14\u5170\u8054\u5408\u738b\u56fd","common":"\u82f1\u56fd"}},"latlng":[54.0,-2.0],"landlocked":false,"borders":["IRL"],"area":242900.0,"demonyms":{"eng":{"f":"British","m":"British"},"fra":{"f":"Britannique","m":"Britannique"}},"flag":"\ud83c\uddec\ud83c\udde7","maps":{"googleMaps":"https://goo.gl/maps/FoDtc3UKMkFsXAjHA","openStreetMaps":"https://www.openstreetmap.org/relation/62149"},"population":67215293,"gini":{"2017":35.1},"fifa":"ENG","car":{"signs":["GB"],"side":"left"},"timezones":["UTC","UTC+01:00"],"continents":["Europe"],"flags":{"png":"https://flagcdn.com/w320/gb.png","svg":"https://flagcdn.com/gb.svg"},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/gb.png","svg":"https://mainfacts.com/media/images/coats_of_arms/gb.svg"},"startOfWeek":"monday","capitalInfo":{"latlng":[51.5,-0.12]},"postalCode":{"format":"@# #@@","regex":"^([A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2})$"}}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Not Found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v1/region/{region}":{"get":{"operationId":"v1Region","parameters":[{"name":"region","in":"path","required":true,"schema":{"type":"string"},"example":"Europe"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","topLevelDomain":[".de"],"alpha2Code":"DE","alpha3Code":"DEU","callingCodes":["49"],"capital":"Berlin","altSpellings":["DE","Federal Republic of Germany","Bundesrepublik Deutschland"],"region":"Europe","subregion":"Western Europe","population":83240525,"latlng":[51.0,9.0],"demonym":"German","area":357114.0,"gini":31.9,"timezones":["UTC+01:00"],"borders":["AUT","BEL","CZE","DNK","FRA","LUX","NLD","POL","CHE"],"nativeName":"Deutschland","numericCode":"276","currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}],"languages":[{"iso639_1":"de","iso639_2":"deu","name":"German","nativeName":"Deutsch"}],"translations":{"br":"Alemanha","pt":"Alemanha","nl":"Duitsland","hr":"Njema\u010dka","fa":"\u0622\u0644\u0645\u0627\u0646","de":"Deutschland","es":"Alemania","fr":"Allemagne","ja":"\u30c9\u30a4\u30c4","it":"Germania","hu":"N\u00e9metorsz\u00e1g"},"flag":"https://restcountries.eu/data/deu.svg","regionalBlocs":[{"acronym":"EU","name":"European Union","otherAcronyms":[],"otherNames":[]}],"cioc":"GER"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Not Found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v1/subregion/{subregion}":{"get":{"operationId":"v1Subregion","parameters":[{"name":"subregion","in":"path","required":true,"schema":{"type":"string"},"example":"Western Europe"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":{"common":"Germany","official":"Federal Republic of Germany","nativeName":{"deu":{"official":"Bundesrepublik Deutschland","common":"Deutschland"}}},"tld":[".de"],"cca2":"DE","ccn3":"276","cca3":"DEU","cioc":"GER","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"EUR":{"name":"Euro","symbol":"\u20ac"}},"idd":{"root":"+4","suffixes":["9"]},"capital":["Berlin"],"altSpellings":["DE","Federal Republic of Germany","Bundesrepublik Deutschland"],"region":"Europe","subregion":"Western Europe","languages":{"deu":"German"},"translations":{"ara":{"official":"\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0623\u0644\u0645\u0627\u0646\u064a\u0627 \u0627\u0644\u0627\u062a\u062d\u0627\u062f\u064a\u0629","common":"\u0623\u0644\u0645\u0627\u0646\u064a\u0627"},"bre":{"official":"Republik Kevreadel Alamagn","common":"Alamagn"},"ces":{"official":"Spolkov\u00e1 republika N\u011bmecko","common":"N\u011bmecko"},"cym":{"official":"Federal Republic of Germany","common":"Germany"},"deu":{"official":"Bundesrepublik Deutschland","common":"Deutschland"},"est":{"official":"Saksamaa Liitvabariik","common":"Saksamaa"},"fin":{"official":"Saksan liittotasavalta","common":"Saksa"},"fra":{"official":"R\u00e9publique f\u00e9d\u00e9rale d'Allemagne","common":"Allemagne"},"hrv":{"official":"Njema\u010dka Federativna Republika","common":"Njema\u010dka"},"hun":{"official":"N\u00e9met Sz\u00f6vets\u00e9gi K\u00f6zt\u00e1rsas\u00e1g","common":"N\u00e9metorsz\u00e1g"},"ita":{"official":"Repubblica federale di Germania","common":"Germania"},"jpn":{"official":"\u30c9\u30a4\u30c4\u9023\u90a6\u5171\u548c\u56fd","common":"\u30c9\u30a4\u30c4"},"kor":{"official":"\ub3c5\uc77c \uc5f0\ubc29 \uacf5\ud654\uad6d","common":"\ub3c5\uc77c"},"nld":{"official":"Bondsrepubliek Duitsland","common":"Duitsland"},"per":{"official":"\u062c\u0645\u0647\u0648\u0631\u06cc \u0641\u062f\u0631\u0627\u0644 \u0622\u0644\u0645\u0627\u0646","common":"\u0622\u0644\u0645\u0627\u0646"},"pol":{"official":"Republika Federalna Niemiec","common":"Niemcy"},"por":{"official":"Rep\u00fablica Federal da Alemanha","common":"Alemanha"},"rus":{"official":"\u0424\u0435\u0434\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430 \u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f","common":"\u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f"},"slk":{"official":"Nemeck\u00e1 spolkov\u00e1 republika","common":"Nemecko"},"spa":{"official":"Rep\u00fablica Federal de Alemania","common":"Alemania"},"swe":{"official":"F\u00f6rbundsrepubliken Tyskland","common":"Tyskland"},"tur":{"official":"Almanya Federal Cumhuriyeti","common":"Almanya"},"urd":{"official":"\u0648\u0641\u0627\u0642\u06cc \u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u062c\u0631\u0645\u0646\u06cc","common":"\u062c\u0631\u0645\u0646\u06cc"},"zho":{"official":"\u5fb7\u610f\u5fd7\u8054\u90a6\u5171\u548c\u56fd","common":"\u5fb7\u56fd"}},"latlng":[51.0,9.0],"landlocked":false,"borders":["AUT","BEL","CZE","DNK","FRA","LUX","NLD","POL","CHE"],"area":357114.0,"demonyms":{"eng":{"f":"German","m":"German"},"fra":{"f":"Allemande","m":"Allemand"}},"flag":"\ud83c\udde9\ud83c\uddea","maps":{"googleMaps":"https://goo.gl/maps/mD9FBMq1nvXUBrkv6","openStreetMaps":"https://www.openstreetmap.org/relation/51477"},"population":83240525,"gini":{"2016":31.9},"fifa":"GER","car":{"signs":["DY"],"side":"right"},"timezones":["UTC+01:00"],"continents":["Europe"],"flags":{"png":"https://flagcdn.com/w320/de.png","svg":"https://flagcdn.com/de.svg","alt":"The flag of Germany is composed of three equal horizontal bands of black, red and gold."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/de.png","svg":"https://mainfacts.com/media/images/coats_of_arms/de.svg"},"startOfWeek":"monday","capitalInfo":{"latlng":[52.52,13.4]},"postalCode":{"format":"#####","regex":"^(\\d{5})$"}},{"name":{"common":"Austria","official":"Republic of Austria","nativeName":{"bar":{"official":"Republik \u00d6sterreich","common":"\u00d6sterreich"}}},"tld":[".at"],"cca2":"AT","ccn3":"040","cca3":"AUT","cioc":"AUT","independent":true,"status":"officially-assigned","unMember":true,"currencies":{"EUR":{"name":"Euro","symbol":"\u20ac"}},"idd":{"root":"+4","suffixes":["3"]},"capital":["Vienna"],"altSpellings":["AT","Osterreich","Oesterreich"],"region":"Europe","subregion":"Western Europe","languages":{"bar":"Austro-Bavarian German"},"translations":{"ara":{"official":"\u062c\u0645\u0647\u0648\u0631\u064a\u0629 \u0627\u0644\u0646\u0645\u0633\u0627","common":"\u0627\u0644\u0646\u0645\u0633\u0627"},"bre":{"official":"Republik Aostria","common":"Aostria"},"ces":{"official":"Rakousk\u00e1 republika","common":"Rakousko"},"cym":{"official":"Gweriniaeth Awstria","common":"Awstria"},"deu":{"official":"Republik \u00d6sterreich","common":"\u00d6sterreich"},"est":{"official":"Austria Vabariik","common":"Austria"},"fin":{"official":"It\u00e4vallan tasavalta","common":"It\u00e4valta"},"fra":{"official":"R\u00e9publique d'Autriche","common":"Autriche"},"hrv":{"official":"Republika Austrija","common":"Austrija"},"hun":{"official":"Ausztria","common":"Ausztria"},"ita":{"official":"Repubblica d'Austria","common":"Austria"},"jpn":{"official":"\u30aa\u30fc\u30b9\u30c8\u30ea\u30a2\u5171\u548c\u56fd","common":"\u30aa\u30fc\u30b9\u30c8\u30ea\u30a2"},"kor":{"official":"\uc624\uc2a4\ud2b8\ub9ac\uc544 \uacf5\ud654\uad6d","common":"\uc624\uc2a4\ud2b8\ub9ac\uc544"},"nld":{"official":"Republiek Oostenrijk","common":"Oostenrijk"},"per":{"official":"\u062c\u0645\u0647\u0648\u0631\u06cc \u0627\u062a\u0631\u06cc\u0634","common":"\u0627\u062a\u0631\u06cc\u0634"},"pol":{"official":"Republika Austrii","common":"Austria"},"por":{"official":"Rep\u00fablica da \u00c1ustria","common":"\u00c1ustria"},"rus":{"official":"\u0410\u0432\u0441\u0442\u0440\u0438\u0439\u0441\u043a\u0430\u044f \u0420\u0435\u0441\u043f\u0443\u0431\u043b\u0438\u043a\u0430","common":"\u0410\u0432\u0441\u0442\u0440\u0438\u044f"},"slk":{"official":"Rak\u00faska republika","common":"Rak\u00fasko"},"spa":{"official":"Rep\u00fablica de Austria","common":"Austria"},"swe":{"official":"Republiken \u00d6sterrike","common":"\u00d6sterrike"},"tur":{"official":"Avusturya Cumhuriyeti","common":"Avusturya"},"urd":{"official":"\u062c\u0645\u06c1\u0648\u0631\u06cc\u06c1 \u0622\u0633\u0679\u0631\u06cc\u0627","common":"\u0622\u0633\u0679\u0631\u06cc\u0627"},"zho":{"official":"\u5965\u5730\u5229\u5171\u548c\u56fd","common":"\u5965\u5730\u5229"}},"latlng":[47.33333333,13.33333333],"landlocked":true,"borders":["CZE","DEU","HUN","ITA","LIE","SVK","SVN","CHE"],"area":83871.0,"demonyms":{"eng":{"f":"Austrian","m":"Austrian"},"fra":{"f":"Autrichienne","m":"Autrichien"}},"flag":"\ud83c\udde6\ud83c\uddf9","maps":{"googleMaps":"https://goo.gl/maps/pCWpWQHznHyRzQcu9","openStreetMaps":"https://www.openstreetmap.org/relation/16239"},"population":8917205,"gini":{"2018":30.8},"fifa":"AUT","car":{"signs":["A"],"side":"right"},"timezones":["UTC+01:00"],"continents":["Europe"],"flags":{"png":"https://flagcdn.com/w320/at.png","svg":"https://flagcdn.com/at.svg","alt":"The flag of Austria is composed of three equal horizontal bands of red, white and red."},"coatOfArms":{"png":"https://mainfacts.com/media/images/coats_of_arms/at.png","svg":"https://mainfacts.com/media/images/coats_of_arms/at.svg"},"startOfWeek":"monday","capitalInfo":{"latlng":[48.2,16.37]},"postalCode":{"format":"####","regex":"^(\\d{4})$"}}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"error":true,"message":"Subregion not found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"error":true,"message":"Internal server error"}}}}}}}}},"/v1/lang/{lang}":{"get":{"operationId":"v1Lang","parameters":[{"name":"lang","in":"path","required":true,"schema":{"type":"string"},"example":"es"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Spain","alpha2Code":"ES","alpha3Code":"ESP","capital":"Madrid","region":"Europe","subregion":"Southern Europe","population":47351567,"languages":[{"iso639_1":"es","iso639_2":"spa","name":"Spanish","nativeName":"Espa\u00f1ol"}]},{"name":"China","alpha2Code":"CN","alpha3Code":"CHN","capital":"Beijing","region":"Asia","subregion":"Eastern Asia","population":1439323776,"languages":[{"iso639_1":"zh","iso639_2":"zho","name":"Chinese","nativeName":"\u4e2d\u6587 (Zh\u014dngw\u00e9n)"}]}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"error":"Not Found","message":"No countries found for language code"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing the request"}}}}}}}}},"/v2/all":{"get":{"operationId":"v2All","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;region;population;flag"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Afghanistan","capital":"Kabul","region":"Asia","population":38928346,"flag":"https://flagcdn.com/af.svg"},{"name":"\u00c5land Islands","capital":"Mariehamn","region":"Europe","population":28875,"flag":"https://flagcdn.com/ax.svg"}]}}}}}}}},"/v2/alpha/{alphacode}":{"get":{"operationId":"v2Alphacode","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"alphacode","in":"path","required":true,"schema":{"type":"string"},"example":"US"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":{"name":"United States","alpha2Code":"US","alpha3Code":"USA","capital":"Washington, D.C.","region":"Americas","subregion":"Northern America","population":331002651,"area":9372610}}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"message":"Bad Request","error":"Invalid alpha code format"}}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","error":"Country not found for provided alpha code"}}}}}}}}},"/v2/alpha":{"get":{"operationId":"v2Alphacodes","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"codes","in":"query","required":true,"schema":{"type":"string"},"example":"US,CA,MX"}],"responses":{"200":{"description":"Successful response"},"400":{"description":"Client error \u2014 400"},"404":{"description":"Client error \u2014 404"},"500":{"description":"Server error \u2014 500"}}}},"/v2/currency/{currency}":{"get":{"operationId":"v2Currency","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"currency","in":"path","required":true,"schema":{"type":"string"},"example":"EUR"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","capital":"Berlin","population":83240525,"currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}]}]}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"status":400,"message":"Bad Request"}}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Currency not found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v2/name/{name}":{"get":{"operationId":"v2Name","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"name","in":"path","required":true,"schema":{"type":"string"},"example":"Germany"},{"name":"fullText","in":"query","required":false,"schema":{"type":"boolean"},"example":false}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","topLevelDomain":[".de"],"alpha2Code":"DE","alpha3Code":"DEU","callingCodes":["49"],"capital":"Berlin","altSpellings":["DE","Federal Republic of Germany","Bundesrepublik Deutschland"],"region":"Europe","subregion":"Western Europe","population":83240525,"latlng":[51.0,9.0],"demonym":"German","area":357114.0,"gini":31.9,"timezones":["UTC+01:00"],"borders":["AUT","BEL","CZE","DNK","FRA","LUX","NLD","POL","CHE"],"nativeName":"Deutschland","numericCode":"276","currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}],"languages":[{"iso639_1":"de","iso639_2":"deu","name":"German","nativeName":"Deutsch"}],"translations":{"br":"Alemanha","pt":"Alemanha","nl":"Duitsland","hr":"Njema\u010dka","fa":"\u0622\u0644\u0645\u0627\u0646"},"flag":"https://restcountries.eu/data/deu.svg","regionalBlocs":[{"acronym":"EU","name":"European Union"}],"cioc":"GER"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Not Found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v2/callingcode/{callingcode}":{"get":{"operationId":"v2Callingcode","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;region"},{"name":"callingcode","in":"path","required":true,"schema":{"type":"string"},"example":"1"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"United States","topLevelDomain":[".us"],"alpha2Code":"US","alpha3Code":"USA","callingCodes":["1"],"capital":"Washington, D.C.","altSpellings":["US","USA","United States of America"],"region":"Americas","subregion":"Northern America","population":323947000,"latlng":[38.0,-97.0],"demonym":"American","area":9629091.0,"gini":48.0,"timezones":["UTC-12:00","UTC-11:00","UTC-10:00","UTC-09:00","UTC-08:00","UTC-07:00","UTC-06:00","UTC-05:00","UTC-04:00","UTC+10:00","UTC+12:00"],"borders":["CA","MX"],"nativeName":"United States","numericCode":"840","currencies":[{"code":"USD","name":"United States dollar","symbol":"$"}],"languages":[{"iso639_1":"en","iso639_2":"eng","name":"English","nativeName":"English"}],"translations":{"de":"Vereinigte Staaten von Amerika","es":"Estados Unidos","fr":"\u00c9tats-Unis","ja":"\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd","it":"Stati Uniti D'America","br":"Estados Unidos","pt":"Estados Unidos","nl":"Verenigde Staten","hr":"Sjedinjene Ameri\u010dke Dr\u017eave","fa":"\u0627\u06cc\u0627\u0644\u0627\u062a \u0645\u062a\u062d\u062f\u0647 \u0622\u0645\u0631\u06cc\u06a9\u0627"},"flag":"https://restcountries.com/data/usa.svg","regionalBlocs":[{"acronym":"NAFTA","name":"North American Free Trade Agreement","otherAcronyms":[],"otherNames":[]}],"cioc":"USA"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Not Found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal Server Error"}}}}}}}}},"/v2/capital/{capital}":{"get":{"operationId":"v2Capital","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"capital","in":"path","required":true,"schema":{"type":"string"},"example":"Paris"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"France","capital":"Paris","population":67390000,"region":"Europe","subregion":"Western Europe","alpha2Code":"FR","alpha3Code":"FRA"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","status":404}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","status":500}}}}}}}}},"/v2/region/{region}":{"get":{"operationId":"v2Region","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"region","in":"path","required":true,"schema":{"type":"string"},"example":"Europe"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","capital":"Berlin","population":83240525},{"name":"Nigeria","capital":"Abuja","population":206139589}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","status":404}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","status":500}}}}}}}}},"/v2/subregion/{subregion}":{"get":{"operationId":"v2Subregion","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"subregion","in":"path","required":true,"schema":{"type":"string"},"example":"Western Europe"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","capital":"Berlin","population":83240525,"area":357114,"region":"Europe","subregion":"Western Europe"},{"name":"Australia","capital":"Canberra","population":25687041,"area":7692024,"region":"Oceania","subregion":"Australia and New Zealand"}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","status":404}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","status":500}}}}}}}}},"/v2/lang/{lang}":{"get":{"operationId":"v2Lang","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"lang","in":"path","required":true,"schema":{"type":"string"},"example":"Spanish"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Argentina","capital":"Buenos Aires","population":45380000,"languages":[{"iso639_1":"es","iso639_2":"spa","name":"Spanish","nativeName":"Espa\u00f1ol"}]},{"name":"Antarctica","capital":"","population":0,"languages":[]}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not found","error":"No countries found for language code 'xyz'"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal server error","error":"An unexpected error occurred while processing the request"}}}}}}}}},"/v2/demonym/{demonym}":{"get":{"operationId":"v2Demonym","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;population"},{"name":"demonym","in":"path","required":true,"schema":{"type":"string"},"example":"American"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"United States","capital":"Washington, D.C.","population":331002651}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"message":"Not Found","status":404}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"message":"Internal Server Error","status":500}}}}}}}}},"/v2/regionalbloc/{regionalbloc}":{"get":{"operationId":"v2Regionalbloc","parameters":[{"name":"fields","in":"query","required":false,"schema":{"type":"string"},"example":"name;capital;currencies"},{"name":"regionalbloc","in":"path","required":true,"schema":{"type":"string"},"example":"EU"}],"responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Germany","capital":"Berlin","currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}]},{"name":"United States","capital":"Washington, D.C.","currencies":[{"code":"USD","name":"United States Dollar","symbol":"$"}]}]}}}}},"404":{"description":"Client error \u2014 404","content":{"application/json":{"examples":{"example_404":{"value":{"status":404,"message":"Regional bloc not found"}}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":{"status":500,"message":"Internal server error"}}}}}}}}},"/v1":{"get":{"summary":"Returns all countries.","description":"Returns all countries.","responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":{"_name":"typical","value":[{"name":"Afghanistan","topLevelDomain":[".af"],"alpha2Code":"AF","alpha3Code":"AFG","callingCodes":["93"],"capital":"Kabul","altSpellings":["AF","Af\u0121\u0101nist\u0101n"],"region":"Asia","subregion":"Southern Asia","population":27657145,"latlng":[33,65],"demonym":"Afghan","area":652230,"gini":27.8,"timezones":["UTC+04:30"],"borders":["IRN","PAK","TKM","UZB","TJK","CHN"],"nativeName":"\u0627\u0641\u063a\u0627\u0646\u0633\u062a\u0627\u0646","numericCode":"004","currencies":[{"code":"AFN","name":"Afghan afghani","symbol":"\u060b"}],"languages":[{"iso639_1":"ps","iso639_2":"pus","name":"Pashto","nativeName":"\u067e\u069a\u062a\u0648"},{"iso639_1":"uz","iso639_2":"uzb","name":"Uzbek","nativeName":"O\u02bbzbek"},{"iso639_1":"tk","iso639_2":"tuk","name":"Turkmen","nativeName":"T\u00fcrkmen"}],"translations":{"br":"Afeganist\u00e3o","pt":"Afeganist\u00e3o","nl":"Afghanistan","hr":"Afganistan","fa":"\u0627\u0641\u063a\u0627\u0646\u0633\u062a\u0627\u0646","de":"Afghanistan","es":"Afganist\u00e1n","fr":"Afghanistan","ja":"\u30a2\u30d5\u30ac\u30cb\u30b9\u30bf\u30f3","it":"Afghanistan","hu":"Afganiszt\u00e1n"},"flag":"https://restcountries.eu/data/afg.svg","regionalBlocs":[{"acronym":"SAARC","name":"South Asian Association for Regional Cooperation","otherAcronyms":[],"otherNames":[]}],"cioc":"AFG"},{"name":"\u00c5land Islands","topLevelDomain":[".ax"],"alpha2Code":"AX","alpha3Code":"ALA","callingCodes":["358"],"capital":"Mariehamn","altSpellings":["AX","Aaland","Aland","Ahvenanmaa"],"region":"Europe","subregion":"Northern Europe","population":28875,"latlng":[60.116667,19.9],"demonym":"\u00c5landish","area":1580,"gini":null,"timezones":["UTC+02:00"],"borders":[],"nativeName":"\u00c5land","numericCode":"248","currencies":[{"code":"EUR","name":"Euro","symbol":"\u20ac"}],"languages":[{"iso639_1":"sv","iso639_2":"swe","name":"Swedish","nativeName":"svenska"}],"translations":{"br":"Ilhas de Aland","pt":"Ilhas de Aland","nl":"\u00c5landeilanden","hr":"\u00c5landski otoci","fa":"\u062c\u0632\u0627\u06cc\u0631 \u0627\u0644\u0646\u062f","de":"\u00c5land","es":"Alandia","fr":"\u00c5land","ja":"\u30aa\u30fc\u30e9\u30f3\u30c9\u8af8\u5cf6","it":"Isole Aland","hu":"\u00c5land-szigetek"},"flag":"https://restcountries.eu/data/ala.svg","regionalBlocs":[{"acronym":"EU","name":"European Union","otherAcronyms":[],"otherNames":[]}],"cioc":""}]}}}}}}},"x-added-from-impl":true},"post":{"summary":"Handles POST requests and returns method not allowed.","description":"Handles POST requests and returns method not allowed.","responses":{"405":{"description":"Client error \u2014 405","content":{"application/json":{"examples":{"example_405":{"value":{"error":"Method Not Allowed","message":"POST method is not allowed for this endpoint","status":405}}}}}}},"x-added-from-impl":true}},"/v2":{"get":{"summary":"Returns all countries with optional field filtering.","description":"Returns all countries with optional field filtering.","responses":{"200":{"description":"Successful response","content":{"application/json":{"examples":{"example_200":{"value":[{"name":"Afghanistan","capital":"Kabul","population":38928346,"region":"Asia"},{"name":"\u00c5land Islands","capital":"Mariehamn","population":28875,"region":"Europe"}]}}}}}},"x-added-from-impl":true,"parameters":[{"name":"fields","in":"query","description":"Semicolon-separated list of fields to include in response","schema":{"type":"string"},"example":"name;capital;population;region"}]},"post":{"summary":"Handles POST requests by returning method not allowed.","description":"Handles POST requests by returning method not allowed.","responses":{"405":{"description":"Client error \u2014 405","content":{"application/json":{"examples":{"example_405":{"value":{"message":"Method not allowed","error":"POST method is not supported on this endpoint","status":405}}}}}}},"x-added-from-impl":true}},"/contribute":{"post":{"summary":"Processes a Stripe charge for a contribution.","description":"Processes a Stripe charge for a contribution.","responses":{"202":{"description":"Response 202","content":{"application/json":{"examples":{"example_202":{"value":{"status":"accepted","message":"Contribution received and is being processed."}}}}}},"400":{"description":"Client error \u2014 400","content":{"application/json":{"examples":{"example_400":{"value":{"error":"Invalid request","message":"Required fields are missing or invalid."}}}}}}},"x-added-from-impl":true,"requestBody":{"content":{"application/json":{"schema":{"type":"string"}}},"description":"JSON payload containing amount, currency, token, etc."}}}},"components":{"schemas":{}}}
+#####

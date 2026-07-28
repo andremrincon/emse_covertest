@@ -1,0 +1,57 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0True_i1False_i2True_i3True() {
+        given()
+            .when()
+            .get("/api/notypevar/28/world")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/notypevar/28/world")
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0False_i1True_i2False_i3True() {
+        given()
+            .when()
+            .get("/api/notypevar/7/abc")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/notypevar/7/abc")
+            .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0False_i1False_i2False_i3False() {
+        given()
+            .when()
+            .get("/api/notypevar/3/abc")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/notypevar/3/abc")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}

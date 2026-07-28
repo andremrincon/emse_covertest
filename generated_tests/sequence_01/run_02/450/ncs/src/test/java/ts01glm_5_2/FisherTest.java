@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddNBothLoopsSkipped() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMEvenNLoopsEntered() {
+        given()
+            .when()
+                .get("/api/fisher/3/4/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddNZkBranch() {
+        given()
+            .when()
+                .get("/api/fisher/4/3/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMEvenNZkBranch() {
+        given()
+            .when()
+                .get("/api/fisher/4/4/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOneReturnsOne() {
+        given()
+            .when()
+                .get("/api/fisher/3/3/500")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPLessThanZeroReturnsZero() {
+        given()
+            .when()
+                .get("/api/fisher/5/3/0.0001")
+            .then()
+                .statusCode(200);
+    }
+}

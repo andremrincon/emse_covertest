@@ -1,0 +1,63 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.baseUrl");
+        if (base == null) base = System.getenv("API_BASE_URL");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").when().post("/products/{productName}/constraints/requires", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintReturns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response created = given().contentType(ContentType.URLENC).formParam("sourceFeature", "PSU-Redundant").formParam("excludedFeature", "OS-Home").when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300)).extract().response();
+        String body = created.getBody() == null ? "" : created.getBody().asString();
+        Object idObj = null;
+        if (body != null && !body.isEmpty()) {
+            try {
+                idObj = new JsonPath(body).get("id");
+            } catch (Exception e) {
+                idObj = null;
+            }
+        }
+        if (idObj == null) {
+            String loc = created.getHeader("Location");
+            if (loc == null) loc = created.getHeader("location");
+            if (loc != null) {
+                int idx = loc.lastIndexOf('/');
+                if (idx >= 0 && idx < loc.length() - 1) idObj = loc.substring(idx + 1);
+                else idObj = loc;
+            }
+        }
+        String constraintId = idObj == null ? "" : idObj.toString();
+        given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId).then().statusCode(204);
+    }
+}

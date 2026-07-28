@@ -1,0 +1,69 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUri = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (baseUri == null || baseUri.isEmpty()) {
+            baseUri = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUri;
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUserIdWithValidUserPrefix() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithNonMatchingValue() {
+        given()
+            .when()
+                .get("/api/cookie/session/xyz/abc.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/session/xyz/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+}

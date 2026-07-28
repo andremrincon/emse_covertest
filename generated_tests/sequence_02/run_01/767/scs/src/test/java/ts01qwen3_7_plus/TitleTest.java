@@ -1,0 +1,62 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    @Test(timeout = 60000)
+    public void testTitleMaleMr() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "male", "mr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleFemaleMrs() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "female", "mrs")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleNoneDr() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "none", "dr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleMaleMrs() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "male", "mrs")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleFemaleMr() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "female", "mr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleNoneMr() {
+        given()
+            .when()
+                .get("/api/title/{sex}/{title}", "none", "mr")
+            .then()
+                .statusCode(200);
+    }
+}

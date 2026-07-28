@@ -1,0 +1,131 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080/rest";
+        }
+        BASE = env;
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaReturns200ForValidCode() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaReturns400ForInvalidFormat() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListReturns200ForSingleCode() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US").when().get(BASE + "/v1/alpha");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListReturns400ForBadQuery() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "123").when().get(BASE + "/v1/alpha");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListReturns404WhenNoCountriesFound() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "XX;YY").when().get(BASE + "/v1/alpha");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyReturns200ForValidCurrency() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyReturns400ForInvalidCurrencyFormat() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameReturns200ForKnownName() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/name/France");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameReturns404ForUnknownName() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/name/NoCountry123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeReturns200ForValidCode() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeReturns404ForInvalidCode() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/callingcode/abc");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalReturns200ForKnownCapital() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/capital/London");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionReturns200ForKnownRegion() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/region/Europe");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregionReturns200ForKnownSubregion() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("sub", "Western Europe").when().get(BASE + "/v1/subregion/{sub}");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageReturns200ForKnownLanguage() {
+        given().when().get(BASE + "/v1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+}

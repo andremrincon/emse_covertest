@@ -1,0 +1,147 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_1() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_2() {
+        given()
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithName() {
+        given()
+                .when()
+                .get("/v2/alpha/FR")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithNativeName() {
+        given()
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", is("de"))
+                .body("languages[0].iso639_2", is("deu"))
+                .body("languages[0].name", is("German"))
+                .body("languages[0].nativeName", is("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLangEndpointReturnsCountriesWithLanguageFields() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("languages[0][0].iso639_1", is("es"))
+                .body("languages[0][0].name", is("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesEndpointReturnsLanguageFields() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/capital/Paris")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", is("fr"))
+                .body("languages[0].nativeName", is("français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubregionEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionalBlocEndpointReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("de"));
+    }
+}
+```

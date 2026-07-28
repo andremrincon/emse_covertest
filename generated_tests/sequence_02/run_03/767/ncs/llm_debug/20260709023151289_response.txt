@@ -1,0 +1,36 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+
+public class BessjTest {
+
+    private static final String BASE = System.getProperty("base.url", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testBessj_Returns200_ForValidParameters() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/bessj/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_Returns400_ForNLessThanTwo() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/bessj/1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_ReturnsZero_WhenXIsZero() {
+        given().baseUri(BASE).when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/bessj/3/0").then().body("value", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NegativeX_ProducesNegativeValue() {
+        given().baseUri(BASE).when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/bessj/3/-2.5").then().body("value", nullValue());
+    }
+}

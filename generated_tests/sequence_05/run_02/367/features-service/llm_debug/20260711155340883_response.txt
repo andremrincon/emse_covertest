@@ -1,0 +1,156 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithConflictingFeaturesTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + featureA)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + featureB)
+            .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesWithConflictingConstraintsTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct2-" + uuid;
+        String sourceFeature = "SourceFeat-" + uuid;
+        String requiredFeature = "RequiredFeat-" + uuid;
+        String missingFeature = "MissingFeat-" + uuid;
+        String configurationName = "TestConfig2-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+            .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", missingFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeature)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + requiredFeature)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithMutuallyExclusiveFeaturesTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct3-" + uuid;
+        String featureX = "FeatureX-" + uuid;
+        String featureY = "FeatureY-" + uuid;
+        String configurationName = "TestConfig3-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + featureX)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/features/" + featureY)
+            .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureX)
+            .formParam("excludedFeature", featureY)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureY)
+            .formParam("excludedFeature", featureX)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureX)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureY)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName + "/features")
+            .then().statusCode(500);
+    }
+}
+```

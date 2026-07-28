@@ -1,0 +1,540 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddDuplicateFeatureToConfigurationTriggersEqualsSelfComparison TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddDuplicateFeatureToConfigurationTriggersEqualsSelfComparison FAILURE AT LINE 177
+java.lang.AssertionError:
+at ts01glm_5_2.FeatureTest.testAddDuplicateFeatureToConfigurationTriggersEqualsSelfComparison(FeatureTest.java:177)
+CODE CONTEXT:
+   174:         .when()
+   175:             .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+   176:         .then()
+   177:             .statusCode(lessThan(300));  ← FAILURE HERE
+   178:     }
+   179: 
+   180:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.http.ContentType;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private static String baseUrl() {
+        return System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductCoversSetNameAndSetProduct() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProductCoversGetProduct() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .get("/products/{productName}/features", productName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetName() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationTriggersEquals() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureToConfigurationTriggersEqualsSelfComparison() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesTriggersEquals() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationTriggersEquals() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesToConfigurationTriggersEqualsDifferentNames() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName1 = "feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName2 = "feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName2)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testSameFeatureNameDifferentProductsTriggersEqualsProductComparison() {
+        String productName1 = "prod1-" + UUID.randomUUID().toString().substring(0, 8);
+        String productName2 = "prod2-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName1 = "config1-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName2 = "config2-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "shared-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName1, configName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName2, configName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName1, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName2, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName1, configName1, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName2, configName2, featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductInfoAfterAddingFeatureCoversGetProduct() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .get("/products/{productName}", productName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromProductTriggersEquals() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .delete("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithNameCoversGetProductAndEquals() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl())
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+            .statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

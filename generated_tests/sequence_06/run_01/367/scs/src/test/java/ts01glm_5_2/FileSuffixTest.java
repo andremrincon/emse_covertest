@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FileSuffixTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/file.txt")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/acrobat/file.pdf")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/word/file.doc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithNonTxtSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/file.pdf")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithNonPdfSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/acrobat/file.txt")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutDotSuffix() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/file")
+            .then()
+                .statusCode(200);
+    }
+}

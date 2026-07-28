@@ -1,0 +1,89 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        base = Optional.ofNullable(System.getProperty("baseUrl"))
+                .orElseGet(() -> Optional.ofNullable(System.getenv("BASE_URL")).orElse("http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200ForValidNAndX() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/3/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns400ForNTooSmall() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/2/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns400ForNTooLarge() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/1001/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns200ForValidParameters() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/fisher/10/5/0.75");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns400WhenMTooLarge() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/fisher/1001/5/0.75");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns400ForInvalidXThatCausesRuntimeException() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/fisher/10/5/1.2");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqReturns200ForValidParameters() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/gammq/5.5/2.3");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqReturns400ForNegativeA() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/gammq/-1.0/2.3");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderReturns200ForValidInputs() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/remainder/17/5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderReturns400WhenInputOutOfRange() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/remainder/10001/5");
+        act.then().statusCode(400);
+    }
+}

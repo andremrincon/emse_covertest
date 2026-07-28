@@ -1,0 +1,103 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_nonOptionsRequest_chainsFilterAndAddsCorsHeaders() {
+        Response response = RestAssured.given().when().get("/products");
+
+        response.then().statusCode(lessThan(300));
+        String allowOrigin = response.getHeader("Access-Control-Allow-Origin");
+        assertEquals("*", allowOrigin);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequest_doesNotChainFilter() {
+        Response response = RestAssured.given().when().options("/products");
+
+        response.then().statusCode(lessThan(500));
+        String allowMethods = response.getHeader("Access-Control-Allow-Methods");
+        assertEquals("POST, PUT, GET, OPTIONS, DELETE", allowMethods);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_postRequest_setsCorsAllowHeaders() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given().when().get("/products/" + productName);
+
+        response.then().statusCode(lessThan(300));
+        String allowHeaders = response.getHeader("Access-Control-Allow-Headers");
+        assertEquals("x-requested-with", allowHeaders);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_deleteRequest_setsCorsMaxAgeHeader() {
+        String productName = "CORS-Delete-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given().when().delete("/products/" + productName);
+
+        response.then().statusCode(lessThan(300));
+        String maxAge = response.getHeader("Access-Control-Max-Age");
+        assertEquals("3600", maxAge);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_putRequest_setsAllCorsHeaders() {
+        String productName = "CORS-Put-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "cors-feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given()
+                .formParam("description", "Test feature for CORS")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given()
+                .formParam("description", "Updated description for CORS test")
+                .when()
+                .put("/products/" + productName + "/features/" + featureName);
+
+        response.then().statusCode(lessThan(300));
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+        assertEquals("POST, PUT, GET, OPTIONS, DELETE", response.getHeader("Access-Control-Allow-Methods"));
+        assertEquals("x-requested-with", response.getHeader("Access-Control-Allow-Headers"));
+        assertEquals("3600", response.getHeader("Access-Control-Max-Age"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequestOnSpecificEndpoint_returnsCorsHeaders() {
+        Response response = RestAssured.given().when().options("/products/AeroBook-Pro-15/features");
+
+        response.then().statusCode(lessThan(500));
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+        assertEquals("POST, PUT, GET, OPTIONS, DELETE", response.getHeader("Access-Control-Allow-Methods"));
+        assertEquals("x-requested-with", response.getHeader("Access-Control-Allow-Headers"));
+        assertEquals("3600", response.getHeader("Access-Control-Max-Age"));
+    }
+}

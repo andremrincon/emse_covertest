@@ -1,0 +1,28 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Text2TxtTest {
+
+    @Test(timeout = 60000)
+    public void testSeeYouCombination() {
+        Response response = given().when().get("/api/text2txt/see/you/anything");
+        response.then().statusCode(200).body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWayCombination() {
+        Response response = given().when().get("/api/text2txt/by/the/way");
+        response.then().statusCode(200).body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDefaultCase() {
+        Response response = given().when().get("/api/text2txt/hello/world/test");
+        response.then().statusCode(200).body(equalTo(""));
+    }
+}

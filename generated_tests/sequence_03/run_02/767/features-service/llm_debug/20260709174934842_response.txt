@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv("API_BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddingVeryLongFeatureToConfigurationProducesServerError() {
+        String productName = "test-prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 200; i++) {
+            sb.append(UUID.randomUUID().toString());
+        }
+        String veryLongFeatureName = sb.toString();
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, veryLongFeatureName);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCreatingConfigurationWithExtremelyLongNameProducesServerError() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            sb.append("LONGNAME-").append(UUID.randomUUID().toString());
+        }
+        String longConfigurationName = sb.toString();
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}", productName, longConfigurationName);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddingRequiresConstraintWithEmptySourceFeatureProducesServerError() {
+        String productName = "p-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "").formParam("requiredFeature", "FeatureA").when().post("/products/{productName}/constraints/requires", productName);
+        assertEquals(500, resp.getStatusCode());
+    }
+}

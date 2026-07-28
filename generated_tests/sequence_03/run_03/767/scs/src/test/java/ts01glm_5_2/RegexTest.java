@@ -1,0 +1,52 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseHost = System.getProperty("baseHost", "localhost");
+        String basePort = System.getProperty("basePort", "8080");
+        RestAssured.baseURI = "http://" + baseHost + ":" + basePort;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() throws Exception {
+        String txt = URLEncoder.encode("http://abc/def", "UTF-8");
+        given().urlEncodingEnabled(false)
+        .when().get("/api/pat/" + txt)
+        .then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() throws Exception {
+        String txt = URLEncoder.encode("mon01jan", "UTF-8");
+        given().urlEncodingEnabled(false)
+        .when().get("/api/pat/" + txt)
+        .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() throws Exception {
+        String txt = URLEncoder.encode("12.34e+56", "UTF-8");
+        given().urlEncodingEnabled(false)
+        .when().get("/api/pat/" + txt)
+        .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() throws Exception {
+        String txt = URLEncoder.encode("hello", "UTF-8");
+        given().urlEncodingEnabled(false)
+        .when().get("/api/pat/" + txt)
+        .then().statusCode(200);
+    }
+}

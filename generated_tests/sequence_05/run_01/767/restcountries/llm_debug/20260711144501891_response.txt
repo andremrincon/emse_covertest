@@ -1,0 +1,62 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        if (envUrl != null && !envUrl.isEmpty()) {
+            return envUrl;
+        }
+        String propUrl = System.getProperty("base.url");
+        if (propUrl != null && !propUrl.isEmpty()) {
+            return propUrl;
+        }
+        return "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .body("languages[0]['iso639_1']", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .body("languages[0]['iso639_2']", equalTo("fra"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .body("languages[0]['name']", equalTo("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .body("languages[0]['nativeName']", equalTo("English"));
+    }
+}

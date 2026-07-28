@@ -1,0 +1,45 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void postConfiguration_with_extremely_long_name_returns_500() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}", productName, longConfigName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureTo_configuration_with_problematic_feature_returns_body_containing_wrong_product_configuration() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        String problematicFeatureName = "feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, problematicFeatureName);
+        act.then().statusCode(500).body(containsString("Object with id feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit has not been found"));
+    }
+}

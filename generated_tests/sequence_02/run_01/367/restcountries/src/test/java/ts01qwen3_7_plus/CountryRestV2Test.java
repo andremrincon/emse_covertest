@@ -1,0 +1,151 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("test.base.url", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess() {
+        given()
+            .when()
+                .get("/v2/alpha?codes=US,CA")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        given()
+            .when()
+                .get("/v2/alpha?codes=XX,YY")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListEmptyCodes() {
+        given()
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        given()
+            .when()
+                .get("/v2/name/Atlantis")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess() {
+        given()
+            .when()
+                .get("/v2/callingcode/1")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess() {
+        given()
+            .when()
+                .get("/v2/capital/Paris")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccess() {
+        given()
+            .when()
+                .get("/v2/region/Europe")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionSuccess() {
+        given()
+            .when()
+                .get("/v2/subregion/Western%20Europe")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccess() {
+        given()
+            .when()
+                .get("/v2/lang/es")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymSuccess() {
+        given()
+            .when()
+                .get("/v2/demonym/American")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocSuccess() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(404);
+    }
+}

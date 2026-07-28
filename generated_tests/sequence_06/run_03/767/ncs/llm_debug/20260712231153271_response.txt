@@ -1,0 +1,63 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RemainderTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveAPositiveB() {
+        Response response = given()
+            .pathParam("a", 17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveANegativeB() {
+        Response response = given()
+            .pathParam("a", 17)
+            .pathParam("b", -9)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeAPositiveB() {
+        Response response = given()
+            .pathParam("a", -17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeANegativeB() {
+        Response response = given()
+            .pathParam("a", -17)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+}
+```

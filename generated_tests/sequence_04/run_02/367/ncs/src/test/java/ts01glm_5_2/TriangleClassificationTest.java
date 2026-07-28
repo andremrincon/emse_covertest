@@ -1,0 +1,76 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyWithNonPositiveEdgeA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/0/4/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyWithNonPositiveEdgeB() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/3/0/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateralTriangle() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/3/3/3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyDegenerateTriangleMaxIsC() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/3/4/10")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsoscelesTriangleBEqualsC() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/4/3/3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScaleneTriangle() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/3/4/5")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,217 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencyCode() {
+        Response r = given()
+                .when()
+                .get("/v1/alpha/US");
+        r.then().statusCode(lessThan(300));
+        Object body = r.as(Object.class);
+        List<Map<String, Object>> currencyObjects = findCurrenciesInBody(body);
+        boolean found = false;
+        for (Map<String, Object> c : currencyObjects) {
+            Object code = c.get("code");
+            if (code != null && "USD".equals(code.toString())) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencyName() {
+        Response r = given()
+                .when()
+                .get("/v1/alpha/US");
+        r.then().statusCode(lessThan(300));
+        Object body = r.as(Object.class);
+        List<Map<String, Object>> currencyObjects = findCurrenciesInBody(body);
+        boolean found = false;
+        for (Map<String, Object> c : currencyObjects) {
+            if (c.get("name") != null) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencySymbol() {
+        Response r = given()
+                .when()
+                .get("/v1/alpha/FR");
+        r.then().statusCode(lessThan(300));
+        Object body = r.as(Object.class);
+        List<Map<String, Object>> currencyObjects = findCurrenciesInBody(body);
+        boolean found = false;
+        for (Map<String, Object> c : currencyObjects) {
+            if (c.get("symbol") != null) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v1/currency/USD");
+        r.then().statusCode(lessThan(300));
+        Object body = r.as(Object.class);
+        List<Map<String, Object>> rootList = toListOfMaps(body);
+        boolean found = false;
+        for (Map<String, Object> country : rootList) {
+            Object currencies = country.get("currencies");
+            List<Map<String, Object>> currencyObjects = extractCurrencyObjects(currencies);
+            for (Map<String, Object> c : currencyObjects) {
+                Object code = c.get("code");
+                if (code != null && "USD".equals(code.toString())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        assertTrue(found);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaByCodeReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrenciesWithCode() {
+        given()
+                .queryParam("fields", "name;capital;currencies")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v1/name/France");
+        r.then().statusCode(lessThan(300));
+        Object body = r.as(Object.class);
+        List<Map<String, Object>> rootList = toListOfMaps(body);
+        boolean found = false;
+        for (Map<String, Object> country : rootList) {
+            Object currencies = country.get("currencies");
+            List<Map<String, Object>> currencyObjects = extractCurrencyObjects(currencies);
+            for (Map<String, Object> c : currencyObjects) {
+                Object code = c.get("code");
+                if (code != null && "EUR".equals(code.toString())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        assertTrue(found);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> findCurrenciesInBody(Object body) {
+        if (body instanceof Map) {
+            Map<String, Object> m = (Map<String, Object>) body;
+            Object currencies = m.get("currencies");
+            return extractCurrencyObjects(currencies);
+        } else {
+            List<Map<String, Object>> root = toListOfMaps(body);
+            if (!root.isEmpty()) {
+                Object currencies = root.get(0).get("currencies");
+                return extractCurrencyObjects(currencies);
+            }
+        }
+        return new ArrayList<Map<String, Object>>();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> extractCurrencyObjects(Object currencies) {
+        if (currencies == null) return new ArrayList<Map<String, Object>>();
+        if (currencies instanceof List) {
+            return (List<Map<String, Object>>) currencies;
+        } else if (currencies instanceof Map) {
+            List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
+            Map<String, Object> map = (Map<String, Object>) currencies;
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+                Object v = e.getValue();
+                if (v instanceof Map) {
+                    Map<String, Object> vm = (Map<String, Object>) v;
+                    if (!vm.containsKey("code")) {
+                        vm.put("code", e.getKey());
+                    }
+                    out.add(vm);
+                }
+            }
+            return out;
+        } else {
+            return new ArrayList<Map<String, Object>>();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> toListOfMaps(Object body) {
+        if (body instanceof List) {
+            return (List<Map<String, Object>>) body;
+        } else if (body instanceof Map) {
+            List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
+            l.add((Map<String, Object>) body);
+            return l;
+        } else {
+            return new ArrayList<Map<String, Object>>();
+        }
+    }
+}

@@ -1,0 +1,90 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void contributeNullBodyReturnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeEmptyTokenReturnsBadRequest() {
+        String body = "{\"amount\":1000,\"token\":\"\"}";
+        given()
+                .contentType(ContentType.JSON)
+                .body(body)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWhitespaceTokenReturnsBadRequest() {
+        String body = "{\"amount\":1000,\"token\":\"   \"}";
+        given()
+                .contentType(ContentType.JSON)
+                .body(body)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeNullTokenReturnsBadRequest() {
+        String body = "{\"amount\":1000,\"token\":null}";
+        given()
+                .contentType(ContentType.JSON)
+                .body(body)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeValidTokenWithAmountReturnsErrorDueToInvalidApiKey() {
+        String body = "{\"amount\":1000,\"token\":\"tok_visa\"}";
+        given()
+                .contentType(ContentType.JSON)
+                .body(body)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeValidTokenWithoutAmountReturnsErrorDueToInvalidApiKey() {
+        String body = "{\"token\":\"tok_visa\"}";
+        given()
+                .contentType(ContentType.JSON)
+                .body(body)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+}
+```

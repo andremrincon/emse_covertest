@@ -1,0 +1,95 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FileSuffixTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithNoDotReturnsZero() {
+        given()
+            .pathParam("directory", "text")
+            .pathParam("file", "nodotfile")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffixReturnsOne() {
+        given()
+            .pathParam("directory", "text")
+            .pathParam("file", "report.txt")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffixReturnsTwo() {
+        given()
+            .pathParam("directory", "acrobat")
+            .pathParam("file", "document.pdf")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffixReturnsThree() {
+        given()
+            .pathParam("directory", "word")
+            .pathParam("file", "letter.doc")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeSuffixReturnsFour() {
+        given()
+            .pathParam("directory", "bin")
+            .pathParam("file", "application.exe")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllSuffixReturnsFive() {
+        given()
+            .pathParam("directory", "lib")
+            .pathParam("file", "library.dll")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+    }
+}
+```

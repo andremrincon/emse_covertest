@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+public class Ordered4Test {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void test_increasing_order_returns_200() {
+        given().when().get(base + "/api/pat/healthcheck").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/ordered4/alpha/bravo/delta/charl");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_decreasing_order_returns_200() {
+        given().when().get(base + "/api/pat/setup").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/ordered4/omega/kappa/alpha/gamma");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_unordered_by_value_returns_unordered_body() {
+        given().when().get(base + "/api/pat/arrange").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/ordered4/alpha/charl/delta/bravo");
+        String body = act.getBody().asString();
+        Assert.assertEquals("unordered", body);
+    }
+
+    @Test(timeout = 60000)
+    public void test_unordered_due_to_length_returns_unordered_body() {
+        given().when().get(base + "/api/pat/ready").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/ordered4/tiny/short/len7val/okval");
+        String body = act.getBody().asString();
+        Assert.assertEquals("unordered", body);
+    }
+
+    @Test(timeout = 60000)
+    public void test_increasing_with_six_char_strings_returns_200() {
+        given().when().get(base + "/api/pat/prime").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/ordered4/aaaaaa/bbbbbb/dddddd/cccccc");
+        act.then().statusCode(200);
+    }
+}

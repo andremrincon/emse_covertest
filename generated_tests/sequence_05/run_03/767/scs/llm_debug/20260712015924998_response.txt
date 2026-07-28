@@ -1,0 +1,87 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class FileSuffixTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getenv("TEST_HOST");
+        if (host == null || host.isEmpty()) {
+            host = "localhost";
+        }
+        String port = System.getenv("TEST_PORT");
+        if (port == null || port.isEmpty()) {
+            port = "8080";
+        }
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDotInFileReturnsZero() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/nodotfile")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffixReturnsOne() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/report.txt")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffixReturnsTwo() {
+        given()
+            .when()
+                .get("/api/filesuffix/acrobat/document.pdf")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffixReturnsThree() {
+        given()
+            .when()
+                .get("/api/filesuffix/word/letter.doc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeSuffixReturnsFour() {
+        given()
+            .when()
+                .get("/api/filesuffix/bin/application.exe")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllSuffixReturnsFive() {
+        given()
+            .when()
+                .get("/api/filesuffix/lib/library.dll")
+            .then()
+                .statusCode(200)
+                .body(equalTo("5"));
+    }
+}
+```

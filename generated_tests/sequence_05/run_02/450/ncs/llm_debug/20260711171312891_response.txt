@@ -1,0 +1,144 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class FisherTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOdd() {
+        Response r = doGet("/api/fisher/1/1/0.75");
+        assertThat(r.statusCode, lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMOddNEven() {
+        Response r = doGet("/api/fisher/1/2/0.75");
+        assertThat(r.statusCode, lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMEvenNOdd() {
+        Response r = doGet("/api/fisher/2/1/0.75");
+        assertThat(r.statusCode, lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEven() {
+        Response r = doGet("/api/fisher/2/2/0.75");
+        assertThat(r.statusCode, lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPNegativeReturnsZero() {
+        Response r = doGet("/api/fisher/10/5/0.01");
+        assertEquals(200, r.statusCode);
+        double value = extractValue(r.body);
+        assertEquals(0.0, value, 0.001);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOneReturnsOne() {
+        Response r = doGet("/api/fisher/3/4/1000000");
+        assertEquals(200, r.statusCode);
+        double value = extractValue(r.body);
+        assertEquals(1.0, value, 0.001);
+    }
+
+    private Response doGet(String path) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(concatUrl(path));
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            int status = conn.getResponseCode();
+            InputStream is;
+            if (status >= 200 && status < 400) {
+                is = conn.getInputStream();
+            } else {
+                is = conn.getErrorStream();
+                if (is == null) {
+                    return new Response(status, "");
+                }
+            }
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            in.close();
+            return new Response(status, sb.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private String concatUrl(String path) {
+        if (path == null) {
+            return baseUrl;
+        }
+        if (baseUrl.endsWith("/") && path.startsWith("/")) {
+            return baseUrl + path.substring(1);
+        } else if (!baseUrl.endsWith("/") && !path.startsWith("/")) {
+            return baseUrl + "/" + path;
+        } else {
+            return baseUrl + path;
+        }
+    }
+
+    private double extractValue(String body) {
+        if (body == null) {
+            throw new IllegalArgumentException("Empty response body");
+        }
+        Pattern[] patterns = new Pattern[] {
+            Pattern.compile("\"resultAsDouble\"\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)"),
+            Pattern.compile("\"value\"\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)"),
+            Pattern.compile("value\\s*:\\s*([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)"),
+            Pattern.compile("([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)")
+        };
+        for (Pattern p : patterns) {
+            Matcher m = p.matcher(body);
+            if (m.find()) {
+                String num = m.group(1);
+                return Double.parseDouble(num);
+            }
+        }
+        throw new IllegalStateException("No numeric 'value' field found in response: " + body);
+    }
+
+    private static class Response {
+        final int statusCode;
+        final String body;
+        Response(int statusCode, String body) {
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+    }
+}

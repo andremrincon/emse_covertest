@@ -1,0 +1,105 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithNoConstraints() {
+        String productName = "Product_NoConstraints_" + UUID.randomUUID().toString();
+        String featureName = "Feature1_" + UUID.randomUUID().toString();
+        String configName = "Config1_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithRequiresConstraint() throws Exception {
+        String productName = "Product_Requires_" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature_" + UUID.randomUUID().toString();
+        String requiredFeature = "RequiredFeature_" + UUID.randomUUID().toString();
+        String configName = "Config_Requires_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        String body = "sourceFeature=" + URLEncoder.encode(sourceFeature, "UTF-8") +
+                      "&requiredFeature=" + URLEncoder.encode(requiredFeature, "UTF-8");
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .body(body)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithExcludesConstraint() throws Exception {
+        String productName = "Product_Excludes_" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature_" + UUID.randomUUID().toString();
+        String excludedFeature = "ExcludedFeature_" + UUID.randomUUID().toString();
+        String configName = "Config_Excludes_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        String body = "sourceFeature=" + URLEncoder.encode(sourceFeature, "UTF-8") +
+                      "&excludedFeature=" + URLEncoder.encode(excludedFeature, "UTF-8");
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .body(body)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature)
+            .then()
+            .statusCode(500);
+    }
+}

@@ -1,0 +1,92 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowOriginHeaderOnV1All() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowMethodsHeaderOnV1Alpha() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().header("Access-Control-Allow-Methods", equalTo("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowHeadersHeaderOnV1Currency() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1NameWithFullText() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get("/v1/name/France").then().header("Cache-Control", equalTo("public, max-age=86400"));
+    }
+
+    @Test(timeout = 60000)
+    public void test400ResponseForAlphaInvalidFormat() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void test404ResponseForAlphaNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersPresentOnV2AllWithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;region").when().get("/v2/all").then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsOnCallingCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostContributeAcceptedStatus() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String uniqueBody = "{\"amount\":1,\"currency\":\"USD\",\"token\":\"tok_" + UUID.randomUUID().toString() + "\"}";
+        given().contentType("application/json").body(uniqueBody).when().post("/contribute").then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostV2MethodNotAllowedStatus() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String body = "{\"dummy\":\"value-" + UUID.randomUUID().toString() + "\"}";
+        given().contentType("application/json").body(body).when().post("/v2").then().statusCode(405);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesQueryParameterResponse200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(200);
+    }
+}

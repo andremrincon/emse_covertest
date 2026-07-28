@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrl() {
+        Response response = given()
+                .pathParam("txt", "http://a/b")
+                .when()
+                .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDate() {
+        Response response = given()
+                .pathParam("txt", "mon01jan")
+                .when()
+                .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpe() {
+        Response response = given()
+                .pathParam("txt", "0.0e+00")
+                .when()
+                .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNone() {
+        Response response = given()
+                .pathParam("txt", "invalid")
+                .when()
+                .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+}

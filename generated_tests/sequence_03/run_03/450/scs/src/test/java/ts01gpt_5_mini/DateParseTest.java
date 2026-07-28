@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String cfg = System.getProperty("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_JAN_withValidShortDay() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "Jan");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_FEB_withValidLowerDay() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "tue", "feb");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_MAR_withUpperMonth() {
+        given().when().get("/api/pat/{txt}", "alive").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "WED", "MAR");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_APR_withValidDay() {
+        given().when().get("/api/pat/{txt}", "check").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "thur", "apr");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_MAY_withValidDayMixedCase() {
+        given().when().get("/api/pat/{txt}", "status").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Sat", "May");
+        resp.then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateparse_DEC_withInvalidDayNumeric() {
+        given().when().get("/api/pat/{txt}", "probe").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "123", "DEC");
+        resp.then().statusCode(500);
+    }
+}

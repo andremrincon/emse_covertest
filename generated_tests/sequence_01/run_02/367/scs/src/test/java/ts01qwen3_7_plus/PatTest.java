@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/abc/ab").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/abc/ab");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoPatRev() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/abcde/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/abcde/abc");
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevImmediately() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/abccba/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/abccba/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevLater() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/abcxxcba/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/abcxxcba/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundNoPat() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/cbaxxx/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/cbaxxx/abc");
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundPatImmediately() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/cbaabc/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/cbaabc/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundPatLater() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/cbaxxabc/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/cbaxxabc/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFirstCharMatchesButNoFullMatch() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/abxxxx/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/abxxxx/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFirstCharMatchesButNoFullMatch() {
+        String baseUrl = getBaseUrl();
+        given().when().get(baseUrl + "/api/pat/cbxxxx/abc").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/pat/cbxxxx/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+}

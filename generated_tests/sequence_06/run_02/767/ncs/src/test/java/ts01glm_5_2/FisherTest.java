@@ -1,0 +1,67 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOdd_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/3/3/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMOddNEven_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/3/4/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMEvenNOdd_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/4/3/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEven_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/4/4/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOne_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/1/100/2000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPLessThanZero_1() {
+        RestAssured.given()
+            .when()
+                .get("/api/fisher/2/2/-0.5")
+            .then()
+                .statusCode(200);
+    }
+}

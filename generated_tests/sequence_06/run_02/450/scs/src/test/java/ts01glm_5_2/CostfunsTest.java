@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.containsString;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFive() {
+        given()
+            .when()
+                .get("/api/costfuns/5/algorithm")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsMinusFour_SEqualsAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/ababba")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsMinusFour_SLessThanAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/a")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanMinus444_SEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-445/baab")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/667/ababba")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterEqual555_ButNotGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/555/algorithm")
+            .then()
+                .statusCode(200)
+                .body(containsString("10"));
+    }
+}

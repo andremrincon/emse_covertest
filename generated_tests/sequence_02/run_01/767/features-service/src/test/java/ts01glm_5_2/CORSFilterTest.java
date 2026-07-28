@@ -1,0 +1,58 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterProcessesGetRequestAndSetsHeaders() {
+        given()
+            .header("Origin", "http://example.com")
+        .when()
+            .get("/products")
+        .then()
+            .statusCode(200)
+            .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterProcessesOptionsRequestWithoutChaining() {
+        given()
+            .header("Origin", "http://example.com")
+            .header("Access-Control-Request-Method", "GET")
+        .when()
+            .options("/products")
+        .then()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterProcessesPostRequestThroughFullChain() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .header("Origin", "http://example.com")
+        .when()
+            .post("/products/{productName}", productName)
+        .then()
+            .statusCode(lessThan(300));
+    }
+}

@@ -1,0 +1,115 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE_URL;
+
+    @BeforeClass
+    public static void setup() {
+        String prop = System.getProperty("baseUrl");
+        String env = System.getenv("BASE_URL");
+        if (prop != null && !prop.isEmpty()) {
+            BASE_URL = prop;
+        } else if (env != null && !env.isEmpty()) {
+            BASE_URL = env;
+        } else {
+            BASE_URL = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess_US() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequest_Short() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/A").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound_ZZZ() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBad_NoCodes() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess_US_CA() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get(BASE_URL + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInternalServerError_Malformed() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get(BASE_URL + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess_USD() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequest_LengthNotThree() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound_XYZ() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess_France_FullTextFalse() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get(BASE_URL + "/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound_Numeric() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get(BASE_URL + "/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess_1() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess_London() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccess_Europe() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccess_es() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/lang/es").then().statusCode(200);
+    }
+}

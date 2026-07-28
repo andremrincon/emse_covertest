@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("API_BASE");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintReturns201() {
+        String productName = "prod-requires-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-" + UUID.randomUUID().toString())
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", productName);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintReturnsIdInBody() {
+        String productName = "prod-excludes-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", productName);
+        resp.then().body("id", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintByIdReturns204() {
+        String productName = "prod-delete-const-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response createResp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "feature-to-delete-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "excluded-" + UUID.randomUUID().toString())
+                .when().post("/products/{productName}/constraints/excludes", productName);
+        createResp.then().statusCode(lessThan(300));
+        Object id = createResp.jsonPath().get("id");
+        Response delResp = given().when().delete("/products/{productName}/constraints/{constraintId}", productName, id);
+        assertEquals(204, delResp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintSetsProductNameInResponse() {
+        String productName = "prod-constraint-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "Source-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "Excluded-" + UUID.randomUUID().toString())
+                .when().post("/products/{productName}/constraints/excludes", productName);
+        resp.then().body("productName", equalTo(productName));
+    }
+}

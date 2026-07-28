@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        String cfg = System.getProperty("api.base");
+        if (cfg == null || cfg.isEmpty()) cfg = System.getenv("API_BASE");
+        if (cfg == null || cfg.isEmpty()) cfg = "http://localhost:8080";
+        base = cfg.endsWith("/") ? cfg.substring(0, cfg.length() - 1) : cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturns200() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtComputesSquareRootBody() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9", "0");
+        resp.then().body(equalTo("3.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusComputesSumBody() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "plus", "15.5", "4.5");
+        resp.then().body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCosineOfZeroReturnsOneBody() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "cosine", "0", "0");
+        resp.then().body(equalTo("1.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturns500() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testLogOfOneReturnsZeroBody() {
+        String id = "setup-" + UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/{txt}", id).then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/calc/{op}/{arg1}/{arg2}", "log", "1", "0");
+        resp.then().body(equalTo("0.0"));
+    }
+}

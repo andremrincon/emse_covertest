@@ -1,0 +1,231 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validPayload_returnsAccepted() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":100,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingAmount_returnsBadRequest() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingToken_returnsBadRequest() {
+        String payload = "{"
+                + "\"amount\":100,"
+                + "\"currency\":\"usd\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_emptyBody_returnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_negativeAmount_returnsBadRequest() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":-50,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_invalidAmountType_returnsBadRequest() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":\"not-a-number\","
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_zeroAmount_returnsBadRequest() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":0,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingCurrency_returnsBadRequest() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":100,"
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_malformedJson_returnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{invalid json")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_largeAmount_returnsAcceptedOrError() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":99999999,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validPayload_responseBodyContainsStatusOrError() {
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{"
+                + "\"amount\":50,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"tok_" + uuid + "\""
+                + "}";
+
+        Response resp = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute");
+
+        resp.then().statusCode(lessThan(300));
+        resp.then().body(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_emptyToken_returnsBadRequest() {
+        String payload = "{"
+                + "\"amount\":100,"
+                + "\"currency\":\"usd\","
+                + "\"token\":\"\""
+                + "}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+}

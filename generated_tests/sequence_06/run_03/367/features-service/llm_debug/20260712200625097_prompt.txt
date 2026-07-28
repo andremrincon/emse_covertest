@@ -1,0 +1,436 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ConstraintRequiresTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testEvaluateConfigurationSourceActiveRequiredNotActiveIncludesSource TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "src-feat-00901819"
+  Actual: ["src-feat-00901819","req-feat-bc9001a9"]
+
+[2] METHOD=testCreateRequiresConstraintCoversSetSourceFeatureName TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a string containing "src-feat-4b4d50b4"
+  Actual:
+
+[3] METHOD=testEvaluateConfigurationSourceActiveRequiredNotActiveDerivesRequired TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "req-feat-ccbd9236"
+  Actual: ["req-feat-ccbd9236","src-feat-be1e067c"]
+
+[4] METHOD=testCreateRequiresConstraintCoversSetRequiredFeatureName TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a string containing "req-feat-43770dd1"
+  Actual:
+
+[5] METHOD=testEvaluateConfigurationSourceActiveRequiredAlsoActive TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testEvaluateConfigurationSourceActiveRequiredNotActiveIncludesSource FAILURE AT LINE 315
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintRequiresTest.testEvaluateConfigurationSourceActiveRequiredNotActiveIncludesSource(ConstraintRequiresTest.java:315)
+CODE CONTEXT:
+   312:         .when()
+   313:             .get("/products/" + productName + "/configurations/" + configName + "/features")
+   314:         .then()
+   315:             .body(hasItem(sourceFeature));  ← FAILURE HERE
+   316:     }
+   317: }
+
+[2] METHOD=testCreateRequiresConstraintCoversSetSourceFeatureName FAILURE AT LINE 81
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintRequiresTest.testCreateRequiresConstraintCoversSetSourceFeatureName(ConstraintRequiresTest.java:81)
+CODE CONTEXT:
+    78:         .when()
+    79:             .post("/products/" + productName + "/constraints/requires")
+    80:         .then()
+    81:             .body(containsString(sourceFeature));  ← FAILURE HERE
+    82:     }
+    83: 
+    84:     @Test(timeout = 60000)
+
+[3] METHOD=testEvaluateConfigurationSourceActiveRequiredNotActiveDerivesRequired FAILURE AT LINE 205
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintRequiresTest.testEvaluateConfigurationSourceActiveRequiredNotActiveDerivesRequired(ConstraintRequiresTest.java:205)
+CODE CONTEXT:
+   202:         .when()
+   203:             .get("/products/" + productName + "/configurations/" + configName + "/features")
+   204:         .then()
+   205:             .body(hasItem(requiredFeature));  ← FAILURE HERE
+   206:     }
+   207: 
+   208:     @Test(timeout = 60000)
+
+[4] METHOD=testCreateRequiresConstraintCoversSetRequiredFeatureName FAILURE AT LINE 100
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintRequiresTest.testCreateRequiresConstraintCoversSetRequiredFeatureName(ConstraintRequiresTest.java:100)
+CODE CONTEXT:
+    97:         .when()
+    98:             .post("/products/" + productName + "/constraints/requires")
+    99:         .then()
+   100:             .body(containsString(requiredFeature));  ← FAILURE HERE
+   101:     }
+   102: 
+   103:     @Test(timeout = 60000)
+
+[5] METHOD=testEvaluateConfigurationSourceActiveRequiredAlsoActive FAILURE AT LINE 147
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintRequiresTest.testEvaluateConfigurationSourceActiveRequiredAlsoActive(ConstraintRequiresTest.java:147)
+CODE CONTEXT:
+   144:             .post("/products/" + productName + "/constraints/requires")
+   145:         .then().statusCode(lessThan(300));
+   146:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+   147:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + requiredFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   148: 
+   149:         given()
+   150:         .when()
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintCoversParameterizedConstructor() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintCoversGetType() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .body(containsString("requires"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintCoversSetSourceFeatureName() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .body(containsString(sourceFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintCoversSetRequiredFeatureName() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .body(containsString(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceActiveRequiredNotActive() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceActiveRequiredAlsoActive() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceNotActive() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceActiveRequiredNotActiveDerivesRequired() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .body(hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testDefaultConstructorNoSourceRequiredParams() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetSourceFeatureNameViaProductResponse() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .body(containsString(sourceFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRequiredFeatureNameViaProductResponse() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .body(containsString(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNoFeaturesActive() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceActiveRequiredNotActiveIncludesSource() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .body(hasItem(sourceFeature));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

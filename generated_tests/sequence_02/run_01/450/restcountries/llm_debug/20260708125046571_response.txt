@@ -1,0 +1,44 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Assert;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    private static String base() {
+        String b = System.getProperty("API_BASE_URL");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getenv("API_BASE_URL");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getProperty("api.base");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getenv("api.base");
+        if (b != null && !b.isEmpty()) return b;
+        return "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusWhenNameNotFound() {
+        String b = base();
+        given().when().get(b + "/v1/all").then().statusCode(lessThan(300));
+        String uniqueName = "no-country-" + UUID.randomUUID().toString();
+        Response r = given().when().get(b + "/v1/name/" + uniqueName);
+        Object statusObj = r.path("status");
+        int status = statusObj instanceof Number ? ((Number) statusObj).intValue() : Integer.parseInt(String.valueOf(statusObj));
+        Assert.assertEquals(404, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageWhenPostV1NotAllowed() {
+        String b = base();
+        given().when().get(b + "/v2/all").then().statusCode(lessThan(300));
+        Response r = given().contentType("application/json").body("{}").when().post(b + "/v1");
+        r.then().statusCode(405);
+        String message = r.path("message");
+        Assert.assertEquals("Method Not Allowed", message);
+    }
+}

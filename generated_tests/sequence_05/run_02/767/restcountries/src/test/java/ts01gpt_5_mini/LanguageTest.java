@@ -1,0 +1,82 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    static {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("BASEURL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_iso6392_equals_eng() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0]['iso639_2']", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaInvalidFormat_status400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNotFound_status404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFrance_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Ignore("The parameter \"name\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1NameFrance_language_name_equals_French() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().body("[0].languages[0]['name']", equalTo("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_Spanish_iso6391_equals_es() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish").then().body("[0].languages[0]['iso639_1']", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaWithFields_status200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+}

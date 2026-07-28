@@ -1,0 +1,75 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDefaultPathI0SA() {
+        given()
+            .when()
+                .get("/api/costfuns/0/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEquals5() {
+        given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanMinus444() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsMinus4AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666AndSCompareToPositive() {
+        given()
+            .when()
+                .get("/api/costfuns/700/z")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGeq555AndSCompareToEqual() {
+        given()
+            .when()
+                .get("/api/costfuns/600/ababba")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,95 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaAlphaCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaAlphaCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaAlphaCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaAlphaCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaAlphaCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaName() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaName() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0].translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaName() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaName() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaName() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaCurrency() {
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaCurrency() {
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("[0].translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaRegion() {
+        given().when().get("/v1/region/Europe").then().statusCode(200).body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaRegion() {
+        given().when().get("/v1/region/Europe").then().statusCode(200).body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaRegion() {
+        given().when().get("/v1/region/Europe").then().statusCode(200).body("[0].translations.it", notNullValue());
+    }
+}
+```

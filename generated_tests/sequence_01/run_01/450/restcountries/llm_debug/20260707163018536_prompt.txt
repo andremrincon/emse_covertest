@@ -1,0 +1,402 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCorsAllowOriginHeaderOnV1Alpha TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=780
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[2] METHOD=testCorsAllowOriginHeaderOnV1CallingCode TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[3] METHOD=testCorsCacheControlHeaderOnV1All TYPE=FAILURE
+1 expectation failed.
+Expected header "Cache-Control" was not "public, max-age=86400", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[4] METHOD=testCorsAllowOriginHeaderOnV1All TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[5] METHOD=testCorsAllowOriginHeaderOnV2All TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[6] METHOD=testCorsAllowOriginHeaderOnV1Subregion TYPE=ERROR
+Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+
+[7] METHOD=testCorsAllowHeadersHeaderOnV1All TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Headers" was not "Accept, X-Requested-With", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[8] METHOD=testCorsAllowOriginHeaderOnV1Region TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[9] METHOD=testCorsAllowOriginHeaderOnV1Name TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=739
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[10] METHOD=testCorsAllowOriginHeaderOnV1Currency TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[11] METHOD=testCorsAllowMethodsHeaderOnV1All TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Methods" was not "GET", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[12] METHOD=testCorsAllowOriginHeaderOnV1Capital TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=679
+Date=Tue, 07 Jul 2026 19:29:47 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCorsAllowOriginHeaderOnV1Alpha FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Alpha(CORSFilterTest.java:68)
+CODE CONTEXT:
+    65:             .when()
+    66:                 .get("/v1/alpha/US")
+    67:             .then()
+    68:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    69:     }
+    70: 
+    71:     @Test(timeout = 60000)
+
+[2] METHOD=testCorsAllowOriginHeaderOnV1CallingCode FAILURE AT LINE 113
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1CallingCode(CORSFilterTest.java:113)
+CODE CONTEXT:
+   110:             .when()
+   111:                 .get("/v1/callingcode/1")
+   112:             .then()
+   113:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   114:     }
+   115: 
+   116:     @Test(timeout = 60000)
+
+[3] METHOD=testCorsCacheControlHeaderOnV1All FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsCacheControlHeaderOnV1All(CORSFilterTest.java:50)
+CODE CONTEXT:
+    47:             .when()
+    48:                 .get("/v1/all")
+    49:             .then()
+    50:                 .header("Cache-Control", equalTo("public, max-age=86400"));  ← FAILURE HERE
+    51:     }
+    52: 
+    53:     @Test(timeout = 60000)
+
+[4] METHOD=testCorsAllowOriginHeaderOnV1All FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1All(CORSFilterTest.java:23)
+CODE CONTEXT:
+    20:             .when()
+    21:                 .get("/v1/all")
+    22:             .then()
+    23:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[5] METHOD=testCorsAllowOriginHeaderOnV2All FAILURE AT LINE 59
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV2All(CORSFilterTest.java:59)
+CODE CONTEXT:
+    56:             .when()
+    57:                 .get("/v2/all")
+    58:             .then()
+    59:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    60:     }
+    61: 
+    62:     @Test(timeout = 60000)
+
+[6] METHOD=testCorsAllowOriginHeaderOnV1Subregion FAILURE AT LINE 120
+java.net.URISyntaxException: Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Subregion(CORSFilterTest.java:120)
+CODE CONTEXT:
+   117:     public void testCorsAllowOriginHeaderOnV1Subregion() {
+   118:         given()
+   119:             .when()
+   120:                 .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+   121:             .then()
+   122:                 .header("Access-Control-Allow-Origin", equalTo("*"));
+   123:     }
+
+[7] METHOD=testCorsAllowHeadersHeaderOnV1All FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowHeadersHeaderOnV1All(CORSFilterTest.java:41)
+CODE CONTEXT:
+    38:             .when()
+    39:                 .get("/v1/all")
+    40:             .then()
+    41:                 .header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));  ← FAILURE HERE
+    42:     }
+    43: 
+    44:     @Test(timeout = 60000)
+
+[8] METHOD=testCorsAllowOriginHeaderOnV1Region FAILURE AT LINE 95
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Region(CORSFilterTest.java:95)
+CODE CONTEXT:
+    92:             .when()
+    93:                 .get("/v1/region/Europe")
+    94:             .then()
+    95:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    96:     }
+    97: 
+    98:     @Test(timeout = 60000)
+
+[9] METHOD=testCorsAllowOriginHeaderOnV1Name FAILURE AT LINE 77
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Name(CORSFilterTest.java:77)
+CODE CONTEXT:
+    74:             .when()
+    75:                 .get("/v1/name/France")
+    76:             .then()
+    77:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    78:     }
+    79: 
+    80:     @Test(timeout = 60000)
+
+[10] METHOD=testCorsAllowOriginHeaderOnV1Currency FAILURE AT LINE 104
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Currency(CORSFilterTest.java:104)
+CODE CONTEXT:
+   101:             .when()
+   102:                 .get("/v1/currency/USD")
+   103:             .then()
+   104:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   105:     }
+   106: 
+   107:     @Test(timeout = 60000)
+
+[11] METHOD=testCorsAllowMethodsHeaderOnV1All FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowMethodsHeaderOnV1All(CORSFilterTest.java:32)
+CODE CONTEXT:
+    29:             .when()
+    30:                 .get("/v1/all")
+    31:             .then()
+    32:                 .header("Access-Control-Allow-Methods", equalTo("GET"));  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+[12] METHOD=testCorsAllowOriginHeaderOnV1Capital FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CORSFilterTest.testCorsAllowOriginHeaderOnV1Capital(CORSFilterTest.java:86)
+CODE CONTEXT:
+    83:             .when()
+    84:                 .get("/v1/capital/London")
+    85:             .then()
+    86:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    87:     }
+    88: 
+    89:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Methods", equalTo("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Cache-Control", equalTo("public, max-age=86400"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Alpha() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Name() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Capital() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Region() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Currency() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1CallingCode() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderOnV1Subregion() {
+        given()
+            .when()
+                .get("/v1/subregion/Western Europe")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

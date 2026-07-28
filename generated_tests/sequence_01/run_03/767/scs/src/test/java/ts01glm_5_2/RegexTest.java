@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/http%3A%2F%2Fa%2Fa")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/12.34e%2B56")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchReturnsUrl() {
+        given()
+            .when()
+                .get("/api/pat/http%3A%2F%2Fb%2Fb")
+            .then()
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatchReturnsNone() {
+        given()
+            .when()
+                .get("/api/pat/xyz123")
+            .then()
+                .body(equalTo("none"));
+    }
+}

@@ -1,0 +1,93 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @Before
+    public void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth1() {
+        String dayname = "mon";
+        String monthname = "jan";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth2() {
+        String dayname = "tue";
+        String monthname = "feb";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth3() {
+        String dayname = "wed";
+        String monthname = "mar";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth4() {
+        String dayname = "thur";
+        String monthname = "apr";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth5() {
+        String dayname = "fri";
+        String monthname = "may";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayAndMonth() {
+        String dayname = "xyz";
+        String monthname = "xyz";
+        given()
+            .pathParam("dayname", dayname)
+            .pathParam("monthname", monthname)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(500);
+    }
+}

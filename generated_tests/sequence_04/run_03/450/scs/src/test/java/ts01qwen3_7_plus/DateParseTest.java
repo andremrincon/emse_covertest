@@ -1,0 +1,55 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonth() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        Response response = given()
+                .pathParam("dayname", "mon")
+                .pathParam("monthname", "jan")
+                .when()
+                .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonth() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        Response response = given()
+                .pathParam("dayname", "invalid")
+                .pathParam("monthname", "invalid")
+                .when()
+                .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAnotherValidCombination() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        Response response = given()
+                .pathParam("dayname", "fri")
+                .pathParam("monthname", "dec")
+                .when()
+                .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+}

@@ -1,0 +1,79 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchHttp() {
+        given()
+            .urlEncodingEnabled(true)
+            .pathParam("txt", "http://a/a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchFtp() {
+        given()
+            .urlEncodingEnabled(true)
+            .pathParam("txt", "ftp://x/y")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatchMonJan() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatchFriDec() {
+        given()
+            .pathParam("txt", "fri31dec")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .pathParam("txt", "12.34e-56")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .pathParam("txt", "hello")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFiveBranch() {
+        given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanNegative444AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-445/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsNegativeFourAndSCompareToAbabbaEqualsZero() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666AndSCompareToAbabbaGreaterThanZero() {
+        given()
+            .when()
+                .get("/api/costfuns/667/bbabba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanOrEqualNegative333Boundary() {
+        given()
+            .when()
+                .get("/api/costfuns/-333/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThanOrEqual555Boundary() {
+        given()
+            .when()
+                .get("/api/costfuns/555/a")
+            .then()
+                .statusCode(200);
+    }
+}
+```

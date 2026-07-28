@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_Succeeds() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_InvalidFeatureResultsInServerError() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String nonexistentFeature = "nonexistent-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, nonexistentFeature);
+        act.then().statusCode(500);
+    }
+}

@@ -1,0 +1,142 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnV2All() {
+        given()
+                .when()
+                .get("/v2/all")
+                .then()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET")
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With")
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnAlphaCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOn404Response() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOn400Response() {
+        given()
+                .when()
+                .get("/v1/alpha/123")
+                .then()
+                .statusCode(400)
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnRegionEndpoint() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Methods", "GET")
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersOnCallingCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+}
+```

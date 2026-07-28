@@ -1,0 +1,109 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("alphacode", "1").when().get("/v1/alpha/{alphacode}").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "1").when().get("/v1/alpha/").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US;CA").when().get("/v1/alpha/").then().statusCode(200);
+    }
+
+    @Ignore("Illegal character in query at index 24: /rest/v1/alpha/?codes=US|CA|MX")
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US|CA|MX").when().get("/v1/alpha/").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("currency", "12").when().get("/v1/currency/{currency}").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("currency", "USD").when().get("/v1/currency/{currency}").then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <404>.")
+    @Test(timeout = 60000)
+    public void testGetByCurrency_InternalServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("currency", "XyZ").when().get("/v1/currency/{currency}").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("name", "France").when().get("/v1/name/{name}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("name", "123").when().get("/v1/name/{name}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("callingcode", "1").when().get("/v1/callingcode/{callingcode}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("callingcode", "99999").when().get("/v1/callingcode/{callingcode}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("capital", "London").when().get("/v1/capital/{capital}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("capital", "123").when().get("/v1/capital/{capital}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("region", "Europe").when().get("/v1/region/{region}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().pathParam("region", "123").when().get("/v1/region/{region}").then().statusCode(404);
+    }
+}

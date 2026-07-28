@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class ExpintTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThan1() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXBetween0And1() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/3/0.1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNLessThan0() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/-1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXLessThan0() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/3/-999.9")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNEquals0() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/0/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXEquals0NGreaterThan1() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/expint/2/0.0")
+            .then()
+                .statusCode(200);
+    }
+}

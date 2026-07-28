@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithMonAndJan() {
+        given()
+            .when()
+            .get("/api/dateparse/mon/jan")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithTueAndFeb() {
+        given()
+            .when()
+            .get("/api/dateparse/tue/feb")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithWedAndMar() {
+        given()
+            .when()
+            .get("/api/dateparse/wed/mar")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithThurAndApr() {
+        given()
+            .when()
+            .get("/api/dateparse/thur/apr")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithFriAndMay() {
+        given()
+            .when()
+            .get("/api/dateparse/fri/may")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithSatAndJun() {
+        given()
+            .when()
+            .get("/api/dateparse/sat/jun")
+            .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,119 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaInvalidLengthBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaFoundWithFieldsReturnsFilteredBody() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListNumericCodesBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListFoundWithFieldsReturnsFilteredArray() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA&fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyInvalidLengthBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNotFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNumericNotFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/123?fullText=false").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeWithFieldsReturnsBodyContainingName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/callingcode/1?fields=name;capital;region").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalParisReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/capital/Paris").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionNumericReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/region/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubregionFoundWithFieldsReturnsFilteredArray() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/subregion/Western%20Europe?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListMissingCodesBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDemonymNumericReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/demonym/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionalBlocNotFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/regionalbloc/123").then().statusCode(404);
+    }
+}

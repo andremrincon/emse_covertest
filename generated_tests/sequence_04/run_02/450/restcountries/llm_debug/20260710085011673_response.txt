@@ -1,0 +1,144 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_addsAccessControlAllowOriginHeader() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_addsAccessControlAllowMethodsHeader() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_addsAccessControlAllowHeadersHeader() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_addsCacheControlHeader() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToV2Endpoints() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToErrorResponses() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToBadRequestResponses() {
+        given()
+                .when()
+                .get("/v1/alpha/123")
+                .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToCallingCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToSubregionEndpoint() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_appliesToLangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+}

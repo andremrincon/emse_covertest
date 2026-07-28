@@ -1,0 +1,175 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validAlphaCode_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_invalidAlphaCodeTooLong_returns400() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/1234")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFoundAlphaCode_returns404() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US;CA;MX")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_invalidCodesTooLongNoSemicolon_returns400() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "1234")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFoundCodes_returns404() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "XX;YY;ZZ")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_validCurrency_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_invalidCurrencyLength_returns400() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/currency/12")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFoundCurrency_returns404() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/currency/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_validName_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_validCallingCode_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_validCapital_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_validRegion_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_validSubregion_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/subregion/Western Europe")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_validLanguage_returns200() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200);
+    }
+}
+```

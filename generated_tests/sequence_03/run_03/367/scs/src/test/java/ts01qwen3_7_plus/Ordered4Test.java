@@ -1,0 +1,72 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "datee")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .pathParam("w", "zebra")
+            .pathParam("x", "yakka")
+            .pathParam("z", "waaaa")
+            .pathParam("y", "xrayy")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "aaaaa")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLength() {
+        given()
+            .pathParam("w", "app")
+            .pathParam("x", "banana")
+            .pathParam("z", "datee")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+}

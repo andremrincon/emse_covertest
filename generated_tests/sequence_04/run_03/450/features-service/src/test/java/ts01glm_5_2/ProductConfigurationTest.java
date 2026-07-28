@@ -1,0 +1,117 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasItem;
+
+import java.util.UUID;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesRetrievedWhenGettingConfigurationWithProductFeatures() {
+        String productName = "AvailProd-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "AvailFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "AvailConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithActivatedFeatureInConfiguration() {
+        String productName = "ActProd-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "ActFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "ActConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then()
+                .statusCode(200)
+                .body("$", hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithEmptyProductFeatureSet() {
+        String productName = "EmptyProd-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "EmptyConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(200);
+    }
+}

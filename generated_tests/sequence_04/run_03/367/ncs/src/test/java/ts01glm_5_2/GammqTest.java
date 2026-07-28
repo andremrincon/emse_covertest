@@ -1,0 +1,100 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String port = System.getProperty("server.port");
+        if (port == null) {
+            port = System.getenv("SERVER_PORT");
+        }
+        if (port == null) {
+            port = "8080";
+        }
+        RestAssured.port = Integer.parseInt(port);
+
+        String host = System.getProperty("server.host");
+        if (host == null) {
+            host = System.getenv("SERVER_HOST");
+        }
+        if (host == null) {
+            host = "localhost";
+        }
+        RestAssured.baseURI = "http://" + host;
+
+        String basePath = System.getProperty("server.basePath");
+        if (basePath == null) {
+            basePath = System.getenv("SERVER_BASE_PATH");
+        }
+        if (basePath != null) {
+            RestAssured.basePath = basePath;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/2.3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalPath() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/0.001/1000.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithXZero() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidA() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/-1.0/3.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidX() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/-1.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidType() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/abc/2.0")
+        .then()
+            .statusCode(400);
+    }
+}

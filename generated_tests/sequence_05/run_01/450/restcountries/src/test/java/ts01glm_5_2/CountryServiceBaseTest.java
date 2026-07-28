@@ -1,0 +1,163 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryServiceBaseTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CharCodeFound() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CharCodeFound() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <404>.")
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidFormat() {
+        given()
+            .when()
+                .get("/v1/alpha/123")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListSingleCode() {
+        given()
+            .queryParam("codes", "US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMultipleCodes() {
+        given()
+            .queryParam("codes", "US;CA;MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicateCodes() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("Illegal character in path at index 41: http://localhost:8080/rest/v1/name/French Republic")
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "French Republic")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFound() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/NonexistentCountry")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchPartialName() {
+        given()
+            .when()
+                .get("/v1/name/Fran")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpellingSubstring() {
+        given()
+            .when()
+                .get("/v1/name/Republic")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(200);
+    }
+}

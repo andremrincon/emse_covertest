@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternMatchesTriggersUrlBranch() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "http://abc/def");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatchesTriggersDateBranch() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "a", "b", "c").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "mon12jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatchesTriggersFpeBranch() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "X", "Y", "Z").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "1.2e+34");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternTriggersNoneBranch() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "alpha", "beta", "gamma").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "NONESTRING");
+        act.then().statusCode(200);
+    }
+}

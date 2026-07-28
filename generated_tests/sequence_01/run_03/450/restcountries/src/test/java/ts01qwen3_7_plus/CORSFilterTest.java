@@ -1,0 +1,84 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("test.base.url");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeader() {
+        String headerValue = given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .extract()
+            .header("Access-Control-Allow-Origin");
+
+        Assert.assertNull(headerValue);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeader() {
+        String headerValue = given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .extract()
+            .header("Access-Control-Allow-Methods");
+
+        Assert.assertNull(headerValue);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeader() {
+        String headerValue = given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .extract()
+            .header("Access-Control-Allow-Headers");
+
+        Assert.assertNull(headerValue);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeader() {
+        String headerValue = given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .extract()
+            .header("Cache-Control");
+
+        Assert.assertNull(headerValue);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Endpoint() {
+        String headerValue = given()
+        .when()
+            .get("/v2/all")
+        .then()
+            .extract()
+            .header("Access-Control-Allow-Origin");
+
+        Assert.assertNull(headerValue);
+    }
+}

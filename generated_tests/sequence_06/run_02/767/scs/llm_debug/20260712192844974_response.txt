@@ -1,0 +1,113 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "apple";
+        String x = "banana";
+        String y = "cherry";
+        String z = "delta";
+        
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "delta";
+        String x = "cherry";
+        String y = "banana";
+        String z = "apple";
+        
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthTooShort() {
+        String w = "app";
+        String x = "ban";
+        String y = "che";
+        String z = "del";
+        
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidLengthButUnordered() {
+        String w = "apple";
+        String x = "cherry";
+        String y = "banana";
+        String z = "delta";
+        
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthTooLong() {
+        String w = "appleee";
+        String x = "bananaa";
+        String y = "cherryy";
+        String z = "deltaaa";
+        
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+}
+```

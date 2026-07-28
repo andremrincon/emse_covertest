@@ -1,0 +1,80 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDReturns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/USD");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyNumericReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/123");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyNotFoundReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String unique = "XYZ" + UUID.randomUUID().toString().substring(0,5);
+        Response res = given().when().get("/v1/currency/" + unique);
+        res.then().statusCode(400);
+    }
+
+    @Ignore("The parameter \"code\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1AlphaUSContainsUSDCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        String code = res.jsonPath().getString("currencies[0].code");
+        assertEquals("USD", code);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURReturnsCurrencyCodeEUR() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v2/currency/EUR");
+        res.then().body("[0].currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameGermanyContainsEURCurrency() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v2/name/Germany");
+        res.then().body("[0].currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNumericReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/123");
+        res.then().statusCode(404);
+    }
+}

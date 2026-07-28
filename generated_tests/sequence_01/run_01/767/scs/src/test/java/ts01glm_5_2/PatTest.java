@@ -1,0 +1,84 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInText() {
+        String txt = "ABABCABAB";
+        String pat = "ABAB";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundInText() {
+        String txt = "ABCDCBA";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatAndReverseAdjacent() {
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        String txt = "abcdefgh";
+        String pat = "ab";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        String txt = "XYZXYZXYZ";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatTxtOnlyEndpoint() throws Exception {
+        String txt = "The quick brown fox jumps over the lazy dog.";
+        String encoded = URLEncoder.encode(txt, "UTF-8").replace("+", "%20");
+        given()
+            .when()
+                .get("/api/pat/{txt}", encoded)
+            .then()
+                .statusCode(200);
+    }
+}

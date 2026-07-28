@@ -1,0 +1,100 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThan2_returns400() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xIsZero_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/3/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_axLessThan8_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/2/5.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_axGreaterOrEqual8_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/2/10.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axLessOrEqualN_backwardRecurrence_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/5/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_largeN_smallX_bignoCondition_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/50/0.1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xNegative_nOdd_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/3/-5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xNegative_axGreaterOrEqual8_returns200() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/2/-10.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_invalidParameterType_returns400() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/bessj/abc/2.5")
+        .then()
+            .statusCode(400);
+    }
+}

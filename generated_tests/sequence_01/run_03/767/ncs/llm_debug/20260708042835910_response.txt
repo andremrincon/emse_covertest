@@ -1,0 +1,72 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("TEST_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("test.base.url", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    private int extractIntResult(Response res) {
+        Object o = res.jsonPath().get("result");
+        if (o == null) o = res.jsonPath().get("resultAsInt");
+        if (o == null) o = res.jsonPath().get("resultAsDouble");
+        if (o instanceof Number) return ((Number) o).intValue();
+        if (o != null) return Integer.parseInt(String.valueOf(o));
+        throw new IllegalStateException("No result field in response");
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aZero_returnsBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 0, 5).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_bZero_returnsBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 5, 0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_positivePositive_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+        int actual = extractIntResult(res);
+        Assert.assertEquals(2, actual);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_positiveNegative_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 17, -9);
+        int actual = extractIntResult(res);
+        Assert.assertEquals(8, actual);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_negativePositive_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", -17, 5);
+        int actual = extractIntResult(res);
+        Assert.assertEquals(-2, actual);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_negativeNegative_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", -10, -3);
+        int actual = extractIntResult(res);
+        Assert.assertEquals(1, actual);
+    }
+}

@@ -1,0 +1,75 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("API_BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("api.base.url");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        String txt = "http://a/b";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        String txt = "mon01jan";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        String txt = "12.34e+56";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        String txt = "hello";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchWithLongIdentifier() {
+        String txt = "ftp://abc-def_xyz/def123";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatchWithSpecialChars() {
+        String txt = "no-match-here-123";
+        given().when().get("/api/pat/" + txt).then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/pat/" + txt);
+        assertTrue(response.statusCode() == 200 || response.statusCode() == 500);
+    }
+}
+```

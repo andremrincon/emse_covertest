@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithXZero() {
+        given()
+            .when()
+            .get("/api/gammq/1.0/0.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormal() {
+        given()
+            .when()
+            .get("/api/gammq/5.5/2.3")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserLargeA() {
+        given()
+            .when()
+            .get("/api/gammq/10000.0/0.001")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormal() {
+        given()
+            .when()
+            .get("/api/gammq/0.001/1000.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfLargeX() {
+        given()
+            .when()
+            .get("/api/gammq/1.0/1e35")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfLargeA() {
+        given()
+            .when()
+            .get("/api/gammq/10000.0/20000.0")
+            .then()
+            .statusCode(400);
+    }
+}

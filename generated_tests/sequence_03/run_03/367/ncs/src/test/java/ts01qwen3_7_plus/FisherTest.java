@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1_loopFalse() {
+        given().when().get("/api/fisher/1/1/1.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/1/1/1.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1_loopTrue() {
+        given().when().get("/api/fisher/3/3/1.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/3/3/1.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_bNot1() {
+        given().when().get("/api/fisher/1/2/1.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/1/2/1.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_b1() {
+        given().when().get("/api/fisher/2/1/1.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/2/1/1.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_bNot1_pGreaterThan1() {
+        given().when().get("/api/fisher/2/2/1000.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/2/2/1000.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_bNot1_pLessThan0() {
+        given().when().get("/api/fisher/2/2/-0.5").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/2/2/-0.5");
+
+        response.then().statusCode(200);
+    }
+}

@@ -1,0 +1,75 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/1/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDegenerateTriangleMaxA() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/5/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDegenerateTriangleMaxB() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/1/5/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDegenerateTriangleMaxC() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/1/1/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangleABEqual() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/2/2/3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangleBCEqual() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/triangle/3/2/2")
+            .then()
+                .statusCode(200);
+    }
+}
+```

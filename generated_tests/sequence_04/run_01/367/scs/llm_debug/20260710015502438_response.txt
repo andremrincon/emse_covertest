@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/ordered4/aaaaaa/bbbbbb/dddddd/cccccc")
+                .then()
+                .body(containsString("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+                .then()
+                .body(containsString("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengths() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/ordered4/bbbbb/dddddd/eeeee/ccccc")
+                .then()
+                .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testShortStringLength() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/ordered4/abcd/bbbbb/ccccc/ddddd")
+                .then()
+                .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLongStringLength() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/ordered4/aaaaaaa/bbbbb/ccccc/ddddd")
+                .then()
+                .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testServerErrorWithEmptyParameter() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .urlEncodingEnabled(false)
+                .when()
+                .get("/api/ordered4/first/second//fourth")
+                .then()
+                .statusCode(404);
+    }
+}

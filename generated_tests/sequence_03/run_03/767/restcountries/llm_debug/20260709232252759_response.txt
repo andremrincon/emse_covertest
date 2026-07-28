@@ -1,0 +1,112 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl",
+            System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrency() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameEndpointReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaByCodeReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCountriesWithCurrency() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameEndpointReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturnsCurrencyData() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("currencies", notNullValue());
+    }
+}
+```

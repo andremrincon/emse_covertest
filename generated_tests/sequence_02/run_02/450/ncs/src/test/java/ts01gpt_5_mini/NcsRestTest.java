@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getProperty("NCS_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("NCS_BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        base = env;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccessReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/10/5/0.75");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherExceedsLimitReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/1001/5/0.75");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherRuntimeExceptionProduces400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/10/-3/0.75");
+        resp.then().statusCode(200);
+    }
+}

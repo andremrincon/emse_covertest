@@ -1,0 +1,279 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetJaViaAlphaUS TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testSetItViaAlphaUS TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testSetDeViaAlphaUS TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testSetEsViaAlphaUS TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testAlphaInvalidFormat400 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testV1AllReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testV1NameTranslationsDe TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testSetFrViaAlphaUS TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testAlphaNotFound404 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testV1CurrencyUSDReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetJaViaAlphaUS FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testSetJaViaAlphaUS(CountryTranslationsTest.java:41)
+CODE CONTEXT:
+    38: 
+    39:     @Test(timeout = 60000)
+    40:     public void testSetJaViaAlphaUS() {
+    41:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    42:         Response act = given().when().get("/v1/alpha/US");
+    43:         act.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    44:     }
+
+[2] METHOD=testSetItViaAlphaUS FAILURE AT LINE 48
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testSetItViaAlphaUS(CountryTranslationsTest.java:48)
+CODE CONTEXT:
+    45: 
+    46:     @Test(timeout = 60000)
+    47:     public void testSetItViaAlphaUS() {
+    48:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    49:         Response act = given().when().get("/v1/alpha/US");
+    50:         act.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    51:     }
+
+[3] METHOD=testSetDeViaAlphaUS FAILURE AT LINE 20
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testSetDeViaAlphaUS(CountryTranslationsTest.java:20)
+CODE CONTEXT:
+    17: 
+    18:     @Test(timeout = 60000)
+    19:     public void testSetDeViaAlphaUS() {
+    20:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    21:         Response act = given().when().get("/v1/alpha/US");
+    22:         act.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    23:     }
+
+[4] METHOD=testSetEsViaAlphaUS FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testSetEsViaAlphaUS(CountryTranslationsTest.java:27)
+CODE CONTEXT:
+    24: 
+    25:     @Test(timeout = 60000)
+    26:     public void testSetEsViaAlphaUS() {
+    27:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    28:         Response act = given().when().get("/v1/alpha/US");
+    29:         act.then().body("translations.es", equalTo("Estados Unidos"));
+    30:     }
+
+[5] METHOD=testAlphaInvalidFormat400 FAILURE AT LINE 55
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testAlphaInvalidFormat400(CountryTranslationsTest.java:55)
+CODE CONTEXT:
+    52: 
+    53:     @Test(timeout = 60000)
+    54:     public void testAlphaInvalidFormat400() {
+    55:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    56:         Response act = given().when().get("/v1/alpha/123");
+    57:         act.then().statusCode(400);
+    58:     }
+
+[6] METHOD=testV1AllReturns200 FAILURE AT LINE 76
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testV1AllReturns200(CountryTranslationsTest.java:76)
+CODE CONTEXT:
+    73: 
+    74:     @Test(timeout = 60000)
+    75:     public void testV1AllReturns200() {
+    76:         given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));  ← FAILURE HERE
+    77:         Response act = given().when().get("/v1/all");
+    78:         act.then().statusCode(200);
+    79:     }
+
+[7] METHOD=testV1NameTranslationsDe FAILURE AT LINE 69
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testV1NameTranslationsDe(CountryTranslationsTest.java:69)
+CODE CONTEXT:
+    66: 
+    67:     @Test(timeout = 60000)
+    68:     public void testV1NameTranslationsDe() {
+    69:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    70:         Response act = given().when().get("/v1/name/France");
+    71:         act.then().body("[0].translations.de", equalTo("Frankreich"));
+    72:     }
+
+[8] METHOD=testSetFrViaAlphaUS FAILURE AT LINE 34
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testSetFrViaAlphaUS(CountryTranslationsTest.java:34)
+CODE CONTEXT:
+    31: 
+    32:     @Test(timeout = 60000)
+    33:     public void testSetFrViaAlphaUS() {
+    34:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    35:         Response act = given().when().get("/v1/alpha/US");
+    36:         act.then().body("translations.fr", equalTo("États-Unis"));
+    37:     }
+
+[9] METHOD=testAlphaNotFound404 FAILURE AT LINE 62
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testAlphaNotFound404(CountryTranslationsTest.java:62)
+CODE CONTEXT:
+    59: 
+    60:     @Test(timeout = 60000)
+    61:     public void testAlphaNotFound404() {
+    62:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    63:         Response act = given().when().get("/v1/alpha/XYZ");
+    64:         act.then().statusCode(404);
+    65:     }
+
+[10] METHOD=testV1CurrencyUSDReturns200 FAILURE AT LINE 83
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryTranslationsTest.testV1CurrencyUSDReturns200(CountryTranslationsTest.java:83)
+CODE CONTEXT:
+    80: 
+    81:     @Test(timeout = 60000)
+    82:     public void testV1CurrencyUSDReturns200() {
+    83:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    84:         Response act = given().when().get("/v1/currency/USD");
+    85:         act.then().statusCode(200);
+    86:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080/rest"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaInvalidFormat400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFound404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameTranslationsDe() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France");
+        act.then().body("[0].translations.de", equalTo("Frankreich"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturns200() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDReturns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

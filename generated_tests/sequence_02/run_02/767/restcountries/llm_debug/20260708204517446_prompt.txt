@@ -1,0 +1,314 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CountryRestV1Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByLanguage_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[2] METHOD=testGetByAlphaList_InternalServerError TYPE=ERROR
+Illegal character in query at index 23: /rest/v1/alpha?codes=US|CA
+
+[3] METHOD=testGetByRegion_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[4] METHOD=testGetByCapital_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[5] METHOD=testGetByAlphaList_Success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+[6] METHOD=testGetByCallingCode_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[7] METHOD=testGetBySubregion_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[8] METHOD=testGetByCurrency_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[9] METHOD=testGetByName_InternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByLanguage_InternalServerError FAILURE AT LINE 118
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByLanguage_InternalServerError(CountryRestV1Test.java:118)
+CODE CONTEXT:
+   115:         .when()
+   116:             .get(baseUrl + "/v1/lang/True")
+   117:         .then()
+   118:             .statusCode(404);  ← FAILURE HERE
+   119:     }
+   120: 
+   121:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByAlphaList_InternalServerError FAILURE AT LINE 44
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByAlphaList_InternalServerError(CountryRestV1Test.java:44)
+Caused by: java.net.URISyntaxException: Illegal character in query at index 23: /rest/v1/alpha?codes=US|CA
+CODE CONTEXT:
+    41:         given()
+    42:             .queryParam("codes", "US|CA")
+    43:         .when()
+    44:             .get(baseUrl + "/v1/alpha")  ← FAILURE HERE
+    45:         .then()
+    46:             .statusCode(500);
+    47:     }
+
+[3] METHOD=testGetByRegion_InternalServerError FAILURE AT LINE 100
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByRegion_InternalServerError(CountryRestV1Test.java:100)
+CODE CONTEXT:
+    97:         .when()
+    98:             .get(baseUrl + "/v1/region/True")
+    99:         .then()
+   100:             .statusCode(404);  ← FAILURE HERE
+   101:     }
+   102: 
+   103:     @Test(timeout = 60000)
+
+[4] METHOD=testGetByCapital_InternalServerError FAILURE AT LINE 91
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByCapital_InternalServerError(CountryRestV1Test.java:91)
+CODE CONTEXT:
+    88:         .when()
+    89:             .get(baseUrl + "/v1/capital/True")
+    90:         .then()
+    91:             .statusCode(404);  ← FAILURE HERE
+    92:     }
+    93: 
+    94:     @Test(timeout = 60000)
+
+[5] METHOD=testGetByAlphaList_Success FAILURE AT LINE 36
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByAlphaList_Success(CountryRestV1Test.java:36)
+CODE CONTEXT:
+    33:         .when()
+    34:             .get(baseUrl + "/v1/alpha")
+    35:         .then()
+    36:             .statusCode(400);  ← FAILURE HERE
+    37:     }
+    38: 
+    39:     @Test(timeout = 60000)
+
+[6] METHOD=testGetByCallingCode_InternalServerError FAILURE AT LINE 82
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByCallingCode_InternalServerError(CountryRestV1Test.java:82)
+CODE CONTEXT:
+    79:         .when()
+    80:             .get(baseUrl + "/v1/callingcode/True")
+    81:         .then()
+    82:             .statusCode(404);  ← FAILURE HERE
+    83:     }
+    84: 
+    85:     @Test(timeout = 60000)
+
+[7] METHOD=testGetBySubregion_InternalServerError FAILURE AT LINE 109
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetBySubregion_InternalServerError(CountryRestV1Test.java:109)
+CODE CONTEXT:
+   106:         .when()
+   107:             .get(baseUrl + "/v1/subregion/True")
+   108:         .then()
+   109:             .statusCode(404);  ← FAILURE HERE
+   110:     }
+   111: 
+   112:     @Test(timeout = 60000)
+
+[8] METHOD=testGetByCurrency_InternalServerError FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByCurrency_InternalServerError(CountryRestV1Test.java:64)
+CODE CONTEXT:
+    61:         .when()
+    62:             .get(baseUrl + "/v1/currency/XyZ")
+    63:         .then()
+    64:             .statusCode(404);  ← FAILURE HERE
+    65:     }
+    66: 
+    67:     @Test(timeout = 60000)
+
+[9] METHOD=testGetByName_InternalServerError FAILURE AT LINE 73
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV1Test.testGetByName_InternalServerError(CountryRestV1Test.java:73)
+CODE CONTEXT:
+    70:         .when()
+    71:             .get(baseUrl + "/v1/name/True")
+    72:         .then()
+    73:             .statusCode(404);  ← FAILURE HERE
+    74:     }
+    75: 
+    76:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        given()
+            .queryParam("codes", "US|CA")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/currency/XyZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/name/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/callingcode/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/capital/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/region/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/subregion/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/lang/True")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_MissingQueryParam() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_EmptyQueryParam() {
+        given()
+            .queryParam("codes", "")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,50 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZero() {
+        given().when().get("/api/gammq/5.5/0.0").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormal() {
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGserITMAXExceeded() {
+        given().when().get("/api/gammq/200.0/200.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormal() {
+        given().when().get("/api/gammq/0.001/1000.0").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfSmallD() {
+        given().when().get("/api/gammq/1.0/1.0E35").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfITMAXExceeded() {
+        given().when().get("/api/gammq/200.0/201.0").then().statusCode(200);
+    }
+}

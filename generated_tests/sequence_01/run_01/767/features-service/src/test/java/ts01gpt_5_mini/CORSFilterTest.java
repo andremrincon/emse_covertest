@@ -1,0 +1,48 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesPassesThroughCORSFilter() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String encoded = URLEncoder.encode(product, "UTF-8");
+        given().when().post("/products/{productName}", encoded).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", encoded).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestSetsCORSHeaders() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String encoded = URLEncoder.encode(product, "UTF-8");
+        given().when().post("/products/{productName}", encoded).then().statusCode(lessThan(300));
+        given().when().options("/products/{productName}/features", encoded).then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProductReturnsNoContent() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String encoded = URLEncoder.encode(product, "UTF-8");
+        given().when().post("/products/{productName}", encoded).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}", encoded).then().statusCode(204);
+    }
+}

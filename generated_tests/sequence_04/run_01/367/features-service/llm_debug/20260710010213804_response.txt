@@ -1,0 +1,105 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationValid() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProd-" + uuid;
+        String featureName = "TestFeature-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationInvalid() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProd-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED)
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when().post("/products/{productName}/constraints/excludes", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB)
+            .then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationValid() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProd-" + uuid;
+        String featureName = "TestFeature-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationInvalid() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProd-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED).when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENCODED)
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when().post("/products/{productName}/constraints/requires", productName)
+            .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB)
+            .then().statusCode(400);
+    }
+}
+```

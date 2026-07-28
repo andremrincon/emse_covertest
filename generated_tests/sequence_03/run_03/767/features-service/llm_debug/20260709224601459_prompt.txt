@@ -1,0 +1,129 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ConfigurationEvaluatorTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=test_get_configuration_contains_derived_feature_after_require_constraint TYPE=FAILURE
+1 expectation failed.
+JSON path activedFeatures doesn't match.
+Expected: a collection containing "req3-044acc14-811b-4310-b39c-78efa88da83e"
+  Actual: <[{id=12, name=src3-044acc14-811b-4310-b39c-78efa88da83e, description=null}, {id=13, name=req3-044acc14-811b-4310-b39c-78efa88da83e, description=null}]>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=test_get_configuration_contains_derived_feature_after_require_constraint FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01gpt_5_mini.ConfigurationEvaluatorTest.test_get_configuration_contains_derived_feature_after_require_constraint(ConfigurationEvaluatorTest.java:64)
+CODE CONTEXT:
+    61:         given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+    62:         given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+    63:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature).then().statusCode(lessThan(300));
+    64:         given().when().get("/products/{productName}/configurations/{configurationName}", product, config).then().body("activedFeatures", hasItem(requiredFeature));  ← FAILURE HERE
+    65:     }
+    66: 
+    67:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_add_feature_to_configuration_triggers_required_feature_activation() {
+        String uid = UUID.randomUUID().toString();
+        String product = "prod-" + uid;
+        String sourceFeature = "src-" + uid;
+        String requiredFeature = "req-" + uid;
+        String config = "conf-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, sourceFeature).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void test_add_feature_to_configuration_without_constraints_returns_201() {
+        String uid = UUID.randomUUID().toString();
+        String product = "prod2-" + uid;
+        String feature = "feat-" + uid;
+        String config = "conf2-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void test_get_configuration_contains_derived_feature_after_require_constraint() {
+        String uid = UUID.randomUUID().toString();
+        String product = "prod3-" + uid;
+        String sourceFeature = "src3-" + uid;
+        String requiredFeature = "req3-" + uid;
+        String config = "conf3-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, sourceFeature).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}", product, config).then().body("activedFeatures", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void test_delete_feature_from_configuration_returns_204() {
+        String uid = UUID.randomUUID().toString();
+        String product = "prod4-" + uid;
+        String feature = "feat4-" + uid;
+        String config = "conf4-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

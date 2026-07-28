@@ -1,0 +1,193 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.SampleControllerTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSayHelloDefaultNameReturnsGuestGreeting TYPE=FAILURE
+expected:<[Hello Guest!!]> but was:<[{"_links":{"self":{"href":"http://localhost:8080/actuator","templated":false},"beans":{"href":"http://localhost:8080/actuator/beans","templated":false},"caches-cache":{"href":"http://localhost:8080/actuator/caches/{cache}","templated":true},"caches":{"href":"http://localhost:8080/actuator/caches","templated":false},"health":{"href":"http://localhost:8080/actuator/health","templated":false},"health-path":{"href":"http://localhost:8080/actuator/health/{*path}","templated":true},"info":{"href":"http://localhost:8080/actuator/info","templated":false},"conditions":{"href":"http://localhost:8080/actuator/conditions","templated":false},"shutdown":{"href":"http://localhost:8080/actuator/shutdown","templated":false},"configprops":{"href":"http://localhost:8080/actuator/configprops","templated":false},"env-toMatch":{"href":"http://localhost:8080/actuator/env/{toMatch}","templated":true},"env":{"href":"http://localhost:8080/actuator/env","templated":false},"logfile":{"href":"http://localhost:8080/actuator/logfile","templated":false},"loggers-name":{"href":"http://localhost:8080/actuator/loggers/{name}","templated":true},"loggers":{"href":"http://localhost:8080/actuator/loggers","templated":false},"heapdump":{"href":"http://localhost:8080/actuator/heapdump","templated":false},"threaddump":{"href":"http://localhost:8080/actuator/threaddump","templated":false},"prometheus":{"href":"http://localhost:8080/actuator/prometheus","templated":false},"metrics-requiredMetricName":{"href":"http://localhost:8080/actuator/metrics/{requiredMetricName}","templated":true},"metrics":{"href":"http://localhost:8080/actuator/metrics","templated":false},"scheduledtasks":{"href":"http://localhost:8080/actuator/scheduledtasks","templated":false},"mappings":{"href":"http://localhost:8080/actuator/mappings","templated":false}}}]>
+
+[2] METHOD=testSlowApiWithPositiveDelayReturns200 TYPE=FAILURE
+expected:<200> but was:<401>
+
+[3] METHOD=testSayHelloWithNameReturnsGreeting TYPE=FAILURE
+expected:<[Hello John Smith!!]> but was:<[{"_links":{"self":{"href":"http://localhost:8080/actuator","templated":false},"beans":{"href":"http://localhost:8080/actuator/beans","templated":false},"caches-cache":{"href":"http://localhost:8080/actuator/caches/{cache}","templated":true},"caches":{"href":"http://localhost:8080/actuator/caches","templated":false},"health":{"href":"http://localhost:8080/actuator/health","templated":false},"health-path":{"href":"http://localhost:8080/actuator/health/{*path}","templated":true},"info":{"href":"http://localhost:8080/actuator/info","templated":false},"conditions":{"href":"http://localhost:8080/actuator/conditions","templated":false},"shutdown":{"href":"http://localhost:8080/actuator/shutdown","templated":false},"configprops":{"href":"http://localhost:8080/actuator/configprops","templated":false},"env-toMatch":{"href":"http://localhost:8080/actuator/env/{toMatch}","templated":true},"env":{"href":"http://localhost:8080/actuator/env","templated":false},"logfile":{"href":"http://localhost:8080/actuator/logfile","templated":false},"loggers-name":{"href":"http://localhost:8080/actuator/loggers/{name}","templated":true},"loggers":{"href":"http://localhost:8080/actuator/loggers","templated":false},"heapdump":{"href":"http://localhost:8080/actuator/heapdump","templated":false},"threaddump":{"href":"http://localhost:8080/actuator/threaddump","templated":false},"prometheus":{"href":"http://localhost:8080/actuator/prometheus","templated":false},"metrics-requiredMetricName":{"href":"http://localhost:8080/actuator/metrics/{requiredMetricName}","templated":true},"metrics":{"href":"http://localhost:8080/actuator/metrics","templated":false},"scheduledtasks":{"href":"http://localhost:8080/actuator/scheduledtasks","templated":false},"mappings":{"href":"http://localhost:8080/actuator/mappings","templated":false}}}]>
+
+[4] METHOD=testSlowApiWithZeroDelayTriggersRandomBranchAndReturns200 TYPE=FAILURE
+expected:<200> but was:<401>
+
+[5] METHOD=testSlowApiWithNegativeDelayReturns500 TYPE=FAILURE
+expected:<500> but was:<401>
+
+[6] METHOD=testSlowApiWithNonIntegerDelayReturns500 TYPE=FAILURE
+expected:<500> but was:<401>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSayHelloDefaultNameReturnsGuestGreeting FAILURE AT LINE 40
+at ts01gpt_5_mini.SampleControllerTest.testSayHelloDefaultNameReturnsGuestGreeting(SampleControllerTest.java:40)
+CODE CONTEXT:
+    37:         String arrName = UUID.randomUUID().toString();
+    38:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    39:         Response act = given().when().get("/");
+    40:         Assert.assertEquals("Hello Guest!!", act.asString());  ← FAILURE HERE
+    41:     }
+    42: 
+    43:     @Test(timeout = 60000)
+
+[2] METHOD=testSlowApiWithPositiveDelayReturns200 FAILURE AT LINE 48
+java.lang.AssertionError: expected:<200> but was:<401>
+at ts01gpt_5_mini.SampleControllerTest.testSlowApiWithPositiveDelayReturns200(SampleControllerTest.java:48)
+CODE CONTEXT:
+    45:         String arrName = UUID.randomUUID().toString();
+    46:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    47:         Response act = given().when().get("/slowApi?delay=1");
+    48:         Assert.assertEquals(200, act.getStatusCode());  ← FAILURE HERE
+    49:     }
+    50: 
+    51:     @Test(timeout = 60000)
+
+[3] METHOD=testSayHelloWithNameReturnsGreeting FAILURE AT LINE 32
+at ts01gpt_5_mini.SampleControllerTest.testSayHelloWithNameReturnsGreeting(SampleControllerTest.java:32)
+CODE CONTEXT:
+    29:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    30:         String name = "John Smith";
+    31:         Response act = given().when().get("/?name=" + URLEncoder.encode(name, "UTF-8"));
+    32:         Assert.assertEquals("Hello John Smith!!", act.asString());  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+[4] METHOD=testSlowApiWithZeroDelayTriggersRandomBranchAndReturns200 FAILURE AT LINE 56
+java.lang.AssertionError: expected:<200> but was:<401>
+at ts01gpt_5_mini.SampleControllerTest.testSlowApiWithZeroDelayTriggersRandomBranchAndReturns200(SampleControllerTest.java:56)
+CODE CONTEXT:
+    53:         String arrName = UUID.randomUUID().toString();
+    54:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    55:         Response act = given().when().get("/slowApi?delay=0");
+    56:         Assert.assertEquals(200, act.getStatusCode());  ← FAILURE HERE
+    57:     }
+    58: 
+    59:     @Test(timeout = 60000)
+
+[5] METHOD=testSlowApiWithNegativeDelayReturns500 FAILURE AT LINE 72
+java.lang.AssertionError: expected:<500> but was:<401>
+at ts01gpt_5_mini.SampleControllerTest.testSlowApiWithNegativeDelayReturns500(SampleControllerTest.java:72)
+CODE CONTEXT:
+    69:         String arrName = UUID.randomUUID().toString();
+    70:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    71:         Response act = given().when().get("/slowApi?delay=-1");
+    72:         Assert.assertEquals(500, act.getStatusCode());  ← FAILURE HERE
+    73:     }
+    74: }
+
+[6] METHOD=testSlowApiWithNonIntegerDelayReturns500 FAILURE AT LINE 64
+java.lang.AssertionError: expected:<500> but was:<401>
+at ts01gpt_5_mini.SampleControllerTest.testSlowApiWithNonIntegerDelayReturns500(SampleControllerTest.java:64)
+CODE CONTEXT:
+    61:         String arrName = UUID.randomUUID().toString();
+    62:         given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+    63:         Response act = given().when().get("/slowApi?delay=abc");
+    64:         Assert.assertEquals(500, act.getStatusCode());  ← FAILURE HERE
+    65:     }
+    66: 
+    67:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        String fromProp = System.getProperty("baseUrl");
+        String fromEnv = System.getenv("BASE_URL");
+        baseUrl = fromProp != null && !fromProp.isEmpty() ? fromProp : (fromEnv != null && !fromEnv.isEmpty() ? fromEnv : "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithNameReturnsGreeting() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        String name = "John Smith";
+        Response act = given().when().get("/?name=" + URLEncoder.encode(name, "UTF-8"));
+        Assert.assertEquals("Hello John Smith!!", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultNameReturnsGuestGreeting() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/");
+        Assert.assertEquals("Hello Guest!!", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithPositiveDelayReturns200() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/slowApi?delay=1");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithZeroDelayTriggersRandomBranchAndReturns200() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/slowApi?delay=0");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNonIntegerDelayReturns500() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/slowApi?delay=abc");
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNegativeDelayReturns500() throws Exception {
+        String arrName = UUID.randomUUID().toString();
+        given().when().get("/?name=" + URLEncoder.encode(arrName, "UTF-8")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/slowApi?delay=-1");
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

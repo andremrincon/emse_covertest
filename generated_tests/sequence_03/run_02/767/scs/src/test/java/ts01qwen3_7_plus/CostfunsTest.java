@@ -1,0 +1,51 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsAllFalseBranches() {
+        String path = "/api/costfuns/-4/abab";
+        Response response = given().when().get(path);
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIEquals5AndStringTrueBranches() {
+        String path = "/api/costfuns/5/baab";
+        Response response = given().when().get(path);
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsILessThanMinus444() {
+        String path = "/api/costfuns/-500/abab";
+        Response response = given().when().get(path);
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIGreaterThan666() {
+        String path = "/api/costfuns/700/abab";
+        Response response = given().when().get(path);
+        response.then().body(equalTo("10"));
+    }
+}

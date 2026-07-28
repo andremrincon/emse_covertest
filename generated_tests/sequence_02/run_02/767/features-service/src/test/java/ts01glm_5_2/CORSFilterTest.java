@@ -1,0 +1,57 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsHeadersOnGetRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterHandlesOptionsRequestWithoutForwarding() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(500))
+                .header("Access-Control-Allow-Origin", notNullValue())
+                .header("Access-Control-Allow-Methods", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterProcessesPostRequestThroughFilterChain() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+    }
+}

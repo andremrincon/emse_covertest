@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CookieTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridWithValidUserPrefix() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/userid/user123/example.com");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridWithShortValue() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/userid/user1/example.com");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridWithInvalidPrefix() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/userid/admin123/example.com");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithValidAmAndAbcCom() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/session/am/abc.com");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithInvalidValue() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/session/pm/abc.com");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOtherName() {
+        Response response = given()
+            .when()
+            .get("/api/cookie/other/anything/example.com");
+        response.then().statusCode(200);
+    }
+}

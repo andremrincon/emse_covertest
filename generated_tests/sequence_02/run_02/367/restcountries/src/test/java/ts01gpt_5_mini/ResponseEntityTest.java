@@ -1,0 +1,50 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNameServerErrorStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/True").then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionServerErrorStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/True").then().body("status", equalTo(404));
+    }
+}

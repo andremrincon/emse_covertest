@@ -1,0 +1,42 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.baseURI;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0True() {
+        given()
+            .when()
+            .get("/api/notypevar/28/abc")
+            .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i1True_i2True() {
+        given()
+            .when()
+            .get("/api/notypevar/7/world")
+            .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i3False() {
+        given()
+            .when()
+            .get("/api/notypevar/5/abc")
+            .then()
+            .body(equalTo("0"));
+    }
+}

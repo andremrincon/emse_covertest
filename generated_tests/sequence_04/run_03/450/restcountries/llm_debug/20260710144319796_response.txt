@@ -1,0 +1,57 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CountryServiceTest {
+
+    private static String baseUrl() {
+        return Optional.ofNullable(System.getProperty("BASE_URL"))
+                .orElse(Optional.ofNullable(System.getenv("BASE_URL"))
+                        .orElse("http://localhost:8080/rest"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_TwoLetter_returns200() {
+        String base = baseUrl();
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/es");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_ThreeLetter_returns200() {
+        String base = baseUrl();
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/eng");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InvalidCode_returns404() {
+        String base = baseUrl();
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/123");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_Acronym_returns200() {
+        String base = baseUrl();
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v2/regionalbloc/EU");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_NAFTA_returns200() {
+        String base = baseUrl();
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v2/regionalbloc/NAFTA");
+        assertEquals(200, resp.getStatusCode());
+    }
+}

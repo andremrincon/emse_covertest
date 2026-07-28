@@ -1,0 +1,190 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AllReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("[0].translations", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturnsTranslations() {
+        given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.es", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1NameReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1CapitalReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.es", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1SubregionReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1LangReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AllReturnsDeTranslation() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AllReturnsItTranslation() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1AlphaGBReturnsAllTranslations() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue())
+                .body("translations.es", notNullValue())
+                .body("translations.fr", notNullValue())
+                .body("translations.ja", notNullValue())
+                .body("translations.it", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1NameFullTextReturnsTranslations() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEURReturnsTranslations() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+}

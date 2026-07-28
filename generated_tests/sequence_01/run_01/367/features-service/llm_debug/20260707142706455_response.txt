@@ -1,0 +1,37 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithGetMethod() {
+        // ARRANGE
+
+        // ACT
+        Response response = given()
+                .when()
+                .get("/products");
+
+        // ASSERT
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithOptionsMethod() {
+        // ARRANGE
+
+        // ACT
+        Response response = given()
+                .when()
+                .options("/products");
+
+        // ASSERT
+        response.then().statusCode(200);
+    }
+}
+```

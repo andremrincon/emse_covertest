@@ -1,0 +1,124 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl != null) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaAlphaCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("USD"))
+                .body("currencies[0].name", equalTo("United States dollar"))
+                .body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", hasItem("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("EUR"))
+                .body("currencies[0].name", equalTo("Euro"))
+                .body("currencies[0].symbol", equalTo("€"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2AlphaCodeEndpoint() {
+        given()
+                .when()
+                .get("/v2/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("GBP"))
+                .body("currencies[0].name", equalTo("British pound"))
+                .body("currencies[0].symbol", equalTo("£"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v2/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", hasItem("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2NameEndpoint() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("EUR"))
+                .body("currencies[0].name", equalTo("Euro"))
+                .body("currencies[0].symbol", equalTo("€"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2RegionalBlocEndpoint() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV1AllEndpoint() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2CapitalEndpoint() {
+        given()
+                .when()
+                .get("/v2/capital/London")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("GBP"));
+    }
+}
+```

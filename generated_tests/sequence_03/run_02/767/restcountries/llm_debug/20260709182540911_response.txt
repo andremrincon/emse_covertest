@@ -1,0 +1,150 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFoundReturns404() {
+        given()
+            .pathParam("alphacode", "XYZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CodeReturns200() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CodeReturns200() {
+        given()
+            .pathParam("alphacode", "USA")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithValidCodesReturns200() {
+        given()
+            .queryParam("codes", "US;CA;MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithDuplicateCodesReturns200() {
+        given()
+            .queryParam("codes", "US;US;CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithNonExistentCodesReturns404() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithInvalidCodeFormatReturns400() {
+        given()
+            .queryParam("codes", "123")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchByNameReturns200() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchByAltSpellingReturns200() {
+        given()
+            .pathParam("name", "French Republic")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFoundReturns404() {
+        given()
+            .pathParam("name", "123")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonAllCountriesReturns200() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonV2AllCountriesReturns200() {
+        given()
+            .queryParam("fields", "name;capital;region;population;flag")
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+}
+```

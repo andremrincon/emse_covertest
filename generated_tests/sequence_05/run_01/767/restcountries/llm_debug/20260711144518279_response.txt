@@ -1,0 +1,127 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CodeMatch() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CodeNoMatch() {
+        given()
+        .when()
+            .get("/v1/alpha/XX")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CodeMatch() {
+        given()
+        .when()
+            .get("/v1/alpha/USA")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CodeNoMatch() {
+        given()
+        .when()
+            .get("/v1/alpha/XXX")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidLength() {
+        given()
+        .when()
+            .get("/v1/alpha/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMatch() {
+        given()
+        .when()
+            .get("/v1/alpha?codes=US;CA")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNoMatch() {
+        given()
+        .when()
+            .get("/v1/alpha?codes=XX;YY")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        given()
+        .when()
+            .get("/v1/alpha?codes=US;US")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNameMatch() {
+        given()
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpellingMatch() {
+        given()
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}", "French Republic")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNoMatch() {
+        given()
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/NonExistentCountry")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonSuccess() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(lessThan(300));
+    }
+}

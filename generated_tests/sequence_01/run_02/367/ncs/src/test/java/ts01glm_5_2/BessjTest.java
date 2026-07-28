@@ -1,0 +1,45 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class BessjTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZero() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/3/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanN() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/3/10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNNegativeXOddN() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/3/-10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualN() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualNNegativeXEvenN() {
+        RestAssured.given().baseUri(baseUrl).when().get("/api/bessj/4/-2.5").then().statusCode(200);
+    }
+}

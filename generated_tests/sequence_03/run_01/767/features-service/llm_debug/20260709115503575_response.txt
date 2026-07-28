@@ -1,0 +1,34 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.*;
+
+public class DuplicatedObjectExceptionTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = System.getProperty("api.base", "http://localhost:8080");
+        baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProductReturns201() {
+        String productName = "product-" + UUID.randomUUID().toString();
+        Response act = given()
+            .when()
+            .post("/products/{productName}", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateProductReturns500() {
+        String productName = "product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}", productName);
+        act.then().statusCode(500);
+    }
+}

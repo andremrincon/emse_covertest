@@ -1,0 +1,172 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.RemainderTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testNegativeAWithPositiveBProducesNegativeRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <-2>
+  Actual: null
+
+[2] METHOD=testZeroAProducesBadRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <200>.
+
+[3] METHOD=testNegativeAWithNegativeBProducesPositiveRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+[4] METHOD=testPositiveDivisorPositiveDividendProducesRemainder2 TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+[5] METHOD=testPositiveAWithNegativeBProducesRemainder2 TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testNegativeAWithPositiveBProducesNegativeRemainder FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testNegativeAWithPositiveBProducesNegativeRemainder(RemainderTest.java:39)
+CODE CONTEXT:
+    36:     @Test(timeout = 60000)
+    37:     public void testNegativeAWithPositiveBProducesNegativeRemainder() {
+    38:         given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    39:         given().when().get("/api/remainder/{a}/{b}", -17, 5).then().body("result", equalTo(-2));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[2] METHOD=testZeroAProducesBadRequest FAILURE AT LINE 51
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testZeroAProducesBadRequest(RemainderTest.java:51)
+CODE CONTEXT:
+    48:     @Test(timeout = 60000)
+    49:     public void testZeroAProducesBadRequest() {
+    50:         given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    51:         given().when().get("/api/remainder/{a}/{b}", 0, 5).then().statusCode(200);  ← FAILURE HERE
+    52:     }
+    53: }
+
+[3] METHOD=testNegativeAWithNegativeBProducesPositiveRemainder FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testNegativeAWithNegativeBProducesPositiveRemainder(RemainderTest.java:45)
+CODE CONTEXT:
+    42:     @Test(timeout = 60000)
+    43:     public void testNegativeAWithNegativeBProducesPositiveRemainder() {
+    44:         given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    45:         given().when().get("/api/remainder/{a}/{b}", -17, -5).then().body("result", equalTo(2));  ← FAILURE HERE
+    46:     }
+    47: 
+    48:     @Test(timeout = 60000)
+
+[4] METHOD=testPositiveDivisorPositiveDividendProducesRemainder2 FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testPositiveDivisorPositiveDividendProducesRemainder2(RemainderTest.java:27)
+CODE CONTEXT:
+    24:     @Test(timeout = 60000)
+    25:     public void testPositiveDivisorPositiveDividendProducesRemainder2() {
+    26:         given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    27:         given().when().get("/api/remainder/{a}/{b}", 17, 5).then().body("result", equalTo(2));  ← FAILURE HERE
+    28:     }
+    29: 
+    30:     @Test(timeout = 60000)
+
+[5] METHOD=testPositiveAWithNegativeBProducesRemainder2 FAILURE AT LINE 33
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testPositiveAWithNegativeBProducesRemainder2(RemainderTest.java:33)
+CODE CONTEXT:
+    30:     @Test(timeout = 60000)
+    31:     public void testPositiveAWithNegativeBProducesRemainder2() {
+    32:         given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    33:         given().when().get("/api/remainder/{a}/{b}", 17, -5).then().body("result", equalTo(2));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("ncs.baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+            if (base == null || base.isEmpty()) {
+                base = "http://localhost:8080";
+            }
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveDivisorPositiveDividendProducesRemainder2() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 17, 5).then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveAWithNegativeBProducesRemainder2() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 17, -5).then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAWithPositiveBProducesNegativeRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", -17, 5).then().body("result", equalTo(-2));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAWithNegativeBProducesPositiveRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", -17, -5).then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroAProducesBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 0, 5).then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i5_sBaab() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", 5)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iNeg500_sAbabba() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", -500)
+            .pathParam("s", "ababba")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i700_sAbabbc() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", 700)
+            .pathParam("s", "ababbc")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iNeg4_sAbab() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", -4)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i0_sXyz() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", 0)
+            .pathParam("s", "xyz")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_invalidI() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("i", "one")
+            .pathParam("s", "test")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}

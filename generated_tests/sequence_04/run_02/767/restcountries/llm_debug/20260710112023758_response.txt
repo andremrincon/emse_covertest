@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE");
+        String prop = System.getProperty("api.base");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else if (prop != null && !prop.isEmpty()) {
+            RestAssured.baseURI = prop;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_codes_query_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_fields_containsName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        act.then().body("name", equalTo("United States"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_invalid_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/123");
+        act.then().statusCode(400);
+    }
+}

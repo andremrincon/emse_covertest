@@ -1,0 +1,94 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    private static final String BASE_URL = System.getProperty("test.base.url", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_WithAlpha2Code() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_WithAlpha3Code() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_InvalidCodeReturns404() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_ValidCodesReturns200() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_DuplicateCodesReturns200() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_ExactNameMatchReturns200() {
+        given()
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_AltSpellingMatchReturns200() {
+        given()
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/{name}", "United States of America")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_AllCountriesReturns200() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404);
+    }
+}

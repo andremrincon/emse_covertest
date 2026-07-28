@@ -1,0 +1,51 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundMapper_whenAlphaCodeNotFound_returns404() {
+        given()
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundMapper_whenNameNotFound_returns404() {
+        given()
+                .pathParam("name", "123")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundMapper_whenCallingCodeNotFound_returns404() {
+        given()
+                .pathParam("callingcode", "abc")
+                .when()
+                .get("/v1/callingcode/{callingcode}")
+                .then()
+                .statusCode(404);
+    }
+}

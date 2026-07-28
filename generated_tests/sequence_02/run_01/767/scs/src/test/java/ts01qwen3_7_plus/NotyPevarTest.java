@@ -1,0 +1,91 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    private String getBaseUrl() {
+        return System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testI0TrueI3True() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 28)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testI1TrueI3True() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 7)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testI2TrueI3False() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 3)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllFalse() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 3)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testI2TrueI3True() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 6)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testI1TrueI2TrueI3True() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 7)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+}

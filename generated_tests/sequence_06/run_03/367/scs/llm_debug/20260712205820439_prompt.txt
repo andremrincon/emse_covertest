@@ -1,0 +1,126 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/scs/src/test/java/ts01gpt_5_mini/CostfunsTest.java:[28,13] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/scs/src/test/java/ts01gpt_5_mini/CostfunsTest.java:[30,13] cannot find symbol
+symbol:   method port(int)
+location: class ts01gpt_5_mini.CostfunsTest
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            base = env;
+        } else {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_not_found_returns_zero() {
+        given().when().get(base + "/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        String txt = "abcdefg";
+        String pat = "xyz";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_found_only_returns_one() {
+        given().when().get(base + "/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        String txt = "xxpatternyy";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_found_only_returns_two() {
+        given().when().get(base + "/api/pat/{txt}", "ping2").then().statusCode(lessThan(300));
+        String txt = "xxnrettapyy";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_both_found_nonadjacent_pat_first_returns_index() {
+        given().when().get(base + "/api/pat/{txt}", "setup").then().statusCode(lessThan(300));
+        String txt = "xxpatternyyxxnrettap";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_both_found_adjacent_pat_then_reverse_returns_index() {
+        given().when().get(base + "/api/pat/{txt}", "ready").then().statusCode(lessThan(300));
+        String txt = "prepatternnrettap";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_then_pat_adjacent_returns_index_of_reverse() {
+        given().when().get(base + "/api/pat/{txt}", "check").then().statusCode(lessThan(300));
+        String txt = "nrettappattern";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_then_pat_nonadjacent_returns_index_of_reverse() {
+        given().when().get(base + "/api/pat/{txt}", "warm").then().statusCode(lessThan(300));
+        String txt = "xnrettapxxpattern";
+        String pat = "pattern";
+        given().when().get(base + "/api/pat/{txt}/{pat}", txt, pat).then().assertThat().body(equalTo("1"));
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

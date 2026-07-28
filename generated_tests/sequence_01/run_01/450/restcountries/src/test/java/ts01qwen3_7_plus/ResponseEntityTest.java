@@ -1,0 +1,34 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Test(timeout = 60000)
+    public void testResponseEntityStatusViaNameEndpoint() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/name/123");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityStatusViaPostEndpoint() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .when()
+                .post("/");
+
+        response.then().statusCode(404);
+    }
+}

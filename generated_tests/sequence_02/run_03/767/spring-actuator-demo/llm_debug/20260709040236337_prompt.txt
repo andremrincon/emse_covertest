@@ -1,0 +1,95 @@
+
+Do create a white box test suite in JUnit 4 and Java 1.8 using REST Assured to achieve full 
+test coverage, including methods, lines, and all branches with all possible execution paths, 
+according to the instructions delimited by %%%%%, which is part of the REST Java Application 
+code delimited by *****. Use the Swagger documentation delimited by ##### to provide 
+complementary information about the application.
+
+Your responses must contain ONLY valid, compilable Java code in JUnit 4 format.
+NO comments, NO explanations, NO syntax errors.
+
+IMPORTANT CONSTRAINTS:
+- Generate AT MOST 6 @Test methods total
+- Test class name MUST be: SampleControllerTest
+- Test class package MUST be: ts01glm_5_2
+- Tests CANNOT instantiate business classes directly
+- Tests can ONLY call REST API endpoints via REST Assured
+- Use base URL from environment or configuration
+- Include proper imports for REST Assured and JUnit 4
+- ALL @Test methods MUST explicitly declare a timeout of 60000 milliseconds using @Test(timeout = 60000)
+- Prioritize endpoint-aware request data and parameter examples when available
+- Keep assertions aligned with endpoint response codes when known
+
+TEST DESIGN RULES — SINGLE OBJECTIVE PER TEST:
+- Each @Test method MUST test exactly ONE behavior or scenario (single test objective).
+- Each @Test method should be small and focused; do not combine multiple behaviors in one test.
+- Follow the AAA pattern strictly inside every @Test method:
+    * ARRANGE: REST calls that set up the necessary state (e.g., create a product before adding a feature).
+      - Arrange calls MUST NOT use exact statusCode assertions.
+      - Use: given().when().<call>().then().statusCode(lessThan(300)); (import static org.hamcrest.Matchers.lessThan;)
+      - This prevents setup failures from masking the real test objective.
+    * ACT: The single REST call that exercises the behavior being tested.
+    * ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked.
+- NEVER chain multiple exact statusCode(N) assertions in the same test method with the same importance.
+- If an endpoint is idempotent for setup (e.g., creating a resource), use a unique identifier (UUID) per test to avoid state leakage between tests.
+
+CLASS ROLE NOTE:
+NOTE: This class has no direct REST endpoint. It is exercised TRANSITIVELY by the REST API (e.g., via Spring DI: Resource → Service → DAO → Model). You MUST still write integration tests that call REST API endpoints via REST Assured. Analyse the source code and the available endpoints to identify which endpoints internally exercise the methods listed in UNCOVERED INFO, then write tests that call those endpoints and indirectly cover this class.
+
+UNCOVERED INFO:
+%%%%%
+Uncovered method: sayHello - Uncovered Lines: [15]
+Uncovered method: timeConsumingAPI - Uncovered Lines: [20, 21, 22, 25, 26]
+%%%%%
+
+APPLICATION SOURCE CODE:
+*****
+package com.example.actuatordemo.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+@RestController
+public class SampleController {
+
+    @GetMapping("/")
+    public String sayHello(@RequestParam(value = "name", defaultValue = "Guest") String name) {
+        return "Hello " + name + "!!";
+    }
+
+    @GetMapping("/slowApi")
+    public String timeConsumingAPI(@RequestParam(value = "delay", defaultValue = "0") Integer delay) throws InterruptedException {
+        if(delay == 0) {
+            Random random = new Random();
+            delay = random.nextInt(10);
+        }
+
+        TimeUnit.SECONDS.sleep(delay);
+        return "Result";
+    }
+
+}
+
+*****
+
+ENDPOINT CONTEXT (normalized):
+@@@@@
+- GET / | expected status codes: 200, 500
+- GET /slowApi | expected status codes: 200, 500
+@@@@@
+
+PRIORITIZED PARAMETER EXAMPLES (x-parameter-examples when available):
+$$$$$
+- GET / | status 200 | name: John Smith, A, María-José O'Connor-Smith III
+- GET /slowApi | status 200 | delay: 1000, 0
+- GET /slowApi | status 500 | delay: abc, -1
+$$$$$
+
+SWAGGER DOCUMENTATION:
+#####
+{"openapi":"3.0.1","info":{"title":"OpenAPI definition","version":"v0"},"servers":[{"url":"http://localhost:8080","description":"Generated server url"}],"paths":{"/":{"get":{"tags":["sample-controller"],"operationId":"sayHello","parameters":[{"name":"name","in":"query","required":false,"schema":{"type":"string","default":"Guest"},"example":"John Smith"}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"}}}},"500":{"description":"Server error \u2014 500"}}}},"/slowApi":{"get":{"tags":["sample-controller"],"operationId":"timeConsumingAPI","parameters":[{"name":"delay","in":"query","required":false,"schema":{"type":"integer","format":"int32","default":0},"example":1000}],"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"string"},"examples":{"example_200":{"value":"Request completed after delay"}}}}},"500":{"description":"Server error \u2014 500","content":{"application/json":{"examples":{"example_500":{"value":"Internal Server Error"}}}}}}}}},"components":{}}
+#####

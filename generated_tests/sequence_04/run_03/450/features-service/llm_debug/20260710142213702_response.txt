@@ -1,0 +1,138 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.util.UUID;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.baseUrl", System.getenv("API_BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraint_returns201() {
+        String product = "prod-" + UUID.randomUUID();
+        String source = "src-" + UUID.randomUUID();
+        String excluded = "exc-" + UUID.randomUUID();
+        Response r1 = RestAssured.given().when().post("/products/{productName}", product);
+        Assert.assertTrue(r1.getStatusCode() < 300);
+        Response r2 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, source);
+        Assert.assertTrue(r2.getStatusCode() < 300);
+        Response r3 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excluded);
+        Assert.assertTrue(r3.getStatusCode() < 300);
+        Response r4 = RestAssured.given()
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertEquals(201, r4.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void constraintResponse_containsSourceAndExcluded() {
+        String product = "prod-" + UUID.randomUUID();
+        String source = "src-" + UUID.randomUUID();
+        String excluded = "exc-" + UUID.randomUUID();
+        Response createProduct = RestAssured.given().when().post("/products/{productName}", product);
+        Assert.assertTrue(createProduct.getStatusCode() < 300);
+        Response resp = RestAssured.given()
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertTrue(resp.getStatusCode() < 300);
+        Response dup = RestAssured.given()
+                .formParam("sourceFeature", source + "-dup")
+                .formParam("excludedFeature", excluded + "-dup")
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertTrue(dup.getStatusCode() < 300);
+        String returnedSource = resp.jsonPath().getString("sourceFeature");
+        Assert.assertEquals(source, returnedSource);
+    }
+
+    @Test(timeout = 60000)
+    public void configuration_valid_true_when_only_source_active() {
+        String product = "prod-" + UUID.randomUUID();
+        String configuration = "cfg-" + UUID.randomUUID();
+        String source = "feature-src-" + UUID.randomUUID();
+        String excluded = "feature-exc-" + UUID.randomUUID();
+        Response rp = RestAssured.given().when().post("/products/{productName}", product);
+        Assert.assertTrue(rp.getStatusCode() < 300);
+        Response rf1 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, source);
+        Assert.assertTrue(rf1.getStatusCode() < 300);
+        Response rf2 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excluded);
+        Assert.assertTrue(rf2.getStatusCode() < 300);
+        Response rc = RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration);
+        Assert.assertTrue(rc.getStatusCode() < 300);
+        Response rcons = RestAssured.given()
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertTrue(rcons.getStatusCode() < 300);
+        Response addSourceToCfg = RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, source);
+        Assert.assertTrue(addSourceToCfg.getStatusCode() < 300);
+        Response getCfg = RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", product, configuration);
+        Assert.assertTrue(getCfg.getStatusCode() < 300);
+        Boolean valid = getCfg.jsonPath().getBoolean("valid");
+        Assert.assertTrue(valid != null && valid);
+    }
+
+    @Test(timeout = 60000)
+    public void configuration_invalid_when_both_features_active() {
+        String product = "prod-" + UUID.randomUUID();
+        String configuration = "cfg-" + UUID.randomUUID();
+        String source = "feature-src-" + UUID.randomUUID();
+        String excluded = "feature-exc-" + UUID.randomUUID();
+        Response rp = RestAssured.given().when().post("/products/{productName}", product);
+        Assert.assertTrue(rp.getStatusCode() < 300);
+        Response rf1 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, source);
+        Assert.assertTrue(rf1.getStatusCode() < 300);
+        Response rf2 = RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excluded);
+        Assert.assertTrue(rf2.getStatusCode() < 300);
+        Response rc = RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration);
+        Assert.assertTrue(rc.getStatusCode() < 300);
+        Response rcons = RestAssured.given()
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertTrue(rcons.getStatusCode() < 300);
+        Response addSourceToCfg = RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, source);
+        Assert.assertTrue(addSourceToCfg.getStatusCode() < 300);
+        Response addExcludedToCfg = RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, excluded);
+        Assert.assertTrue(addExcludedToCfg.getStatusCode() < 300);
+        Response getCfg = RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", product, configuration);
+        Assert.assertTrue(getCfg.getStatusCode() < 300);
+        Boolean valid = getCfg.jsonPath().getBoolean("valid");
+        Assert.assertTrue(valid != null && !valid);
+    }
+
+    @Test(timeout = 60000)
+    public void constraint_response_includes_constraintType_EXCLUDES() {
+        String product = "prod-" + UUID.randomUUID();
+        String source = "src-" + UUID.randomUUID();
+        String excluded = "exc-" + UUID.randomUUID();
+        Response rp = RestAssured.given().when().post("/products/{productName}", product);
+        Assert.assertTrue(rp.getStatusCode() < 300);
+        Response r = RestAssured.given()
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        Assert.assertTrue(r.getStatusCode() < 300);
+        String type = r.jsonPath().getString("constraintType");
+        Assert.assertEquals("EXCLUDES", type);
+    }
+}

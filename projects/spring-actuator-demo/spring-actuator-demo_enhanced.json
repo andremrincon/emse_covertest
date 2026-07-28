@@ -1,0 +1,147 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "sample-controller"
+        ],
+        "operationId": "sayHello",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "Guest"
+            },
+            "example": "John Smith"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error — 500"
+          }
+        },
+        "x-parameter-examples": {
+          "200": [
+            {
+              "_name": "typical",
+              "name": "John Smith"
+            },
+            {
+              "_name": "edge_case",
+              "name": ""
+            },
+            {
+              "_name": "edge_case_long_name",
+              "name": "A"
+            },
+            {
+              "_name": "edge_case_special_characters",
+              "name": "María-José O'Connor-Smith III"
+            }
+          ]
+        }
+      }
+    },
+    "/slowApi": {
+      "get": {
+        "tags": [
+          "sample-controller"
+        ],
+        "operationId": "timeConsumingAPI",
+        "parameters": [
+          {
+            "name": "delay",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            },
+            "example": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "example_200": {
+                    "value": "Request completed after delay"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error — 500",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example_500": {
+                    "value": "Internal Server Error"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-parameter-examples": {
+          "200": [
+            {
+              "_name": "typical",
+              "delay": 1000
+            },
+            {
+              "_name": "edge_case",
+              "delay": 0
+            }
+          ],
+          "500": [
+            {
+              "_name": "invalid_type",
+              "delay": "abc"
+            },
+            {
+              "_name": "boundary_violation",
+              "delay": -1
+            },
+            {
+              "_name": "null_or_missing",
+              "delay": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "components": {}
+}

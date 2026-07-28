@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridValidStartsWithUser() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        String unique = "user" + UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", "userid", unique, "example.com");
+        assertEquals("1", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridInvalidShortValue() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", "userid", "usr", "example.com");
+        assertEquals("0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionValidAmAbcCom() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", "session", "am", "abc.com");
+        assertEquals("1", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionInvalidOtherValueReturnsTwo() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", "session", "notam", "other.com");
+        assertEquals("2", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownNameReturnsZero() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        String name = "unknown" + UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", name, "someval", "example.com");
+        assertEquals("0", resp.asString());
+    }
+}

@@ -1,0 +1,28 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @Test(timeout = 60000)
+    public void testCalcInit() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+
+        Response response = given()
+                .when()
+                .get("/api/calc/plus/1.0/2.0");
+
+        response.then().statusCode(200);
+    }
+}

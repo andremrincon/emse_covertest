@@ -1,0 +1,188 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_badRequest_shortAlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("alphacode", "1")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFound_unknownAlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US;CA")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_badRequest_shortCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "1")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFound_unknownCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "XX;YY;ZZ")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_internalServerError_pipeDelimiter() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US|CA|MX")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_badRequest_invalidLength() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "12")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFound_unknownCurrency() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "XYZ")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_internalServerError_mixedCase() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "XyZ")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFound_unknownName() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("name", "nonexistentcountry12345")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFound_unknownCallingCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("callingcode", "99999")
+                .when()
+                .get("/v1/callingcode/{callingcode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFound_unknownCapital() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("capital", "nonexistentcapital12345")
+                .when()
+                .get("/v1/capital/{capital}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFound_unknownRegion() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("region", "nonexistentregion12345")
+                .when()
+                .get("/v1/region/{region}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_notFound_unknownSubregion() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("subregion", "nonexistentsubregion12345")
+                .when()
+                .get("/v1/subregion/{subregion}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_notFound_unknownLanguage() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("lang", "nonexistentlang12345")
+                .when()
+                .get("/v1/lang/{lang}")
+                .then()
+                .statusCode(404);
+    }
+}
+```

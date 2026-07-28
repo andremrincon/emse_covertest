@@ -1,0 +1,93 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Method;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_getRequestPassesThroughFilter() {
+        String productName = "CORSFilterTest-GET-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequestHandledByFilter() {
+        given()
+            .when()
+            .request(Method.OPTIONS, "/products")
+            .then()
+            .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_postRequestPassesThroughFilter() {
+        String productName = "CORSFilterTest-POST-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_deleteRequestPassesThroughFilter() {
+        String productName = "CORSFilterTest-DELETE-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_corsHeadersSetOnGetResponse() {
+        given()
+            .when()
+            .get("/products")
+            .then()
+            .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_corsHeadersSetOnOptionsResponse() {
+        given()
+            .when()
+            .request(Method.OPTIONS, "/products")
+            .then()
+            .header("Access-Control-Allow-Origin", "*");
+    }
+}
+```

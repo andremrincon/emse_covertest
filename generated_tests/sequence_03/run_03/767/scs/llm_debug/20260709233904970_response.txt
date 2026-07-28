@@ -1,0 +1,60 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectPatFollowedByPatRev() {
+        String txt = "ABABBABA";
+        String pat = "ABAB";
+
+        Response response = given()
+                .pathParam("txt", txt)
+                .pathParam("pat", pat)
+                .when()
+                .get("/api/pat/{txt}/{pat}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectPatRevFound() {
+        String txt = "BABA";
+        String pat = "ABAB";
+
+        Response response = given()
+                .pathParam("txt", txt)
+                .pathParam("pat", pat)
+                .when()
+                .get("/api/pat/{txt}/{pat}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectPatRevFollowedByPat() {
+        String txt = "BABAABAB";
+        String pat = "ABAB";
+
+        Response response = given()
+                .pathParam("txt", txt)
+                .pathParam("pat", pat)
+                .when()
+                .get("/api/pat/{txt}/{pat}");
+
+        response.then().statusCode(200);
+    }
+}
+```

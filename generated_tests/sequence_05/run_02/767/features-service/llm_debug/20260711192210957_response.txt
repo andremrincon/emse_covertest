@@ -1,0 +1,321 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ConstraintRequiresTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String formatPath(String path, Object... args) {
+        Pattern p = Pattern.compile("\\{[^}]+\\}");
+        Matcher m = p.matcher(path);
+        StringBuffer sb = new StringBuffer();
+        int i = 0;
+        while (m.find()) {
+            String replacement = "";
+            if (i < args.length && args[i] != null) {
+                try {
+                    replacement = URLEncoder.encode(String.valueOf(args[i]), "UTF-8");
+                } catch (Exception e) {
+                    replacement = String.valueOf(args[i]);
+                }
+            }
+            m.appendReplacement(sb, replacement);
+            i++;
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private Response send(String method, String path, Object... args) throws Exception {
+        String formatted = formatPath(path, args);
+        String urlString = baseUrl + formatted;
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Length", "0");
+        }
+        int status = conn.getResponseCode();
+        InputStream is;
+        if (status >= 200 && status <= 299) {
+            is = conn.getInputStream();
+        } else {
+            is = conn.getErrorStream();
+            if (is == null) {
+                is = conn.getInputStream();
+            }
+        }
+        String body = "";
+        if (is != null) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            body = sb.toString().trim();
+            br.close();
+        }
+        conn.disconnect();
+        return new Response(status, body);
+    }
+
+    private Response post(String path, Object... args) throws Exception {
+        return send("POST", path, args);
+    }
+
+    private Response get(String path, Object... args) throws Exception {
+        return send("GET", path, args);
+    }
+
+    private Response delete(String path, Object... args) throws Exception {
+        return send("DELETE", path, args);
+    }
+
+    private static class Response {
+        private final int status;
+        private final String body;
+
+        Response(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+
+        int statusCode() {
+            return status;
+        }
+
+        String body() {
+            return body;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturnsConfigurationNames() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+
+        assertEquals(200, get("/products/{productName}/configurations", productName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturnsEmptyListWhenNoConfigurations() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+
+        assertEquals(200, get("/products/{productName}/configurations", productName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesReturnsFeatureNames() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, featureName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode() < 300);
+
+        assertEquals(200, get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesReturnsEmptyWhenNoFeatures() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+
+        assertEquals(200, get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfigurationSucceeds() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, featureName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode() < 300);
+
+        assertEquals(204, delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfigurationWhenFeatureNotActive() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, featureName).statusCode() < 300);
+
+        assertEquals(204, delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfigurationSucceeds() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, featureName).statusCode() < 300);
+
+        assertEquals(201, post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfigurationThrowsDuplicatedWhenAlreadyActive() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, featureName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode() < 300);
+
+        assertEquals(500, post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationOnAddWithRequiresConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, requiredFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/constraints/requires", productName, sourceFeature, requiredFeature).statusCode() < 300);
+
+        assertEquals(201, post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationOnAddWithExcludesConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, excludedFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/constraints/excludes", productName, sourceFeature, excludedFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).statusCode() < 300);
+
+        assertEquals(201, post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationOnRemoveWithRequiresConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, requiredFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/constraints/requires", productName, sourceFeature, requiredFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature).statusCode() < 300);
+
+        assertEquals(204, delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationOnRemoveWithExcludesConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, excludedFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/constraints/excludes", productName, sourceFeature, excludedFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature).statusCode() < 300);
+
+        assertEquals(204, delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature).statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductWithMultipleConfigurations() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configName1 = "Config1-" + UUID.randomUUID().toString();
+        String configName2 = "Config2-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configName1).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configName2).statusCode() < 300);
+
+        Response r = get("/products/{productName}/configurations", productName);
+        assertEquals(200, r.statusCode());
+        String body = r.body();
+        assertTrue(body.contains(configName1));
+        assertTrue(body.contains(configName2));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesWithMultipleFeatures() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        assertTrue(post("/products/{productName}", productName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}", productName, configurationName).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, feature1).statusCode() < 300);
+        assertTrue(post("/products/{productName}/features/{featureName}", productName, feature2).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature1).statusCode() < 300);
+        assertTrue(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature2).statusCode() < 300);
+
+        Response r = get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertEquals(200, r.statusCode());
+        String body = r.body();
+        assertTrue(body.contains(feature1));
+        assertTrue(body.contains(feature2));
+    }
+}

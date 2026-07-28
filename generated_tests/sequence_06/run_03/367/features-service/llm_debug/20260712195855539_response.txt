@@ -1,0 +1,108 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CORSFilterTest {
+
+    private static String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        return baseUrl;
+    }
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = getBaseUrl();
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithGetRequestNonOptions() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithOptionsRequest() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue())
+                .header("Access-Control-Allow-Methods", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithPostRequestNonOptions() {
+        String productName = "CORS-Post-Test-" + java.util.UUID.randomUUID().toString();
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithDeleteRequestNonOptions() {
+        String productName = "CORS-Delete-Test-" + java.util.UUID.randomUUID().toString();
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithPutRequestNonOptions() {
+        String productName = "CORS-Put-Test-" + java.util.UUID.randomUUID().toString();
+        String featureName = "cors-feature-" + java.util.UUID.randomUUID().toString();
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Updated via CORS filter test")
+            .when()
+                .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithGetFeaturesRequestNonOptions() {
+        given()
+            .when()
+                .get("/products/AeroBook-Pro-15/features")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", notNullValue());
+    }
+}
+```

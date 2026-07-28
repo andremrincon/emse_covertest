@@ -1,0 +1,89 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintStatusCreated() {
+        String product = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintAddsDerivedFeatureWhenSourceActiveRequiredInactive() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("$", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintDoesNotAddDerivedWhenSourceInactive() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("$", not(hasItem(requiredFeature)));
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintDoesNotCreateDuplicateWhenRequiredAlreadyActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("$", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintWithNoParamsUsesDefaultConstructor() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").when().post("/products/{productName}/constraints/requires", product).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintTypeExposedInProductConstraints() {
+        String product = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product).then().body("constraints[0].type", equalTo("requires"));
+    }
+}

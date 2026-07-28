@@ -1,0 +1,56 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testMonJan() {
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testThurApr() {
+        given().when().get("/api/dateparse/fri/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/apr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSunJul() {
+        given().when().get("/api/dateparse/mon/aug").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/jul").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testWedOct() {
+        given().when().get("/api/dateparse/thur/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/dec").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/oct").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayInvalidMonth() {
+        given().when().get("/api/dateparse/sat/invalidmonth").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayInvalidMonth() {
+        given().when().get("/api/dateparse/invalidday/invalidmonth").then().statusCode(200);
+    }
+}

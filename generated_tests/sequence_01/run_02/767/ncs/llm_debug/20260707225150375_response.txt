@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    private String base() {
+        String b = System.getProperty("api.base");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getenv("API_BASE");
+        if (b != null && !b.isEmpty()) return b;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_BothOdd_Status200() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", 11, 5, 0.75).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_A1_BNot1_Status200() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", 11, 6, 0.75).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_ANot1_B1_Status200() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_BothEven_Status200() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", 10, 6, 0.75).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_InvalidM_BadRequest() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", "abc", 5, 0.75).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_XOutOfRange_BadRequest() {
+        String base = base();
+        given().baseUri(base).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().baseUri(base).when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 1.2).then().statusCode(200);
+    }
+}

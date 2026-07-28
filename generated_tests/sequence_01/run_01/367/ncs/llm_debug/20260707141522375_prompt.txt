@@ -1,0 +1,175 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.RemainderTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testBZeroReturnsBadRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <200>.
+
+[2] METHOD=testPositiveNegativeReturnsRemainderForNegativeB TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <8>
+  Actual: null
+
+[3] METHOD=testAZeroReturnsBadRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <200>.
+
+[4] METHOD=testPositivePositiveReturnsRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+[5] METHOD=testNegativeAAndPositiveBReturnsRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <-2>
+  Actual: null
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testBZeroReturnsBadRequest FAILURE AT LINE 42
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testBZeroReturnsBadRequest(RemainderTest.java:42)
+CODE CONTEXT:
+    39:     public void testBZeroReturnsBadRequest() {
+    40:         given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    41:         Response resp = given().when().get(base + "/api/remainder/5/0");
+    42:         resp.then().statusCode(200);  ← FAILURE HERE
+    43:     }
+    44: 
+    45:     @Test(timeout = 60000)
+
+[2] METHOD=testPositiveNegativeReturnsRemainderForNegativeB FAILURE AT LINE 35
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testPositiveNegativeReturnsRemainderForNegativeB(RemainderTest.java:35)
+CODE CONTEXT:
+    32:     public void testPositiveNegativeReturnsRemainderForNegativeB() {
+    33:         given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    34:         Response resp = given().when().get(base + "/api/remainder/17/-9");
+    35:         resp.then().body("result", equalTo(8));  ← FAILURE HERE
+    36:     }
+    37: 
+    38:     @Test(timeout = 60000)
+
+[3] METHOD=testAZeroReturnsBadRequest FAILURE AT LINE 49
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testAZeroReturnsBadRequest(RemainderTest.java:49)
+CODE CONTEXT:
+    46:     public void testAZeroReturnsBadRequest() {
+    47:         given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    48:         Response resp = given().when().get(base + "/api/remainder/0/5");
+    49:         resp.then().statusCode(200);  ← FAILURE HERE
+    50:     }
+    51: 
+    52:     @Test(timeout = 60000)
+
+[4] METHOD=testPositivePositiveReturnsRemainder FAILURE AT LINE 28
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testPositivePositiveReturnsRemainder(RemainderTest.java:28)
+CODE CONTEXT:
+    25:     public void testPositivePositiveReturnsRemainder() {
+    26:         given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    27:         Response resp = given().when().get(base + "/api/remainder/17/5");
+    28:         resp.then().body("result", equalTo(2));  ← FAILURE HERE
+    29:     }
+    30: 
+    31:     @Test(timeout = 60000)
+
+[5] METHOD=testNegativeAAndPositiveBReturnsRemainder FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testNegativeAAndPositiveBReturnsRemainder(RemainderTest.java:56)
+CODE CONTEXT:
+    53:     public void testNegativeAAndPositiveBReturnsRemainder() {
+    54:         given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    55:         Response resp = given().when().get(base + "/api/remainder/-17/5");
+    56:         resp.then().body("result", equalTo(-2));  ← FAILURE HERE
+    57:     }
+    58: }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("API_BASE");
+        if (cfg == null || cfg.isEmpty()) cfg = System.getenv("API_BASE");
+        if (cfg == null || cfg.isEmpty()) cfg = "http://localhost:8080";
+        base = cfg;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositivePositiveReturnsRemainder() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/17/5");
+        resp.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveNegativeReturnsRemainderForNegativeB() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/17/-9");
+        resp.then().body("result", equalTo(8));
+    }
+
+    @Test(timeout = 60000)
+    public void testBZeroReturnsBadRequest() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/5/0");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAZeroReturnsBadRequest() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/0/5");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAAndPositiveBReturnsRemainder() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/-17/5");
+        resp.then().body("result", equalTo(-2));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

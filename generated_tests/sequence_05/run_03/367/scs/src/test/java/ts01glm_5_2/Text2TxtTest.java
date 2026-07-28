@@ -1,0 +1,76 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Text2TxtTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectTwo() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/two/x/y")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFor() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/for/x/y")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectYou() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/you/x/y")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAnd() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/and/x/y")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAre() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/are/x/y")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectSeeYou() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/text2txt/see/you/y")
+        .then()
+            .statusCode(200);
+    }
+}

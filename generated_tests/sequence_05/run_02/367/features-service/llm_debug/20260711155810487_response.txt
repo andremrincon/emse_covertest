@@ -1,0 +1,90 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_nonOptionsGetRequest_passesThroughFilter() {
+        String productName = "AeroBook-Pro-15";
+
+        given()
+                .when()
+                .get("/products/" + productName + "/features")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_optionsRequest_doesNotForwardChain() {
+        String productName = "USB-C-Dongle";
+
+        Response response = given()
+                .when()
+                .options("/products/" + productName + "/features");
+
+        assertNotNull(response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_nonOptionsPostRequest_passesThroughFilter() {
+        String productName = "Smartwatch Series 8";
+        String featureName = "Blood Oxygen Sensor";
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_nonOptionsDeleteRequest_passesThroughFilter() {
+        String productName = "SmartWatch-Pro";
+        String featureName = "heart-rate-monitor";
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_nonOptionsPutRequest_passesThroughFilter() {
+        String productName = "AeroBook-Pro-15";
+        String featureName = "backlit-keyboard";
+
+        given()
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when()
+                .put("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilter_doFilter_setsAccessControlAllowOriginHeader() {
+        String productName = "Laptop-Pro-X15";
+
+        Response response = given()
+                .when()
+                .get("/products/" + productName + "/configurations");
+
+        String allowOrigin = response.getHeader("Access-Control-Allow-Origin");
+        assertNotNull(allowOrigin);
+    }
+}

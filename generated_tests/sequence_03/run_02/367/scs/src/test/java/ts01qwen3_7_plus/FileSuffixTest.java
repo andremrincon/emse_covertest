@@ -1,0 +1,94 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FileSuffixTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testTextTxt() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "text", uuid + ".txt").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "text", "file.txt")
+                .then()
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatPdf() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "acrobat", uuid + ".pdf").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "acrobat", "file.pdf")
+                .then()
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDoc() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "word", uuid + ".doc").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "word", "file.doc")
+                .then()
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinExe() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "bin", uuid + ".exe").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "bin", "file.exe")
+                .then()
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDll() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "lib", uuid + ".dll").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "lib", "file.dll")
+                .then()
+                .body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDotInFile() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "text", uuid).then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/api/filesuffix/{directory}/{file}", "text", "file")
+                .then()
+                .body(equalTo("0"));
+    }
+}

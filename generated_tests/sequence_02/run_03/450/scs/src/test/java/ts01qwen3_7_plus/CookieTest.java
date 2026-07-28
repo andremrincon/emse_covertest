@@ -1,0 +1,106 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Test;
+
+public class CookieTest {
+
+    @Test(timeout = 60000)
+    public void testCookieUseridWithValLongerThan6StartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user1234/example.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/userid/user1234/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUseridWithValNotStartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/admin123/example.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/userid/admin123/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUseridWithValLengthLessThanOrEqualTo6() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user1/example.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/userid/user1/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithAmAndDifferentSite() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/xyz.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/session/am/xyz.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithDifferentValAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/other/abc.com")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/cookie/session/other/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+}

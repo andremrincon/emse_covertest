@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"\"   Actual: none")
+    @Test(timeout = 60000)
+    public void testUrlBranchViaPatEndpoint() throws Exception {
+        String arrangeTxt = "seed-" + UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeTxt).then().statusCode(lessThan(300));
+        String txt = "http://a/a";
+        String encoded = URLEncoder.encode(txt, "UTF-8");
+        Response resp = given().when().get("/api/pat/" + encoded);
+        resp.then().assertThat().body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateBranchViaPatEndpoint() throws Exception {
+        String arrangeTxt = "seed-" + UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeTxt).then().statusCode(lessThan(300));
+        String txt = "mon01jan";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        resp.then().assertThat().body(equalTo("date"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFpeBranchViaPatEndpoint() throws Exception {
+        String arrangeTxt = "seed-" + UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeTxt).then().statusCode(lessThan(300));
+        String txt = "1.2e+12";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        resp.then().assertThat().body(equalTo("fpe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneBranchViaPatEndpoint() throws Exception {
+        String arrangeTxt = "seed-" + UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeTxt).then().statusCode(lessThan(300));
+        String txt = "this_will_match_none";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        resp.then().assertThat().body(equalTo("none"));
+    }
+}

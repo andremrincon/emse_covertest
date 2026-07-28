@@ -1,0 +1,49 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithOddMAndOddN() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 1, 1, 0.75)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithEvenMAndOddN() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithInvalidMParameter() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", "abc", 5, 0.75)
+            .then()
+                .statusCode(400);
+    }
+}
+```

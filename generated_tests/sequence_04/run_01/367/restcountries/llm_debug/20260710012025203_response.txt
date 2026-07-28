@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class CurrencyTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String configured = System.getProperty("baseUrl");
+        if (configured == null || configured.isEmpty()) {
+            configured = System.getenv("BASE_URL");
+        }
+        if (configured == null || configured.isEmpty()) {
+            configured = "http://localhost:8080/rest";
+        }
+        BASE = configured;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/US");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_containsUSDCodeInBody() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/currency/USD");
+        assertTrue(act.asString().contains("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_containsEURCode() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v2/currency/EUR");
+        assertTrue(act.asString().contains("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_invalidAlphacode_returns400() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/123");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_unknownCurrency_returns404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        String unique = "XYZ" + UUID.randomUUID().toString().replace("-", "").substring(0, 5);
+        Response act = given().when().get(BASE + "/v1/currency/" + unique);
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Name_fullTextTrue_returns200() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v2/name/Germany?fullText=true");
+        assertEquals(200, act.getStatusCode());
+    }
+}

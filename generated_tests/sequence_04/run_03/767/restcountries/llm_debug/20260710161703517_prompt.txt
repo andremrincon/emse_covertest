@@ -1,0 +1,149 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetNativeName_v1NameFrance TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testSetIso639_1_v1AlphaUS TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testSetName_v1CurrencyUSD TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testSetIso639_2_v1AlphaUS TYPE=ERROR
+The parameter "iso639_2" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetNativeName_v1NameFrance FAILURE AT LINE 60
+at ts01gpt_5_mini.LanguageTest.testSetNativeName_v1NameFrance(LanguageTest.java:60)
+CODE CONTEXT:
+    57:     public void testSetNativeName_v1NameFrance() {
+    58:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    59:         Response act = given().when().get("/v1/name/France");
+    60:         act.then().body("languages[0].nativeName", equalTo("français"));  ← FAILURE HERE
+    61:     }
+    62: }
+
+[2] METHOD=testSetIso639_1_v1AlphaUS FAILURE AT LINE 39
+at ts01gpt_5_mini.LanguageTest.testSetIso639_1_v1AlphaUS(LanguageTest.java:39)
+CODE CONTEXT:
+    36:     public void testSetIso639_1_v1AlphaUS() {
+    37:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    38:         Response act = given().when().get("/v1/alpha/US");
+    39:         act.then().body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[3] METHOD=testSetName_v1CurrencyUSD FAILURE AT LINE 53
+at ts01gpt_5_mini.LanguageTest.testSetName_v1CurrencyUSD(LanguageTest.java:53)
+CODE CONTEXT:
+    50:     public void testSetName_v1CurrencyUSD() {
+    51:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    52:         Response act = given().when().get("/v1/currency/USD");
+    53:         act.then().body("languages[0].name", equalTo("English"));  ← FAILURE HERE
+    54:     }
+    55: 
+    56:     @Test(timeout = 60000)
+
+[4] METHOD=testSetIso639_2_v1AlphaUS FAILURE AT LINE 46
+at ts01gpt_5_mini.LanguageTest.testSetIso639_2_v1AlphaUS(LanguageTest.java:46)
+CODE CONTEXT:
+    43:     public void testSetIso639_2_v1AlphaUS() {
+    44:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    45:         Response act = given().when().get("/v1/alpha/US");
+    46:         act.then().body("languages[0].iso639_2", equalTo("eng"));  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URI;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        URI uri = new URI(base);
+        String schemeHost = uri.getScheme() + "://" + uri.getHost();
+        RestAssured.baseURI = schemeHost;
+        if (uri.getPort() != -1) {
+            RestAssured.port = uri.getPort();
+        }
+        String path = uri.getPath();
+        RestAssured.basePath = path == null ? "" : path;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName_v1CurrencyUSD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName_v1NameFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France");
+        act.then().body("languages[0].nativeName", equalTo("français"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

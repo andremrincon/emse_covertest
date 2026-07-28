@@ -1,0 +1,141 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        given()
+            .queryParam("codes", "US|CA")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/currency/XyZ")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/name/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/callingcode/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/capital/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/region/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/subregion/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InternalServerError() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/lang/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_MissingQueryParam() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_EmptyQueryParam() {
+        given()
+            .queryParam("codes", "")
+        .when()
+            .get(baseUrl + "/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+}
+```

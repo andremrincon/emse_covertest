@@ -1,0 +1,101 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class BessjTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nLessThan2_returns400() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_xZero_returns200WithValueZero() {
+        given()
+            .when()
+                .get("/api/bessj/3/0")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_smallX_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_largeX_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/10")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeX_oddN_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/-2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeX_evenN_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/4/-2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeLargeX_oddN_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessThanOrEqualN_positiveX_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessThanOrEqualN_negativeX_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/-1")
+            .then()
+                .statusCode(200);
+    }
+}

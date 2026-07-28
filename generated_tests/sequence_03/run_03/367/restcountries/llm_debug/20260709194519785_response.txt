@@ -1,0 +1,92 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("REST_BASE");
+        if (base == null || base.isEmpty()) base = System.getenv("REST_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_US_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_123() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound_XYZ() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/XYZ");
+        Assert.assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_Success_US_CA() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_BadRequest_123() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "123").when().get("/v1/alpha");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_NotFound_XX_YY_ZZ() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha");
+        Assert.assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_ServerError_encodedJsonArray() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v1/alpha");
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testName_FullTextTrue_containsFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", true).when().get("/v1/name/France");
+        Assert.assertTrue(act.asString().contains("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testName_SubstringFalse_containsFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", false).when().get("/v1/name/France");
+        Assert.assertTrue(act.asString().contains("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All_success_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+}

@@ -1,0 +1,113 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    private String getBaseUrl() {
+        return System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        String txt = "ab";
+        String pat = "ab";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        String txt = "hello world";
+        String pat = "world";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfter() {
+        String txt = "abccba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLater() {
+        String txt = "abc xyz cba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPat() {
+        String txt = "hello cba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfter() {
+        String txt = "cbaabc";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLater() {
+        String txt = "cba xyz abc";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}
+```

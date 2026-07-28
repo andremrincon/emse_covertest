@@ -1,0 +1,83 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CookieTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixLongValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongValueNotStartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/test12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionAmAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionAmOtherSite() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/other.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionNotAm() {
+        given()
+            .when()
+                .get("/api/cookie/session/other/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+}
+```

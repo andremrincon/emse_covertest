@@ -1,0 +1,197 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsTranslationsDe() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/all")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsTranslationsEs() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/US")
+        .then()
+                .statusCode(200)
+                .body("translations.es", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. JSON path [0].translations.fr doesn't match. Expected: not null   Actual: null")
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturnsTranslationsFr() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US,CA,MX")
+        .when()
+                .get("/v1/alpha")
+        .then()
+                .statusCode(400)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsTranslationsJa() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/currency/USD")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsTranslationsIt() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/name/France")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturnsTranslationsDe() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/callingcode/1")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalReturnsTranslationsEs() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/capital/London")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsTranslationsFr() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/region/Europe")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Ignore("Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe")
+    @Test(timeout = 60000)
+    public void testV1SubregionReturnsTranslationsJa() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/subregion/{sub}", "Western Europe")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturnsTranslationsIt() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/lang/es")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeGBReturnsAllTranslations() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/GB")
+        .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue(),
+                        "translations.es", notNullValue(),
+                        "translations.fr", notNullValue(),
+                        "translations.ja", notNullValue(),
+                        "translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFullTextReturnsTranslationsDe() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("fullText", "true")
+        .when()
+                .get("/v1/name/France")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEURReturnsTranslationsIt() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/currency/EUR")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCode44ReturnsTranslationsFr() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/callingcode/44")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalParisReturnsTranslationsJa() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/capital/Paris")
+        .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+}

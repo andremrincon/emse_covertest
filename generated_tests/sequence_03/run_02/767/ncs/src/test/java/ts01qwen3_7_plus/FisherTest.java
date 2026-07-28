@@ -1,0 +1,107 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturnP() {
+        given()
+            .when()
+            .get("/api/fisher/10/5/0.75")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/10/5/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturnZero() {
+        given()
+            .when()
+            .get("/api/fisher/5/5/1e-10")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/5/5/1e-10")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturnOne() {
+        given()
+            .when()
+            .get("/api/fisher/3/4/1e10")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/3/4/1e10")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBranchOddOdd() {
+        given()
+            .when()
+            .get("/api/fisher/1/1/0.5")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/1/1/0.5")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBranchEvenEven() {
+        given()
+            .when()
+            .get("/api/fisher/4/4/0.5")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/4/4/0.5")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBranchEvenOdd() {
+        given()
+            .when()
+            .get("/api/fisher/2/3/0.5")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/api/fisher/2/3/0.5")
+            .then()
+            .statusCode(200);
+    }
+}

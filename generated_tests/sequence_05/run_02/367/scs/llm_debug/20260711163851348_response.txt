@@ -1,0 +1,105 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanThree() {
+        given()
+            .when()
+            .get("/api/pat/abcdef/ab")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverseInText() {
+        given()
+            .when()
+            .get("/api/pat/ABCDEF/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfterPalindrome() {
+        given()
+            .when()
+            .get("/api/pat/ABCCBA/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseFoundLater() {
+        given()
+            .when()
+            .get("/api/pat/ABCXYZCBA/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatNotFound() {
+        given()
+            .when()
+            .get("/api/pat/CBADEF/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatImmediatelyAfterPalindrome() {
+        given()
+            .when()
+            .get("/api/pat/CBAABC/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatFoundLater() {
+        given()
+            .when()
+            .get("/api/pat/CBAXYZABC/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given()
+            .when()
+            .get("/api/pat/XYZXYZ/ABC")
+            .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testSingleArgPatEndpoint() {
+        given()
+            .when()
+            .get("/api/pat/Thequickbrownfox")
+            .then()
+            .statusCode(equalTo(200));
+    }
+}
+```

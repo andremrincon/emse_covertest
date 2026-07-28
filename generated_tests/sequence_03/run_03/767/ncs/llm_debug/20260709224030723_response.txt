@@ -1,0 +1,93 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPathWithLargeX() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", 5.5)
+            .pathParam("x", 1000.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserPathWithSmallX() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", 5.5)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserPathWithXZero() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", 5.5)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAThrowsException() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", -1.0)
+            .pathParam("x", 2.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidXThrowsException() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", 5.5)
+            .pathParam("x", -1.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPathWithSmallA() {
+        given()
+            .contentType(ContentType.JSON)
+            .pathParam("a", 0.001)
+            .pathParam("x", 1000.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

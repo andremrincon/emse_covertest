@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void maleKnownTitleReturnsOne() {
+        given().when().get("/api/pat/{txt}", "healthcheck").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "male", "Mr");
+        act.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void maleUnknownTitleReturnsMinusOne() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "male", "Smith");
+        act.then().statusCode(200).body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void femaleKnownTitleDrReturnsZero() {
+        given().when().get("/api/pat/{txt}", "ready").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "female", "Dr");
+        act.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void femaleUnknownTitleReturnsMinusOne() {
+        given().when().get("/api/pat/{txt}", "check").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "female", "RandomTitle");
+        act.then().statusCode(200).body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void noneWithAcademicTitleReturnsTwo() {
+        given().when().get("/api/pat/{txt}", "alive").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "none", "prof");
+        act.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void invalidSexProducesServerError() {
+        given().when().get("/api/pat/{txt}", "start").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/{sex}/{title}", "neuter", "Jones");
+        act.then().statusCode(200);
+    }
+}

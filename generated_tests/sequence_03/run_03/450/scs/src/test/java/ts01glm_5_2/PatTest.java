@@ -1,0 +1,105 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv("TEST_HOST");
+        if (host == null || host.isEmpty()) {
+            host = "localhost";
+        }
+        String port = System.getenv("TEST_PORT");
+        if (port == null || port.isEmpty()) {
+            port = "8080";
+        }
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLeqTwoReturnsZero() {
+        given()
+            .when()
+                .get("/api/pat/abcdef/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNotFoundReturnsOne() {
+        given()
+            .when()
+                .get("/api/pat/abcdef/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfterReturnsIndex() {
+        given()
+            .when()
+                .get("/api/pat/abccba/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLaterReturnsIndex() {
+        given()
+            .when()
+                .get("/api/pat/abcXcba/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatNotFoundReturnsTwo() {
+        given()
+            .when()
+                .get("/api/pat/cbadef/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfterReturnsIndex() {
+        given()
+            .when()
+                .get("/api/pat/cbaabc/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLaterReturnsIndex() {
+        given()
+            .when()
+                .get("/api/pat/cbaXabc/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFoundReturnsZero() {
+        given()
+            .when()
+                .get("/api/pat/xyzdef/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatTxtOnlyEndpoint() {
+        given()
+            .when()
+                .get("/api/pat/Thequickbrownfoxjumpsoverthelazydog")
+            .then()
+                .statusCode(lessThan(300));
+    }
+}

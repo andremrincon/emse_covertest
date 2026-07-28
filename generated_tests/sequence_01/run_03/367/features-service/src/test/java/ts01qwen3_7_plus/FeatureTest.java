@@ -1,0 +1,99 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature() {
+        String productName = "Product-Create-" + System.currentTimeMillis();
+        String featureName = "Feature-Create-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature() {
+        String productName = "Product-Update-" + System.currentTimeMillis();
+        String featureName = "Feature-Update-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeatures() {
+        String productName = "Product-Get-" + System.currentTimeMillis();
+        String featureName = "Feature-Get-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "Product-Conf-" + System.currentTimeMillis();
+        String featureName = "Feature-Conf-" + System.currentTimeMillis();
+        String configName = "Config-Conf-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures() {
+        String productName = "Product-GetConf-" + System.currentTimeMillis();
+        String featureName = "Feature-GetConf-" + System.currentTimeMillis();
+        String configName = "Config-GetConf-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+            .then()
+            .statusCode(200);
+    }
+}

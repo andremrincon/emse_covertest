@@ -1,0 +1,60 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FileSuffixTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        given().when().get("/api/filesuffix/text/document.txt").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/text/document.txt");
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        given().when().get("/api/filesuffix/acrobat/document.pdf").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/acrobat/document.pdf");
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        given().when().get("/api/filesuffix/word/document.doc").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/word/document.doc");
+        response.then().statusCode(200).body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        given().when().get("/api/filesuffix/bin/program.exe").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/bin/program.exe");
+        response.then().statusCode(200).body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        given().when().get("/api/filesuffix/lib/library.dll").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/lib/library.dll");
+        response.then().statusCode(200).body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutDot() {
+        given().when().get("/api/filesuffix/text/document").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/filesuffix/text/document");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+}

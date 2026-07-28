@@ -1,0 +1,106 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_400_Empty() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=XX,YY").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/US").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/subregion/Western%20Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/xyz").then().statusCode(404);
+    }
+}

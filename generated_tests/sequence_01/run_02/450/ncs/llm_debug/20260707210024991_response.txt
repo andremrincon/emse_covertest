@@ -1,0 +1,68 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyWithZeroSide() {
+        given()
+            .when()
+                .get("/api/triangle/0/4/5")
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo("invalid"));
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateral() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/3")
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo("equilateral"));
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/1/2/5")
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo("invalid"));
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsosceles() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/5")
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo("isosceles"));
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScalene() {
+        given()
+            .when()
+                .get("/api/triangle/3/4/6")
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo("scalene"));
+    }
+}
+```

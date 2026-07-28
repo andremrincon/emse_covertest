@@ -1,0 +1,130 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintInvokesSetters() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .when().post("/products/{productName}")
+                .then().statusCode(lessThan(300));
+        String source = "src-" + UUID.randomUUID();
+        String required = "req-" + UUID.randomUUID();
+        given().contentType(ContentType.URLENC)
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSourceFeatureToConfigurationReturns201WhenConstraintExists() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .when().post("/products/{productName}")
+                .then().statusCode(lessThan(300));
+        String configName = "cfg-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .when().post("/products/{productName}/configurations/{configurationName}")
+                .then().statusCode(lessThan(300));
+        String source = "src-" + UUID.randomUUID();
+        String required = "req-" + UUID.randomUUID();
+        given().contentType(ContentType.URLENC)
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(lessThan(300));
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .pathParam("featureName", source)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddingSourceCausesRequiredFeatureToBePresentInConfiguration() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .when().post("/products/{productName}")
+                .then().statusCode(lessThan(300));
+        String configName = "cfg-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .when().post("/products/{productName}/configurations/{configurationName}")
+                .then().statusCode(lessThan(300));
+        String source = "src-" + UUID.randomUUID();
+        String required = "req-" + UUID.randomUUID();
+        given().contentType(ContentType.URLENC)
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(lessThan(300));
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .pathParam("featureName", source)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(500);
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .when().get("/products/{productName}/configurations/{configurationName}/features")
+                .then().body("", hasItem(required));
+    }
+
+    @Test(timeout = 60000)
+    public void testWhenRequiredAlreadyActiveAddingSourceDoesNotDuplicateRequiredFeature() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .when().post("/products/{productName}")
+                .then().statusCode(lessThan(300));
+        String configName = "cfg-" + UUID.randomUUID();
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .when().post("/products/{productName}/configurations/{configurationName}")
+                .then().statusCode(lessThan(300));
+        String source = "src-" + UUID.randomUUID();
+        String required = "req-" + UUID.randomUUID();
+        given().contentType(ContentType.URLENC)
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(lessThan(300));
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .pathParam("featureName", required)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(lessThan(300));
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .pathParam("featureName", source)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(500);
+        given().pathParam("productName", productName)
+                .pathParam("configurationName", configName)
+                .when().get("/products/{productName}/configurations/{configurationName}/features")
+                .then().body(String.format("findAll { it == '%s' }.size()", required), equalTo(1));
+    }
+}

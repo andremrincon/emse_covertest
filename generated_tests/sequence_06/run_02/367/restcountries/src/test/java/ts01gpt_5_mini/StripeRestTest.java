@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeReturnsBadRequestWhenTokenMissing() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeReturnsBadRequestWhenChargeThrows() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"token\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response act = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeReturnsAcceptedWhenValidToken() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"token\":\"tok_visa\"}";
+        Response act = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute");
+        act.then().statusCode(400);
+    }
+}

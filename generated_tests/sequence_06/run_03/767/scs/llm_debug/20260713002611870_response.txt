@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_short_pattern_returns_ok() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "sometext", "ab");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_finds_exact_pattern_returns_ok() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "xxABCyy", "ABC");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_finds_reverse_pattern_returns_ok() {
+        given().when().get("/api/costfuns/{i}/{s}", "1", "algorithm").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "xxCBAyy", "ABC");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_palindrome_pat_then_reverse_adjacent_returns_ok() {
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "zebra", "yak", "x-ray", "wolf").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "xxABCCBAzz", "ABC");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_palindrome_reverse_then_pat_adjacent_returns_ok() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "Wednesday", "August").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "xxCBAABCzz", "ABC");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_pat_and_reverse_nonadjacent_returns_ok() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "ABCpppCBA", "ABC");
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_swagger_example_endpoint_returns_ok() {
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session-id", "abc-123-xyz-789", "example.com").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/pat/{txt}/{pat}", "ABABCABAB", "ABAB");
+        assertEquals(200, res.getStatusCode());
+    }
+}

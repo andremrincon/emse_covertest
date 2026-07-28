@@ -1,0 +1,213 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/450/restcountries/src/test/java/ts01glm_5_2/StripeRestTest.java:[91,42] cannot find symbol
+symbol:   method or(org.hamcrest.Matcher<java.lang.Integer>)
+location: interface org.hamcrest.Matcher<java.lang.Integer>
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_TooShort_Returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/1")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_InvalidCodes_Returns400() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "1")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_MalformedCodes_Returns500() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "US;;CA")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_InvalidLength_Returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_Exception_Returns500() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/XyZ")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_NotFound_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/lang/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_ValidCode_Returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

@@ -1,0 +1,46 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithMrReturns200() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "male", "mr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithMsReturns200() {
+        given().when().get("/api/pat/{txt}", "ABABCABAB").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "female", "ms").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithDrReturns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "none", "dr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexReturns500() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "neuter", "Jones").then().statusCode(200);
+    }
+}

@@ -1,0 +1,598 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.ProductTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testRemoveFeatureAfterConstraintCreation TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[2] METHOD=testRemoveFeatureFromProduct TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=testAddMultipleFeaturesSequentially TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=testAddFeatureToProduct TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[5] METHOD=testAddConstraintAfterFeatureCreation TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[6] METHOD=testAddRequiresConstraintToProduct TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[7] METHOD=testGetProductFeaturesAfterAdding TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[8] METHOD=testAddExcludesConstraintToProduct TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[9] METHOD=testUpdateFeatureDescription TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[10] METHOD=testBuildProductWithMultipleFeatures TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[11] METHOD=testRemoveFeatureAndVerifyDeletion TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testRemoveFeatureAfterConstraintCreation FAILURE AT LINE 364
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testRemoveFeatureAfterConstraintCreation(ProductTest.java:364)
+CODE CONTEXT:
+   361:         .when()
+   362:             .post("/products/" + productName + "/features/" + featureName1)
+   363:         .then()
+   364:             .statusCode(lessThan(300));  ← FAILURE HERE
+   365: 
+   366:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+   367:         given()
+
+[2] METHOD=testRemoveFeatureFromProduct FAILURE AT LINE 59
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testRemoveFeatureFromProduct(ProductTest.java:59)
+CODE CONTEXT:
+    56:         .when()
+    57:             .post("/products/" + productName + "/features/" + featureName)
+    58:         .then()
+    59:             .statusCode(lessThan(300));  ← FAILURE HERE
+    60: 
+    61:         given()
+    62:             .contentType(ContentType.JSON)
+
+[3] METHOD=testAddMultipleFeaturesSequentially FAILURE AT LINE 293
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testAddMultipleFeaturesSequentially(ProductTest.java:293)
+CODE CONTEXT:
+   290:         .when()
+   291:             .post("/products/" + productName + "/features/" + featureName1)
+   292:         .then()
+   293:             .statusCode(lessThan(300));  ← FAILURE HERE
+   294: 
+   295:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+   296:         given()
+
+[4] METHOD=testAddFeatureToProduct FAILURE AT LINE 40
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testAddFeatureToProduct(ProductTest.java:40)
+CODE CONTEXT:
+    37:         .when()
+    38:             .post("/products/" + productName + "/features/" + featureName)
+    39:         .then()
+    40:             .statusCode(500);  ← FAILURE HERE
+    41:     }
+    42: 
+    43:     @Test(timeout = 60000)
+
+[5] METHOD=testAddConstraintAfterFeatureCreation FAILURE AT LINE 328
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testAddConstraintAfterFeatureCreation(ProductTest.java:328)
+CODE CONTEXT:
+   325:         .when()
+   326:             .post("/products/" + productName + "/features/" + featureName1)
+   327:         .then()
+   328:             .statusCode(lessThan(300));  ← FAILURE HERE
+   329: 
+   330:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+   331:         given()
+
+[6] METHOD=testAddRequiresConstraintToProduct FAILURE AT LINE 112
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testAddRequiresConstraintToProduct(ProductTest.java:112)
+CODE CONTEXT:
+   109:         .when()
+   110:             .post("/products/" + productName + "/features/" + featureName1)
+   111:         .then()
+   112:             .statusCode(lessThan(300));  ← FAILURE HERE
+   113: 
+   114:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+   115:         given()
+
+[7] METHOD=testGetProductFeaturesAfterAdding FAILURE AT LINE 184
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testGetProductFeaturesAfterAdding(ProductTest.java:184)
+CODE CONTEXT:
+   181:         .when()
+   182:             .post("/products/" + productName + "/features/" + featureName)
+   183:         .then()
+   184:             .statusCode(lessThan(300));  ← FAILURE HERE
+   185: 
+   186:         given()
+   187:             .contentType(ContentType.JSON)
+
+[8] METHOD=testAddExcludesConstraintToProduct FAILURE AT LINE 148
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testAddExcludesConstraintToProduct(ProductTest.java:148)
+CODE CONTEXT:
+   145:         .when()
+   146:             .post("/products/" + productName + "/features/" + featureName1)
+   147:         .then()
+   148:             .statusCode(lessThan(300));  ← FAILURE HERE
+   149: 
+   150:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+   151:         given()
+
+[9] METHOD=testUpdateFeatureDescription FAILURE AT LINE 265
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testUpdateFeatureDescription(ProductTest.java:265)
+CODE CONTEXT:
+   262:         .when()
+   263:             .post("/products/" + productName + "/features/" + featureName)
+   264:         .then()
+   265:             .statusCode(lessThan(300));  ← FAILURE HERE
+   266: 
+   267:         String newDescription = "Updated-" + UUID.randomUUID().toString();
+   268:         given()
+
+[10] METHOD=testBuildProductWithMultipleFeatures FAILURE AT LINE 85
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testBuildProductWithMultipleFeatures(ProductTest.java:85)
+CODE CONTEXT:
+    82:         .when()
+    83:             .post("/products/" + productName + "/features/" + featureName1)
+    84:         .then()
+    85:             .statusCode(lessThan(300));  ← FAILURE HERE
+    86: 
+    87:         String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+    88:         given()
+
+[11] METHOD=testRemoveFeatureAndVerifyDeletion FAILURE AT LINE 210
+java.lang.AssertionError:
+at ts01qwen3_7_plus.ProductTest.testRemoveFeatureAndVerifyDeletion(ProductTest.java:210)
+CODE CONTEXT:
+   207:         .when()
+   208:             .post("/products/" + productName + "/features/" + featureName)
+   209:         .then()
+   210:             .statusCode(lessThan(300));  ← FAILURE HERE
+   211: 
+   212:         given()
+   213:             .contentType(ContentType.JSON)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildProductWithMultipleFeatures() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureName1)
+            .formParam("requiredFeature", featureName2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureName1)
+            .formParam("excludedFeature", featureName2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesAfterAdding() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/products/" + productName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureAndVerifyDeletion() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/products/" + productName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithDescription() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String description = "Description-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", description)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String newDescription = "Updated-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", newDescription)
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesSequentially() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName3 = "Feature3-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName3)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddConstraintAfterFeatureCreation() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureName1)
+            .formParam("requiredFeature", featureName2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureAfterConstraintCreation() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureName1)
+            .formParam("requiredFeature", featureName2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

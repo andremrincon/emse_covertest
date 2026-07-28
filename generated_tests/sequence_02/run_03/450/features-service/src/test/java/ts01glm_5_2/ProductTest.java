@@ -1,0 +1,202 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class ProductTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductReturns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureWithDescriptionReturns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "A test feature description")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromProductReturns204() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given().when()
+                .delete("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getFeaturesForProductReturns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/" + productName + "/features")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductByNameReturns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/" + productName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void createProductReturns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+
+        given().when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintReturns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintReturns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString();
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getAllProductsReturns200() {
+        given().when()
+                .get("/products")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void updateFeatureDescriptionReturns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Updated description for feature")
+                .when()
+                .put("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteProductReturns204() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when()
+                .delete("/products/" + productName)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithFeaturesAndConstraintsReturns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", feature1)
+                .formParam("excludedFeature", feature2)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/" + productName)
+                .then()
+                .statusCode(200)
+                .body("features", notNullValue())
+                .body("constraints", notNullValue());
+    }
+}

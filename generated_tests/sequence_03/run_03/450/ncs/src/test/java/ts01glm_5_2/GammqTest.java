@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithXZero() {
+        given()
+            .when()
+                .get("/api/gammq/0.001/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalPath() {
+        given()
+            .when()
+                .get("/api/gammq/0.001/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidA() {
+        given()
+            .when()
+                .get("/api/gammq/-1.0/2.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidX() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/-1.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNonConvergence() {
+        given()
+            .when()
+                .get("/api/gammq/1000/999")
+            .then()
+                .statusCode(400);
+    }
+}

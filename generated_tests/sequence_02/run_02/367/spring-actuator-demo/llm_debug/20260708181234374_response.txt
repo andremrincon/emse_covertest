@@ -1,0 +1,78 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultName() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .queryParam("name", "John")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithZeroDelay() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNonZeroDelay() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithInvalidDelay() {
+        given()
+            .queryParam("delay", "abc")
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(500);
+    }
+}

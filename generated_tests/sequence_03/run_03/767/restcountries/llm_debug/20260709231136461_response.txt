@@ -1,0 +1,59 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("API_BASE_URL");
+        String base = System.getProperty("api.base", env != null ? env : "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_US_shouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(404);
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_invalidFormat_shouldReturn400() {
+        given().when().get("/v1/all").then().statusCode(404);
+        given().when().get("/v1/currency/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_unknown_shouldReturn404() {
+        given().when().get("/v1/all").then().statusCode(404);
+        given().when().get("/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_shouldReturn200() {
+        given().when().get("/v2/all").then().statusCode(404);
+        given().when().get("/v2/currency/EUR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_invalidFormat_shouldReturn400() {
+        given().when().get("/v2/all").then().statusCode(404);
+        given().when().get("/v2/currency/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_shouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(404);
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_US_withFields_shouldReturn200() {
+        given().when().get("/v2/all").then().statusCode(404);
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().statusCode(200);
+    }
+}

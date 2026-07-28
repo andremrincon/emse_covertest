@@ -1,0 +1,75 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testLengthsOutOfBounds() {
+        given()
+            .pathParam("w", "a")
+            .pathParam("x", "b")
+            .pathParam("z", "c")
+            .pathParam("y", "d")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("y", "ccccc")
+            .pathParam("z", "ddddd")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .pathParam("w", "eeeee")
+            .pathParam("x", "ddddd")
+            .pathParam("y", "ccccc")
+            .pathParam("z", "bbbbb")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("y", "ccccc")
+            .pathParam("z", "bbbbb")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInternalServerError() {
+        String longString = new String(new char[500]).replace('\0', 'y');
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "cherry")
+            .pathParam("y", longString)
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(500);
+    }
+}
+```

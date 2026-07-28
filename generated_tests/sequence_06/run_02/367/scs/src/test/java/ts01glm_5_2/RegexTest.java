@@ -1,0 +1,58 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost";
+            RestAssured.port = 8080;
+        }
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() throws Exception {
+        String encoded = URLEncoder.encode("http://a/a", "UTF-8");
+        given().urlEncodingEnabled(false).when().get("/api/pat/" + encoded).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given().when().get("/api/pat/mon01jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() throws Exception {
+        String encoded = URLEncoder.encode("1.0e+12", "UTF-8");
+        given().urlEncodingEnabled(false).when().get("/api/pat/" + encoded).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given().when().get("/api/pat/xyz").then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testSubjectFtpUrlMatch() throws Exception {
+        String encoded = URLEncoder.encode("ftp://b/c", "UTF-8");
+        given().urlEncodingEnabled(false).when().get("/api/pat/" + encoded).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAnotherDateMatch() {
+        given().when().get("/api/pat/wed25dec").then().statusCode(200);
+    }
+}

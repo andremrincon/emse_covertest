@@ -1,0 +1,101 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThan2() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xIsZero() {
+        given()
+            .when()
+                .get("/api/bessj/3/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_forwardRecurrence() {
+        given()
+            .when()
+                .get("/api/bessj/3/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_backwardRecurrence() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_largeNForRescaling() {
+        given()
+            .when()
+                .get("/api/bessj/100/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeXOddN() {
+        given()
+            .when()
+                .get("/api/bessj/3/-2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeXEvenN() {
+        given()
+            .when()
+                .get("/api/bessj/4/-2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_forwardRecurrenceNegativeX() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_invalidN() {
+        given()
+            .when()
+                .get("/api/bessj/abc/2.5")
+            .then()
+                .statusCode(400);
+    }
+}
+```

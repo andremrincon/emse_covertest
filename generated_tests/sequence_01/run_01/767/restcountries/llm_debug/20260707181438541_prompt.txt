@@ -1,0 +1,233 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAccessControlAllowMethodsOnV1AlphaBadRequest TYPE=FAILURE
+expected:<GET> but was:<null>
+
+[2] METHOD=testAccessControlOnV2AlphaWithFields TYPE=FAILURE
+expected:<*> but was:<null>
+
+[3] METHOD=testAllowMethodsHeaderOnV2PostMethodNotAllowed TYPE=FAILURE
+expected:<GET> but was:<null>
+
+[4] METHOD=testCacheControlOnV1NameFullTextTrue TYPE=FAILURE
+expected:<public, max-age=86400> but was:<null>
+
+[5] METHOD=testAccessControlAllowOriginOnV1AlphaSuccess TYPE=FAILURE
+expected:<*> but was:<null>
+
+[6] METHOD=testHeadersPresentOnPostContribute TYPE=FAILURE
+expected:<*> but was:<null>
+
+[7] METHOD=testCacheControlHeaderOnV1All TYPE=FAILURE
+expected:<public, max-age=86400> but was:<null>
+
+[8] METHOD=testAccessControlAllowHeadersOnV1AlphaNotFound TYPE=FAILURE
+expected:<Accept, X-Requested-With> but was:<null>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAccessControlAllowMethodsOnV1AlphaBadRequest FAILURE AT LINE 37
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testAccessControlAllowMethodsOnV1AlphaBadRequest(CORSFilterTest.java:37)
+CODE CONTEXT:
+    34:     public void testAccessControlAllowMethodsOnV1AlphaBadRequest() {
+    35:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    36:         Response r = given().when().get("/v1/alpha/123");
+    37:         Assert.assertEquals("GET", r.getHeader("Access-Control-Allow-Methods"));  ← FAILURE HERE
+    38:     }
+    39: 
+    40:     @Test(timeout = 60000)
+
+[2] METHOD=testAccessControlOnV2AlphaWithFields FAILURE AT LINE 66
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testAccessControlOnV2AlphaWithFields(CORSFilterTest.java:66)
+CODE CONTEXT:
+    63:     public void testAccessControlOnV2AlphaWithFields() {
+    64:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    65:         Response r = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+    66:         Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    67:     }
+    68: 
+    69:     @Test(timeout = 60000)
+
+[3] METHOD=testAllowMethodsHeaderOnV2PostMethodNotAllowed FAILURE AT LINE 80
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testAllowMethodsHeaderOnV2PostMethodNotAllowed(CORSFilterTest.java:80)
+CODE CONTEXT:
+    77:     public void testAllowMethodsHeaderOnV2PostMethodNotAllowed() {
+    78:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    79:         Response r = given().contentType("application/json").body("{}").when().post("/v2");
+    80:         Assert.assertEquals("GET", r.getHeader("Access-Control-Allow-Methods"));  ← FAILURE HERE
+    81:     }
+    82: }
+
+[4] METHOD=testCacheControlOnV1NameFullTextTrue FAILURE AT LINE 73
+java.lang.AssertionError: expected:<public, max-age=86400> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testCacheControlOnV1NameFullTextTrue(CORSFilterTest.java:73)
+CODE CONTEXT:
+    70:     public void testCacheControlOnV1NameFullTextTrue() {
+    71:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    72:         Response r = given().queryParam("fullText", "true").when().get("/v1/name/France");
+    73:         Assert.assertEquals("public, max-age=86400", r.getHeader("Cache-Control"));  ← FAILURE HERE
+    74:     }
+    75: 
+    76:     @Test(timeout = 60000)
+
+[5] METHOD=testAccessControlAllowOriginOnV1AlphaSuccess FAILURE AT LINE 30
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testAccessControlAllowOriginOnV1AlphaSuccess(CORSFilterTest.java:30)
+CODE CONTEXT:
+    27:     public void testAccessControlAllowOriginOnV1AlphaSuccess() {
+    28:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    29:         Response r = given().when().get("/v1/alpha/US");
+    30:         Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    31:     }
+    32: 
+    33:     @Test(timeout = 60000)
+
+[6] METHOD=testHeadersPresentOnPostContribute FAILURE AT LINE 59
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testHeadersPresentOnPostContribute(CORSFilterTest.java:59)
+CODE CONTEXT:
+    56:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    57:         String payload = "{\"id\":\"" + UUID.randomUUID().toString() + "\",\"amount\":1}";
+    58:         Response r = given().contentType("application/json").body(payload).when().post("/contribute");
+    59:         Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    60:     }
+    61: 
+    62:     @Test(timeout = 60000)
+
+[7] METHOD=testCacheControlHeaderOnV1All FAILURE AT LINE 51
+java.lang.AssertionError: expected:<public, max-age=86400> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testCacheControlHeaderOnV1All(CORSFilterTest.java:51)
+CODE CONTEXT:
+    48:     public void testCacheControlHeaderOnV1All() {
+    49:         given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+    50:         Response r = given().when().get("/v1/all");
+    51:         Assert.assertEquals("public, max-age=86400", r.getHeader("Cache-Control"));  ← FAILURE HERE
+    52:     }
+    53: 
+    54:     @Test(timeout = 60000)
+
+[8] METHOD=testAccessControlAllowHeadersOnV1AlphaNotFound FAILURE AT LINE 44
+java.lang.AssertionError: expected:<Accept, X-Requested-With> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testAccessControlAllowHeadersOnV1AlphaNotFound(CORSFilterTest.java:44)
+CODE CONTEXT:
+    41:     public void testAccessControlAllowHeadersOnV1AlphaNotFound() {
+    42:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    43:         Response r = given().when().get("/v1/alpha/XYZ");
+    44:         Assert.assertEquals("Accept, X-Requested-With", r.getHeader("Access-Control-Allow-Headers"));  ← FAILURE HERE
+    45:     }
+    46: 
+    47:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1AlphaSuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response r = given().when().get("/v1/alpha/US");
+        Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV1AlphaBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response r = given().when().get("/v1/alpha/123");
+        Assert.assertEquals("GET", r.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersOnV1AlphaNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response r = given().when().get("/v1/alpha/XYZ");
+        Assert.assertEquals("Accept, X-Requested-With", r.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1All() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response r = given().when().get("/v1/all");
+        Assert.assertEquals("public, max-age=86400", r.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testHeadersPresentOnPostContribute() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String payload = "{\"id\":\"" + UUID.randomUUID().toString() + "\",\"amount\":1}";
+        Response r = given().contentType("application/json").body(payload).when().post("/contribute");
+        Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlOnV2AlphaWithFields() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response r = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        Assert.assertEquals("*", r.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlOnV1NameFullTextTrue() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response r = given().queryParam("fullText", "true").when().get("/v1/name/France");
+        Assert.assertEquals("public, max-age=86400", r.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowMethodsHeaderOnV2PostMethodNotAllowed() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response r = given().contentType("application/json").body("{}").when().post("/v2");
+        Assert.assertEquals("GET", r.getHeader("Access-Control-Allow-Methods"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,435 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureExercisesSetNameAndSetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureExercisesSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateDuplicateFeatureExercisesEqualsTrueBranch() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "First description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Second description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureWithDifferentNameExercisesEqualsFalseBranch() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName1", featureName1)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName2", featureName2)
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductExercisesGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateMultipleFeaturesExercisesEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        String featureName3 = "Feature3-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName1", featureName1)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName2", featureName2)
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName3", featureName3)
+            .formParam("description", "Third feature")
+        .when()
+            .post("/products/{productName}/features/{featureName3}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureNameExercisesSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated description with new content")
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(200);
+    }
+}

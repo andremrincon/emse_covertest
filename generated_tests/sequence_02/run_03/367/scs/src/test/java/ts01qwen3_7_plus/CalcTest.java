@@ -1,0 +1,76 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstant() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo(String.valueOf(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstant() {
+        given()
+            .when()
+                .get("/api/calc/e/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo(String.valueOf(Math.E)));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnary() {
+        given()
+            .when()
+                .get("/api/calc/sqrt/16/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusBinary() {
+        given()
+            .when()
+                .get("/api/calc/plus/5/3")
+            .then()
+                .statusCode(200)
+                .body(equalTo("8.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZero() {
+        given()
+            .when()
+                .get("/api/calc/divide/10/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidOperation() {
+        given()
+            .when()
+                .get("/api/calc/invalid/5/3")
+            .then()
+                .statusCode(200);
+    }
+}

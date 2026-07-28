@@ -1,0 +1,184 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("fr"))
+                .body("languages[0].iso639_2", equalTo("fra"))
+                .body("languages[0].name", equalTo("French"))
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByLanguageCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCapitalReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByRegionReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMultipleCountriesByAlphaCodesReturnsLanguageFields() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesBySubregionReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameFullTextReturnsLanguageFields() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v1/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("de"))
+                .body("languages[0].iso639_2", equalTo("deu"))
+                .body("languages[0].name", equalTo("German"))
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeGBReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("en"))
+                .body("languages[0].iso639_2", equalTo("eng"))
+                .body("languages[0].name", equalTo("English"))
+                .body("languages[0].nativeName", notNullValue());
+    }
+}
+```

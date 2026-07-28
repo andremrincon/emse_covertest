@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Assert;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns6ForI5AndSAbab() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+        Assert.assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns10ForINeg333AndSBaab() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -333, "baab");
+        Assert.assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns10ForINeg4AndSAbabba() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -4, "ababba");
+        Assert.assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns6ForI700AndSAbab() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 700, "abab");
+        Assert.assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns10ForINeg500AndSzzz() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "zzz");
+        Assert.assertEquals("10", resp.getBody().asString());
+    }
+}

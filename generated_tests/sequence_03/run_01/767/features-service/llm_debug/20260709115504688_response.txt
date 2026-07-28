@@ -1,0 +1,77 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String config = "cfg-" + uuid;
+        String feature = "feature-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        io.restassured.response.Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintThenAddSourceFeatureReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-req-" + uuid;
+        String config = "cfg-req-" + uuid;
+        String sourceFeature = "source-" + uuid;
+        String requiredFeature = "required-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        io.restassured.response.Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, sourceFeature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testChainedRequiresConstraintsTriggerRecursiveDerivedFeaturesReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-chain-" + uuid;
+        String config = "cfg-chain-" + uuid;
+        String a = "A-" + uuid;
+        String b = "B-" + uuid;
+        String c = "C-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", a).formParam("requiredFeature", b).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", b).formParam("requiredFeature", c).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        io.restassured.response.Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, a);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesContainsAddedFeature() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-get-" + uuid;
+        String config = "cfg-get-" + uuid;
+        String feature = "feat-get-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("$", hasItem(feature));
+    }
+}

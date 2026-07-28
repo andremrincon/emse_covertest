@@ -1,0 +1,40 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base != null) RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantReturnsMathPiString() {
+        given().when().get("/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0);
+        Assert.assertEquals("3.141592653589793", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryReturnsCorrectValue() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 9, 0);
+        Assert.assertEquals("3.0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroYieldsServerError() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0);
+        Assert.assertEquals(500, resp.getStatusCode());
+    }
+}

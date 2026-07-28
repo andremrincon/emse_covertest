@@ -1,0 +1,104 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanOrEqualTo2() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/abc/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundButReverseNotFound() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/ABCxABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseFoundImmediatelyAfter() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/ABCCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseFoundLater() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/ABCxCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundAndReversePartialMatch() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/ABCxCBC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundButPatNotFound() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/CxCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatAndPatFoundImmediatelyAfter() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/CBAABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatAndPatFoundLater() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/CBAxABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundAndPatPartialMatch() {
+        String baseUrl = getBaseUrl();
+        given()
+            .when()
+                .get(baseUrl + "/api/pat/CBAxBCB/ABC")
+            .then()
+                .statusCode(200);
+    }
+}
+```

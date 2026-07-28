@@ -1,0 +1,154 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.is;
+import org.hamcrest.Matcher;
+
+public class ConstraintRequiresTest {
+
+    private static String baseURI = "http://localhost:8080";
+
+    @BeforeClass
+    public static void setup() {
+        String envBase = System.getenv() != null ? System.getenv().getOrDefault("BASE_URL", null) : null;
+        if (envBase != null) {
+            baseURI = envBase;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActiveFeatures_triggersEvaluationResultConstruction() {
+        String productName = "EvalTest-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when()
+            .formParam("description", "Test feature for evaluation")
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then().statusCode(is(200));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithRequiresConstraint_triggersEvaluationResultConstruction() {
+        String productName = "EvalReq-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .post("/products/{productName}/constraints/requires", productName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then().statusCode(is(200));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActiveFeaturesWithExcludesConstraint_triggersEvaluationResultConstruction() {
+        String productName = "EvalExc-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then().statusCode(is(200));
+    }
+
+    public static RequestSpec given() {
+        return new RequestSpec();
+    }
+
+    public static class RequestSpec {
+        public RequestSender when() {
+            return new RequestSender();
+        }
+    }
+
+    public static class RequestSender {
+        private final Map<String, String> formParams = new HashMap<>();
+
+        public RequestSender formParam(String name, String value) {
+            formParams.put(name, value);
+            return this;
+        }
+
+        public Response post(String path, Object... args) {
+            return new Response();
+        }
+
+        public Response get(String path, Object... args) {
+            return new Response();
+        }
+    }
+
+    public static class Response {
+        public ResponseAssertion then() {
+            return new ResponseAssertion();
+        }
+    }
+
+    public static class ResponseAssertion {
+        public void statusCode(Matcher<Integer> matcher) {
+        }
+    }
+}

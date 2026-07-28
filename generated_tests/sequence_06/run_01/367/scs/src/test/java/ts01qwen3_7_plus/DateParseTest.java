@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testSaturdayAndAugust() {
+        given()
+            .baseUri("http://localhost:8080")
+        .when()
+            .get("/api/dateparse/sat/aug")
+        .then()
+            .statusCode(200)
+            .body(equalTo("9"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSundayAndJanuary() {
+        given()
+            .baseUri("http://localhost:8080")
+        .when()
+            .get("/api/dateparse/sun/jan")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndValidMonth() {
+        given()
+            .baseUri("http://localhost:8080")
+        .when()
+            .get("/api/dateparse/invalid/feb")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndInvalidMonth() {
+        given()
+            .baseUri("http://localhost:8080")
+        .when()
+            .get("/api/dateparse/mon/invalid")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given()
+            .baseUri("http://localhost:8080")
+        .when()
+            .get("/api/dateparse/invalid/invalid")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}

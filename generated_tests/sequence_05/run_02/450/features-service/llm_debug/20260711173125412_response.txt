@@ -1,0 +1,208 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationsServiceTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturns200WhenProductHasConfigurations() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturns200WhenProductHasNoConfigurations() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturns500WhenProductDoesNotExist() {
+        String productName = "nonexistent-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesReturns200WhenConfigurationHasFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesReturns200WhenConfigurationHasNoFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNamesReturns500WhenConfigurationDoesNotExist() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "nonexistent-config";
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfigurationReturns204WhenFeatureExists() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfigurationReturns500WhenConfigurationDoesNotExist() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "nonexistent-config";
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfigurationReturns201WhenFeatureAddedSuccessfully() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfigurationReturns500WhenFeatureAlreadyActive() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfigurationReturns500WhenConfigurationDoesNotExist() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "nonexistent-config";
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationWithRequiresConstraintValid() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "feat-src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "feat-req-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+            .when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationWithExcludesConstraintValid() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "feat-src-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "feat-exc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfigurationAfterRemoveFeature() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProductReturns200WithMultipleConfigurations() {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String config1 = "config1-" + UUID.randomUUID().toString().substring(0, 8);
+        String config2 = "config2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, config1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, config2).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/{productName}/configurations", productName).then().statusCode(200).body("size()", greaterThanOrEqualTo(2));
+    }
+}

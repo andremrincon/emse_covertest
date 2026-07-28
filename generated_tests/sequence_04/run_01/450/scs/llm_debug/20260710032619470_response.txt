@@ -1,0 +1,54 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_sumEquals56_returns28() {
+        given().when().get("/api/pat/{txt}", "setup-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 28, "a").then().statusCode(200).extract().response();
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_concatEqualsHello7_returns1() {
+        given().when().get("/api/pat/{txt}", "setup-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 7, "irrelevant").then().statusCode(200).extract().response();
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_compareToLessThan_returns2() {
+        given().when().get("/api/pat/{txt}", "setup-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 5, "world").then().statusCode(200).extract().response();
+        assertEquals("2", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_yGreaterThanFive_returns3() {
+        given().when().get("/api/pat/{txt}", "setup-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 6, "a").then().statusCode(200).extract().response();
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_noConditionsMet_returns0() {
+        given().when().get("/api/pat/{txt}", "setup-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 4, "a").then().statusCode(200).extract().response();
+        assertEquals("0", resp.getBody().asString());
+    }
+}

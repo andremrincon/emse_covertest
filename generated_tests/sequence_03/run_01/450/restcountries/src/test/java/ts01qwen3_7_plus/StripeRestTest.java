@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithMissingToken() {
+        io.restassured.response.Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankToken() {
+        io.restassured.response.Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{\"token\": \"   \", \"amount\": 100}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidToken() {
+        io.restassured.response.Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{\"token\": \"tok_123456789\", \"amount\": 500}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+}

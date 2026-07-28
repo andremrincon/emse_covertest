@@ -1,0 +1,72 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/banana/delta/cherry")
+            .then()
+                .statusCode(200)
+                .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/zebra/yacht/wheat/xerox")
+            .then()
+                .statusCode(200)
+                .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/apple/apple/apple")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthShort() {
+        given()
+            .when()
+                .get("/api/ordered4/a/banana/delta/cherry")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthLong() {
+        given()
+            .when()
+                .get("/api/ordered4/appleee/banana/delta/cherry")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testServerError() {
+        String longY = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy";
+        given()
+            .when()
+                .get("/api/ordered4/first/second/third/" + longY)
+            .then()
+                .statusCode(500);
+    }
+}

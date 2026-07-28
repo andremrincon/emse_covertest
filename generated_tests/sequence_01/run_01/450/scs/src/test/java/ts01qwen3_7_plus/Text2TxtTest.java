@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testTwo() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/two/x/y");
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFor() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/for/x/y");
+        response.then().statusCode(200).body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAnd() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/and/x/y");
+        response.then().statusCode(200).body(equalTo("n"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAre() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/are/x/y");
+        response.then().statusCode(200).body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYou() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/see/you/y");
+        response.then().statusCode(200).body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWay() {
+        Response response = given()
+                .when()
+                .get("/api/text2txt/by/the/way");
+        response.then().statusCode(200).body(equalTo("btw"));
+    }
+}

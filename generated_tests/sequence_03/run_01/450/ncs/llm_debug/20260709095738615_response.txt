@@ -1,0 +1,83 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ?
+            System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testGcfNormalExecution() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", 5.5)
+                .pathParam("x", 1000.0)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfItmaxExceeded() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", 100000.0)
+                .pathParam("x", 200000.0)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalExecution() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", 5.5)
+                .pathParam("x", 2.3)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserItmaxExceeded() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", 100000.0)
+                .pathParam("x", 0.5)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAParameter() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", -1.0)
+                .pathParam("x", 2.0)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidXParameter() {
+        given()
+                .basePath(BASE_URL)
+                .pathParam("a", 5.5)
+                .pathParam("x", -1.0)
+                .when()
+                .get("/api/gammq/{a}/{x}")
+                .then()
+                .statusCode(404);
+    }
+}

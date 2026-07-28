@@ -1,0 +1,49 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_validInput_branchI0() {
+        given()
+            .when()
+                .get("/api/notypevar/28/aaa")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_invalidIntegerInput_returns400() {
+        given()
+            .when()
+                .get("/api/notypevar/abc/valid-string")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_branchI1AndI2AndI3() {
+        given()
+            .when()
+                .get("/api/notypevar/7/zzzzz")
+            .then()
+                .statusCode(200);
+    }
+}

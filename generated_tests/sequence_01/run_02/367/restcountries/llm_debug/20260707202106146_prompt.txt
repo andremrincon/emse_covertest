@@ -1,0 +1,185 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CountryServiceBaseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByAlpha3Code TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testGetByCodeListWithNull TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testFulltextSearchExactMatch TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testLoadJsonInitialization TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testSubstringSearchNameMatch TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testGetByCodeListWithDuplicates TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByAlpha3Code FAILURE AT LINE 20
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByAlpha3Code(CountryServiceBaseTest.java:20)
+CODE CONTEXT:
+    17: 
+    18:     @Test(timeout = 60000)
+    19:     public void testGetByAlpha3Code() {
+    20:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    21:         Response response = given().when().get("/v1/alpha/DEU");
+    22:         response.then().statusCode(200);
+    23:     }
+
+[2] METHOD=testGetByCodeListWithNull FAILURE AT LINE 34
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByCodeListWithNull(CountryServiceBaseTest.java:34)
+CODE CONTEXT:
+    31: 
+    32:     @Test(timeout = 60000)
+    33:     public void testGetByCodeListWithNull() {
+    34:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    35:         Response response = given().when().get("/v1/alpha");
+    36:         response.then().statusCode(400);
+    37:     }
+
+[3] METHOD=testFulltextSearchExactMatch FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testFulltextSearchExactMatch(CountryServiceBaseTest.java:41)
+CODE CONTEXT:
+    38: 
+    39:     @Test(timeout = 60000)
+    40:     public void testFulltextSearchExactMatch() {
+    41:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    42:         Response response = given().when().get("/v1/name/France?fullText=true");
+    43:         response.then().statusCode(200);
+    44:     }
+
+[4] METHOD=testLoadJsonInitialization FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testLoadJsonInitialization(CountryServiceBaseTest.java:56)
+CODE CONTEXT:
+    53:     @Test(timeout = 60000)
+    54:     public void testLoadJsonInitialization() {
+    55:         Response response = given().when().get("/v1/all");
+    56:         response.then().statusCode(404);  ← FAILURE HERE
+    57:     }
+    58: }
+
+[5] METHOD=testSubstringSearchNameMatch FAILURE AT LINE 48
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testSubstringSearchNameMatch(CountryServiceBaseTest.java:48)
+CODE CONTEXT:
+    45: 
+    46:     @Test(timeout = 60000)
+    47:     public void testSubstringSearchNameMatch() {
+    48:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    49:         Response response = given().when().get("/v1/name/Ger?fullText=false");
+    50:         response.then().statusCode(200);
+    51:     }
+
+[6] METHOD=testGetByCodeListWithDuplicates FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByCodeListWithDuplicates(CountryServiceBaseTest.java:27)
+CODE CONTEXT:
+    24: 
+    25:     @Test(timeout = 60000)
+    26:     public void testGetByCodeListWithDuplicates() {
+    27:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    28:         Response response = given().when().get("/v1/alpha?codes=US;US");
+    29:         response.then().statusCode(200);
+    30:     }
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3Code() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/DEU");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithDuplicates() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha?codes=US;US");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithNull() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/France?fullText=true");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchNameMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/Ger?fullText=false");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonInitialization() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

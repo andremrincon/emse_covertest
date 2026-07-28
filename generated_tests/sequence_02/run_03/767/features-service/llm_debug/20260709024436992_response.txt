@@ -1,0 +1,138 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import java.util.UUID;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsServiceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Success() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String description = "Description-" + UUID.randomUUID().toString();
+
+        Response resp1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        resp1.then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given().formParam("description", description);
+        Response resp2 = req.when().post(baseUrl + "/products/" + productName + "/features/" + featureName);
+        resp2.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Duplicate() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String description = "Description-" + UUID.randomUUID().toString();
+
+        Response resp1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        resp1.then().statusCode(lessThan(300));
+
+        RequestSpecification req1 = RestAssured.given().formParam("description", description);
+        Response resp2 = req1.when().post(baseUrl + "/products/" + productName + "/features/" + featureName);
+        resp2.then().statusCode(lessThan(300));
+
+        RequestSpecification req2 = RestAssured.given().formParam("description", description);
+        Response resp3 = req2.when().post(baseUrl + "/products/" + productName + "/features/" + featureName);
+        resp3.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_ActiveInConfiguration() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        Response r1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        r1.then().statusCode(lessThan(300));
+
+        RequestSpecification rf = RestAssured.given().formParam("description", "desc");
+        Response r2 = rf.when().post(baseUrl + "/products/" + productName + "/features/" + featureName);
+        r2.then().statusCode(lessThan(300));
+
+        Response r3 = RestAssured.given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configName);
+        r3.then().statusCode(lessThan(300));
+
+        Response r4 = RestAssured.given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configName + "/features/" + featureName);
+        r4.then().statusCode(lessThan(300));
+
+        Response r5 = RestAssured.given().when().delete(baseUrl + "/products/" + productName + "/features/" + featureName);
+        r5.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_NotActiveInConfiguration() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        Response r1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        r1.then().statusCode(lessThan(300));
+
+        RequestSpecification rf = RestAssured.given().formParam("description", "desc");
+        Response r2 = rf.when().post(baseUrl + "/products/" + productName + "/features/" + featureName);
+        r2.then().statusCode(lessThan(300));
+
+        Response r3 = RestAssured.given().when().delete(baseUrl + "/products/" + productName + "/features/" + featureName);
+        r3.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct_Success() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        Response r1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        r1.then().statusCode(lessThan(300));
+
+        RequestSpecification rf1 = RestAssured.given().formParam("description", "desc");
+        Response r2 = rf1.when().post(baseUrl + "/products/" + productName + "/features/" + sourceFeature);
+        r2.then().statusCode(lessThan(300));
+
+        RequestSpecification rf2 = RestAssured.given().formParam("description", "desc");
+        Response r3 = rf2.when().post(baseUrl + "/products/" + productName + "/features/" + requiredFeature);
+        r3.then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature);
+        Response r4 = req.when().post(baseUrl + "/products/" + productName + "/constraints/requires");
+        r4.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct_Success() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String excludedFeature = "Excluded-" + UUID.randomUUID().toString();
+
+        Response r1 = RestAssured.given().when().post(baseUrl + "/products/" + productName);
+        r1.then().statusCode(lessThan(300));
+
+        RequestSpecification rf1 = RestAssured.given().formParam("description", "desc");
+        Response r2 = rf1.when().post(baseUrl + "/products/" + productName + "/features/" + sourceFeature);
+        r2.then().statusCode(lessThan(300));
+
+        RequestSpecification rf2 = RestAssured.given().formParam("description", "desc");
+        Response r3 = rf2.when().post(baseUrl + "/products/" + productName + "/features/" + excludedFeature);
+        r3.then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature);
+        Response r4 = req.when().post(baseUrl + "/products/" + productName + "/constraints/excludes");
+        r4.then().statusCode(201);
+    }
+}

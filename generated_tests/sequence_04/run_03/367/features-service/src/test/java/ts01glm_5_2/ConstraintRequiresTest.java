@@ -1,0 +1,157 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+
+public class ConstraintRequiresTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateSourceActiveRequiredInactive() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        String configName = "cfg-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateSourceInactive() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        String configName = "cfg-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateBothActive() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        String configName = "cfg-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + requiredFeature).then().statusCode(500);
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateViaConfigurationEndpoint() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        String configName = "cfg-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateSourceInactiveRequiredActive() {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        String configName = "cfg-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,54 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithNullBody_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().contentType("application/json").body("null").when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankToken_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String json = "{\"amount\":100,\"token\":\"   \"}";
+        given().contentType("application/json").body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidToken_returnsAccepted() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String uuid = UUID.randomUUID().toString();
+        String json = "{\"amount\":100,\"token\":\"tok_visa\",\"description\":\"donation-" + uuid + "\"}";
+        given().contentType("application/json").body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithInvalidToken_triggersStripeException_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String uuid = UUID.randomUUID().toString();
+        String json = "{\"amount\":100,\"token\":\"invalid_token_" + uuid + "\"}";
+        given().contentType("application/json").body(json).when().post("/contribute").then().statusCode(400);
+    }
+}

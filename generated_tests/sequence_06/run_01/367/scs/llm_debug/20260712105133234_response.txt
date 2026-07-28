@@ -1,0 +1,77 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("test.server");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("TEST_SERVER");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonth_August_returnsNine() {
+        given().when().get("/api/dateparse/{day}/{month}", "ignored", "jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "ignored", "feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "ignored", "mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "ignored", "apr").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Wednesday", "August");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayValidMonth_Jan_returnsOne() {
+        given().when().get("/api/dateparse/{day}/{month}", "x", "may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "x", "jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "x", "jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "x", "dec").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Notaday", "Jan");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherDayNorMonthMatches_returnsZero() {
+        given().when().get("/api/dateparse/{day}/{month}", "foo", "may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "bar", "jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "baz", "jul").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "xyz", "unknownmonth");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonth_December_returnsThirteen() {
+        given().when().get("/api/dateparse/{day}/{month}", "ignore", "sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "ignore", "nov").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "mon", "dec");
+        act.then().body(equalTo("13"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity_MarWithMixedCase_returnsFour() {
+        given().when().get("/api/dateparse/{day}/{month}", "anything", "sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "anything", "nov").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Fri", "MAR");
+        act.then().body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStatusCodeOnOct_returns200() {
+        given().when().get("/api/dateparse/{day}/{month}", "alpha", "beta").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "alpha", "gamma").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Mon", "Oct");
+        act.then().statusCode(200);
+    }
+}

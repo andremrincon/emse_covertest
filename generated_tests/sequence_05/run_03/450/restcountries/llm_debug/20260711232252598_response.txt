@@ -1,0 +1,170 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_twoCharCodeNotFound_returns404() {
+        given()
+            .pathParam("alphacode", "ZZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_threeCharCodeNotFound_returns404() {
+        given()
+            .pathParam("alphacode", "ZZZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validTwoCharCode_returns200() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validThreeCharCode_returns200() {
+        given()
+            .pathParam("alphacode", "USA")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_nullCodesParam_returns400() {
+        given()
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_duplicateCodes_returns200() {
+        given()
+            .queryParam("codes", "US;US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_multipleValidCodes_returns200() {
+        given()
+            .queryParam("codes", "US;CA;MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_allInvalidCodes_returns404() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_mixedValidInvalidCodes_returns200() {
+        given()
+            .queryParam("codes", "US;XX;CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_altSpellingMatch_returns200() throws Exception {
+        given()
+            .pathParam("name", URLEncoder.encode("French Republic", "UTF-8"))
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_exactNameMatch_returns200() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_altSpellingPartialMatch_returns200() throws Exception {
+        given()
+            .pathParam("name", URLEncoder.encode("Federal Republic", "UTF-8"))
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_partialNameMatch_returns200() {
+        given()
+            .pathParam("name", "Fran")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_successfulLoad_v1AllReturns200() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_errorPath_triggers500() throws Exception {
+        given()
+            .queryParam("codes", URLEncoder.encode("[\"US\", \"CA\"]", "UTF-8"))
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(500);
+    }
+}

@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithIEquals5() {
+        given()
+            .when()
+                .get("/api/costfuns/5/algorithm")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithILessThanNegative444() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/700/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithIEqualsNegative4AndSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/1/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsWithInvalidI() {
+        given()
+            .when()
+                .get("/api/costfuns/abc/test")
+            .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,46 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchXPlusYEquals56() {
+        given()
+            .when()
+                .get("/api/notypevar/28/hello")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchHelloConcatenationEqualsHello7() {
+        given()
+            .when()
+                .get("/api/notypevar/7/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarInvalidIntegerReturns400() {
+        given()
+            .when()
+                .get("/api/notypevar/abc/valid-string")
+            .then()
+                .statusCode(400);
+    }
+}

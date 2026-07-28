@@ -1,0 +1,165 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsServiceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Success() {
+        String productName = "Smartwatch-Series-8-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Blood-Oxygen-Sensor-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "Measures the oxygen saturation of your blood on demand.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Duplicate() {
+        String productName = "Wireless-Earbuds-Pro-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "ANC-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "Active Noise Cancellation feature.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Duplicate ANC feature.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_NoActiveConfiguration() {
+        String productName = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "Monitors heart rate continuously.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_WithActiveConfiguration() {
+        String productName = "X1-Device-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "nfc-v3-support-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "NFC version 3 support.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String configName = "basic-config-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct_Success() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "RAID controller hardware.")
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "128GB ECC RAM module.")
+            .when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct_Success() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "Intel Core i9 processor.")
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID().toString();
+        given()
+            .formParam("description", "Integrated graphics only configuration.")
+            .when()
+            .post("/products/" + productName + "/features/" + excludedFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then()
+            .statusCode(201);
+    }
+}

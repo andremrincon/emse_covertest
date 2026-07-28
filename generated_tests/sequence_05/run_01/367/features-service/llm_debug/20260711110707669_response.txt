@@ -1,0 +1,80 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfiguration_returnsConfigurationName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}", product, configuration).then().body("configurationName", equalTo(configuration));
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraint_causesRequiredFeatureToBePresentInConfigurationFeatures() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String featureA = "featureA-" + UUID.randomUUID().toString();
+        String featureB = "featureB-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, featureB).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, featureA).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration).then().body("$", hasItem(featureB));
+    }
+
+    @Test(timeout = 60000)
+    public void recursiveRequiresConstraint_leadsToDeeplyDerivedFeatureBeingPresent() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String featureA = "featA-" + UUID.randomUUID().toString();
+        String featureB = "featB-" + UUID.randomUUID().toString();
+        String featureC = "featC-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, featureC).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureB).formParam("requiredFeature", featureC).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, featureA).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration).then().body("$", hasItem(featureC));
+    }
+}

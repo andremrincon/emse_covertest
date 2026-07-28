@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesMissingParamReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFullTextExactMatchReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFullTextAlternativeSpellingReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/DE?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllV1TriggersLoadJsonAndReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaPathBadFormatReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesMalformedInputCanReturn500() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=[\"US\",\"CA\"]").then().statusCode(500);
+    }
+}

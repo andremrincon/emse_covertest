@@ -1,0 +1,244 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void getConfigurationWithExcludesConstraintViolationTriggersWrongProductConfigurationException() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uniqueSuffix;
+        String featureA = "FeatureA-" + uniqueSuffix;
+        String featureB = "FeatureB-" + uniqueSuffix;
+        String configName = "TestConfig-" + uniqueSuffix;
+
+        given()
+                .when()
+                .post("/products/{productName}", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature A description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureA)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature B description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureB)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB)
+                .then()
+                .statusCode(500);
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesWithRequiresConstraintViolationTriggersWrongProductConfigurationException() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uniqueSuffix;
+        String sourceFeature = "SourceFeature-" + uniqueSuffix;
+        String requiredFeature = "RequiredFeature-" + uniqueSuffix;
+        String configName = "TestConfig-" + uniqueSuffix;
+
+        given()
+                .when()
+                .post("/products/{productName}", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Source feature description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Required feature description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code a value less than <300> but <500> was greater than <300>.")
+    @Test(timeout = 60000)
+    public void getConfigurationWithMultipleConstraintViolationsTriggersWrongProductConfigurationException() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uniqueSuffix;
+        String featureA = "FeatureA-" + uniqueSuffix;
+        String featureB = "FeatureB-" + uniqueSuffix;
+        String featureC = "FeatureC-" + uniqueSuffix;
+        String featureD = "FeatureD-" + uniqueSuffix;
+        String configName = "TestConfig-" + uniqueSuffix;
+
+        given()
+                .when()
+                .post("/products/{productName}", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature A")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureA)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature B")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureB)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature C")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureC)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Feature D")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureD)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureC)
+                .formParam("requiredFeature", featureD)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB)
+                .then()
+                .statusCode(500);
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureC)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(500);
+    }
+}

@@ -1,0 +1,85 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080/rest";
+        }
+        base = env;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1All() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV1Alpha() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        assertEquals("GET", resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersOnV1Currency() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        assertEquals("Accept, X-Requested-With", resp.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV2Region() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/region/Europe");
+        assertEquals("public, max-age=86400", resp.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFilterAppliedForPostContributeAddsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{\"amount\":\"1.00\",\"currency\":\"USD\",\"token\":\"" + uuid + "\"}";
+        Response resp = given().header("Content-Type", "application/json").body(payload).when().post("/contribute");
+        assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFilterPreservedOnNotFoundAlphaReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaListBadCodesReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "123").when().get("/v1/alpha");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        assertEquals(200, resp.getStatusCode());
+    }
+}

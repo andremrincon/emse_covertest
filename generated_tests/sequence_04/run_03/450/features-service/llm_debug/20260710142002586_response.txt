@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("API_BASE_URL");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSuccess() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).andReturn();
+        Assert.assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationFailure() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String invalidFeature = "{\"feature\":\"new-feature\"}--" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, invalidFeature).andReturn();
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccess() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).andReturn();
+        Assert.assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFailure() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String problematicFeature = "a_very_long_feature_name_that_is_intentionally_made_very_long_to_exceed_limits_" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, problematicFeature).andReturn();
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+}

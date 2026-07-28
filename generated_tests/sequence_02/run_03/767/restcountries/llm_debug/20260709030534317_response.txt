@@ -1,0 +1,87 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValid() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        given()
+            .contentType("application/json")
+            .body("{\"amount\": 100, \"token\": \"" + token + "\"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken() {
+        given()
+            .contentType("application/json")
+            .body("{\"amount\": 100}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingAmount() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        given()
+            .contentType("application/json")
+            .body("{\"token\": \"" + token + "\"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeEmptyBody() {
+        given()
+            .contentType("application/json")
+            .body("{}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidAmount() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        given()
+            .contentType("application/json")
+            .body("{\"amount\": -10, \"token\": \"" + token + "\"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidJson() {
+        given()
+            .contentType("application/json")
+            .body("invalid json")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+}

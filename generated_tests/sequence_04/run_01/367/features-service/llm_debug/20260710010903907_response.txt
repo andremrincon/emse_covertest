@@ -1,0 +1,97 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_withRequiresConstraint_activatesDerivedFeature() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "EvalTest-Req-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_withExcludesConstraint_resultsInInvalidConfiguration() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "EvalTest-Excl-" + uuid;
+        String featureA = "FeatureX-" + uuid;
+        String featureB = "FeatureY-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB).then().statusCode(500);
+
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_withNoConstraints_returnsValidConfiguration() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "EvalTest-NoConstraint-" + uuid;
+        String featureA = "FeatureZ-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+}

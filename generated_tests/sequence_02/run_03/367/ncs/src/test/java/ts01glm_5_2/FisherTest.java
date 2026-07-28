@@ -1,0 +1,74 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddN_LargeX_ReturnsCappedValue() {
+        given()
+            .when()
+                .get("/api/fisher/1/3/1000")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMEvenN_SmallX_ReturnsFlooredValue() {
+        given()
+            .when()
+                .get("/api/fisher/5/2/0.001")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddN_ReturnsProbability() {
+        given()
+            .when()
+                .get("/api/fisher/2/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMEvenN_ReturnsProbability() {
+        given()
+            .when()
+                .get("/api/fisher/2/2/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeEvenMOddN_ReturnsProbability() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddN_MinimalParams_ReturnsProbability() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,178 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalid() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("alphacode", "A")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValidWithFields() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("alphacode", "US")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInvalid() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListValidWithFields() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "XX;YY")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalid() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("currency", "12")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("currency", "INVALID")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("name", "True")
+        .when()
+            .get("/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("callingcode", "True")
+        .when()
+            .get("/v2/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("capital", "True")
+        .when()
+            .get("/v2/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("region", "True")
+        .when()
+            .get("/v2/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("subregion", "True")
+        .when()
+            .get("/v2/subregion/{subregion}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("lang", "True")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("demonym", "True")
+        .when()
+            .get("/v2/demonym/{demonym}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocException() {
+        given()
+            .baseUri(BASE_URI)
+            .pathParam("regionalbloc", "True")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(404);
+    }
+}

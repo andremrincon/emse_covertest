@@ -1,0 +1,152 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[3,41] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[31,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[31,73] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[47,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[47,73] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[63,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[63,69] cannot find symbol
+symbol:   class Currency
+location: class ts01gpt_5_mini.CurrencyTest
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Assert;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_twoLetter_success_v1() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v1/alpha/US");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_threeLetter_success_v2() {
+        RestAssured.given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v2/alpha/USA");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalid_format_badRequest() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v1/alpha/123");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_success_multiple_codes_v1() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_invalid_format_badRequest() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().queryParam("codes", "123").when().get("/v1/alpha");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_name_exact_match() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v1/name/Germany").andReturn();
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_name_exact_match_fullText_true() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().queryParam("fullText", "true").when().get("/v1/name/Germany");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_altspelling_match_fullText_true() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().queryParam("fullText", "true").when().get("/v1/name/Federal%20Republic%20of%20Germany");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_substring_search_false() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().queryParam("fullText", "false").when().get("/v1/name/United%20States%20of%20America");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_trigger_server_error_v1_alpha_codes_array() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String encoded = "%5B%22US%22%2C%22CA%22%5D";
+        Response act = RestAssured.given().queryParam("codes", encoded).when().get("/v1/alpha");
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCode_search_success_v1() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v1/callingcode/1");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_not_found() {
+        RestAssured.given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/v1/alpha/XYZ");
+        Assert.assertEquals(404, act.getStatusCode());
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

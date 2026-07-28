@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeAcceptedValidPayload() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100,\"currency\":\"USD\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeRejectedMissingToken() {
+        given().when().get("/v1/alpha/{alphacode}", "US").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50,\"currency\":\"USD\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeRejectedInvalidAmountType() {
+        given().when().get("/v2/alpha/{alphacode}", "US").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":\"abc\",\"currency\":\"USD\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeRejectedMissingAmount() {
+        given().when().get("/v1/name/{name}", "France").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"currency\":\"USD\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidJson() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String malformed = "{amount:100,token:\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(malformed).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeAcceptedWithAdditionalFields() {
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":25,\"currency\":\"EUR\",\"token\":\"" + token + "\",\"note\":\"thanks\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(202);
+    }
+}

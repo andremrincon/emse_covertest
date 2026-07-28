@@ -1,0 +1,99 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConstraintsResourceTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraint_success_returns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String requiredFeature = "req-" + uuid;
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", sourceFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", requiredFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraint_withSpaceInProductName_causesUriException_returns500() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod space " + uuid;
+        String safeProductName = ("prod-" + uuid);
+        String sourceFeature = "src-" + uuid;
+        String requiredFeature = "req-" + uuid;
+
+        given().pathParam("productName", safeProductName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", safeProductName).pathParam("featureName", sourceFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", safeProductName).pathParam("featureName", requiredFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires")
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraint_success_returns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String excludedFeature = "excl-" + uuid;
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", sourceFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", excludedFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when().post("/products/{productName}/constraints/excludes")
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraint_withSpaceInProductName_causesUriException_returns500() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod space " + uuid;
+        String safeProductName = ("prod-" + uuid);
+        String sourceFeature = "src-" + uuid;
+        String excludedFeature = "excl-" + uuid;
+
+        given().pathParam("productName", safeProductName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", safeProductName).pathParam("featureName", sourceFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", safeProductName).pathParam("featureName", excludedFeature).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when().post("/products/{productName}/constraints/excludes")
+                .then().statusCode(500);
+    }
+}

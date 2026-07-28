@@ -1,0 +1,139 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2Code() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha/US");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3Code() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha/USA");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha/XYZ");
+
+        // Assert
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha?codes=US;CA");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha?codes=US;US");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchByName() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/Germany?fullText=true");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchByAltSpelling() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/Deutschland?fullText=true");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchByName() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/Ger?fullText=false");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchByAltSpelling() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/Deutsch?fullText=false");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonTrigger() {
+        // Arrange
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/all");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+}
+```

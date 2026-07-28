@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
+import java.util.Map;
+
+public class ExpintTest {
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        BASE = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeNReturns400() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", -1, 1.0);
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNGreaterThanOneReturnsCalculatedValue() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", 3, 0.0);
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZeroReturns200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", 0, 2.5);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintContinuedFractionBranchReturns200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", 3, 2.5);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesBranchReturns200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", 3, 0.1);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNOneReturns400() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/expint/{n}/{x}", 1, 0.0);
+        resp.then().statusCode(400);
+    }
+}

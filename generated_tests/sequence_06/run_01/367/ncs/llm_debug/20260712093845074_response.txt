@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    private String base() {
+        String p = System.getProperty("api.base");
+        if (p != null && !p.isEmpty()) return p;
+        String e = System.getenv("API_BASE");
+        return (e != null && !e.isEmpty()) ? e : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NegativeN_returns400() {
+        RestAssured.baseURI = base();
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/-5/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_ZeroX_returnsZeroValue() {
+        RestAssured.baseURI = base();
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/0").then().body("value", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_returns200() {
+        RestAssured.baseURI = base();
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_SignFlip_for_n3_negativeX() {
+        RestAssured.baseURI = base();
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Number positive = given().when().get("/api/bessj/3/10.0").then().statusCode(lessThan(300)).extract().path("value");
+        given().when().get("/api/bessj/3/-10.0").then().body("value", equalTo(-positive.floatValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj1_SignFlip_for_n1_negativeX() {
+        RestAssured.baseURI = base();
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Number positive = given().when().get("/api/bessj/1/10.0").then().statusCode(lessThan(300)).extract().path("value");
+        given().when().get("/api/bessj/1/-10.0").then().body("value", equalTo(-positive.floatValue()));
+    }
+}

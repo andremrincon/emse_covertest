@@ -1,0 +1,71 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBOdd() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBEven() {
+        given()
+            .when()
+                .get("/api/fisher/1/6/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBOdd() {
+        given()
+            .when()
+                .get("/api/fisher/4/1/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBEven() {
+        given()
+            .when()
+                .get("/api/fisher/6/2/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOne() {
+        given()
+            .when()
+                .get("/api/fisher/1/3/1000000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidParameters() {
+        given()
+            .when()
+                .get("/api/fisher/abc/5/0.5")
+            .then()
+                .statusCode(400);
+    }
+}
+```

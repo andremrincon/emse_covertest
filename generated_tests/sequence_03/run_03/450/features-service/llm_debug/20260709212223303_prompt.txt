@@ -1,0 +1,187 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetFeaturesForProductContainsAddedFeature TYPE=FAILURE
+1 expectation failed.
+JSON path featureName doesn't match.
+Expected: (a collection containing "Backlit-Keyboard-f41d6044-2246-4de5-b4fe-72b524736e96")
+  Actual: <[null]>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetFeaturesForProductContainsAddedFeature FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01gpt_5_mini.FeatureTest.testGetFeaturesForProductContainsAddedFeature(FeatureTest.java:45)
+CODE CONTEXT:
+    42:                 .when().post("/products/{productName}/features/{featureName}", product, feature)
+    43:                 .then().statusCode(lessThan(300));
+    44:         given().when().get("/products/{productName}/features", product)
+    45:                 .then().body("featureName", hasItems(feature));  ← FAILURE HERE
+    46:     }
+    47: 
+    48:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/";
+        RestAssured.baseURI = base.endsWith("/") ? base : base + "/";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String uid = UUID.randomUUID().toString();
+        String product = "Smartwatch-Series-" + uid;
+        String feature = "Blood-Oxygen-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures SpO2 on demand.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProductContainsAddedFeature() {
+        String uid = UUID.randomUUID().toString();
+        String product = "AeroBook-Pro-" + uid;
+        String feature = "Backlit-Keyboard-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Comfortable typing experience.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product)
+                .then().body("featureName", hasItems(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureReturns200() {
+        String uid = UUID.randomUUID().toString();
+        String product = "EcoTablet-" + uid;
+        String feature = "stylus-support-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Initial desc")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when().put("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String uid = UUID.randomUUID().toString();
+        String product = "SmartWatch-Pro-" + uid;
+        String feature = "heart-rate-monitor-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Heart rate monitoring.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String uid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uid;
+        String config = "standard-gpu-cluster-" + uid;
+        String feature = "distributed-training-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturns200AndContainsFeature() {
+        String uid = UUID.randomUUID().toString();
+        String product = "ultra-laptop-" + uid;
+        String config = "us-standard-16gb-" + uid;
+        String feature = "wifi-6e-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config)
+                .then().body("$", hasItems(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationReturns204() {
+        String uid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-" + uid;
+        String config = "Premium-Tier-" + uid;
+        String feature = "Realtime-Analytics-Dashboard-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByNameReturns200() {
+        String uid = UUID.randomUUID().toString();
+        String product = "Smartwatch-Series-" + uid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product).then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

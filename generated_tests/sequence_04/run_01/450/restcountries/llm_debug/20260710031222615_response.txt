@@ -1,0 +1,141 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaAlphaCodeUS() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaAlphaCodeGB() {
+        given()
+            .when()
+                .get("/v1/alpha/GB")
+            .then()
+                .statusCode(200)
+                .body("languages[0].name", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaNameFrance() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaNameGermany() {
+        given()
+            .when()
+                .get("/v1/name/Germany")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaLangEs() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaLangZh() {
+        given()
+            .when()
+                .get("/v1/lang/zh")
+            .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaRegionEurope() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(200)
+                .body("languages[0].name", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCurrencyUSD() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCapitalLondon() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCallingCode1() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaSubregionWesternEurope() {
+        given()
+            .when()
+                .get("/v1/subregion/Western%20Europe")
+            .then()
+                .statusCode(200)
+                .body("languages[0].name", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaAlphaCodesMultiple() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", org.hamcrest.Matchers.notNullValue());
+    }
+}

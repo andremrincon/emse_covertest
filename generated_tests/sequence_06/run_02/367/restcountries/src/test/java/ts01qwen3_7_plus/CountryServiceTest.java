@@ -1,0 +1,34 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocValidAcronym() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocInvalidAcronym() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/123")
+            .then()
+                .statusCode(404);
+    }
+}

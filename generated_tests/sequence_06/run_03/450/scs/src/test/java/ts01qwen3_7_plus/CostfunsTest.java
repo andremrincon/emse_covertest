@@ -1,0 +1,100 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5() {
+        int i = 5;
+        String s = "test";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444() {
+        int i = -500;
+        String s = "test";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666() {
+        int i = 700;
+        String s = "test";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4() {
+        int i = -4;
+        String s = "test";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsBaab() {
+        int i = 0;
+        String s = "baab";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsAbab() {
+        int i = 0;
+        String s = "abab";
+
+        Response response = given()
+            .pathParam("i", i)
+            .pathParam("s", s)
+        .when()
+            .get("/api/costfuns/{i}/{s}");
+
+        response.then().statusCode(200);
+    }
+}

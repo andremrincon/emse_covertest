@@ -1,0 +1,134 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithFridayAndJanuary() {
+        given()
+            .pathParam("dayname", "fri")
+            .pathParam("monthname", "jan")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "fri")
+            .pathParam("monthname", "jan")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithMondayAndMay() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "may")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "may")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithTuesdayAndJuly() {
+        given()
+            .pathParam("dayname", "tue")
+            .pathParam("monthname", "jul")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "tue")
+            .pathParam("monthname", "jul")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithWednesdayAndSeptember() {
+        given()
+            .pathParam("dayname", "wed")
+            .pathParam("monthname", "sep")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "wed")
+            .pathParam("monthname", "sep")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithThursdayAndOctober() {
+        given()
+            .pathParam("dayname", "thur")
+            .pathParam("monthname", "oct")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "thur")
+            .pathParam("monthname", "oct")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWithSaturdayAndNovember() {
+        given()
+            .pathParam("dayname", "sat")
+            .pathParam("monthname", "nov")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("dayname", "sat")
+            .pathParam("monthname", "nov")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+}
+```

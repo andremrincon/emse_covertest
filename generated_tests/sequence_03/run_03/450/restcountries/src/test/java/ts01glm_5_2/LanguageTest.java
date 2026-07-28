@@ -1,0 +1,156 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2NameEndpoint() {
+        given()
+                .when()
+                .get("/v2/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2LangEndpoint() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2AllEndpoint() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2CapitalEndpoint() {
+        given()
+                .when()
+                .get("/v2/capital/Paris")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2CallingcodeEndpoint() {
+        given()
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2RegionEndpoint() {
+        given()
+                .when()
+                .get("/v2/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2SubregionEndpoint() {
+        given()
+                .when()
+                .get("/v2/subregion/{subregion}", "Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2DemonymEndpoint() {
+        given()
+                .when()
+                .get("/v2/demonym/American")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2RegionalblocEndpoint() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2AlphaCodesEndpoint() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+}

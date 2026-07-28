@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsDeForUS() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsEsForUS() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsFrForUS() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().body("translations.fr", equalTo("\u00c9tats-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsJaForUS() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().body("translations.ja", equalTo("\u30a2\u30e1\u30ea\u30ab\u5408\u8846\u56fd"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsItForUS() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaEndpointReturns400ForNumericCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/123");
+        res.then().statusCode(400);
+    }
+}

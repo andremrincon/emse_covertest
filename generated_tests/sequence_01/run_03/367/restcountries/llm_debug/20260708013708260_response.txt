@@ -1,0 +1,72 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.http.ContentType;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    private final String baseUrl = System.getProperty("base.url", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testContributeValid() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("{\"amount\": 100, \"token\": \"tok_123\"}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingAmount() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("{\"token\": \"tok_123\"}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("{\"amount\": 100}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeEmptyBody() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidJson() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("invalid json")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+}

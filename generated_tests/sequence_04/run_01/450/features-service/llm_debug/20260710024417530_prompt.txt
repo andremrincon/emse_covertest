@@ -1,0 +1,230 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ProductTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=addFeatureToConfiguration_shouldReturn201 TYPE=FAILURE
+expected:<201> but was:<500>
+
+[2] METHOD=deleteConstraint_shouldReturn204 TYPE=ERROR
+Cannot invoke the path method because no content-type was present in the response and no default parser has been set.
+
+You can specify a default parser using e.g.:
+RestAssured.defaultParser = Parser.JSON;
+
+[3] METHOD=getConfigurationFeatures_shouldContainAddedFeature TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=addFeatureToConfiguration_shouldReturn201 FAILURE AT LINE 136
+java.lang.AssertionError: expected:<201> but was:<500>
+at ts01gpt_5_mini.ProductTest.addFeatureToConfiguration_shouldReturn201(ProductTest.java:136)
+CODE CONTEXT:
+   133:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+   134:         given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+   135:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+   136:         assertEquals(201, act.getStatusCode());  ← FAILURE HERE
+   137:     }
+   138: 
+   139:     @Test(timeout = 60000)
+
+[2] METHOD=deleteConstraint_shouldReturn204 FAILURE AT LINE 123
+at ts01gpt_5_mini.ProductTest.deleteConstraint_shouldReturn204(ProductTest.java:123)
+CODE CONTEXT:
+   120:         String product = "prod-" + UUID.randomUUID().toString();
+   121:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+   122:         Response arrange = given().formParam("sourceFeature", "S").formParam("excludedFeature", "E").when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300)).extract().response();
+   123:         String id = String.valueOf(arrange.path("id"));  ← FAILURE HERE
+   124:         Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", product, id);
+   125:         assertEquals(204, act.getStatusCode());
+   126:     }
+
+[3] METHOD=getConfigurationFeatures_shouldContainAddedFeature FAILURE AT LINE 146
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.getConfigurationFeatures_shouldContainAddedFeature(ProductTest.java:146)
+CODE CONTEXT:
+   143:         String feature = "feat-" + UUID.randomUUID().toString();
+   144:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+   145:         given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+   146:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   147:         Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config);
+   148:         assertTrue(act.asString().contains(feature));
+   149:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void createProduct_shouldReturn201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        Response act = given().when().post("/products/{productName}", product);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_shouldReturn201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getProductFeatures_shouldContainAddedFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", product);
+        assertTrue(act.asString().contains(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void updateFeature_shouldReturn200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "Updated description").when().put("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_shouldReturn204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void updateNonExistentFeature_shouldReturn500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String missingFeature = "missing-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "desc").when().put("/products/{productName}/features/{featureName}", product, missingFeature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getProduct_shouldIncludeFeature_whenFeatureAdded() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        assertTrue(act.asString().contains(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void getProduct_shouldHaveEmptyFeatures_whenNoneAdded() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        assertTrue(act.asString().contains("\"features\":[]") || act.asString().contains("\"features\": null") || act.asString().contains("\"features\":[]"));
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraint_shouldReturn201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "A").formParam("requiredFeature", "B").when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraint_shouldReturn201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "X").formParam("excludedFeature", "Y").when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraint_shouldReturn204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response arrange = given().formParam("sourceFeature", "S").formParam("excludedFeature", "E").when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300)).extract().response();
+        String id = String.valueOf(arrange.path("id"));
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", product, id);
+        assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_shouldReturn201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeatures_shouldContainAddedFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config);
+        assertTrue(act.asString().contains(feature));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

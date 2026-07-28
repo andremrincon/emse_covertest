@@ -1,0 +1,63 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base");
+        BASE = prop != null ? prop : (env != null ? env : "http://localhost:8080");
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iEqualsFive_sAbab_returnsBody6() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/5/abab");
+        resp.then().body(equalTo("6"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iLessThanMinus444_sX_returnsBody10() {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/-500/x");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iGreaterThan666_sA_returnsBody10() {
+        given().when().get("/api/pat/sample").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/700/a");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iEquals555_sAbabba_returnsStatus200() {
+        given().when().get("/api/pat/check").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/555/ababba").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iEqualsMinus4_sAbab_returnsBody0() {
+        given().when().get("/api/pat/ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/-4/abab");
+        resp.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iEqualsMinus4_sBaab_returnsBody10() {
+        given().when().get("/api/pat/alive").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/-4/baab");
+        resp.then().body(equalTo("10"));
+    }
+}

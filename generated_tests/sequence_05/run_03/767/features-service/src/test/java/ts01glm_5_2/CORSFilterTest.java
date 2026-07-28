@@ -1,0 +1,116 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterGetRequestContinuesChain() {
+        String productName = "CORSFilterTest-GET-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .get("/products/" + productName)
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterOptionsRequestDoesNotContinueChain() {
+        Response response = given()
+            .when()
+            .options("/products");
+
+        int statusCode = response.getStatusCode();
+        assertTrue(statusCode == 200 || statusCode == 204);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPostRequestContinuesChain() {
+        String productName = "CORSFilterTest-POST-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterDeleteRequestContinuesChain() {
+        String productName = "CORSFilterTest-DEL-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCORSHeadersOnResponse() {
+        given()
+            .when()
+            .get("/products")
+            .then()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", containsString("POST"))
+            .header("Access-Control-Allow-Methods", containsString("GET"))
+            .header("Access-Control-Allow-Methods", containsString("DELETE"))
+            .header("Access-Control-Allow-Headers", "x-requested-with")
+            .header("Access-Control-Max-Age", "3600");
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPutRequestContinuesChain() {
+        String productName = "CORSFilterTest-PUT-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+}

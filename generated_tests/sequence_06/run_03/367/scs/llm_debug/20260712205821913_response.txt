@@ -1,0 +1,77 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URL;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        try {
+            URL u = new URL(base);
+            String protocol = u.getProtocol();
+            String host = u.getHost();
+            int port = u.getPort();
+            if (port == -1) {
+                if ("https".equalsIgnoreCase(protocol)) {
+                    port = 443;
+                } else {
+                    port = 80;
+                }
+            }
+            RestAssured.baseURI = protocol + "://" + host;
+            RestAssured.port = port;
+        } catch (Exception e) {
+            RestAssured.baseURI = base;
+        }
+    }
+
+    private static String enc(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testShouldRecognizeUrlPatternViaPatEndpoint_1() {
+        given().when().get("/api/pat/{txt}", enc("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("http://abc/def"));
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testShouldRecognizeDatePatternViaPatEndpoint_2() {
+        given().when().get("/api/pat/{txt}", enc("Sample text")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("mon12jan"));
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testShouldRecognizeFloatingPointWithExponentViaPatEndpoint_3() {
+        given().when().get("/api/pat/{txt}", enc("another sample")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("12.34e+56"));
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testShouldReturnNoneForNonMatchingTextViaPatEndpoint_4() {
+        given().when().get("/api/pat/{txt}", enc("warmup")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("hello_world"));
+        act.then().statusCode(200);
+    }
+}

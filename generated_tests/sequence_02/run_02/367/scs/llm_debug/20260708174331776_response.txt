@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternLengthTwoReturnsZero() {
+        given()
+        .when()
+            .get("/api/pat/hello/ab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTextShorterThanPatternReturnsZero() {
+        given()
+        .when()
+            .get("/api/pat/ab/abcdef")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundNoReverseReturnsOne() {
+        given()
+        .when()
+            .get("/api/pat/abcXYZ/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseAdjacentReturnsIndex() {
+        given()
+        .when()
+            .get("/api/pat/abccba/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseNonAdjacentReturnsIndex() {
+        given()
+        .when()
+            .get("/api/pat/abcXYZcba/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPatternReturnsTwo() {
+        given()
+        .when()
+            .get("/api/pat/cbaXYZ/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatternAdjacentReturnsIndex() {
+        given()
+        .when()
+            .get("/api/pat/cbaabc/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatternNonAdjacentReturnsIndex() {
+        given()
+        .when()
+            .get("/api/pat/cbaXYZabc/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFirstCharMatchButFullPatternNoMatchReturnsZero() {
+        given()
+        .when()
+            .get("/api/pat/aXYZcXYZ/abc")
+        .then()
+            .statusCode(200);
+    }
+}
+```

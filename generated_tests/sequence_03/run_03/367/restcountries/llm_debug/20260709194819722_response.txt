@@ -1,0 +1,108 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URL;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+    @BeforeClass
+    public static void setup() throws Exception {
+        String base = System.getProperty("test.server.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("TEST_SERVER_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        URL u = new URL(base);
+        String protocol = u.getProtocol();
+        String host = u.getHost();
+        int port = u.getPort();
+        String path = u.getPath();
+        if (port == -1) {
+            if ("https".equalsIgnoreCase(protocol)) port = 443;
+            else port = 80;
+        }
+        RestAssured.baseURI = protocol + "://" + host;
+        RestAssured.port = port;
+        RestAssured.basePath = path != null && !path.isEmpty() ? path : "";
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All_hasAccessControlAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        resp.then().header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_hasAccessControlAllowMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_numericBadFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_notFound_hasCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_hasAccessControlAllowHeadersHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_badFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2_withFields_hasCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2?fields=name;capital;population");
+        resp.then().header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_fullTextTrue_hasAccessControlAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France?fullText=true");
+        resp.then().header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_numeric_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_post_withValidPayload_returns202() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String uuid = UUID.randomUUID().toString();
+        String payload = "{\"amount\":1,\"currency\":\"USD\",\"token\":\"tok_" + uuid + "\"}";
+        Response resp = given().contentType("application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

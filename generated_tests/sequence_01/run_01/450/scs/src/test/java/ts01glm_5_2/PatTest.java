@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class PatTest {
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given()
+            .pathParam("txt", "ABCDEF")
+            .pathParam("pat", "ABC")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReversePalindrome() {
+        given()
+            .pathParam("txt", "ABCCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseSeparate() {
+        given()
+            .pathParam("txt", "ABCXYZCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseThenPatPalindrome() {
+        given()
+            .pathParam("txt", "CBAABC")
+            .pathParam("pat", "ABC")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given()
+            .pathParam("txt", "hello")
+            .pathParam("pat", "abc")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTooShort() {
+        given()
+            .pathParam("txt", "abc")
+            .pathParam("pat", "ab")
+        .when()
+            .get(baseUrl + "/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+}

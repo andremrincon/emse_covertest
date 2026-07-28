@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String envDefault = System.getenv("API_BASE_URL");
+        String base = System.getProperty("API_BASE", envDefault);
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @AfterClass
+    public static void teardown() {
+        RestAssured.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllAddsAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all");
+        act.then().header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaUSAddsAllowMethodsHeader() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testPostRootAddsAllowHeadersHeader() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().contentType("application/json").body("{}").when().post("/");
+        act.then().header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsIncludesCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().options("/v1/all");
+        act.then().header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNonexistentEndpointReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String path = "/nonexistent-" + UUID.randomUUID().toString();
+        Response act = given().when().get(path);
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAlphaReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        act.then().statusCode(404);
+    }
+}

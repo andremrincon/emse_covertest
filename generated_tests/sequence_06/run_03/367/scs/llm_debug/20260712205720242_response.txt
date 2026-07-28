@@ -1,0 +1,54 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Text2TxtTest {
+
+    private static final String BASE;
+    static {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080");
+        }
+        BASE = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testWord1TwoReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "two", "x", "y").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testWord1ForReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange2").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "for", "anything", "here").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYouReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange3").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "see", "you", "later").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWayReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange4").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "by", "the", "way").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testWord1AreReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "are", "you", "ok").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatchReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "arrange6").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/text2txt/{word1}/{word2}/{word3}", "hello", "world", "again").then().statusCode(200);
+    }
+}

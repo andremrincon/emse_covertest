@@ -1,0 +1,162 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    private RequestSpecification given() {
+        return RestAssured.given().baseUri(baseUrl);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_200_validCode() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_400_tooShort() {
+        given()
+                .when()
+                .get("/v1/alpha/A")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_404_notFound() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_400_noCodesParam() {
+        given()
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_400_invalidCodes() {
+        given()
+                .when()
+                .queryParam("codes", "123")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_200_validCodes() {
+        given()
+                .when()
+                .queryParam("codes", "US;CA")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_404_notFoundCodes() {
+        given()
+                .when()
+                .queryParam("codes", "XX;YY;ZZ")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_400_invalidLength() {
+        given()
+                .when()
+                .get("/v1/currency/12")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_404_notFound() {
+        given()
+                .when()
+                .get("/v1/currency/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_404_notFound() {
+        given()
+                .when()
+                .get("/v1/name/nonexistentcountryname")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_404_notFound() {
+        given()
+                .when()
+                .get("/v1/callingcode/99999")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_404_notFound() {
+        given()
+                .when()
+                .get("/v1/capital/nonexistentcapitalcity")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_404_notFound() {
+        given()
+                .when()
+                .get("/v1/region/nonexistentregion")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_404_notFound() {
+        given()
+                .when()
+                .get("/v1/subregion/nonexistentsubregion")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_404_notFound() {
+        given()
+                .when()
+                .get("/v1/lang/zz")
+                .then()
+                .statusCode(404);
+    }
+}
+```

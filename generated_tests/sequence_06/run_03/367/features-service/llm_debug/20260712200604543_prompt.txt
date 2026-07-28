@@ -1,0 +1,253 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsConfigurationsServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getConfigurationActivedFeaturesNames_withoutFeatures_returnsEmpty TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection with size <0>
+  Actual: []
+
+[2] METHOD=getConfigurationsNamesForProduct_withConfigurations_returnsNames TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "Config-c8635425"
+  Actual: ["Config-c8635425"]
+
+[3] METHOD=getConfigurationActivedFeaturesNames_withFeatures_returnsFeatureNames TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "Feature-76db0d39"
+  Actual: ["Feature-76db0d39"]
+
+[4] METHOD=getConfigurationsNamesForProduct_withoutConfigurations_returnsEmpty TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection with size <0>
+  Actual: []
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getConfigurationActivedFeaturesNames_withoutFeatures_returnsEmpty FAILURE AT LINE 71
+java.lang.AssertionError:
+at ts01glm_5_2.ProductsConfigurationsServiceTest.getConfigurationActivedFeaturesNames_withoutFeatures_returnsEmpty(ProductsConfigurationsServiceTest.java:71)
+CODE CONTEXT:
+    68:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    69:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    70: 
+    71:         given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().body(hasSize(0));  ← FAILURE HERE
+    72:     }
+    73: 
+    74:     @Test(timeout = 60000)
+
+[2] METHOD=getConfigurationsNamesForProduct_withConfigurations_returnsNames FAILURE AT LINE 37
+java.lang.AssertionError:
+at ts01glm_5_2.ProductsConfigurationsServiceTest.getConfigurationsNamesForProduct_withConfigurations_returnsNames(ProductsConfigurationsServiceTest.java:37)
+CODE CONTEXT:
+    34:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    35:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    36: 
+    37:         given().when().get("/products/{productName}/configurations", productName).then().body(hasItem(configName));  ← FAILURE HERE
+    38:     }
+    39: 
+    40:     @Test(timeout = 60000)
+
+[3] METHOD=getConfigurationActivedFeaturesNames_withFeatures_returnsFeatureNames FAILURE AT LINE 60
+java.lang.AssertionError:
+at ts01glm_5_2.ProductsConfigurationsServiceTest.getConfigurationActivedFeaturesNames_withFeatures_returnsFeatureNames(ProductsConfigurationsServiceTest.java:60)
+CODE CONTEXT:
+    57:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    58:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+    59: 
+    60:         given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().body(hasItem(featureName));  ← FAILURE HERE
+    61:     }
+    62: 
+    63:     @Test(timeout = 60000)
+
+[4] METHOD=getConfigurationsNamesForProduct_withoutConfigurations_returnsEmpty FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01glm_5_2.ProductsConfigurationsServiceTest.getConfigurationsNamesForProduct_withoutConfigurations_returnsEmpty(ProductsConfigurationsServiceTest.java:46)
+CODE CONTEXT:
+    43: 
+    44:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    45: 
+    46:         given().when().get("/products/{productName}/configurations", productName).then().body(hasSize(0));  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+
+import java.util.UUID;
+
+public class ProductsConfigurationsServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String unique(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withConfigurations_returnsNames() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations", productName).then().body(hasItem(configName));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withoutConfigurations_returnsEmpty() {
+        String productName = unique("Product");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations", productName).then().body(hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withFeatures_returnsFeatureNames() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureName = unique("Feature");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().body(hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withoutFeatures_returnsEmpty() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().body(hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_newFeature_returnsCreated() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureName = unique("Feature");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_duplicateFeature_returnsError() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureName = unique("Feature");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_activeFeature_returnsNoContent() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureName = unique("Feature");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_addWithConstraints_returnsEvaluation() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureA = unique("FeatureA");
+        String featureB = unique("FeatureB");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_removeWithConstraints_returnsEvaluation() {
+        String productName = unique("Product");
+        String configName = unique("Config");
+        String featureA = unique("FeatureA");
+        String featureB = unique("FeatureB");
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

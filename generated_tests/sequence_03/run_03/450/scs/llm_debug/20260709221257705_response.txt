@@ -1,0 +1,72 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_xPlusYEquals56() {
+        given()
+            .when()
+                .get("/api/notypevar/5/example-string")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/notypevar/28/test");
+
+        assertEquals(200, response.statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_hello7AndCompareToBranch() {
+        given()
+            .when()
+                .get("/api/notypevar/0/a")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/notypevar/7/zzz");
+
+        assertEquals(200, response.statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_yGreaterThanXBranch() {
+        given()
+            .when()
+                .get("/api/notypevar/1/a")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/notypevar/10/aaa");
+
+        assertEquals(200, response.statusCode());
+    }
+}
+```

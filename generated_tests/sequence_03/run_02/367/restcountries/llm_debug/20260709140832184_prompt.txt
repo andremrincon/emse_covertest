@@ -1,0 +1,385 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryRestV1Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByName_NotFound_numeric TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testGetByName_Success_France_FullTextFalse TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testGetByAlpha_BadRequest_short TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testGetByAlpha_Success_US TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testGetByCallingCode_Success_1 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testGetByAlpha_NotFound_XYZ TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testGetByRegion_Success_Europe TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testGetBySubregion_Success_WesternEurope TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testGetByCurrency_BadRequest_numeric TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testGetByAlphaList_NotFound TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[11] METHOD=testGetByAlphaList_Success_US_CA TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[12] METHOD=testGetByCurrency_Success_USD TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[13] METHOD=testGetByCapital_Success_London TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[14] METHOD=testGetByAlphaList_BadRequest_EmptyCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[15] METHOD=testGetByLanguage_Success_es TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByName_NotFound_numeric FAILURE AT LINE 80
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByName_NotFound_numeric(CountryRestV1Test.java:80)
+CODE CONTEXT:
+    77: 
+    78:     @Test(timeout = 60000)
+    79:     public void testGetByName_NotFound_numeric() {
+    80:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    81:         given().when().get("/v1/name/123").then().statusCode(404);
+    82:     }
+    83: 
+
+[2] METHOD=testGetByName_Success_France_FullTextFalse FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByName_Success_France_FullTextFalse(CountryRestV1Test.java:74)
+CODE CONTEXT:
+    71: 
+    72:     @Test(timeout = 60000)
+    73:     public void testGetByName_Success_France_FullTextFalse() {
+    74:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    75:         given().queryParam("fullText", "false").when().get("/v1/name/France").then().statusCode(200);
+    76:     }
+    77: 
+
+[3] METHOD=testGetByAlpha_BadRequest_short FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlpha_BadRequest_short(CountryRestV1Test.java:32)
+CODE CONTEXT:
+    29: 
+    30:     @Test(timeout = 60000)
+    31:     public void testGetByAlpha_BadRequest_short() {
+    32:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    33:         given().when().get("/v1/alpha/1").then().statusCode(400);
+    34:     }
+    35: 
+
+[4] METHOD=testGetByAlpha_Success_US FAILURE AT LINE 26
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlpha_Success_US(CountryRestV1Test.java:26)
+CODE CONTEXT:
+    23: 
+    24:     @Test(timeout = 60000)
+    25:     public void testGetByAlpha_Success_US() {
+    26:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    27:         given().when().get("/v1/alpha/US").then().statusCode(200);
+    28:     }
+    29: 
+
+[5] METHOD=testGetByCallingCode_Success_1 FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByCallingCode_Success_1(CountryRestV1Test.java:86)
+CODE CONTEXT:
+    83: 
+    84:     @Test(timeout = 60000)
+    85:     public void testGetByCallingCode_Success_1() {
+    86:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    87:         given().when().get("/v1/callingcode/1").then().statusCode(200);
+    88:     }
+    89: 
+
+[6] METHOD=testGetByAlpha_NotFound_XYZ FAILURE AT LINE 38
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlpha_NotFound_XYZ(CountryRestV1Test.java:38)
+CODE CONTEXT:
+    35: 
+    36:     @Test(timeout = 60000)
+    37:     public void testGetByAlpha_NotFound_XYZ() {
+    38:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    39:         given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    40:     }
+    41: 
+
+[7] METHOD=testGetByRegion_Success_Europe FAILURE AT LINE 98
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByRegion_Success_Europe(CountryRestV1Test.java:98)
+CODE CONTEXT:
+    95: 
+    96:     @Test(timeout = 60000)
+    97:     public void testGetByRegion_Success_Europe() {
+    98:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    99:         given().when().get("/v1/region/Europe").then().statusCode(200);
+   100:     }
+   101: 
+
+[8] METHOD=testGetBySubregion_Success_WesternEurope FAILURE AT LINE 104
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetBySubregion_Success_WesternEurope(CountryRestV1Test.java:104)
+CODE CONTEXT:
+   101: 
+   102:     @Test(timeout = 60000)
+   103:     public void testGetBySubregion_Success_WesternEurope() {
+   104:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   105:         given().when().get("/v1/subregion/Western%20Europe").then().statusCode(200);
+   106:     }
+   107: 
+
+[9] METHOD=testGetByCurrency_BadRequest_numeric FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByCurrency_BadRequest_numeric(CountryRestV1Test.java:68)
+CODE CONTEXT:
+    65: 
+    66:     @Test(timeout = 60000)
+    67:     public void testGetByCurrency_BadRequest_numeric() {
+    68:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    69:         given().when().get("/v1/currency/12").then().statusCode(400);
+    70:     }
+    71: 
+
+[10] METHOD=testGetByAlphaList_NotFound FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlphaList_NotFound(CountryRestV1Test.java:56)
+CODE CONTEXT:
+    53: 
+    54:     @Test(timeout = 60000)
+    55:     public void testGetByAlphaList_NotFound() {
+    56:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    57:         given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha").then().statusCode(404);
+    58:     }
+    59: 
+
+[11] METHOD=testGetByAlphaList_Success_US_CA FAILURE AT LINE 44
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlphaList_Success_US_CA(CountryRestV1Test.java:44)
+CODE CONTEXT:
+    41: 
+    42:     @Test(timeout = 60000)
+    43:     public void testGetByAlphaList_Success_US_CA() {
+    44:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    45:         given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(200);
+    46:     }
+    47: 
+
+[12] METHOD=testGetByCurrency_Success_USD FAILURE AT LINE 62
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByCurrency_Success_USD(CountryRestV1Test.java:62)
+CODE CONTEXT:
+    59: 
+    60:     @Test(timeout = 60000)
+    61:     public void testGetByCurrency_Success_USD() {
+    62:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    63:         given().when().get("/v1/currency/USD").then().statusCode(200);
+    64:     }
+    65: 
+
+[13] METHOD=testGetByCapital_Success_London FAILURE AT LINE 92
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByCapital_Success_London(CountryRestV1Test.java:92)
+CODE CONTEXT:
+    89: 
+    90:     @Test(timeout = 60000)
+    91:     public void testGetByCapital_Success_London() {
+    92:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    93:         given().when().get("/v1/capital/London").then().statusCode(200);
+    94:     }
+    95: 
+
+[14] METHOD=testGetByAlphaList_BadRequest_EmptyCodes FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlphaList_BadRequest_EmptyCodes(CountryRestV1Test.java:50)
+CODE CONTEXT:
+    47: 
+    48:     @Test(timeout = 60000)
+    49:     public void testGetByAlphaList_BadRequest_EmptyCodes() {
+    50:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    51:         given().queryParam("codes", "").when().get("/v1/alpha").then().statusCode(400);
+    52:     }
+    53: 
+
+[15] METHOD=testGetByLanguage_Success_es FAILURE AT LINE 110
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByLanguage_Success_es(CountryRestV1Test.java:110)
+CODE CONTEXT:
+   107: 
+   108:     @Test(timeout = 60000)
+   109:     public void testGetByLanguage_Success_es() {
+   110:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   111:         given().when().get("/v1/lang/es").then().statusCode(200);
+   112:     }
+   113: }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Success_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_short() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound_XYZ() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success_US_CA() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest_EmptyCodes() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success_USD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest_numeric() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Success_France_FullTextFalse() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound_numeric() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Success_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Success_London() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Success_Europe() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_Success_WesternEurope() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/subregion/Western%20Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Success_es() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

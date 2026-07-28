@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base.url");
+        String base = env != null && !env.isEmpty() ? env : (prop != null && !prop.isEmpty() ? prop : "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_withMalformedFeatureName_shouldReturnBodyContainingWrongProductConfiguration() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        String featureName = "{\"feature\":\"new-feature\"}";
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        resp.then().body(containsString("Wrong product configuration:"));
+    }
+
+    @Test(timeout = 60000)
+    public void addConfiguration_withExtremelyLongConfigurationName_shouldReturnBodyContainingWrongProductConfiguration() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String longConfigName = "cfg-" + new String(new char[1024]).replace('\0', 'A');
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}", productName, longConfigName);
+        resp.then().body(containsString("Wrong product configuration:"));
+    }
+}

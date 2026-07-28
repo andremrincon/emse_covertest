@@ -1,0 +1,79 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPathWithLargeX() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", 5.5, 1000.0)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPathWithXZero() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", 5.5, 0.0)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPathWithSmallX() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", 5.5, 2.3)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPathWithSmallA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", 0.001, 1000.0)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNegativeA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", -1.0, 2.3)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNonNumericA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/{a}/{x}", "abc", 2.3)
+        .then()
+            .statusCode(400);
+    }
+}

@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("REST_BASE_URL");
+        if (base == null) base = System.getProperty("rest.base", "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_twoLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_threeLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_multipleCodes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_invalidCodes_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "123").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_fullTextTrue_matchesAltSpelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "true").when().get("/v1/name/DE").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_malformedCodes_mayReturnServerError_500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v1/alpha").then().statusCode(400);
+    }
+}

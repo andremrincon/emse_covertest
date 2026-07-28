@@ -1,0 +1,98 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        given()
+            .pathParam("n", 0)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZero() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNSmallX() {
+        given()
+            .pathParam("n", 2)
+            .pathParam("x", 5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNLargeX() {
+        given()
+            .pathParam("n", 2)
+            .pathParam("x", 10.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualToN() {
+        given()
+            .pathParam("n", 10)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", -5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+            .pathParam("n", 4)
+            .pathParam("x", -5.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

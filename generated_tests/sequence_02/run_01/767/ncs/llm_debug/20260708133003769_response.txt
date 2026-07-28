@@ -1,0 +1,63 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2Returns400() {
+        given()
+            .when()
+                .get("/api/bessj/-5/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZeroReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNAxLessThan8Returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/5.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNAxGreaterOrEqual8Returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXNegativeAxGreaterOrEqual8NOddReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200);
+    }
+}
+```

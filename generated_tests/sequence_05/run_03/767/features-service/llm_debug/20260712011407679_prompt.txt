@@ -1,0 +1,237 @@
+
+Do create a white box test suite in JUnit 4 and Java 1.8 using REST Assured to achieve full 
+test coverage, including methods, lines, and all branches with all possible execution paths, 
+according to the instructions delimited by %%%%%, which is part of the REST Java Application 
+code delimited by *****. Use the Swagger documentation delimited by ##### to provide 
+complementary information about the application.
+
+Your responses must contain ONLY valid, compilable Java code in JUnit 4 format.
+NO comments, NO explanations, NO syntax errors.
+
+IMPORTANT CONSTRAINTS:
+- Generate AT MOST 15 @Test methods total
+- Test class name MUST be: ProductsConfigurationsServiceTest
+- Test class package MUST be: ts01glm_5_2
+- Tests CANNOT instantiate business classes directly
+- Tests can ONLY call REST API endpoints via REST Assured
+- Use base URL from environment or configuration
+- Include proper imports for REST Assured and JUnit 4
+- ALL @Test methods MUST explicitly declare a timeout of 60000 milliseconds using @Test(timeout = 60000)
+- Prioritize endpoint-aware request data and parameter examples when available
+- Keep assertions aligned with endpoint response codes when known
+
+TEST DESIGN RULES — SINGLE OBJECTIVE PER TEST:
+- Each @Test method MUST test exactly ONE behavior or scenario (single test objective).
+- Each @Test method should be small and focused; do not combine multiple behaviors in one test.
+- Follow the AAA pattern strictly inside every @Test method:
+    * ARRANGE: REST calls that set up the necessary state (e.g., create a product before adding a feature).
+      - Arrange calls MUST NOT use exact statusCode assertions.
+      - Use: given().when().<call>().then().statusCode(lessThan(300)); (import static org.hamcrest.Matchers.lessThan;)
+      - This prevents setup failures from masking the real test objective.
+    * ACT: The single REST call that exercises the behavior being tested.
+    * ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked.
+- NEVER chain multiple exact statusCode(N) assertions in the same test method with the same importance.
+- If an endpoint is idempotent for setup (e.g., creating a resource), use a unique identifier (UUID) per test to avoid state leakage between tests.
+
+CLASS ROLE NOTE:
+NOTE: This class has no direct REST endpoint. It is exercised TRANSITIVELY by the REST API (e.g., via Spring DI: Resource → Service → DAO → Model). You MUST still write integration tests that call REST API endpoints via REST Assured. Analyse the source code and the available endpoints to identify which endpoints internally exercise the methods listed in UNCOVERED INFO, then write tests that call those endpoints and indirectly cover this class.
+
+UNCOVERED INFO:
+%%%%%
+Uncovered method: getConfigurationsNamesForProduct - Uncovered Lines: [32, 33, 34]
+Uncovered method: getConfigurationActivedFeaturesNames - Uncovered Lines: [46, 47, 48]
+Uncovered method: removeFeatureFromConfiguration - Uncovered Lines: [70, 72]
+Uncovered method: addFeatureFromConfiguration - Uncovered Lines: [79, 80, 82, 84]
+Uncovered method: evaluateAndUpdateConfiguration - Uncovered Lines: [88, 89, 90, 91]
+%%%%%
+
+APPLICATION SOURCE CODE:
+*****
+package org.javiermf.features.services;
+
+import org.javiermf.features.daos.ProductsConfigurationsDAO;
+import org.javiermf.features.exceptions.DuplicatedObjectException;
+import org.javiermf.features.models.Feature;
+import org.javiermf.features.models.Product;
+import org.javiermf.features.models.ProductConfiguration;
+import org.javiermf.features.models.evaluation.ConfigurationEvaluator;
+import org.javiermf.features.models.evaluation.EvaluationResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class ProductsConfigurationsService {
+
+    @Autowired
+    ProductsConfigurationsDAO productsConfigurationsDAO;
+
+    @Autowired
+    ProductsService productsService;
+
+    @Autowired
+    ConfigurationEvaluator configurationEvaluator;
+
+    public List<String> getConfigurationsNamesForProduct(String productName) {
+        List<String> configurationsForProduct = new ArrayList<String>();
+
+        for (ProductConfiguration productConfiguration : productsConfigurationsDAO.findByProductName(productName)) {
+            configurationsForProduct.add(productConfiguration.getName());
+        }
+
+        return configurationsForProduct;
+    }
+
+    public ProductConfiguration findByNameAndProductName(String productName, String configurationName) {
+        return productsConfigurationsDAO.findByNameAndProductName(productName, configurationName);
+    }
+
+    public List<String> getConfigurationActivedFeaturesNames(String productName, String configurationName) {
+        ProductConfiguration productConfiguration = productsConfigurationsDAO.findByNameAndProductName(productName, configurationName);
+        List<String> featureNames = new ArrayList<String>();
+        for (Feature feature : productConfiguration.getActivedFeatures()) {
+            featureNames.add(feature.getName());
+        }
+        return featureNames;
+    }
+
+
+    public void add(String productName, String configurationName) {
+        Product product = productsService.findByName(productName);
+
+        ProductConfiguration configuration = new ProductConfiguration();
+        configuration.setName(configurationName);
+        configuration.setProduct(product);
+        productsConfigurationsDAO.insert(configuration);
+    }
+
+    public void deleteByName(String productName, String configurationName) {
+        productsConfigurationsDAO.deleteConfigurationForProduct(productName, configurationName);
+
+    }
+
+    @Transactional
+    public EvaluationResult removeFeatureFromConfiguration(String productName, String configurationName, String featureName) {
+        ProductConfiguration configuration = productsConfigurationsDAO.findByNameAndProductName(productName, configurationName);
+        configuration.deactive(featureName);
+
+        return evaluateAndUpdateConfiguration(configuration);
+    }
+
+
+    @Transactional
+    public EvaluationResult addFeatureFromConfiguration(String productName, String configurationName, String featureName) {
+        ProductConfiguration configuration = productsConfigurationsDAO.findByNameAndProductName(productName, configurationName);
+        if (configuration.hasActiveFeature(featureName)) {
+            throw new DuplicatedObjectException(featureName);
+        }
+        configuration.active(featureName);
+
+        return evaluateAndUpdateConfiguration(configuration);
+    }
+
+    private EvaluationResult evaluateAndUpdateConfiguration(ProductConfiguration configuration) {
+        Product product = configuration.getProduct();
+        EvaluationResult evaluationResult = configurationEvaluator.evaluateConfiguration(configuration, product.getProductFeatureConstraints());
+        configuration.setValid(evaluationResult.isValid);
+        return evaluationResult;
+    }
+}
+
+*****
+
+ENDPOINT CONTEXT (normalized):
+@@@@@
+- GET / | expected status codes: 200, 404, 500
+- POST / | expected status codes: 201, 400, 500
+- GET /products/{productName}/features | expected status codes: 200, 500
+- POST /products/{productName}/features/{featureName} | expected status codes: 201, 500
+- PUT /products/{productName}/features/{featureName} | expected status codes: 200, 500
+- DELETE /products/{productName}/features/{featureName} | expected status codes: 204, 500
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | expected status codes: 201, 500
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | expected status codes: 204, 500
+- GET /products/{productName}/configurations/{configurationName}/features | expected status codes: 200, 500
+- GET /products/{productName}/configurations | expected status codes: 200, 500
+@@@@@
+
+PRIORITIZED PARAMETER EXAMPLES (x-parameter-examples when available):
+$$$$$
+- GET /products/{productName}/features | status 200 | productName: AeroBook-Pro-15, USB-C-Dongle
+- GET /products/{productName}/features | status 500 | productName: product/with/slashes, ThisProductNameIsIntentionallyMadeExtremelyLongToExceedPotentialDatabaseColumnLimitsOrOtherBackendProcessingBuffersWhichCouldLeadToAnUnhandledExceptionAndResultInAnInternalServerErrorResponseCodeFiveHundred
+- POST /products/{productName}/features/{featureName} | status 201 | productName: Smartwatch Series 8, Wireless-Earbuds-Pro
+- POST /products/{productName}/features/{featureName} | status 201 | featureName: Blood Oxygen Sensor, ANC
+- POST /products/{productName}/features/{featureName} | status 201 | description: Measures the oxygen saturation (SpO2) of your blood on demand.
+- POST /products/{productName}/features/{featureName} | status 500 | productName: Gaming-PC-Tower, UltraBook-Z1
+- POST /products/{productName}/features/{featureName} | status 500 | featureName: Liquid Cooling, a_feature_name_that_is_extremely_long_and_exceeds_the_likely_database_column_width_limit_for_storing_feature_names_which_could_cause_an_unhandled_sql_exception_or_a_buffer_overflow_if_the_server_side_code_is_not_robustly_written_to_handle_such_long_inputs, Fingerprint-Reader
+- POST /products/{productName}/features/{featureName} | status 500 | description: Using special characters that might be improperly handled by the server's backend logic, causing an unhandled exception.  , A feature name that is excessively long., Providing an empty string for a required path parameter, which might not be anticipated by the server routing or business logic, leading to a crash.
+- PUT /products/{productName}/features/{featureName} | status 200 | productName: AeroBook-Pro-15, EcoTablet-10
+- PUT /products/{productName}/features/{featureName} | status 200 | featureName: backlit-keyboard, stylus-support
+- PUT /products/{productName}/features/{featureName} | status 200 | description: RGB backlit keyboard with customizable zones and per-key lighting.
+- PUT /products/{productName}/features/{featureName} | status 500 | productName: AeroBook-Pro-15, ThisIsAnExtremelyLongProductNameThatIsIntendedToExceedAnyReasonableLengthLimitImposedByTheDatabaseSchemaOrTheURLParserOfTheWebServerOrAnyIntermediateProxiesInOrderToTriggerAnUnhandledExceptionAndCauseAnInternalServerErrorResponseCode500
+- PUT /products/{productName}/features/{featureName} | status 500 | featureName: camera-%00-injection, storage
+- PUT /products/{productName}/features/{featureName} | status 500 | description: Using a null byte character in the feature name, which might cause an unhandled exception in lower-level C/C++ code., Testing with an excessively long product name that could cause a buffer overflow or database error., Sending an empty string for a required path parameter, which may not be handled gracefully by the server's routing logic.
+- DELETE /products/{productName}/features/{featureName} | status 204 | productName: SmartWatch-Pro, X1
+- DELETE /products/{productName}/features/{featureName} | status 204 | featureName: heart-rate-monitor, nfc-v3-support
+- DELETE /products/{productName}/features/{featureName} | status 500 | productName: E-Reader-K2, Security-Camera-HD, Wireless-Headphones
+- DELETE /products/{productName}/features/{featureName} | status 500 | featureName: a_very_long_feature_name_that_exceeds_the_maximum_allowed_length_for_a_feature_identifier_in_the_database_and_causes_a_string_truncation_or_buffer_overflow_error_leading_to_an_unhandled_exception_and_a_500_internal_server_error_response, ../../../etc/passwd
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 201 | productName: QuantumLeap-AI-Platform, P1
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 201 | configurationName: standard-gpu-cluster, basic
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 201 | featureName: distributed-training, sso
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | productName: QuantumLeap-AI-Platform
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | configurationName: standard-gpu-cluster
+- POST /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | featureName: {"feature":"new-feature"}, feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit-and-potentially-cause-an-unhandled-exception-or-a-buffer-overflow-somewhere-deep-in-the-application-stack-resulting-in-a-generic-five-hundred-internal-server-error-response-instead-of-a-more-graceful-four-hundred-bad-request-error, distributed-training
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 204 | productName: QuantumLeap-AI, IoT-Sensor-Hub
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 204 | configurationName: Premium-Tier, Basic
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 204 | featureName: Realtime-Analytics-Dashboard, GPS
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | productName: DataStreamer, WebApp-Firewall, Mobile-App-Backend
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | configurationName: Standard, Max-Security
+- DELETE /products/{productName}/configurations/{configurationName}/features/{featureName} | status 500 | featureName: 99, feature-name-that-is-intentionally-made-very-long-to-exceed-potential-database-column-size-limits-or-other-internal-buffer-restrictions-leading-to-an-unhandled-server-side-exception-and-a-500-internal-server-error-response, Push-Notifications
+- GET /products/{productName}/configurations/{configurationName}/features | status 200 | productName: ultra-laptop-x1, iot-sensor-2
+- GET /products/{productName}/configurations/{configurationName}/features | status 200 | configurationName: us-standard-16gb, base
+- GET /products/{productName}/configurations/{configurationName}/features | status 500 | productName: web-server-pro, a_very_long_product_name_that_likely_exceeds_the_maximum_allowed_length_in_the_database_or_application_logic_leading_to_an_unhandled_exception_and_a_generic_server_error_response, firewall-appliance
+- GET /products/{productName}/configurations/{configurationName}/features | status 500 | configurationName: config' OR '1'='1, standard
+- GET /products/{productName}/configurations | status 200 | productName: Laptop-Pro-X15, USB-C-Adapter
+- GET /products/{productName}/configurations | status 500 | productName: product/with/slashes, a-product-name-that-is-intentionally-made-extremely-long-to-surpass-any-reasonable-character-limit-that-might-be-enforced-by-the-database-or-the-application-logic-potentially-causing-an-unhandled-exception-or-a-buffer-overflow-which-would-result-in-a-500-internal-server-error
+- GET /products/{productName}/configurations/{configurationName} | status 200 | productName: MobileApp-Backend, Data-Ingest-Service-v3
+- GET /products/{productName}/configurations/{configurationName} | status 200 | configurationName: production-us-east-1, dev
+- GET /products/{productName}/configurations/{configurationName} | status 500 | productName: MobileApp-Backend, Data-Ingest-Service-v3, null
+- GET /products/{productName}/configurations/{configurationName} | status 500 | configurationName: 12345, production
+- POST /products/{productName}/configurations/{configurationName} | status 201 | productName: smart-thermostat-v3, z1
+- POST /products/{productName}/configurations/{configurationName} | status 201 | configurationName: us-standard-wifi, base
+- POST /products/{productName}/configurations/{configurationName} | status 500 | productName: gaming-console-pro, security-camera-4k, null
+- POST /products/{productName}/configurations/{configurationName} | status 500 | configurationName: a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully, default-config
+- DELETE /products/{productName}/configurations/{configurationName} | status 204 | productName: nexus-dashboard, api-gateway
+- DELETE /products/{productName}/configurations/{configurationName} | status 204 | configurationName: production-us-east, v1
+- DELETE /products/{productName}/configurations/{configurationName} | status 500 | productName: user-service, auth-service, null
+- DELETE /products/{productName}/configurations/{configurationName} | status 500 | configurationName: config/v2, default
+- POST /products/{productName}/constraints/requires | status 201 | productName: Enterprise-Server-X1, Mobile-App-Basic
+- POST /products/{productName}/constraints/requires | status 201 | sourceFeature: RAID-Controller-Card, Push-Notifications
+- POST /products/{productName}/constraints/requires | status 201 | requiredFeature: 128GB-ECC-RAM, User-Authentication
+- POST /products/{productName}/constraints/requires | status 500 | productName: Desktop-PC,  , Web-Hosting-Package
+- POST /products/{productName}/constraints/requires | status 500 | sourceFeature: 12345, FeatureA, SSD-Storage
+- POST /products/{productName}/constraints/requires | status 500 | requiredFeature: Graphics-Card, FeatureB
+- POST /products/{productName}/constraints/excludes | status 201 | productName: Laptop-Pro-15, Custom-T-Shirt
+- POST /products/{productName}/constraints/excludes | status 201 | sourceFeature: CPU-i9-13900H, Color-Black
+- POST /products/{productName}/constraints/excludes | status 201 | excludedFeature: Integrated-Graphics-Only, Logo-White-On-Black
+- POST /products/{productName}/constraints/excludes | status 500 | productName: Workstation-Z8, Smart-Watch-S3
+- POST /products/{productName}/constraints/excludes | status 500 | sourceFeature: PSU-Redundant, Strap-Leather, OS-Windows-11-Pro
+- POST /products/{productName}/constraints/excludes | status 500 | excludedFeature: PSU-Redundant, OS-Home
+- DELETE /products/{productName}/constraints/{constraintId} | status 204 | productName: UltraPhoneX, Basic-Charger-v1
+- DELETE /products/{productName}/constraints/{constraintId} | status 204 | constraintId: 12345, 1
+- DELETE /products/{productName}/constraints/{constraintId} | status 500 | productName: PowerBankPro, SmartWatchSE
+- DELETE /products/{productName}/constraints/{constraintId} | status 500 | constraintId: abc-def, -100, 9876
+- GET /products/{productName} | status 200 | productName: Smartwatch Series 7, USB-C Adapter
+- GET /products/{productName} | status 500 | productName: Product' OR 1=1; --, ThisIsAnExtremelyLongProductNameDesignedToExceedCharacterLimitsInBackendSystemsWhichMayNotBeHandledGracefullyAndCouldResultInAnUnhandledExceptionLeadingToAnInternalServerError., %E0%A4%A
+- POST /products/{productName} | status 201 | productName: Wireless Mouse, Super-HD-4K-Monitor-v2.1
+- POST /products/{productName} | status 500 | productName: ../../../etc/passwd, ThisIsAnExtremelyLongProductNameThatIsIntendedToExceedAnyReasonableDatabaseColumnSizeLimitAndCauseAnInternalServerErrorWhenTheApplicationTriesToPersistItWithoutProperValidationOrTruncationLeadingToAnUnhandledDatabaseExceptionAndThereforeAFiveHundredError,    
+- DELETE /products/{productName} | status 204 | productName: Smartwatch Series 9, Ultra-Thin Keyboard Cover
+- DELETE /products/{productName} | status 500 | productName: true, null
+$$$$$
+
+SWAGGER DOCUMENTATION:
+#####
+{"swagger":"2.0","info":{"version":"1.0","title":"API"},"host":"localhost:8080","basePath":"/","schemes":["http"],"paths":{"/products/{productName}/features":{"get":{"operationId":"getFeaturesForProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"AeroBook-Pro-15"}],"responses":{"200":{"description":"successful operation","schema":{"type":"array","uniqueItems":true,"items":{"$ref":"#/definitions/Feature"}},"headers":{},"examples":{"application/json":[{"featureName":"15.6-inch OLED Display","description":"Vibrant colors and deep blacks with a 4K resolution screen."},{"featureName":"16GB LPDDR5 RAM","description":"High-speed memory for seamless multitasking and performance."},{"featureName":"1TB NVMe SSD","description":"Ultra-fast solid-state drive for quick boot times and application loading."},{"featureName":"Backlit Keyboard","description":"Comfortable typing experience in any lighting condition."}]}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":"Internal Server Error","message":"An unexpected error occurred while processing the request.","timestamp":"2023-10-27T10:00:00Z","traceId":"a1b2c3d4-e5f6-7890-1234-567890abcdef"}}}}}},"/products/{productName}/features/{featureName}":{"post":{"operationId":"addFeatureToProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Smartwatch Series 8"},{"name":"featureName","in":"path","required":true,"type":"string","x-example":"Blood Oxygen Sensor"},{"name":"description","in":"formData","required":false,"type":"string","x-example":"Measures the oxygen saturation (SpO2) of your blood on demand."}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{"status":"success","message":"Feature 'Blood Oxygen Sensor' added to product 'Smartwatch Series 8'.","data":{"productName":"Smartwatch Series 8","featureName":"Blood Oxygen Sensor","description":"Measures the oxygen saturation (SpO2) of your blood on demand."}}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"message":"Internal Server Error"}}}},"consumes":["application/x-www-form-urlencoded"]},"put":{"operationId":"updateFeatureOfProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"AeroBook-Pro-15"},{"name":"featureName","in":"path","required":true,"type":"string","x-example":"backlit-keyboard"},{"name":"description","in":"formData","required":false,"type":"string","x-example":"RGB backlit keyboard with customizable zones and per-key lighting."}],"responses":{"200":{"description":"successful operation","schema":{"$ref":"#/definitions/Feature"},"headers":{},"examples":{"application/json":{"name":"backlit-keyboard","description":"RGB backlit keyboard with customizable zones and per-key lighting.","enabled":true}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"type":"InternalServerError","message":"An unexpected error occurred on the server."}}}},"consumes":["application/x-www-form-urlencoded"]},"delete":{"operationId":"deleteFeatureOfProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"SmartWatch-Pro"},{"name":"featureName","in":"path","required":true,"type":"string","x-example":"heart-rate-monitor"}],"responses":{"204":{"description":"Successful response","examples":{"application/json":{}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred while trying to delete the product feature."}}}}}},"/products/{productName}/configurations/{configurationName}/features/{featureName}":{"post":{"operationId":"addFeatureToConfiguration","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"QuantumLeap-AI-Platform"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"standard-gpu-cluster"},{"name":"featureName","in":"path","required":true,"type":"string","x-example":"distributed-training"}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"message":"Internal Server Error"}}}}},"delete":{"operationId":"deleteFeature","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"QuantumLeap-AI"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"Premium-Tier"},{"name":"featureName","in":"path","required":true,"type":"string","x-example":"Realtime-Analytics-Dashboard"}],"responses":{"204":{"description":"Successful response","examples":{"application/json":{}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-10-27T10:00:00Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while trying to delete the feature. Please contact support and provide the request ID.","requestId":"a1b2c3d4-e5f6-7890-1234-567890abcdef"}}}}}},"/products/{productName}/configurations/{configurationName}/features":{"get":{"operationId":"getConfigurationActivedFeatures","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"ultra-laptop-x1"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"us-standard-16gb"}],"responses":{"200":{"description":"successful operation","schema":{"type":"array","items":{"type":"string"}},"headers":{},"examples":{"application/json":["fingerprint-scanner","4k-display","wifi-6e","thunderbolt-4-ports","backlit-keyboard"]}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred on the server."}}}}}},"/products/{productName}/configurations":{"get":{"operationId":"getConfigurationsForProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Laptop-Pro-X15"}],"responses":{"200":{"description":"successful operation","schema":{"type":"array","items":{"type":"string"}},"headers":{},"examples":{"application/json":["16GB RAM, 512GB SSD, Silver","16GB RAM, 1TB SSD, Silver","32GB RAM, 1TB SSD, Space Gray","32GB RAM, 2TB SSD, Space Gray"]}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":"Internal Server Error","message":"An unexpected error occurred while processing the request."}}}}}},"/products/{productName}/configurations/{configurationName}":{"get":{"operationId":"getConfigurationWithNameForProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"MobileApp-Backend"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"production-us-east-1"}],"responses":{"200":{"description":"successful operation","schema":{"$ref":"#/definitions/ProductConfiguration"},"headers":{},"examples":{"application/json":{"configurationName":"production-us-east-1","productName":"MobileApp-Backend","settings":{"database_url":"postgres://prod-user@db.us-east-1.internal:5432/main_db","cache_enabled":true,"feature_flags":{"new_user_onboarding":true,"realtime_analytics":false},"threads":16},"lastUpdated":"2023-10-27T10:00:00Z","version":"v1.2.3"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":"Internal Server Error","message":"An unexpected error occurred while retrieving the product configuration.","timestamp":"2023-08-15T14:30:00Z","traceId":"a1b2c3d4-e5f6-7890-1234-567890abcdef"}}}}},"post":{"operationId":"addConfiguration","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"smart-thermostat-v3"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"us-standard-wifi"}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{"status":"created","productName":"smart-thermostat-v3","configurationName":"us-standard-wifi"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"message":"An unexpected internal server error has occurred."}}}}},"delete":{"operationId":"deleteConfiguration","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"nexus-dashboard"},{"name":"configurationName","in":"path","required":true,"type":"string","x-example":"production-us-east"}],"responses":{"204":{"description":"Successful response"},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"message":"An unexpected internal server error has occurred."}}}}}},"/products/{productName}/constraints/requires":{"post":{"operationId":"addRequiresConstraintToProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Enterprise-Server-X1"},{"name":"sourceFeature","in":"formData","required":false,"type":"string","x-example":"RAID-Controller-Card"},{"name":"requiredFeature","in":"formData","required":false,"type":"string","x-example":"128GB-ECC-RAM"}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{"status":"success","message":"Constraint 'RAID-Controller-Card requires 128GB-ECC-RAM' added to product 'Enterprise-Server-X1'."}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":"Internal Server Error","message":"An unexpected error occurred while processing the request.","timestamp":"2023-05-21T14:48:00Z"}}}},"consumes":["application/x-www-form-urlencoded"]}},"/products/{productName}/constraints/excludes":{"post":{"operationId":"addExcludesConstraintToProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Laptop-Pro-15"},{"name":"sourceFeature","in":"formData","required":false,"type":"string","x-example":"CPU-i9-13900H"},{"name":"excludedFeature","in":"formData","required":false,"type":"string","x-example":"Integrated-Graphics-Only"}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{"id":"excl-const-a4b1c8d3","productName":"Laptop-Pro-15","constraintType":"EXCLUDES","sourceFeature":"CPU-i9-13900H","excludedFeature":"Integrated-Graphics-Only"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-08-24T10:30:00.123Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while creating the constraint. Please contact support.","traceId":"f4a9b1c8-d3e2-f1a0-b9c8-d7e6f5a4b3c2"}}}},"consumes":["application/x-www-form-urlencoded"]}},"/products/{productName}/constraints/{constraintId}":{"delete":{"operationId":"deleteConstraint","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"UltraPhoneX"},{"name":"constraintId","in":"path","required":true,"type":"integer","format":"int64","x-example":12345}],"responses":{"204":{"description":"Successful response","examples":{"application/json":{}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":{"code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred while processing the request."}}}}}}},"/products":{"get":{"operationId":"getAllProducts","produces":["application/json"],"parameters":[],"responses":{"200":{"description":"successful operation","schema":{"type":"array","items":{"type":"string"}},"headers":{},"examples":{"application/json":["Laptop Pro 15","Wireless Mouse X1","Mechanical Keyboard K7","4K Monitor 27-inch","USB-C Hub"]}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":500,"message":"Internal Server Error: The product database is currently unavailable."}}}}}},"/products/{productName}":{"get":{"operationId":"getProductByName","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Smartwatch Series 7"}],"responses":{"200":{"description":"successful operation","schema":{"$ref":"#/definitions/Product"},"headers":{},"examples":{"application/json":{"id":"prod_78910","name":"Smartwatch Series 7","description":"The latest smartwatch with a larger display and advanced health monitoring features.","price":399.99,"currency":"USD","inStock":true,"category":"Electronics","attributes":{"color":"Midnight","case_size":"45mm"}}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred while processing your request."}}}}},"post":{"operationId":"addProduct","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Wireless Mouse"}],"responses":{"201":{"description":"Successful response","examples":{"application/json":{"productId":"prod_7a8b9c0d","productName":"Wireless Mouse","status":"created","createdAt":"2024-05-21T14:30:00Z"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":"Internal Server Error","message":"An unexpected error occurred on the server.","timestamp":"2024-05-21T14:32:15Z","traceId":"e9f0a1b2-c3d4-5678-90ab-cdef12345678"}}}}},"delete":{"operationId":"deleteProductByName","produces":["application/json"],"parameters":[{"name":"productName","in":"path","required":true,"type":"string","x-example":"Smartwatch Series 9"}],"responses":{"204":{"description":"Successful response","examples":{"application/json":{}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"error":{"code":"INTERNAL_SERVER_ERROR","message":"An unexpected error occurred while trying to delete the product. Please try again later.","timestamp":"2024-07-15T10:30:00Z"}}}}}}}},"definitions":{"ProductsFeaturesResource":{"type":"object"},"Feature":{"type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"},"description":{"type":"string"}}},"ProductsConfigurationResource":{"type":"object"},"ProductsConfigurationFeaturesResource":{"type":"object"},"ProductConfiguration":{"type":"object","properties":{"name":{"type":"string"},"valid":{"type":"boolean"},"activedFeatures":{"type":"array","uniqueItems":true,"items":{"$ref":"#/definitions/Feature"}}}},"ProductsConstraintsResource":{"type":"object"},"FeatureConstraint":{"type":"object","properties":{"id":{"type":"integer","format":"int64"},"type":{"type":"string"}}},"Product":{"type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"},"features":{"type":"array","readOnly":true,"uniqueItems":true,"items":{"$ref":"#/definitions/Feature"}},"constraints":{"type":"array","readOnly":true,"uniqueItems":true,"items":{"$ref":"#/definitions/FeatureConstraint"}}}}}}
+#####

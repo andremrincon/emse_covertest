@@ -1,0 +1,85 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectXPlusYEquals56() {
+        given()
+            .pathParam("i", 28)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectXsPlusYEqualsHello7() {
+        given()
+            .pathParam("i", 7)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectXsCompareToSLessThanZero() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAllConditionsFalse() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidIntegerParam() {
+        given()
+            .pathParam("i", "abc")
+            .pathParam("s", "valid-string")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIntegerOverflowParam() {
+        given()
+            .pathParam("i", "2147483648")
+            .pathParam("s", "valid-string")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

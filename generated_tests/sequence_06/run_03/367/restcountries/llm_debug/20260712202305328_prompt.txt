@@ -1,0 +1,267 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetCountryBySubregionWesternEuropeTriggersTranslations TYPE=ERROR
+Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+
+[2] METHOD=testGetCountryByNameFullTextTriggersTranslations TYPE=ERROR
+Illegal character in path at index 41: http://localhost:8080/rest/v1/name/United States of America
+
+[3] METHOD=testGetMultipleAlphaCodesTriggersTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetCountryBySubregionWesternEuropeTriggersTranslations FAILURE AT LINE 112
+java.net.URISyntaxException: Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+at ts01glm_5_2.CountryTranslationsTest.testGetCountryBySubregionWesternEuropeTriggersTranslations(CountryTranslationsTest.java:112)
+CODE CONTEXT:
+   109:         given()
+   110:                 .accept(ContentType.JSON)
+   111:                 .when()
+   112:                 .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+   113:                 .then()
+   114:                 .statusCode(200)
+   115:                 .body("translations.fr", hasItem(notNullValue()));
+
+[2] METHOD=testGetCountryByNameFullTextTriggersTranslations FAILURE AT LINE 147
+java.net.URISyntaxException: Illegal character in path at index 41: http://localhost:8080/rest/v1/name/United States of America
+at ts01glm_5_2.CountryTranslationsTest.testGetCountryByNameFullTextTriggersTranslations(CountryTranslationsTest.java:147)
+CODE CONTEXT:
+   144:                 .accept(ContentType.JSON)
+   145:                 .queryParam("fullText", "true")
+   146:                 .when()
+   147:                 .get("/v1/name/United States of America")  ← FAILURE HERE
+   148:                 .then()
+   149:                 .statusCode(200)
+   150:                 .body("translations.de", hasItem(notNullValue()));
+
+[3] METHOD=testGetMultipleAlphaCodesTriggersTranslations FAILURE AT LINE 137
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetMultipleAlphaCodesTriggersTranslations(CountryTranslationsTest.java:137)
+CODE CONTEXT:
+   134:                 .when()
+   135:                 .get("/v1/alpha")
+   136:                 .then()
+   137:                 .statusCode(400)  ← FAILURE HERE
+   138:                 .body("translations.it", hasItem(notNullValue()));
+   139:     }
+   140: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesV1CoversTranslationsSetters() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeUSTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeGBTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameFranceTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyUSDTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCode1TriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("translations.it", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCapitalLondonTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByRegionEuropeTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("translations.es", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryBySubregionWesternEuropeTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("translations.fr", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByLanguageEsTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMultipleAlphaCodesTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400)
+                .body("translations.it", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameFullTextTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v1/name/United States of America")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeDETriggersAllTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/DE")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue())
+                .body("translations.es", notNullValue())
+                .body("translations.fr", notNullValue())
+                .body("translations.ja", notNullValue())
+                .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeFRTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/FR")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeJPTriggersTranslations() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/JP")
+                .then()
+                .statusCode(200)
+                .body("translations.it", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

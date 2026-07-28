@@ -1,0 +1,80 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .pathParam("txt", "abc")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoPatrev() {
+        given()
+            .pathParam("txt", "xabcy")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevFoundNoPat() {
+        given()
+            .pathParam("txt", "xcbay")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevAdjacent() {
+        given()
+            .pathParam("txt", "xabccba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevNotAdjacent() {
+        given()
+            .pathParam("txt", "xabcxcba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevAndPatAdjacent() {
+        given()
+            .pathParam("txt", "xcbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+}

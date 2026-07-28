@@ -1,0 +1,103 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5_sEqualsAbab() {
+        int i = 5;
+        String s = "abab";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444_sEqualsAbab() {
+        int i = -500;
+        String s = "abab";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666_sEqualsAbab() {
+        int i = 700;
+        String s = "abab";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsAbab() {
+        int i = -4;
+        String s = "abab";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsBaab() {
+        int i = -4;
+        String s = "baab";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsAbabba() {
+        int i = -4;
+        String s = "ababba";
+
+        Response response = given()
+                .baseUri(BASE_URL)
+                .pathParam("i", i)
+                .pathParam("s", s)
+                .when()
+                .get("/api/costfuns/{i}/{s}");
+
+        response.then().body(equalTo("10"));
+    }
+}

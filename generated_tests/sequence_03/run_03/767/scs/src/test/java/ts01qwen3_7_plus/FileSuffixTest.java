@@ -1,0 +1,105 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        String directory = "text";
+        String file = "document.txt";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        String directory = "acrobat";
+        String file = "document.pdf";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        String directory = "word";
+        String file = "document.doc";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        String directory = "bin";
+        String file = "program.exe";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        String directory = "lib";
+        String file = "library.dll";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutExtension() {
+        String directory = "text";
+        String file = "document";
+
+        given()
+            .pathParam("directory", directory)
+            .pathParam("file", file)
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .body(equalTo("0"));
+    }
+}

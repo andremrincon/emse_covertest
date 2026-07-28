@@ -1,0 +1,88 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_wordTwo_returnsAbbreviation() {
+        given()
+            .pathParam("word1", "two")
+            .pathParam("word2", "words")
+            .pathParam("word3", "here")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_wordFor_returnsAbbreviation() {
+        given()
+            .pathParam("word1", "for")
+            .pathParam("word2", "the")
+            .pathParam("word3", "record")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_wordAre_returnsAbbreviation() {
+        given()
+            .pathParam("word1", "are")
+            .pathParam("word2", "you")
+            .pathParam("word3", "sure")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_seeYou_returnsAbbreviation() {
+        given()
+            .pathParam("word1", "see")
+            .pathParam("word2", "you")
+            .pathParam("word3", "later")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_byTheWay_returnsAbbreviation() {
+        given()
+            .pathParam("word1", "by")
+            .pathParam("word2", "the")
+            .pathParam("word3", "way")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_noMatch_returnsEmpty() {
+        given()
+            .pathParam("word1", "hello")
+            .pathParam("word2", "world")
+            .pathParam("word3", "today")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,203 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.PatTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testPatFoundNoReverse TYPE=ERROR
+Illegal character in path at index 35: http://localhost:8080/api/pat/hello world/world
+
+[2] METHOD=testReverseFoundPatLater TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/cba xyz abc/abc
+
+[3] METHOD=testPatFoundReverseLater TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/abc xyz cba/abc
+
+[4] METHOD=testReverseFoundNoPat TYPE=ERROR
+Illegal character in path at index 35: http://localhost:8080/api/pat/hello cba/abc
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testPatFoundNoReverse FAILURE AT LINE 36
+java.net.URISyntaxException: Illegal character in path at index 35: http://localhost:8080/api/pat/hello world/world
+at ts01qwen3_7_plus.PatTest.testPatFoundNoReverse(PatTest.java:36)
+CODE CONTEXT:
+    33:         given()
+    34:             .baseUri(getBaseUrl())
+    35:         .when()
+    36:             .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    37:         .then()
+    38:             .statusCode(200)
+    39:             .body(equalTo("1"));
+
+[2] METHOD=testReverseFoundPatLater FAILURE AT LINE 106
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/cba xyz abc/abc
+at ts01qwen3_7_plus.PatTest.testReverseFoundPatLater(PatTest.java:106)
+CODE CONTEXT:
+   103:         given()
+   104:             .baseUri(getBaseUrl())
+   105:         .when()
+   106:             .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+   107:         .then()
+   108:             .statusCode(200)
+   109:             .body(equalTo("0"));
+
+[3] METHOD=testPatFoundReverseLater FAILURE AT LINE 64
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/abc xyz cba/abc
+at ts01qwen3_7_plus.PatTest.testPatFoundReverseLater(PatTest.java:64)
+CODE CONTEXT:
+    61:         given()
+    62:             .baseUri(getBaseUrl())
+    63:         .when()
+    64:             .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    65:         .then()
+    66:             .statusCode(200)
+    67:             .body(equalTo("0"));
+
+[4] METHOD=testReverseFoundNoPat FAILURE AT LINE 78
+java.net.URISyntaxException: Illegal character in path at index 35: http://localhost:8080/api/pat/hello cba/abc
+at ts01qwen3_7_plus.PatTest.testReverseFoundNoPat(PatTest.java:78)
+CODE CONTEXT:
+    75:         given()
+    76:             .baseUri(getBaseUrl())
+    77:         .when()
+    78:             .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    79:         .then()
+    80:             .statusCode(200)
+    81:             .body(equalTo("2"));
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    private String getBaseUrl() {
+        return System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        String txt = "ab";
+        String pat = "ab";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        String txt = "hello world";
+        String pat = "world";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfter() {
+        String txt = "abccba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLater() {
+        String txt = "abc xyz cba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPat() {
+        String txt = "hello cba";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfter() {
+        String txt = "cbaabc";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLater() {
+        String txt = "cba xyz abc";
+        String pat = "abc";
+
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

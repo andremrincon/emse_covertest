@@ -1,0 +1,444 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetItViaCallingcode1Endpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testSetEsViaNameEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testSetJaViaCallingcodeEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testSetDeViaCapitalEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testSetDeViaNameFullTextEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testSetJaViaSubregionEndpoint TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+
+[7] METHOD=testSetItViaLangEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testSetFrViaCurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testSetFrViaAllEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testSetFrViaNameFranceEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testSetJaViaCurrencyEUREndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testSetDeViaAlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[13] METHOD=testSetEsViaAlphaCodesEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[14] METHOD=testSetItViaRegionEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[15] METHOD=testSetEsViaAlphaGermanyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetItViaCallingcode1Endpoint FAILURE AT LINE 170
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaCallingcode1Endpoint(CountryTranslationsTest.java:170)
+CODE CONTEXT:
+   167:                 .when()
+   168:                 .get("/v1/callingcode/1")
+   169:                 .then()
+   170:                 .statusCode(404)  ← FAILURE HERE
+   171:                 .body("[0].translations.it", equalTo("Stati Uniti D'America"));
+   172:     }
+   173: }
+
+[2] METHOD=testSetEsViaNameEndpoint FAILURE AT LINE 38
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaNameEndpoint(CountryTranslationsTest.java:38)
+CODE CONTEXT:
+    35:                 .when()
+    36:                 .get("/v1/name/France")
+    37:                 .then()
+    38:                 .statusCode(404)  ← FAILURE HERE
+    39:                 .body("translations.es", equalTo("Francia"));
+    40:     }
+    41: 
+
+[3] METHOD=testSetJaViaCallingcodeEndpoint FAILURE AT LINE 58
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaCallingcodeEndpoint(CountryTranslationsTest.java:58)
+CODE CONTEXT:
+    55:                 .when()
+    56:                 .get("/v1/alpha/US")
+    57:                 .then()
+    58:                 .statusCode(404)  ← FAILURE HERE
+    59:                 .body("translations.ja", equalTo("アメリカ合衆国"));
+    60:     }
+    61: 
+
+[4] METHOD=testSetDeViaCapitalEndpoint FAILURE AT LINE 78
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaCapitalEndpoint(CountryTranslationsTest.java:78)
+CODE CONTEXT:
+    75:                 .when()
+    76:                 .get("/v1/capital/London")
+    77:                 .then()
+    78:                 .statusCode(404)  ← FAILURE HERE
+    79:                 .body("[0].translations.de", equalTo("Vereinigtes Königreich"));
+    80:     }
+    81: 
+
+[5] METHOD=testSetDeViaNameFullTextEndpoint FAILURE AT LINE 130
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaNameFullTextEndpoint(CountryTranslationsTest.java:130)
+CODE CONTEXT:
+   127:                 .queryParam("fullText", "true")
+   128:                 .get("/v1/name/Germany")
+   129:                 .then()
+   130:                 .statusCode(404)  ← FAILURE HERE
+   131:                 .body("[0].translations.de", equalTo("Deutschland"));
+   132:     }
+   133: 
+
+[6] METHOD=testSetJaViaSubregionEndpoint FAILURE AT LINE 107
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaSubregionEndpoint(CountryTranslationsTest.java:107)
+CODE CONTEXT:
+   104:     public void testSetJaViaSubregionEndpoint() {
+   105:         given()
+   106:                 .when()
+   107:                 .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+   108:                 .then()
+   109:                 .statusCode(200)
+   110:                 .body("[0].translations.ja", equalTo("ドイツ"));
+
+[7] METHOD=testSetItViaLangEndpoint FAILURE AT LINE 119
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaLangEndpoint(CountryTranslationsTest.java:119)
+CODE CONTEXT:
+   116:                 .when()
+   117:                 .get("/v1/lang/es")
+   118:                 .then()
+   119:                 .statusCode(404)  ← FAILURE HERE
+   120:                 .body("[0].translations.it", org.hamcrest.Matchers.notNullValue());
+   121:     }
+   122: 
+
+[8] METHOD=testSetFrViaCurrencyEndpoint FAILURE AT LINE 48
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaCurrencyEndpoint(CountryTranslationsTest.java:48)
+CODE CONTEXT:
+    45:                 .when()
+    46:                 .get("/v1/currency/USD")
+    47:                 .then()
+    48:                 .statusCode(404)  ← FAILURE HERE
+    49:                 .body("translations.fr", equalTo("États-Unis"));
+    50:     }
+    51: 
+
+[9] METHOD=testSetFrViaAllEndpoint FAILURE AT LINE 99
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaAllEndpoint(CountryTranslationsTest.java:99)
+CODE CONTEXT:
+    96:                 .when()
+    97:                 .get("/v1/all")
+    98:                 .then()
+    99:                 .statusCode(404)  ← FAILURE HERE
+   100:                 .body("[0].translations.fr", org.hamcrest.Matchers.notNullValue());
+   101:     }
+   102: 
+
+[10] METHOD=testSetFrViaNameFranceEndpoint FAILURE AT LINE 150
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaNameFranceEndpoint(CountryTranslationsTest.java:150)
+CODE CONTEXT:
+   147:                 .when()
+   148:                 .get("/v1/name/France")
+   149:                 .then()
+   150:                 .statusCode(404)  ← FAILURE HERE
+   151:                 .body("[0].translations.fr", equalTo("France"));
+   152:     }
+   153: 
+
+[11] METHOD=testSetJaViaCurrencyEUREndpoint FAILURE AT LINE 160
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaCurrencyEUREndpoint(CountryTranslationsTest.java:160)
+CODE CONTEXT:
+   157:                 .when()
+   158:                 .get("/v1/currency/EUR")
+   159:                 .then()
+   160:                 .statusCode(404)  ← FAILURE HERE
+   161:                 .body("[0].translations.ja", org.hamcrest.Matchers.notNullValue());
+   162:     }
+   163: 
+
+[12] METHOD=testSetDeViaAlphaEndpoint FAILURE AT LINE 28
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaAlphaEndpoint(CountryTranslationsTest.java:28)
+CODE CONTEXT:
+    25:                 .when()
+    26:                 .get("/v1/alpha/US")
+    27:                 .then()
+    28:                 .statusCode(404)  ← FAILURE HERE
+    29:                 .body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    30:     }
+    31: 
+
+[13] METHOD=testSetEsViaAlphaCodesEndpoint FAILURE AT LINE 89
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaAlphaCodesEndpoint(CountryTranslationsTest.java:89)
+CODE CONTEXT:
+    86:                 .queryParam("codes", "US,CA")
+    87:                 .get("/v1/alpha")
+    88:                 .then()
+    89:                 .statusCode(404)  ← FAILURE HERE
+    90:                 .body("[0].translations.es", equalTo("Estados Unidos"));
+    91:     }
+    92: 
+
+[14] METHOD=testSetItViaRegionEndpoint FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaRegionEndpoint(CountryTranslationsTest.java:68)
+CODE CONTEXT:
+    65:                 .when()
+    66:                 .get("/v1/region/Europe")
+    67:                 .then()
+    68:                 .statusCode(404)  ← FAILURE HERE
+    69:                 .body("[0].translations.it", equalTo("Germania"));
+    70:     }
+    71: 
+
+[15] METHOD=testSetEsViaAlphaGermanyEndpoint FAILURE AT LINE 140
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaAlphaGermanyEndpoint(CountryTranslationsTest.java:140)
+CODE CONTEXT:
+   137:                 .when()
+   138:                 .get("/v1/alpha/DE")
+   139:                 .then()
+   140:                 .statusCode(404)  ← FAILURE HERE
+   141:                 .body("translations.es", equalTo("Alemania"));
+   142:     }
+   143: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaAlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(404)
+                .body("translations.es", equalTo("Francia"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaCallingcodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaRegionEndpoint() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.it", equalTo("Germania"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.de", equalTo("Vereinigtes Königreich"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaAlphaCodesEndpoint() {
+        given()
+                .when()
+                .queryParam("codes", "US,CA")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaAllEndpoint() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.fr", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaSubregionEndpoint() {
+        given()
+                .when()
+                .get("/v1/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].translations.ja", equalTo("ドイツ"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaLangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.it", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaNameFullTextEndpoint() {
+        given()
+                .when()
+                .queryParam("fullText", "true")
+                .get("/v1/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.de", equalTo("Deutschland"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaAlphaGermanyEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/DE")
+                .then()
+                .statusCode(404)
+                .body("translations.es", equalTo("Alemania"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaNameFranceEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.fr", equalTo("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaCurrencyEUREndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.ja", org.hamcrest.Matchers.notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaCallingcode1Endpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(404)
+                .body("[0].translations.it", equalTo("Stati Uniti D'America"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,49 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcConstants() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/pi/0/0").then().statusCode(200).body(equalTo(String.valueOf(Math.PI)));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/e/0/0").then().body(equalTo(String.valueOf(Math.E)));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnaryMath() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/sqrt/16/0").then().statusCode(200).body(equalTo("4.0"));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/log/1/0").then().body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnaryTrig() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/sine/0/0").then().statusCode(200).body(equalTo("0.0"));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/cosine/0/0").then().body(equalTo("1.0"));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/tangent/0/0").then().body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryAddSub() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/plus/5/3").then().statusCode(200).body(equalTo("8.0"));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/subtract/10/4").then().body(equalTo("6.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryMulDiv() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/multiply/6/7").then().statusCode(200).body(equalTo("42.0"));
+        given().baseUri(getBaseUrl()).when().get("/api/calc/divide/20/4").then().body(equalTo("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidOp() {
+        given().baseUri(getBaseUrl()).when().get("/api/calc/invalid/1/2").then().statusCode(200).body(equalTo("0.0"));
+    }
+}

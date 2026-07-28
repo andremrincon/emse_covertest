@@ -1,0 +1,81 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        String b = System.getProperty("baseUrl");
+        if (b == null || b.isEmpty()) b = System.getenv("BASE_URL");
+        if (b == null || b.isEmpty()) b = "http://localhost:8080";
+        base = b;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternRecognized() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "A" + uniq).pathParam("x", "B").pathParam("y", "C")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "http://a/b")
+            .when().get(base + "/api/pat/{txt}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternRecognized() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "X" + uniq).pathParam("x", "Y").pathParam("y", "Z")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "mon01jan")
+            .when().get(base + "/api/pat/{txt}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternRecognized() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "P" + uniq).pathParam("x", "Q").pathParam("y", "R")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "1.2e+34")
+            .when().get(base + "/api/pat/{txt}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternRecognized() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "U" + uniq).pathParam("x", "V").pathParam("y", "W")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "xyz")
+            .when().get(base + "/api/pat/{txt}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithPatternEndpoint() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "M" + uniq).pathParam("x", "N").pathParam("y", "O")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "ABABCABAB").pathParam("pat", "ABAB")
+            .when().get(base + "/api/pat/{txt}/{pat}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMalformedInputProducesServerError() {
+        String uniq = UUID.randomUUID().toString();
+        given().pathParam("w", "S" + uniq).pathParam("x", "T").pathParam("y", "U")
+            .when().get(base + "/api/text2txt/{w}/{x}/{y}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("txt", "(abc")
+            .when().get(base + "/api/pat/{txt}");
+        act.then().statusCode(500);
+    }
+}

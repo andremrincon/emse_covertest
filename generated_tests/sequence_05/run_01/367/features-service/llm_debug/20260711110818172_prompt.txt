@@ -1,0 +1,182 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ProductTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDeleteConstraint_returns204 TYPE=ERROR
+Cannot invoke the path method because no content-type was present in the response and no default parser has been set.
+
+You can specify a default parser using e.g.:
+RestAssured.defaultParser = Parser.JSON;
+
+[2] METHOD=testGetFeaturesForProduct_containsAddedFeature TYPE=FAILURE
+1 expectation failed.
+JSON path featureName doesn't match.
+Expected: a collection containing "visible-0cf94a64-bfd8-4758-9c90-fe4a3a900150"
+  Actual: <[null]>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDeleteConstraint_returns204 FAILURE AT LINE 111
+at ts01gpt_5_mini.ProductTest.testDeleteConstraint_returns204(ProductTest.java:111)
+CODE CONTEXT:
+   108:         given().formParam("description", "src").when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+   109:         given().formParam("description", "excl").when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+   110:         Response createResp = given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature).when().post("/products/{productName}/constraints/excludes", productName);
+   111:         String constraintId = createResp.then().statusCode(lessThan(300)).extract().path("id");  ← FAILURE HERE
+   112:         Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId);
+   113:         act.then().statusCode(204);
+   114:     }
+
+[2] METHOD=testGetFeaturesForProduct_containsAddedFeature FAILURE AT LINE 55
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.testGetFeaturesForProduct_containsAddedFeature(ProductTest.java:55)
+CODE CONTEXT:
+    52:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    53:         given().formParam("description", "visible feature").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+    54:         Response act = given().when().get("/products/{productName}/features", productName);
+    55:         act.then().body("featureName", hasItem(featureName));  ← FAILURE HERE
+    56:     }
+    57: 
+    58:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "Auto-generated feature").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "Explicit add").when().post("/products/{productName}/features/{featureName}", productName, featureName + "-new");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "remove-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "to be removed").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", productName, featureName);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_containsAddedFeature() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "visible-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "visible feature").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", productName);
+        act.then().body("featureName", hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_caseInsensitive_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String originalFeature = "Heart-Rate-Monitor";
+        String updatePathFeature = "heart-rate-monitor";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "original").when().post("/products/{productName}/features/{featureName}", productName, originalFeature).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "updated desc").when().put("/products/{productName}/features/{featureName}", productName, updatePathFeature);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateNonexistentFeature_returns500() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String missingFeature = "nonexistent-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "no such feature").when().put("/products/{productName}/features/{featureName}", productName, missingFeature);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "src-" + UUID.randomUUID().toString();
+        String requiredFeature = "req-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "source").when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().formParam("description", "required").when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "srcEx-" + UUID.randomUUID().toString();
+        String excludedFeature = "excl-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "src").when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().formParam("description", "excl").when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature).when().post("/products/{productName}/constraints/excludes", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraint_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "srcDel-" + UUID.randomUUID().toString();
+        String excludedFeature = "exclDel-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "src").when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().formParam("description", "excl").when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        Response createResp = given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature).when().post("/products/{productName}/constraints/excludes", productName);
+        String constraintId = createResp.then().statusCode(lessThan(300)).extract().path("id");
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId);
+        act.then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,75 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeaderOnV1All() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeaderOnV1AlphaUS() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeaderOnV1AlphaQueryCodes() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1CurrencyUSD() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        assertEquals(null, resp.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus200OnV1NameFrance() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus400OnV1AlphaInvalid() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus404OnV1AlphaNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersPresentOnPostContribute() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/json").body("{\"amount\":1,\"currency\":\"USD\",\"token\":\"tok_visa\"}").when().post("/contribute");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Origin"));
+    }
+}

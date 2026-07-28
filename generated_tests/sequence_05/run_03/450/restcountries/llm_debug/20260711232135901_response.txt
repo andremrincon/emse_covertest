@@ -1,0 +1,128 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static io.restassured.RestAssured.given;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsLanguageIso639_1() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturns200() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturns200() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsLanguageName() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .body("[0].languages[0].name", equalTo("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturns200() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalReturns200() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturns200() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1SubregionReturns200() {
+        given()
+            .pathParam("subregion", "Western Europe")
+            .when()
+                .get("/v1/subregion/{subregion}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturnsLanguageIso639_2() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .body("[0].languages[0].iso639_2", equalTo("spa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturnsLanguageNativeName() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .body("[0].languages[0].nativeName", equalTo("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangReturns200() {
+        given()
+            .when()
+                .get("/v2/lang/Spanish")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CallingCodeReturns200() {
+        given()
+            .when()
+                .get("/v2/callingcode/1")
+            .then()
+                .statusCode(200);
+    }
+}
+```

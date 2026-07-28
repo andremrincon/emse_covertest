@@ -1,0 +1,86 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CalcTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDivideByZeroYieldsServerError TYPE=FAILURE
+expected:<500> but was:<200>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDivideByZeroYieldsServerError FAILURE AT LINE 38
+java.lang.AssertionError: expected:<500> but was:<200>
+at ts01gpt_5_mini.CalcTest.testDivideByZeroYieldsServerError(CalcTest.java:38)
+CODE CONTEXT:
+    35:     public void testDivideByZeroYieldsServerError() {
+    36:         given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+    37:         Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0);
+    38:         Assert.assertEquals(500, resp.getStatusCode());  ← FAILURE HERE
+    39:     }
+    40: }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base != null) RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantReturnsMathPiString() {
+        given().when().get("/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0);
+        Assert.assertEquals("3.141592653589793", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryReturnsCorrectValue() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 9, 0);
+        Assert.assertEquals("3.0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroYieldsServerError() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0);
+        Assert.assertEquals(500, resp.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

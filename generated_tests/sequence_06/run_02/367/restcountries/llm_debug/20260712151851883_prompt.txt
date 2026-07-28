@@ -1,0 +1,263 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByCurrency_Exception TYPE=ERROR
+Illegal character in path at index 39: http://localhost:8080/rest/v2/currency/{}
+
+[2] METHOD=testGetByName_Exception TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[3] METHOD=testGetByCallingCode_Exception TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[4] METHOD=testGetByAlphaList_NotFound TYPE=FAILURE
+1 expectation failed.
+Expected status code <404> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByCurrency_Exception FAILURE AT LINE 104
+java.net.URISyntaxException: Illegal character in path at index 39: http://localhost:8080/rest/v2/currency/{}
+at ts01qwen3_7_plus.CountryRestV2Test.testGetByCurrency_Exception(CountryRestV2Test.java:104)
+CODE CONTEXT:
+   101:         given()
+   102:             .pathParam("currency", "{}")
+   103:         .when()
+   104:             .get(baseUrl + "/v2/currency/{currency}")  ← FAILURE HERE
+   105:         .then()
+   106:             .statusCode(500);
+   107:     }
+
+[2] METHOD=testGetByName_Exception FAILURE AT LINE 126
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.testGetByName_Exception(CountryRestV2Test.java:126)
+CODE CONTEXT:
+   123:         .when()
+   124:             .get(baseUrl + "/v2/name/{name}")
+   125:         .then()
+   126:             .statusCode(404);  ← FAILURE HERE
+   127:     }
+   128: 
+   129:     @Test(timeout = 60000)
+
+[3] METHOD=testGetByCallingCode_Exception FAILURE AT LINE 146
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.testGetByCallingCode_Exception(CountryRestV2Test.java:146)
+CODE CONTEXT:
+   143:         .when()
+   144:             .get(baseUrl + "/v2/callingcode/{callingcode}")
+   145:         .then()
+   146:             .statusCode(404);  ← FAILURE HERE
+   147:     }
+   148: 
+   149:     @Test(timeout = 60000)
+
+[4] METHOD=testGetByAlphaList_NotFound FAILURE AT LINE 65
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.testGetByAlphaList_NotFound(CountryRestV2Test.java:65)
+CODE CONTEXT:
+    62:         .when()
+    63:             .get(baseUrl + "/v2/alpha/")
+    64:         .then()
+    65:             .statusCode(200);  ← FAILURE HERE
+    66:     }
+    67: 
+    68:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV2Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest() {
+        given()
+            .pathParam("alphacode", "1")
+        .when()
+            .get(baseUrl + "/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+            .pathParam("alphacode", "ZZZ")
+        .when()
+            .get(baseUrl + "/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_SuccessWithFields() {
+        given()
+            .pathParam("alphacode", "US")
+            .queryParam("fields", "name")
+        .when()
+            .get(baseUrl + "/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get(baseUrl + "/v2/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        given()
+            .queryParam("codes", "ZZZ")
+        .when()
+            .get(baseUrl + "/v2/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_SuccessWithFields() {
+        given()
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name")
+        .when()
+            .get(baseUrl + "/v2/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given()
+            .pathParam("currency", "12")
+        .when()
+            .get(baseUrl + "/v2/currency/{currency}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_NotFound() {
+        given()
+            .pathParam("currency", "XYZ")
+        .when()
+            .get(baseUrl + "/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Exception() {
+        given()
+            .pathParam("currency", "{}")
+        .when()
+            .get(baseUrl + "/v2/currency/{currency}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get(baseUrl + "/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Exception() {
+        given()
+            .pathParam("name", "True")
+        .when()
+            .get(baseUrl + "/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_NotFound() {
+        given()
+            .pathParam("callingcode", "999999")
+        .when()
+            .get(baseUrl + "/v2/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Exception() {
+        given()
+            .pathParam("callingcode", "True")
+        .when()
+            .get(baseUrl + "/v2/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_NotFound() {
+        given()
+            .pathParam("capital", "12345")
+        .when()
+            .get(baseUrl + "/v2/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_NotFound() {
+        given()
+            .pathParam("region", "123")
+        .when()
+            .get(baseUrl + "/v2/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

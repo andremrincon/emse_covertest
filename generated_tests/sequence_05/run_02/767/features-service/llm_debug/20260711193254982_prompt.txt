@@ -1,0 +1,241 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsConfigurationFeaturesResourceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=deleteFeature_nonExistentProduct_returns400 TYPE=FAILURE
+expected:<400> but was:<500>
+
+[2] METHOD=deleteFeature_featureNotInConfiguration_returns400 TYPE=FAILURE
+expected:<400> but was:<204>
+
+[3] METHOD=addFeatureToConfiguration_nonExistentProduct_returns400 TYPE=FAILURE
+expected:<400> but was:<500>
+
+[4] METHOD=addFeatureToConfiguration_nonExistentFeature_returns400 TYPE=FAILURE
+expected:<400> but was:<500>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=deleteFeature_nonExistentProduct_returns400 FAILURE AT LINE 148
+java.lang.AssertionError: expected:<400> but was:<500>
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.deleteFeature_nonExistentProduct_returns400(ProductsConfigurationFeaturesResourceTest.java:148)
+CODE CONTEXT:
+   145:         String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+   146: 
+   147:         int code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+   148:         assertEquals(400, code);  ← FAILURE HERE
+   149:     }
+   150: }
+
+[2] METHOD=deleteFeature_featureNotInConfiguration_returns400 FAILURE AT LINE 128
+java.lang.AssertionError: expected:<400> but was:<204>
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.deleteFeature_featureNotInConfiguration_returns400(ProductsConfigurationFeaturesResourceTest.java:128)
+CODE CONTEXT:
+   125:         assertTrue(code < 300);
+   126: 
+   127:         code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+   128:         assertEquals(400, code);  ← FAILURE HERE
+   129:     }
+   130: 
+   131:     @Test(timeout = 60000)
+
+[3] METHOD=addFeatureToConfiguration_nonExistentProduct_returns400 FAILURE AT LINE 138
+java.lang.AssertionError: expected:<400> but was:<500>
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.addFeatureToConfiguration_nonExistentProduct_returns400(ProductsConfigurationFeaturesResourceTest.java:138)
+CODE CONTEXT:
+   135:         String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+   136: 
+   137:         int code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+   138:         assertEquals(400, code);  ← FAILURE HERE
+   139:     }
+   140: 
+   141:     @Test(timeout = 60000)
+
+[4] METHOD=addFeatureToConfiguration_nonExistentFeature_returns400 FAILURE AT LINE 83
+java.lang.AssertionError: expected:<400> but was:<500>
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.addFeatureToConfiguration_nonExistentFeature_returns400(ProductsConfigurationFeaturesResourceTest.java:83)
+CODE CONTEXT:
+    80:         assertTrue(code < 300);
+    81: 
+    82:         code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+    83:         assertEquals(400, code);  ← FAILURE HERE
+    84:     }
+    85: 
+    86:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int request(String method, String path) throws IOException {
+        URL url = new URL(baseUri + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setFixedLengthStreamingMode(0);
+            conn.connect();
+            OutputStream os = conn.getOutputStream();
+            os.write(new byte[0]);
+            os.flush();
+            os.close();
+        } else {
+            conn.connect();
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validFeature_returns201() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_nonExistentFeature_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "non-existent-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_existingFeatureInConfiguration_returns204() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_featureNotInConfiguration_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_nonExistentProduct_returns400() throws Exception {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_nonExistentProduct_returns400() throws Exception {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

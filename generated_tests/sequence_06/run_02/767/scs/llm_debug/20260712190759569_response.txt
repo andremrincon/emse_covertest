@@ -1,0 +1,56 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RegexTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/http://a/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/1.2e+34")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(200);
+    }
+}
+```

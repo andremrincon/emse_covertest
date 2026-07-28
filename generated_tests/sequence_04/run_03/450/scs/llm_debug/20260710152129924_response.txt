@@ -1,0 +1,45 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class NotyPevarTest {
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_I0True() {
+        given()
+            .baseUri(System.getProperty("test.base.url", "http://localhost:8080"))
+            .pathParam("i", 28)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_I1True() {
+        given()
+            .baseUri(System.getProperty("test.base.url", "http://localhost:8080"))
+            .pathParam("i", 7)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_AllFalse() {
+        given()
+            .baseUri(System.getProperty("test.base.url", "http://localhost:8080"))
+            .pathParam("i", 2)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

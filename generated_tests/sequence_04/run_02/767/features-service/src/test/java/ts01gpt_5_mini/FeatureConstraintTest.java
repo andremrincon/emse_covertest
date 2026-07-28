@@ -1,0 +1,120 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+            if (base == null || base.isEmpty()) {
+                base = "http://localhost:8080";
+            }
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintCreatesConstraint() {
+        String productName = "p-req-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintCreatesConstraint() {
+        String productName = "p-excl-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String productName = "p-feat-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureOfProductReturns200() {
+        String productName = "p-update-" + UUID.randomUUID().toString();
+        String featureName = "feat-update-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "initial")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when().put("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProductReturns204() {
+        String productName = "p-delfeat-" + UUID.randomUUID().toString();
+        String featureName = "feat-del-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "to be deleted")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCreatesFeature() {
+        String productName = "p-config-" + UUID.randomUUID().toString();
+        String configurationName = "conf-" + UUID.randomUUID().toString();
+        String featureName = "conf-feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "feature for configuration")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configurationName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesReturns200() {
+        String productName = "p-getconf-" + UUID.randomUUID().toString();
+        String configurationName = "conf-get-" + UUID.randomUUID().toString();
+        String featureName = "conf-get-feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "feature for configuration get")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configurationName, featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProductReturns200() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", productName).then().statusCode(200);
+    }
+}

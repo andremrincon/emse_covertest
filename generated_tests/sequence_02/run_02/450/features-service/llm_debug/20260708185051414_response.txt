@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWhenProductHasFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureA = "featureA-" + UUID.randomUUID().toString();
+        String featureB = "featureB-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWhenProductHasNoFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(200);
+    }
+}

@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204WhenFeatureExists() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+        String featureName = "feat-" + uuid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().put("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+        Response response = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertEquals(204, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns500WhenFeatureNotPresent() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+        String missingFeature = "missing-" + uuid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        Response response = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, missingFeature);
+        assertEquals(500, response.getStatusCode());
+    }
+}

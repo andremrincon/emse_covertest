@@ -1,0 +1,84 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserConvergence() {
+        String a = "5.5";
+        String x = "2.3";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfConvergence() {
+        String a = "0.001";
+        String x = "1000.0";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNegativeA() {
+        String a = "-1.0";
+        String x = "3.0";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNegativeX() {
+        String a = "5.5";
+        String x = "-2.0";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfLargeA() {
+        String a = "1000.0";
+        String x = "1001.0";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserXZero() {
+        String a = "5.5";
+        String x = "0.0";
+        given()
+            .when()
+                .get("/api/gammq/" + a + "/" + x)
+            .then()
+                .statusCode(200);
+    }
+}
+```

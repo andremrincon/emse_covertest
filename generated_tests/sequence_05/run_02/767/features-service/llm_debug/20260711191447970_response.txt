@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Method;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void doGetRequestPassesThroughCORSFilter() {
+        given()
+                .contentType("application/json")
+                .header("Origin", "http://example.com")
+                .when()
+                .request(Method.GET, "/products")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doOptionsRequestHandledByCORSFilter() {
+        given()
+                .header("Origin", "http://example.com")
+                .when()
+                .request(Method.OPTIONS, "/products")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void doPostRequestPassesThroughCORSFilter() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+                .contentType("application/x-www-form-urlencoded")
+                .header("Origin", "http://example.com")
+                .when()
+                .post("/products/{productName}", productName)
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doDeleteRequestPassesThroughCORSFilter() {
+        String productName = "CORS-Delete-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+                .contentType("application/x-www-form-urlencoded")
+                .header("Origin", "http://example.com")
+                .when()
+                .post("/products/{productName}", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .header("Origin", "http://example.com")
+                .when()
+                .delete("/products/{productName}", productName)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsAccessControlAllowMethodsHeader() {
+        given()
+                .header("Origin", "http://example.com")
+                .when()
+                .request(Method.OPTIONS, "/products")
+                .then()
+                .header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsAccessControlMaxAgeHeader() {
+        given()
+                .header("Origin", "http://example.com")
+                .when()
+                .request(Method.OPTIONS, "/products")
+                .then()
+                .header("Access-Control-Max-Age", equalTo("3600"));
+    }
+}
+```

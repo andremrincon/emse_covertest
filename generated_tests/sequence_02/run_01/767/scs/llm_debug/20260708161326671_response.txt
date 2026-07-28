@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithValidTitleMr() {
+        given()
+            .when()
+                .get("/api/title/male/mr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithInvalidTitleSmith() {
+        given()
+            .when()
+                .get("/api/title/male/smith")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithValidTitleMrs() {
+        given()
+            .when()
+                .get("/api/title/female/mrs")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithInvalidTitleSmith() {
+        given()
+            .when()
+                .get("/api/title/female/smith")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithValidTitleDr() {
+        given()
+            .when()
+                .get("/api/title/none/dr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnrecognizedSexNeuterWithJones() {
+        given()
+            .when()
+                .get("/api/title/neuter/jones")
+            .then()
+                .statusCode(500);
+    }
+}

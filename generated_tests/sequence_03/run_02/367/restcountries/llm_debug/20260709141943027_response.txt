@@ -1,0 +1,94 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeReturnsTranslations() {
+        given().when().get("/rest/v1/alpha/US").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeEsTranslation() {
+        given().when().get("/rest/v1/alpha/FR").then().statusCode(200).body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeFrTranslation() {
+        given().when().get("/rest/v1/alpha/DE").then().statusCode(200).body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeJaTranslation() {
+        given().when().get("/rest/v1/alpha/GB").then().statusCode(200).body("translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeItTranslation() {
+        given().when().get("/rest/v1/alpha/IT").then().statusCode(200).body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameReturnsTranslations() {
+        given().when().get("/rest/v1/name/France").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyReturnsTranslations() {
+        given().when().get("/rest/v1/currency/USD").then().statusCode(200).body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCodeReturnsTranslations() {
+        given().when().get("/rest/v1/callingcode/44").then().statusCode(200).body("translations[0].fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCapitalReturnsTranslations() {
+        given().when().get("/rest/v1/capital/London").then().statusCode(200).body("translations[0].ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByRegionReturnsTranslations() {
+        given().when().get("/rest/v1/region/Europe").then().statusCode(200).body("translations[0].it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesReturnsTranslations() {
+        given().when().get("/rest/v1/all").then().statusCode(200).body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCodesReturnsTranslations() {
+        given().queryParam("codes", "US,CA").when().get("/rest/v1/alpha").then().statusCode(200).body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameFullTextReturnsTranslations() {
+        given().queryParam("fullText", "true").when().get("/rest/v1/name/Germany").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryBySubregionReturnsTranslations() {
+        given().when().get("/rest/v1/subregion/Western Europe").then().statusCode(200).body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByLangReturnsTranslations() {
+        given().when().get("/rest/v1/lang/es").then().statusCode(200).body("translations[0].fr", notNullValue());
+    }
+}
+```

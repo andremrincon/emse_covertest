@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLengths() {
+        given()
+            .pathParam("w", "a")
+            .pathParam("x", "b")
+            .pathParam("z", "c")
+            .pathParam("y", "d")
+        .when()
+            .get("http://localhost:8080/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "aaaaa")
+            .pathParam("y", "bbbbb")
+        .when()
+            .get("http://localhost:8080/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "ddddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("http://localhost:8080/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .pathParam("w", "eeeee")
+            .pathParam("x", "ddddd")
+            .pathParam("z", "bbbbb")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("http://localhost:8080/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+}

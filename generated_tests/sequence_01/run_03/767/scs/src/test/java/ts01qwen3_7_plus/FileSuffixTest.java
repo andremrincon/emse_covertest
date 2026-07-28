@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        given()
+            .when()
+            .get("/api/filesuffix/text/document.txt")
+            .then()
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        given()
+            .when()
+            .get("/api/filesuffix/acrobat/document.pdf")
+            .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        given()
+            .when()
+            .get("/api/filesuffix/word/document.doc")
+            .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        given()
+            .when()
+            .get("/api/filesuffix/bin/program.exe")
+            .then()
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        given()
+            .when()
+            .get("/api/filesuffix/lib/library.dll")
+            .then()
+            .body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatchReturnsZero() {
+        given()
+            .when()
+            .get("/api/filesuffix/other/file.xyz")
+            .then()
+            .body(equalTo("0"));
+    }
+}

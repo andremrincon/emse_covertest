@@ -1,0 +1,61 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUri = System.getProperty("base.uri");
+        if (baseUri == null || baseUri.isEmpty()) {
+            baseUri = System.getenv("BASE_URI");
+        }
+        if (baseUri == null || baseUri.isEmpty()) {
+            baseUri = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUri;
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersSetOnGetProductsRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestHandledByCORSFilter() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersSetOnProductCreationAndRetrieval() {
+        String productName = "CORS-Filter-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/" + productName)
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+}
+```

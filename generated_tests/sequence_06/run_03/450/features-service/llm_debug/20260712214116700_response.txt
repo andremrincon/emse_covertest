@@ -1,0 +1,166 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.config.DecoderConfig;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String getBaseUrl() {
+        String url = System.getenv("BASE_URL");
+        if (url == null || url.isEmpty()) {
+            url = System.getProperty("baseUrl");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        return url;
+    }
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = getBaseUrl();
+        RestAssured.config = RestAssured.config().decoderConfig(DecoderConfig.decoderConfig().defaultContentCharset("UTF-8"));
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_success() {
+        String productName = "test-prod-req-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "source-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "required-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_error_nonExistentProduct() {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_success() {
+        String productName = "test-prod-exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "source-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "excluded-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_error_nonExistentProduct() {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "feat-c-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "feat-d-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_error_nonExistentFeatures() {
+        String productName = "test-prod-req-nf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", "non-existent-source")
+                .formParam("requiredFeature", "non-existent-required")
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_error_nonExistentFeatures() {
+        String productName = "test-prod-exc-nf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", "non-existent-source")
+                .formParam("excludedFeature", "non-existent-excluded")
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+}

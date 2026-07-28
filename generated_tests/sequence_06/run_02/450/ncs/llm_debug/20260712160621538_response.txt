@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class TriangleClassificationTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void classify_zeroSide_returnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/0/4/5")
+            .then()
+                .body("triangleType", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void classify_equilateralTriangle_returnsEquilateral() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/3/3/3")
+            .then()
+                .body("triangleType", equalTo("equilateral"));
+    }
+
+    @Test(timeout = 60000)
+    public void classify_isoscelesTriangle_returnsIsosceles() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/3/3/4")
+            .then()
+                .body("triangleType", equalTo("isosceles"));
+    }
+
+    @Test(timeout = 60000)
+    public void classify_scaleneRightTriangle_returnsRight() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/3/4/5")
+            .then()
+                .body("triangleType", equalTo("right"));
+    }
+
+    @Test(timeout = 60000)
+    public void classify_degenerateTriangle_returnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/2/3")
+            .then()
+                .body("triangleType", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void classify_negativeSide_returnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/4/-1/5")
+            .then()
+                .body("triangleType", notNullValue());
+    }
+}
+```

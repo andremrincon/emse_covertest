@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        String cfg = System.getProperty("baseUrl");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080/rest";
+        }
+        base = cfg;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetCodeViaV2Currency_success() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v2/currency/EUR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetCodeViaV2Currency_badRequest() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v2/currency/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNameViaV2Name_success() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v2/name/Germany");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNameViaV2Name_notFound() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v2/name/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetSymbolViaV1Alpha_success() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetSymbolViaV1Alpha_badAlpha() {
+        given().when().get(base + "/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/v1/alpha/123");
+        act.then().statusCode(404);
+    }
+}

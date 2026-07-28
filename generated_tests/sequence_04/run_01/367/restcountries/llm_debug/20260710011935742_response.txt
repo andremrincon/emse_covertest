@@ -1,0 +1,43 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import io.restassured.http.ContentType;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = Optional.ofNullable(System.getenv("BASE_URL")).orElseGet(() -> System.getProperty("base.url", "http://localhost:8080/rest"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameNotFound_statusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/{name}", "123").then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameNotFound_messageField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/{name}", "123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameServerError_returns500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/{name}", "True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1PostMethodNotAllowed_returns405() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().contentType(ContentType.JSON).body("{}").when().post("/v1").then().statusCode(405);
+    }
+}

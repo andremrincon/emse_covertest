@@ -1,0 +1,63 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String prop = System.getProperty("api.base");
+        String env = System.getenv("API_BASE");
+        if (prop != null && !prop.isEmpty()) {
+            BASE = prop;
+        } else if (env != null && !env.isEmpty()) {
+            BASE = env;
+        } else {
+            BASE = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDe_viaAlpha_US() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/US");
+        act.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEs_viaName_France() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/name/France");
+        act.then().body("[0].translations.es", equalTo("Francia"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFr_viaCurrency_USD() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/currency/USD");
+        act.then().body("[0].translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJa_viaAlpha_US() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/US");
+        act.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIt_viaName_France() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/name/France");
+        act.then().body("[0].translations.it", equalTo("Francia"));
+    }
+}

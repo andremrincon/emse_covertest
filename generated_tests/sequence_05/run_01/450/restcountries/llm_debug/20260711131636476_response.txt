@@ -1,0 +1,121 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String getBase() {
+        String b = System.getProperty("api.base");
+        if (b == null || b.isEmpty()) b = System.getenv("API_BASE");
+        if (b == null || b.isEmpty()) b = "http://localhost:8080/rest";
+        if (b.endsWith("/")) b = b.substring(0, b.length() - 1);
+        return b;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequest_Short() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess_US() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListEmpty_BadRequest() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "").when().get(base + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess_US_CA() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get(base + "/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess_USD() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound_XYZ() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess_France_FullTextFalse() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", false).when().get(base + "/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound_Numeric() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", false).when().get(base + "/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess_1() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound_abc() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/callingcode/abc").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess_London() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalNotFound_Numeric() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/capital/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccess_Europe() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregionSuccess_WesternEurope() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/subregion/Western%20Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccess_es() {
+        String base = getBase();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(base + "/v1/lang/es").then().statusCode(200);
+    }
+}

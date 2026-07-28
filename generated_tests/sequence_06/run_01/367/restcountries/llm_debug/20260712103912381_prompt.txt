@@ -1,0 +1,435 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getByName_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=getByAlphaList_success_withFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=getByAlphaList_badRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[4] METHOD=getByRegion_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=getByCurrency_badRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[6] METHOD=getBySubRegion_success TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+
+[7] METHOD=getByCurrency_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=getByCapital_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=getByAlphaList_serverError TYPE=ERROR
+Illegal character in query at index 28: /rest/rest/v2/alpha/?codes=["US", "CA"]
+
+[10] METHOD=getByName_serverError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[11] METHOD=getByCurrency_serverError TYPE=ERROR
+Illegal character in path at index 44: http://localhost:8080/rest/rest/v2/currency/{}
+
+[12] METHOD=getByLanguage_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[13] METHOD=getByCallingCode_success TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[14] METHOD=getByAlpha_badRequest TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[15] METHOD=getByAlpha_success_withFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getByName_success FAILURE AT LINE 105
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByName_success(CountryRestV2Test.java:105)
+CODE CONTEXT:
+   102:         .when()
+   103:             .get("/v2/name/{name}")
+   104:         .then()
+   105:             .statusCode(404);  ← FAILURE HERE
+   106:     }
+   107: 
+   108:     @Test(timeout = 60000)
+
+[2] METHOD=getByAlphaList_success_withFields FAILURE AT LINE 55
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByAlphaList_success_withFields(CountryRestV2Test.java:55)
+CODE CONTEXT:
+    52:         .when()
+    53:             .get("/v2/alpha/")
+    54:         .then()
+    55:             .statusCode(404);  ← FAILURE HERE
+    56:     }
+    57: 
+    58:     @Test(timeout = 60000)
+
+[3] METHOD=getByAlphaList_badRequest FAILURE AT LINE 44
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByAlphaList_badRequest(CountryRestV2Test.java:44)
+CODE CONTEXT:
+    41:         .when()
+    42:             .get("/v2/alpha/")
+    43:         .then()
+    44:             .statusCode(404);  ← FAILURE HERE
+    45:     }
+    46: 
+    47:     @Test(timeout = 60000)
+
+[4] METHOD=getByRegion_success FAILURE AT LINE 145
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByRegion_success(CountryRestV2Test.java:145)
+CODE CONTEXT:
+   142:         .when()
+   143:             .get("/v2/region/{region}")
+   144:         .then()
+   145:             .statusCode(404);  ← FAILURE HERE
+   146:     }
+   147: 
+   148:     @Test(timeout = 60000)
+
+[5] METHOD=getByCurrency_badRequest FAILURE AT LINE 75
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByCurrency_badRequest(CountryRestV2Test.java:75)
+CODE CONTEXT:
+    72:         .when()
+    73:             .get("/v2/currency/{currency}")
+    74:         .then()
+    75:             .statusCode(404);  ← FAILURE HERE
+    76:     }
+    77: 
+    78:     @Test(timeout = 60000)
+
+[6] METHOD=getBySubRegion_success FAILURE AT LINE 153
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+at ts01qwen3_7_plus.CountryRestV2Test.getBySubRegion_success(CountryRestV2Test.java:153)
+CODE CONTEXT:
+   150:         given()
+   151:             .pathParam("subregion", "Western Europe")
+   152:         .when()
+   153:             .get("/v2/subregion/{subregion}")  ← FAILURE HERE
+   154:         .then()
+   155:             .statusCode(200);
+   156:     }
+
+[7] METHOD=getByCurrency_success FAILURE AT LINE 85
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByCurrency_success(CountryRestV2Test.java:85)
+CODE CONTEXT:
+    82:         .when()
+    83:             .get("/v2/currency/{currency}")
+    84:         .then()
+    85:             .statusCode(404);  ← FAILURE HERE
+    86:     }
+    87: 
+    88:     @Test(timeout = 60000)
+
+[8] METHOD=getByCapital_success FAILURE AT LINE 135
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByCapital_success(CountryRestV2Test.java:135)
+CODE CONTEXT:
+   132:         .when()
+   133:             .get("/v2/capital/{capital}")
+   134:         .then()
+   135:             .statusCode(404);  ← FAILURE HERE
+   136:     }
+   137: 
+   138:     @Test(timeout = 60000)
+
+[9] METHOD=getByAlphaList_serverError FAILURE AT LINE 63
+at ts01qwen3_7_plus.CountryRestV2Test.getByAlphaList_serverError(CountryRestV2Test.java:63)
+Caused by: java.net.URISyntaxException: Illegal character in query at index 28: /rest/rest/v2/alpha/?codes=["US", "CA"]
+CODE CONTEXT:
+    60:         given()
+    61:             .queryParam("codes", "[\"US\", \"CA\"]")
+    62:         .when()
+    63:             .get("/v2/alpha/")  ← FAILURE HERE
+    64:         .then()
+    65:             .statusCode(500);
+    66:     }
+
+[10] METHOD=getByName_serverError FAILURE AT LINE 115
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByName_serverError(CountryRestV2Test.java:115)
+CODE CONTEXT:
+   112:         .when()
+   113:             .get("/v2/name/{name}")
+   114:         .then()
+   115:             .statusCode(404);  ← FAILURE HERE
+   116:     }
+   117: 
+   118:     @Test(timeout = 60000)
+
+[11] METHOD=getByCurrency_serverError FAILURE AT LINE 93
+java.net.URISyntaxException: Illegal character in path at index 44: http://localhost:8080/rest/rest/v2/currency/{}
+at ts01qwen3_7_plus.CountryRestV2Test.getByCurrency_serverError(CountryRestV2Test.java:93)
+CODE CONTEXT:
+    90:         given()
+    91:             .pathParam("currency", "{}")
+    92:         .when()
+    93:             .get("/v2/currency/{currency}")  ← FAILURE HERE
+    94:         .then()
+    95:             .statusCode(500);
+    96:     }
+
+[12] METHOD=getByLanguage_success FAILURE AT LINE 165
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByLanguage_success(CountryRestV2Test.java:165)
+CODE CONTEXT:
+   162:         .when()
+   163:             .get("/v2/lang/{lang}")
+   164:         .then()
+   165:             .statusCode(404);  ← FAILURE HERE
+   166:     }
+   167: }
+
+[13] METHOD=getByCallingCode_success FAILURE AT LINE 125
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByCallingCode_success(CountryRestV2Test.java:125)
+CODE CONTEXT:
+   122:         .when()
+   123:             .get("/v2/callingcode/{callingcode}")
+   124:         .then()
+   125:             .statusCode(404);  ← FAILURE HERE
+   126:     }
+   127: 
+   128:     @Test(timeout = 60000)
+
+[14] METHOD=getByAlpha_badRequest FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByAlpha_badRequest(CountryRestV2Test.java:23)
+CODE CONTEXT:
+    20:         .when()
+    21:             .get("/v2/alpha/{alphacode}")
+    22:         .then()
+    23:             .statusCode(404);  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[15] METHOD=getByAlpha_success_withFields FAILURE AT LINE 34
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryRestV2Test.getByAlpha_success_withFields(CountryRestV2Test.java:34)
+CODE CONTEXT:
+    31:         .when()
+    32:             .get("/v2/alpha/{alphacode}")
+    33:         .then()
+    34:             .statusCode(404);  ← FAILURE HERE
+    35:     }
+    36: 
+    37:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_badRequest() {
+        given()
+            .pathParam("alphacode", "1")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_success_withFields() {
+        given()
+            .pathParam("alphacode", "US")
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_badRequest() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_success_withFields() {
+        given()
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_serverError() {
+        given()
+            .queryParam("codes", "[\"US\", \"CA\"]")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_badRequest() {
+        given()
+            .pathParam("currency", "12")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_success() {
+        given()
+            .pathParam("currency", "EUR")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_serverError() {
+        given()
+            .pathParam("currency", "{}")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_success() {
+        given()
+            .pathParam("name", "Germany")
+        .when()
+            .get("/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_serverError() {
+        given()
+            .pathParam("name", "True")
+        .when()
+            .get("/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_success() {
+        given()
+            .pathParam("callingcode", "1")
+        .when()
+            .get("/v2/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_success() {
+        given()
+            .pathParam("capital", "Paris")
+        .when()
+            .get("/v2/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_success() {
+        given()
+            .pathParam("region", "Europe")
+        .when()
+            .get("/v2/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_success() {
+        given()
+            .pathParam("subregion", "Western Europe")
+        .when()
+            .get("/v2/subregion/{subregion}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_success() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

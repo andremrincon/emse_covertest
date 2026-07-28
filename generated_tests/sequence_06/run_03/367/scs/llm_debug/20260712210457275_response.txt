@@ -1,0 +1,112 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+    
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? 
+        System.getenv("BASE_URL") : "http://localhost:8080";
+    
+    @Test(timeout = 60000)
+    public void testValidDayAndMonthCombinations() {
+        String[][] testCases = {
+            {"mon", "jan", "2"},
+            {"tue", "feb", "3"},
+            {"wed", "mar", "4"},
+            {"thur", "apr", "5"},
+            {"fri", "may", "6"},
+            {"sat", "jun", "7"},
+            {"sun", "jul", "8"}
+        };
+        
+        for (String[] testCase : testCases) {
+            given()
+                .baseUri(BASE_URL)
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", testCase[0], testCase[1])
+            .then()
+                .statusCode(200)
+                .body(equalTo(testCase[2]));
+        }
+    }
+    
+    @Test(timeout = 60000)
+    public void testAllValidMonths() {
+        String validDay = "mon";
+        String[][] monthCases = {
+            {"aug", "9"},
+            {"sep", "10"},
+            {"oct", "11"},
+            {"nov", "12"},
+            {"dec", "13"}
+        };
+        
+        for (String[] monthCase : monthCases) {
+            given()
+                .baseUri(BASE_URL)
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", validDay, monthCase[0])
+            .then()
+                .statusCode(200)
+                .body(equalTo(monthCase[1]));
+        }
+    }
+    
+    @Test(timeout = 60000)
+    public void testInvalidDayName() {
+        String invalidDay = "invalidday";
+        String validMonth = "jan";
+        
+        Response response = given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}", invalidDay, validMonth);
+        
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+    
+    @Test(timeout = 60000)
+    public void testInvalidMonthName() {
+        String validDay = "mon";
+        String invalidMonth = "invalidmonth";
+        
+        Response response = given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}", validDay, invalidMonth);
+        
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+    
+    @Test(timeout = 60000)
+    public void testBothInvalidDayAndMonth() {
+        String invalidDay = "invalidday";
+        String invalidMonth = "invalidmonth";
+        
+        Response response = given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}", invalidDay, invalidMonth);
+        
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+    
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity() {
+        String upperCaseDay = "MON";
+        String mixedCaseMonth = "JaN";
+        
+        Response response = given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}", upperCaseDay, mixedCaseMonth);
+        
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+}
+```

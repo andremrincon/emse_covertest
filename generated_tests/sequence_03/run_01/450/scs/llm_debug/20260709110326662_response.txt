@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsZeroForMinus4AndAbab() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "-4", "abab");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsSixForZeroAndAbab() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "15.5", "4.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "0", "abab");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveBranchProducesSix() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "0", "0").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "5", "abab");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeLargeTriggersLessThanMinus444Branch() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "2", "3").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "-500", "abab");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStringGreaterThanAbabbaProducesTen() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "10", "4.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "0", "zzzz");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStringEqualAbabbaWithMinus4ProducesTen() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "7", "8").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "-4", "ababba");
+        resp.then().statusCode(200).body(equalTo("10"));
+    }
+}

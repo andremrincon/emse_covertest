@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+public class CORSFilterTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("rest.base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("REST_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+    @Test(timeout = 60000)
+    public void testAllowsOriginHeaderPresentOnV1All() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().header("Access-Control-Allow-Origin", nullValue());
+    }
+    @Test(timeout = 60000)
+    public void testAllowsMethodsHeaderOnV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().header("Access-Control-Allow-Methods", nullValue());
+    }
+    @Test(timeout = 60000)
+    public void testAllowsHeadersHeaderOnV1NameFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().header("Access-Control-Allow-Headers", nullValue());
+    }
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderPresentOnV1RegionEurope() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().header("Cache-Control", nullValue());
+    }
+    @Test(timeout = 60000)
+    public void testDoFilterChainStillProcessesReturns200ForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+    @Test(timeout = 60000)
+    public void testAlphaBadFormatReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+}

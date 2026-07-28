@@ -1,0 +1,117 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2LetterMatch() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3LetterMatch() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v1/alpha/USA")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNoMatch() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "US;CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListInvalid() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchPrimaryName() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/USA")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchPrimaryName() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fullText", false)
+        .when()
+            .get("/v1/name/Fran")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fullText", false)
+        .when()
+            .get("/v1/name/Republic")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonExecution() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(404);
+    }
+}

@@ -1,0 +1,288 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV1Alpha_BadFormat_Status400 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testV1Currency_USD_Status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testV1Alpha_NotFound_Status404 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testV1Name_France_BodyContainsFrenchLanguage TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testV2Lang_Spanish_BodyContainsSpanish TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testV1Lang_es_Status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testV1Alpha_Codes_Bad400 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testV1Alpha_MultipleCodes_Status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testV2Alpha_US_Status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testV1Alpha_US_Status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV1Alpha_BadFormat_Status400 FAILURE AT LINE 36
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_BadFormat_Status400(LanguageTest.java:36)
+CODE CONTEXT:
+    33: 
+    34:     @Test(timeout = 60000)
+    35:     public void testV1Alpha_BadFormat_Status400() {
+    36:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    37:         Response act = given().when().get("/v1/alpha/123");
+    38:         assertEquals(400, act.getStatusCode());
+    39:     }
+
+[2] METHOD=testV1Currency_USD_Status200 FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Currency_USD_Status200(LanguageTest.java:57)
+CODE CONTEXT:
+    54: 
+    55:     @Test(timeout = 60000)
+    56:     public void testV1Currency_USD_Status200() {
+    57:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    58:         Response act = given().when().get("/v1/currency/USD");
+    59:         assertEquals(200, act.getStatusCode());
+    60:     }
+
+[3] METHOD=testV1Alpha_NotFound_Status404 FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_NotFound_Status404(LanguageTest.java:43)
+CODE CONTEXT:
+    40: 
+    41:     @Test(timeout = 60000)
+    42:     public void testV1Alpha_NotFound_Status404() {
+    43:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    44:         Response act = given().when().get("/v1/alpha/XYZ");
+    45:         assertEquals(404, act.getStatusCode());
+    46:     }
+
+[4] METHOD=testV1Name_France_BodyContainsFrenchLanguage FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Name_France_BodyContainsFrenchLanguage(LanguageTest.java:50)
+CODE CONTEXT:
+    47: 
+    48:     @Test(timeout = 60000)
+    49:     public void testV1Name_France_BodyContainsFrenchLanguage() {
+    50:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    51:         Response act = given().when().get("/v1/name/France");
+    52:         assertTrue(act.asString().contains("French"));
+    53:     }
+
+[5] METHOD=testV2Lang_Spanish_BodyContainsSpanish FAILURE AT LINE 78
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV2Lang_Spanish_BodyContainsSpanish(LanguageTest.java:78)
+CODE CONTEXT:
+    75: 
+    76:     @Test(timeout = 60000)
+    77:     public void testV2Lang_Spanish_BodyContainsSpanish() {
+    78:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    79:         Response act = given().when().get("/v2/lang/Spanish");
+    80:         assertTrue(act.asString().contains("Spanish"));
+    81:     }
+
+[6] METHOD=testV1Lang_es_Status200 FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Lang_es_Status200(LanguageTest.java:64)
+CODE CONTEXT:
+    61: 
+    62:     @Test(timeout = 60000)
+    63:     public void testV1Lang_es_Status200() {
+    64:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    65:         Response act = given().when().get("/v1/lang/es");
+    66:         assertEquals(200, act.getStatusCode());
+    67:     }
+
+[7] METHOD=testV1Alpha_Codes_Bad400 FAILURE AT LINE 92
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_Codes_Bad400(LanguageTest.java:92)
+CODE CONTEXT:
+    89: 
+    90:     @Test(timeout = 60000)
+    91:     public void testV1Alpha_Codes_Bad400() {
+    92:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    93:         Response act = given().queryParam("codes", "123").when().get("/v1/alpha");
+    94:         assertEquals(400, act.getStatusCode());
+    95:     }
+
+[8] METHOD=testV1Alpha_MultipleCodes_Status200 FAILURE AT LINE 85
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_MultipleCodes_Status200(LanguageTest.java:85)
+CODE CONTEXT:
+    82: 
+    83:     @Test(timeout = 60000)
+    84:     public void testV1Alpha_MultipleCodes_Status200() {
+    85:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    86:         Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+    87:         assertEquals(200, act.getStatusCode());
+    88:     }
+
+[9] METHOD=testV2Alpha_US_Status200 FAILURE AT LINE 71
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV2Alpha_US_Status200(LanguageTest.java:71)
+CODE CONTEXT:
+    68: 
+    69:     @Test(timeout = 60000)
+    70:     public void testV2Alpha_US_Status200() {
+    71:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    72:         Response act = given().when().get("/v2/alpha/US");
+    73:         assertEquals(200, act.getStatusCode());
+    74:     }
+
+[10] METHOD=testV1Alpha_US_Status200 FAILURE AT LINE 29
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_US_Status200(LanguageTest.java:29)
+CODE CONTEXT:
+    26: 
+    27:     @Test(timeout = 60000)
+    28:     public void testV1Alpha_US_Status200() {
+    29:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    30:         Response act = given().when().get("/v1/alpha/US");
+    31:         assertEquals(200, act.getStatusCode());
+    32:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", System.getenv("api.base"));
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_Status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_BadFormat_Status400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_NotFound_Status404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/XYZ");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_France_BodyContainsFrenchLanguage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France");
+        assertTrue(act.asString().contains("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_Status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_Status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/lang/es");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_US_Status200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_Spanish_BodyContainsSpanish() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/Spanish");
+        assertTrue(act.asString().contains("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_MultipleCodes_Status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_Codes_Bad400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "123").when().get("/v1/alpha");
+        assertEquals(400, act.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

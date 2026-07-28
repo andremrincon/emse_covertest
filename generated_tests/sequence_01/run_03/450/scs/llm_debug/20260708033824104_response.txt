@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    static {
+        String baseUrl = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTuesdayAndEarlyMonths() {
+        given().when().get("/api/dateparse/tue/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/apr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWednesdayAndMidMonths() {
+        given().when().get("/api/dateparse/wed/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/aug").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseThursdayAndLateMonths() {
+        given().when().get("/api/dateparse/thur/sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/oct").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/dec").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFridaySaturdaySunday() {
+        given().when().get("/api/dateparse/fri/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/mar").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDay() {
+        given().when().get("/api/dateparse/invalid/jan").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidMonth() {
+        given().when().get("/api/dateparse/mon/invalid").then().statusCode(500);
+    }
+}

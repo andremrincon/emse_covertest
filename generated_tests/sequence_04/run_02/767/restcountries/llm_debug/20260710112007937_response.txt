@@ -1,0 +1,85 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("TEST_BASE_URL", System.getenv("TEST_BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/{alphacode}", "US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_languageIso639_1_inBody() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/{alphacode}", "US");
+        resp.then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodes_query_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodes_query_status400_forInvalidCodes() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "123").when().get("/v1/alpha");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/lang/{lang}", "es");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_badAlphacode_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/{alphacode}", "123");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/{alphacode}", "XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_fields_nameMatches() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{alphacode}", "US");
+        resp.then().body("name", equalTo("United States"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_spanish_languagesContainIso639_1_es() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/lang/{lang}", "Spanish");
+        resp.then().body("[0].languages[0].iso639_1", equalTo("es"));
+    }
+}

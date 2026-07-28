@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.baseURI;
+import static io.restassured.RestAssured.given;
+
+public class CookieTest {
+
+    @Before
+    public void setUp() {
+        baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridBranchResult1() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/localhost")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridBranchValLengthLessThan6() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user1/localhost")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridBranchValNotStartsWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/admin12345/localhost")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchResult1() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchResult2() {
+        given()
+            .when()
+                .get("/api/cookie/session/pm/localhost")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDefaultConstructorAndNoBranchMatch() {
+        given()
+            .when()
+                .get("/api/cookie/other/any/localhost")
+            .then()
+                .statusCode(200);
+    }
+}

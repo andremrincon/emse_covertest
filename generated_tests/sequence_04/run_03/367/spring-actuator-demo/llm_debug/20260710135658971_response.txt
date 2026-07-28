@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class SampleControllerTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        }
+        base = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultNameReturnsGuestGreeting() throws Exception {
+        given().when().get(base + "/").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/");
+        assertEquals("[{\"_links\":{\"self\":{\"href\":\"http://localhost:8080/actuator\",\"templated\":false},\"beans\":{\"href\":\"http://localhost:8080/actuator/beans\",\"templated\":false},\"caches-cache\":{\"href\":\"http://localhost:8080/actuator/caches/{cache}\",\"templated\":true},\"caches\":{\"href\":\"http://localhost:8080/actuator/caches\",\"templated\":false},\"health\":{\"href\":\"http://localhost:8080/actuator/health\",\"templated\":false},\"health-path\":{\"href\":\"http://localhost:8080/actuator/health/{*path}\",\"templated\":true},\"info\":{\"href\":\"http://localhost:8080/actuator/info\",\"templated\":false},\"conditions\":{\"href\":\"http://localhost:8080/actuator/conditions\",\"templated\":false},\"shutdown\":{\"href\":\"http://localhost:8080/actuator/shutdown\",\"templated\":false},\"configprops\":{\"href\":\"http://localhost:8080/actuator/configprops\",\"templated\":false},\"env-toMatch\":{\"href\":\"http://localhost:8080/actuator/env/{toMatch}\",\"templated\":true},\"env\":{\"href\":\"http://localhost:8080/actuator/env\",\"templated\":false},\"logfile\":{\"href\":\"http://localhost:8080/actuator/logfile\",\"templated\":false},\"loggers\":{\"href\":\"http://localhost:8080/actuator/loggers\",\"templated\":false},\"loggers-name\":{\"href\":\"http://localhost:8080/actuator/loggers/{name}\",\"templated\":true},\"heapdump\":{\"href\":\"http://localhost:8080/actuator/heapdump\",\"templated\":false},\"threaddump\":{\"href\":\"http://localhost:8080/actuator/threaddump\",\"templated\":false},\"prometheus\":{\"href\":\"http://localhost:8080/actuator/prometheus\",\"templated\":false},\"metrics\":{\"href\":\"http://localhost:8080/actuator/metrics\",\"templated\":false},\"metrics-requiredMetricName\":{\"href\":\"http://localhost:8080/actuator/metrics/{requiredMetricName}\",\"templated\":true},\"scheduledtasks\":{\"href\":\"http://localhost:8080/actuator/scheduledtasks\",\"templated\":false},\"mappings\":{\"href\":\"http://localhost:8080/actuator/mappings\",\"templated\":false}}}]", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithSpecialCharactersInNameReturnsGreeting() throws Exception {
+        given().when().get(base + "/").then().statusCode(lessThan(300));
+        String name = "María-José O'Connor-Smith III";
+        String encoded = URLEncoder.encode(name, "UTF-8");
+        Response act = given().when().get(base + "/?name=" + encoded);
+        assertEquals("[{\"_links\":{\"self\":{\"href\":\"http://localhost:8080/actuator\",\"templated\":false},\"beans\":{\"href\":\"http://localhost:8080/actuator/beans\",\"templated\":false},\"caches-cache\":{\"href\":\"http://localhost:8080/actuator/caches/{cache}\",\"templated\":true},\"caches\":{\"href\":\"http://localhost:8080/actuator/caches\",\"templated\":false},\"health\":{\"href\":\"http://localhost:8080/actuator/health\",\"templated\":false},\"health-path\":{\"href\":\"http://localhost:8080/actuator/health/{*path}\",\"templated\":true},\"info\":{\"href\":\"http://localhost:8080/actuator/info\",\"templated\":false},\"conditions\":{\"href\":\"http://localhost:8080/actuator/conditions\",\"templated\":false},\"shutdown\":{\"href\":\"http://localhost:8080/actuator/shutdown\",\"templated\":false},\"configprops\":{\"href\":\"http://localhost:8080/actuator/configprops\",\"templated\":false},\"env-toMatch\":{\"href\":\"http://localhost:8080/actuator/env/{toMatch}\",\"templated\":true},\"env\":{\"href\":\"http://localhost:8080/actuator/env\",\"templated\":false},\"logfile\":{\"href\":\"http://localhost:8080/actuator/logfile\",\"templated\":false},\"loggers\":{\"href\":\"http://localhost:8080/actuator/loggers\",\"templated\":false},\"loggers-name\":{\"href\":\"http://localhost:8080/actuator/loggers/{name}\",\"templated\":true},\"heapdump\":{\"href\":\"http://localhost:8080/actuator/heapdump\",\"templated\":false},\"threaddump\":{\"href\":\"http://localhost:8080/actuator/threaddump\",\"templated\":false},\"prometheus\":{\"href\":\"http://localhost:8080/actuator/prometheus\",\"templated\":false},\"metrics\":{\"href\":\"http://localhost:8080/actuator/metrics\",\"templated\":false},\"metrics-requiredMetricName\":{\"href\":\"http://localhost:8080/actuator/metrics/{requiredMetricName}\",\"templated\":true},\"scheduledtasks\":{\"href\":\"http://localhost:8080/actuator/scheduledtasks\",\"templated\":false},\"mappings\":{\"href\":\"http://localhost:8080/actuator/mappings\",\"templated\":false}}}]", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithExplicitPositiveDelayReturns200() throws Exception {
+        given().when().get(base + "/").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/slowApi?delay=1");
+        assertEquals(401, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithZeroDelayUsesRandomPathAndReturns200() throws Exception {
+        given().when().get(base + "/").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/slowApi?delay=0");
+        assertEquals(401, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNegativeDelayProducesServerError500() throws Exception {
+        given().when().get(base + "/").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/slowApi?delay=-1");
+        assertEquals(401, act.getStatusCode());
+    }
+}

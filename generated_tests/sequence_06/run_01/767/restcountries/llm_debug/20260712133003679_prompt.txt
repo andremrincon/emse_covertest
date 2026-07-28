@@ -1,0 +1,426 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ContributionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=contribute_missingAmount_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=contribute_largeAmount_returnsAcceptedOrError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=contribute_negativeAmount_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=contribute_missingToken_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=contribute_missingContentType_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=contribute_nullToken_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=contribute_stringAmount_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=contribute_validPayloadWithExtraFields_returnsAcceptedOrError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=contribute_emptyToken_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=contribute_emptyBody_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[11] METHOD=contribute_zeroAmount_returnsClientError TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[12] METHOD=contribute_validPayload_returnsAccepted TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=contribute_missingAmount_returnsClientError FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_missingAmount_returnsClientError(ContributionTest.java:45)
+CODE CONTEXT:
+    42:     public void contribute_missingAmount_returnsClientError() {
+    43:         String payload = "{\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+    44: 
+    45:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    46: 
+    47:         given()
+    48:             .contentType(ContentType.JSON)
+
+[2] METHOD=contribute_largeAmount_returnsAcceptedOrError FAILURE AT LINE 148
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_largeAmount_returnsAcceptedOrError(ContributionTest.java:148)
+CODE CONTEXT:
+   145:     public void contribute_largeAmount_returnsAcceptedOrError() {
+   146:         String payload = "{\"amount\":999999,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+   147: 
+   148:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   149: 
+   150:         given()
+   151:             .contentType(ContentType.JSON)
+
+[3] METHOD=contribute_negativeAmount_returnsClientError FAILURE AT LINE 103
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_negativeAmount_returnsClientError(ContributionTest.java:103)
+CODE CONTEXT:
+   100:     public void contribute_negativeAmount_returnsClientError() {
+   101:         String payload = "{\"amount\":-10,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+   102: 
+   103:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   104: 
+   105:         given()
+   106:             .contentType(ContentType.JSON)
+
+[4] METHOD=contribute_missingToken_returnsClientError FAILURE AT LINE 60
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_missingToken_returnsClientError(ContributionTest.java:60)
+CODE CONTEXT:
+    57:     public void contribute_missingToken_returnsClientError() {
+    58:         String payload = "{\"amount\":50,\"currency\":\"usd\"}";
+    59: 
+    60:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    61: 
+    62:         given()
+    63:             .contentType(ContentType.JSON)
+
+[5] METHOD=contribute_missingContentType_returnsClientError FAILURE AT LINE 178
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_missingContentType_returnsClientError(ContributionTest.java:178)
+CODE CONTEXT:
+   175:     public void contribute_missingContentType_returnsClientError() {
+   176:         String payload = "{\"amount\":100,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+   177: 
+   178:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   179: 
+   180:         given()
+   181:             .body(payload)
+
+[6] METHOD=contribute_nullToken_returnsClientError FAILURE AT LINE 118
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_nullToken_returnsClientError(ContributionTest.java:118)
+CODE CONTEXT:
+   115:     public void contribute_nullToken_returnsClientError() {
+   116:         String payload = "{\"amount\":100,\"token\":null,\"currency\":\"usd\"}";
+   117: 
+   118:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   119: 
+   120:         given()
+   121:             .contentType(ContentType.JSON)
+
+[7] METHOD=contribute_stringAmount_returnsClientError FAILURE AT LINE 163
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_stringAmount_returnsClientError(ContributionTest.java:163)
+CODE CONTEXT:
+   160:     public void contribute_stringAmount_returnsClientError() {
+   161:         String payload = "{\"amount\":\"abc\",\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+   162: 
+   163:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   164: 
+   165:         given()
+   166:             .contentType(ContentType.JSON)
+
+[8] METHOD=contribute_validPayloadWithExtraFields_returnsAcceptedOrError FAILURE AT LINE 192
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_validPayloadWithExtraFields_returnsAcceptedOrError(ContributionTest.java:192)
+CODE CONTEXT:
+   189:     public void contribute_validPayloadWithExtraFields_returnsAcceptedOrError() {
+   190:         String payload = "{\"amount\":250,\"token\":\"tok_mastercard\",\"currency\":\"eur\",\"description\":\"test contribution\"}";
+   191: 
+   192:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   193: 
+   194:         given()
+   195:             .contentType(ContentType.JSON)
+
+[9] METHOD=contribute_emptyToken_returnsClientError FAILURE AT LINE 133
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_emptyToken_returnsClientError(ContributionTest.java:133)
+CODE CONTEXT:
+   130:     public void contribute_emptyToken_returnsClientError() {
+   131:         String payload = "{\"amount\":100,\"token\":\"\",\"currency\":\"usd\"}";
+   132: 
+   133:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   134: 
+   135:         given()
+   136:             .contentType(ContentType.JSON)
+
+[10] METHOD=contribute_emptyBody_returnsClientError FAILURE AT LINE 73
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_emptyBody_returnsClientError(ContributionTest.java:73)
+CODE CONTEXT:
+    70: 
+    71:     @Test(timeout = 60000)
+    72:     public void contribute_emptyBody_returnsClientError() {
+    73:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    74: 
+    75:         given()
+    76:             .contentType(ContentType.JSON)
+
+[11] METHOD=contribute_zeroAmount_returnsClientError FAILURE AT LINE 88
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_zeroAmount_returnsClientError(ContributionTest.java:88)
+CODE CONTEXT:
+    85:     public void contribute_zeroAmount_returnsClientError() {
+    86:         String payload = "{\"amount\":0,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+    87: 
+    88:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    89: 
+    90:         given()
+    91:             .contentType(ContentType.JSON)
+
+[12] METHOD=contribute_validPayload_returnsAccepted FAILURE AT LINE 30
+java.lang.AssertionError:
+at ts01glm_5_2.ContributionTest.contribute_validPayload_returnsAccepted(ContributionTest.java:30)
+CODE CONTEXT:
+    27:     public void contribute_validPayload_returnsAccepted() {
+    28:         String payload = "{\"amount\":100,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+    29: 
+    30:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    31: 
+    32:         given()
+    33:             .contentType(ContentType.JSON)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validPayload_returnsAccepted() {
+        String payload = "{\"amount\":100,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingAmount_returnsClientError() {
+        String payload = "{\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingToken_returnsClientError() {
+        String payload = "{\"amount\":50,\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_emptyBody_returnsClientError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("{}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_zeroAmount_returnsClientError() {
+        String payload = "{\"amount\":0,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_negativeAmount_returnsClientError() {
+        String payload = "{\"amount\":-10,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_nullToken_returnsClientError() {
+        String payload = "{\"amount\":100,\"token\":null,\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_emptyToken_returnsClientError() {
+        String payload = "{\"amount\":100,\"token\":\"\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_largeAmount_returnsAcceptedOrError() {
+        String payload = "{\"amount\":999999,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_stringAmount_returnsClientError() {
+        String payload = "{\"amount\":\"abc\",\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_missingContentType_returnsClientError() {
+        String payload = "{\"amount\":100,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(415);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validPayloadWithExtraFields_returnsAcceptedOrError() {
+        String payload = "{\"amount\":250,\"token\":\"tok_mastercard\",\"currency\":\"eur\",\"description\":\"test contribution\"}";
+
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

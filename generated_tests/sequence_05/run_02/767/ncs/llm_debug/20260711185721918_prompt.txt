@@ -1,0 +1,155 @@
+
+Do create a white box test suite in JUnit 4 and Java 1.8 using REST Assured to achieve full 
+test coverage, including methods, lines, and all branches with all possible execution paths, 
+according to the instructions delimited by %%%%%, which is part of the REST Java Application 
+code delimited by *****. Use the Swagger documentation delimited by ##### to provide 
+complementary information about the application.
+
+Your responses must contain ONLY valid, compilable Java code in JUnit 4 format.
+NO comments, NO explanations, NO syntax errors.
+
+IMPORTANT CONSTRAINTS:
+- Generate AT MOST 6 @Test methods total
+- Test class name MUST be: FisherTest
+- Test class package MUST be: ts01glm_5_2
+- Tests CANNOT instantiate business classes directly
+- Tests can ONLY call REST API endpoints via REST Assured
+- Use base URL from environment or configuration
+- Include proper imports for REST Assured and JUnit 4
+- ALL @Test methods MUST explicitly declare a timeout of 60000 milliseconds using @Test(timeout = 60000)
+- Prioritize endpoint-aware request data and parameter examples when available
+- Keep assertions aligned with endpoint response codes when known
+
+TEST DESIGN RULES — SINGLE OBJECTIVE PER TEST:
+- Each @Test method MUST test exactly ONE behavior or scenario (single test objective).
+- Each @Test method should be small and focused; do not combine multiple behaviors in one test.
+- Follow the AAA pattern strictly inside every @Test method:
+    * ARRANGE: REST calls that set up the necessary state (e.g., create a product before adding a feature).
+      - Arrange calls MUST NOT use exact statusCode assertions.
+      - Use: given().when().<call>().then().statusCode(lessThan(300)); (import static org.hamcrest.Matchers.lessThan;)
+      - This prevents setup failures from masking the real test objective.
+    * ACT: The single REST call that exercises the behavior being tested.
+    * ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked.
+- NEVER chain multiple exact statusCode(N) assertions in the same test method with the same importance.
+- If an endpoint is idempotent for setup (e.g., creating a resource), use a unique identifier (UUID) per test to avoid state leakage between tests.
+
+CLASS ROLE NOTE:
+NOTE: This class has no direct REST endpoint. It is exercised TRANSITIVELY by the REST API (e.g., via Spring DI: Resource → Service → DAO → Model). You MUST still write integration tests that call REST API endpoints via REST Assured. Analyse the source code and the available endpoints to identify which endpoints internally exercise the methods listed in UNCOVERED INFO, then write tests that call those endpoints and indirectly cover this class.
+
+UNCOVERED INFO:
+%%%%%
+Uncovered method: <init> - Uncovered Lines: [5]
+Uncovered method: exe - Uncovered Lines: [16, 22, 23, 56, 57, 58, 59]
+%%%%%
+
+APPLICATION SOURCE CODE:
+*****
+package org.restncs.imp;
+
+
+
+public class Fisher {
+    public static double exe(int m, int n, double x) {
+        int a, b, i, j;
+        double w, y, z, zk, d, p;
+
+        a = 2 * (m / 2) - m + 2;
+        b = 2 * (n / 2) - n + 2;
+        w = (x * m) / n;
+        z = 1.0 / (1.0 + w);
+
+        if (a == 1) {
+            if (b == 1) {
+                p = Math.sqrt(w);
+                y = 0.3183098862;
+                d = y * z / p;
+                p = 2.0 * y * Math.atan(p);
+            } else {
+                p = Math.sqrt(w * z);
+                d = 0.5 * p * z / w;
+            }
+        } else if (b == 1) {
+            p = Math.sqrt(z);
+            d = 0.5 * z * p;
+            p = 1.0 - p;
+        } else {
+            d = z * z;
+            p = w * z;
+        }
+
+        y = 2.0 * w / z;
+
+        if (a == 1)
+            for (j = b + 2; j <= n; j += 2) {
+                d *= (1.0 + 1.0 / (j - 2)) * z;
+                p += d * y / (j - 1);
+            }
+        else {
+            zk = Math.pow(z, (double) ((n - 1) / 2));
+            d *= (zk * n) / b;
+            p = p * zk + w * z * (zk - 1.0) / (z - 1.0);
+        }
+
+        y = w * z;
+        z = 2.0 / z;
+        b = n - 2;
+        for (i = a + 2; i <= m; i += 2) {
+            j = i + b;
+            d *= (y * j) / (i - 2);
+            p -= z * d / j;
+        }
+
+        if (p < 0.0)
+            return 0.0;
+        else if (p > 1.0)
+            return 1.0;
+        else
+            return p;
+    }
+}
+
+*****
+
+ENDPOINT CONTEXT (normalized):
+@@@@@
+- GET /api/bessj/{n}/{x} | expected status codes: 200, 400
+- GET /api/expint/{n}/{x} | expected status codes: 200, 400
+- GET /api/fisher/{m}/{n}/{x} | expected status codes: 200, 400
+- GET /api/gammq/{a}/{x} | expected status codes: 200, 400
+- GET /api/remainder/{a}/{b} | expected status codes: 200, 400
+- GET /api/triangle/{a}/{b}/{c} | expected status codes: 200
+@@@@@
+
+PRIORITIZED PARAMETER EXAMPLES (x-parameter-examples when available):
+$$$$$
+- GET /api/bessj/{n}/{x} | status 200 | n: 3, 0
+- GET /api/bessj/{n}/{x} | status 200 | x: 2.5, 1e-10
+- GET /api/bessj/{n}/{x} | status 400 | n: abc, -5
+- GET /api/bessj/{n}/{x} | status 400 | x: 2.5
+- GET /api/expint/{n}/{x} | status 200 | n: 3, 1
+- GET /api/expint/{n}/{x} | status 200 | x: 2.5, 0.1
+- GET /api/expint/{n}/{x} | status 400 | n: abc, -1, 3
+- GET /api/expint/{n}/{x} | status 400 | x: 2.5, True, -999.9
+- GET /api/fisher/{m}/{n}/{x} | status 200 | m: 10, 1
+- GET /api/fisher/{m}/{n}/{x} | status 200 | n: 5, 1
+- GET /api/fisher/{m}/{n}/{x} | status 200 | x: 0.75, 0.0
+- GET /api/fisher/{m}/{n}/{x} | status 400 | m: abc, 8, 12
+- GET /api/fisher/{m}/{n}/{x} | status 400 | n: 5, -3, 6
+- GET /api/fisher/{m}/{n}/{x} | status 400 | x: 0.5, 1.2
+- GET /api/gammq/{a}/{x} | status 200 | a: 5.5, 0.001
+- GET /api/gammq/{a}/{x} | status 200 | x: 2.3, 1000.0
+- GET /api/gammq/{a}/{x} | status 400 | a: abc, -1.0
+- GET /api/gammq/{a}/{x} | status 400 | x: 3.0, 2.0
+- GET /api/remainder/{a}/{b} | status 200 | a: 17, -9
+- GET /api/remainder/{a}/{b} | status 200 | b: 5, 4
+- GET /api/remainder/{a}/{b} | status 400 | a: abc, 0
+- GET /api/remainder/{a}/{b} | status 400 | b: 3, 0, 7
+- GET /api/triangle/{a}/{b}/{c} | status 200 | a: 3, 1
+- GET /api/triangle/{a}/{b}/{c} | status 200 | b: 4, 1
+- GET /api/triangle/{a}/{b}/{c} | status 200 | c: 5, 1
+$$$$$
+
+SWAGGER DOCUMENTATION:
+#####
+{"swagger":"2.0","info":{"description":"Examples of different numerical algorithms accessible via REST","version":"1.0","title":"API for Numerical Case Study (NCS)"},"schemes":["http"],"host":"localhost:8080","basePath":"/","tags":[{"name":"ncs-rest","description":"Ncs Rest"}],"paths":{"/api/bessj/{n}/{x}":{"get":{"tags":["ncs-rest"],"summary":"bessj","operationId":"bessjUsingGET","produces":["application/json"],"parameters":[{"name":"n","in":"path","description":"n","required":true,"type":"integer","format":"int32","x-example":3},{"name":"x","in":"path","description":"x","required":true,"type":"number","format":"double","x-example":2.5}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"value":-0.261375}}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"error":"Bad Request","message":"Invalid parameter type or value"}}}},"deprecated":false}},"/api/expint/{n}/{x}":{"get":{"tags":["ncs-rest"],"summary":"expint","operationId":"expintUsingGET","produces":["application/json"],"parameters":[{"name":"n","in":"path","description":"n","required":true,"type":"integer","format":"int32","x-example":3},{"name":"x","in":"path","description":"x","required":true,"type":"number","format":"double","x-example":2.5}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"result":0.061099,"status":"success"}}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"error":"Bad Request","message":"Invalid parameter value"}}}},"deprecated":false}},"/api/fisher/{m}/{n}/{x}":{"get":{"tags":["ncs-rest"],"summary":"fisher","operationId":"fisherUsingGET","produces":["application/json"],"parameters":[{"name":"m","in":"path","description":"m","required":true,"type":"integer","format":"int32","x-example":10},{"name":"n","in":"path","description":"n","required":true,"type":"integer","format":"int32","x-example":5},{"name":"x","in":"path","description":"x","required":true,"type":"number","format":"double","x-example":0.75}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"value":0.8473,"message":"Fisher computation successful"}}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"error":"Bad Request","message":"Invalid parameter format or value"}}}},"deprecated":false}},"/api/gammq/{a}/{x}":{"get":{"tags":["ncs-rest"],"summary":"gammq","operationId":"gammqUsingGET","produces":["application/json"],"parameters":[{"name":"a","in":"path","description":"a","required":true,"type":"number","format":"double","x-example":5.5},{"name":"x","in":"path","description":"x","required":true,"type":"number","format":"double","x-example":2.3}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"result":0.849,"error":null}}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"message":"Bad Request","status":400,"error":"Invalid parameter type or value"}}}},"deprecated":false}},"/api/remainder/{a}/{b}":{"get":{"tags":["ncs-rest"],"summary":"remainder","operationId":"remainderUsingGET","produces":["application/json"],"parameters":[{"name":"a","in":"path","description":"a","required":true,"type":"integer","format":"int32","x-example":17},{"name":"b","in":"path","description":"b","required":true,"type":"integer","format":"int32","x-example":5}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"result":2}}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"error":"Bad Request","message":"Invalid parameter type or value"}}}},"deprecated":false}},"/api/triangle/{a}/{b}/{c}":{"get":{"tags":["ncs-rest"],"summary":"Check the triangle type of the given three edges","operationId":"checkTriangleUsingGET","produces":["application/json"],"parameters":[{"name":"a","in":"path","description":"First edge","required":true,"type":"integer","format":"int32","x-example":3},{"name":"b","in":"path","description":"Second edge","required":true,"type":"integer","format":"int32","x-example":4},{"name":"c","in":"path","description":"Third edge","required":true,"type":"integer","format":"int32","x-example":5}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Dto"},"examples":{"application/json":{"triangleType":"right"}}}},"deprecated":false}}},"definitions":{"Dto":{"type":"object","properties":{"resultAsDouble":{"type":"number","format":"double"},"resultAsInt":{"type":"integer","format":"int32"}},"title":"Dto"}}}
+#####

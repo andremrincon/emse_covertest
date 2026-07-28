@@ -1,0 +1,41 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv("API_BASE_URL") != null ? System.getenv("API_BASE_URL") : "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_whenFeatureExists_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().header("Content-Type", "application/json").body("{}").when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().header("Content-Type", "application/json").body("{}").when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_whenInvalidConfiguration_causesServerError500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String longFeature = new String(new char[800]).replace('\0', 'x');
+        given().header("Content-Type", "application/json").body("{}").when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, longFeature);
+        act.then().statusCode(500);
+    }
+}

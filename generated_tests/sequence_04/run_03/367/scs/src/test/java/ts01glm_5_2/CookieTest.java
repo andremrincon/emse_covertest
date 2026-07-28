@@ -1,0 +1,74 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieNameNotUseridOrSessionReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/session-id/abc-123-xyz-789/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUseridShortValueReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUseridLongValueNotStartingWithUserReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/admin123/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUseridLongValueStartingWithUserReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionAmAbcComReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionNonMatchingValOrSiteReturnsTwo() {
+        given()
+            .when()
+                .get("/api/cookie/session/xyz/example.com")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,83 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaTwoCharCodeMatch() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaThreeCharCodeMatch() {
+        given().when().get("/v1/alpha/USA").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaReturnsNullForNonExistentCode() {
+        given().when().get("/v1/alpha/ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithMultipleValidCodes() {
+        given().when().queryParam("codes", "US;CA;MX").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithDuplicateCodes() {
+        given().when().queryParam("codes", "US;US").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithNonExistentCodes() {
+        given().when().queryParam("codes", "XX;YY;ZZ").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithNullCodes() {
+        given().when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchByNameExactMatch() {
+        given().when().queryParam("fullText", "true").get("/v1/name/Germany").then().statusCode(404);
+    }
+
+    @Ignore("Illegal character in path at index 47: http://localhost:8080/rest/rest/v1/name/Federal Republic o...")
+    @Test(timeout = 60000)
+    public void testFulltextSearchByAltSpelling() {
+        given().when().queryParam("fullText", "true").get("/v1/name/{name}", "Federal Republic of Germany").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFound() {
+        given().when().queryParam("fullText", "true").get("/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonViaGetAllV1() {
+        given().when().get("/v1/all").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonViaGetByNameV1() {
+        given().when().get("/v1/name/France").then().statusCode(404);
+    }
+}

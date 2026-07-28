@@ -1,0 +1,91 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        String txt = "http://abc/def";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        String txt = "mon01jan";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        String txt = "12.34e+56";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        String txt = "xyz";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testSubjectUrlFtpMatch() {
+        String txt = "ftp://a-b/c_d";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateWedAugMatch() {
+        String txt = "wed15aug";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+}

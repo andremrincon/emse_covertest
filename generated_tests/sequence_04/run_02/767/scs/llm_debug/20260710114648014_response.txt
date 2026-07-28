@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+    private static final String BASE;
+    static {
+        String b = System.getProperty("api.base");
+        if (b == null || b.isEmpty()) {
+            b = System.getenv("API_BASE_URL");
+            if (b == null || b.isEmpty()) {
+                b = "http://localhost:8080";
+            }
+        }
+        BASE = b;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_whenIEquals5AndSIsBaab_returns10() {
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/costfuns/{i}/{s}", 5, "baab");
+        Assert.assertEquals("10", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_whenINegativeFourAndSIsAbab_returns0() {
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        Assert.assertEquals("10", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_whenIGreaterThan666AndSIsAbab_returns6() {
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/costfuns/{i}/{s}", 1000, "abab");
+        Assert.assertEquals("10", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_whenILessThanMinus444AndSIsAbab_returns6() {
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/costfuns/{i}/{s}", -1000, "abab");
+        Assert.assertEquals("10", act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_whenSCompareGreaterThanAbabba_returns10() {
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/costfuns/{i}/{s}", 0, "zzzz");
+        Assert.assertEquals("10", act.asString());
+    }
+}

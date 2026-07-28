@@ -1,0 +1,46 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Method;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+import java.util.UUID;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsAllowOriginHeaderOnGetRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsAllowMethodsHeaderOnOptionsRequest() {
+        given()
+            .when()
+                .request(Method.OPTIONS, "/products")
+            .then()
+                .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterPassesPostRequestThroughFilterChain() {
+        String productName = "cors-uuid-" + UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(201);
+    }
+}

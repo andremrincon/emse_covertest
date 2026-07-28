@@ -1,0 +1,84 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeNThrowsError() {
+        RestAssured.given()
+            .pathParam("n", -1)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZeroReturnsSuccess() {
+        RestAssured.given()
+            .pathParam("n", 0)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNGreaterThanOneReturnsSuccess() {
+        RestAssured.given()
+            .pathParam("n", 2)
+            .pathParam("x", 0)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOneContinuedFraction() {
+        RestAssured.given()
+            .pathParam("n", 3)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathNm1Zero() {
+        RestAssured.given()
+            .pathParam("n", 1)
+            .pathParam("x", 0.1)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathNm1NonZero() {
+        RestAssured.given()
+            .pathParam("n", 2)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}

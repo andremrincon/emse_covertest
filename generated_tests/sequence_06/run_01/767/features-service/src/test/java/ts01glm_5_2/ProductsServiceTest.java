@@ -1,0 +1,268 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
+public class ProductsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_success() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Test feature description")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_duplicateThrowsException() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "First description")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "Second description")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(anyOf(is(400), is(409), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_withoutDescription() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_productNotFound() {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "desc")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(anyOf(is(404), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_simpleDelete() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "desc")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_withActiveConfiguration() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("description", "desc")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then().statusCode(lessThan(300));
+        given()
+                .when()
+                .post("/products/" + productName + "/configurations/" + configName)
+                .then().statusCode(lessThan(300));
+        given()
+                .when()
+                .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_featureNotFound() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "nonexistent-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(anyOf(is(404), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_success() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + requiredFeature)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_productNotFound() {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(anyOf(is(404), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_success() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + excludedFeature)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_productNotFound() {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(anyOf(is(404), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresAndExcludesConstraints_combined() {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureC = "featC-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + featureA)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + featureB)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post("/products/" + productName + "/features/" + featureC)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("requiredFeature", featureB)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureC)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+}

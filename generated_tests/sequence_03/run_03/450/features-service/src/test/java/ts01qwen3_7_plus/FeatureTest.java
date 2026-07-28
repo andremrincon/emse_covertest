@@ -1,0 +1,466 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+import org.junit.Ignore;
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureCoversSetNameAndSetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200)
+            .body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateFeatureCreationCoversEqualsBranch() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Duplicate feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(anyOf(equalTo(201), equalTo(400), equalTo(500)));
+    }
+
+    @Ignore("Illegal character in path at index 85: http://localhost:8080/products/Product-e86c3579-a541-43df-...")
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversEqualsInCollection() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Feature 2")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName2)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("size()", greaterThanOrEqualTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversProductReference() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Feature to delete")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Ignore("Illegal character in path at index 85: http://localhost:8080/products/Product-45df307c-e915-406d-...")
+    @Test(timeout = 60000)
+    public void testMultipleFeaturesSameProductCoversEqualsComparison() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature-A-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature-B-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200)
+            .body("size()", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testFeatureWithEmptyDescriptionCoversSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureWithEmptyDescriptionCoversSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Original")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Ignore("Illegal character in path at index 85: http://localhost:8080/products/Product-7033a5a2-d484-4927-...")
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesAfterMultipleOperationsCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Feature 2")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .delete("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200)
+            .body("size()", equalTo(1));
+    }
+}

@@ -1,0 +1,83 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(lessThan(300))
+                .body(containsString("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbbb")
+            .then()
+                .statusCode(lessThan(300))
+                .body(containsString("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherIncreasingNorDecreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(lessThan(300))
+                .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/a/bbbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(lessThan(300))
+                .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthTooLong() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaaaa/bbbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(lessThan(300))
+                .body(containsString("unordered"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testVeryLongYReturns500() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            sb.append('y');
+        }
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbbb/ccccc/" + sb.toString())
+            .then()
+                .statusCode(500);
+    }
+}

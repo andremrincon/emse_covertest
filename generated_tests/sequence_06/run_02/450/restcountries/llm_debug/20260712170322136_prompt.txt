@@ -1,0 +1,128 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[7,41] package eu.fayder.restcountries.v1.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[30,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[30,85] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[38,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[38,85] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[46,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[46,85] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[54,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[54,85] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[62,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/450/restcountries/src/test/java/ts01gpt_5_mini/CountryTranslationsTest.java:[62,85] cannot find symbol
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import eu.fayder.restcountries.v1.domain.CountryTranslations;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDe_viaV1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().extract().response();
+        CountryTranslations translations = act.jsonPath().getObject("translations", CountryTranslations.class);
+        assertEquals("Vereinigte Staaten von Amerika", translations.getDe());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEs_viaV1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().extract().response();
+        CountryTranslations translations = act.jsonPath().getObject("translations", CountryTranslations.class);
+        assertEquals("Estados Unidos", translations.getEs());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFr_viaV1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().extract().response();
+        CountryTranslations translations = act.jsonPath().getObject("translations", CountryTranslations.class);
+        assertEquals("États-Unis", translations.getFr());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJa_viaV1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().extract().response();
+        CountryTranslations translations = act.jsonPath().getObject("translations", CountryTranslations.class);
+        assertEquals("アメリカ合衆国", translations.getJa());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIt_viaV1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().extract().response();
+        CountryTranslations translations = act.jsonPath().getObject("translations", CountryTranslations.class);
+        assertEquals("Stati Uniti D'America", translations.getIt());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaEndpoint_returns400_forInvalidCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123").then().extract().response();
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaEndpoint_returns404_forUnknownCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/XYZ").then().extract().response();
+        assertEquals(404, act.getStatusCode());
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

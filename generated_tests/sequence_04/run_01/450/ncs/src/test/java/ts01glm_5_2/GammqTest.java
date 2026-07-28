@@ -1,0 +1,71 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZero() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/5.5/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPath() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/0.001/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNonConvergence() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/10000/10000.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidA() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/-1.0/2.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidType() {
+        given()
+            .when()
+                .get(baseUrl + "/api/gammq/abc/2.0")
+            .then()
+                .statusCode(400);
+    }
+}

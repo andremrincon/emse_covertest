@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_bNot1() {
+        given()
+            .when()
+                .get("/api/fisher/1/2/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_b1() {
+        given()
+            .when()
+                .get("/api/fisher/2/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_bNot1() {
+        given()
+            .when()
+                .get("/api/fisher/2/2/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_pGreaterThan1() {
+        given()
+            .when()
+                .get("/api/fisher/10/2/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_pLessThan0() {
+        given()
+            .when()
+                .get("/api/fisher/100/2/0.01")
+            .then()
+                .statusCode(200);
+    }
+}

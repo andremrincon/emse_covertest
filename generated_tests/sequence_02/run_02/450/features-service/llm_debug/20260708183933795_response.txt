@@ -1,0 +1,51 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testWrongProductConfigurationException() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String featureA = "FeatA-" + UUID.randomUUID().toString();
+        String featureB = "FeatB-" + UUID.randomUUID().toString();
+        String configName = "Conf-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+            .then()
+            .statusCode(500);
+    }
+}
+```

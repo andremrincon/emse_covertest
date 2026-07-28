@@ -1,0 +1,80 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv("API_HOST");
+        if (host == null || host.isEmpty()) {
+            host = "localhost";
+        }
+        String port = System.getenv("API_PORT");
+        if (port == null || port.isEmpty()) {
+            port = "8080";
+        }
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5() {
+        given()
+            .when()
+            .get("/api/costfuns/5/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444() {
+        given()
+            .when()
+            .get("/api/costfuns/-500/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666() {
+        given()
+            .when()
+            .get("/api/costfuns/700/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsBaab() {
+        given()
+            .when()
+            .get("/api/costfuns/-4/baab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sCompareToAbabbaGreaterThanOrEqual() {
+        given()
+            .when()
+            .get("/api/costfuns/1/ababba")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_defaultPath_iEquals0() {
+        given()
+            .when()
+            .get("/api/costfuns/0/a")
+            .then()
+            .statusCode(200);
+    }
+}
+```

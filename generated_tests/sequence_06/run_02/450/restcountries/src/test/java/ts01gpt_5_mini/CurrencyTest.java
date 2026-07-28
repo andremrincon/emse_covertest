@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+
+import org.junit.Ignore;
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Ignore("The parameter \"code\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_currencyCodeIsUSD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200);
+        String code = resp.jsonPath().getString("currencies[0].code");
+        org.junit.Assert.assertEquals("USD", code);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_numericBadRequest_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_unknownCode_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/XYZ");
+        resp.then().statusCode(404);
+    }
+}

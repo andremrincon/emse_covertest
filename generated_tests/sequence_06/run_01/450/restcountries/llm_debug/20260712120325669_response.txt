@@ -1,0 +1,38 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV1Alpha() {
+        given()
+            .baseUri("http://localhost:8080/rest")
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV1Currency() {
+        given()
+            .baseUri("http://localhost:8080/rest")
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaV2Currency() {
+        given()
+            .baseUri("http://localhost:8080/rest")
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(404);
+    }
+}

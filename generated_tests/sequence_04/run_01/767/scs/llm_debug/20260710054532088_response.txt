@@ -1,0 +1,50 @@
+package ts01gpt_5_mini;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import io.restassured.response.Response;
+import java.util.UUID;
+import org.junit.Test;
+
+public class RegexTest {
+
+    private static final String BASE = System.getProperty("API_BASE",
+            System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatches_returns200() {
+        String arrangeId = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/text2txt/{w}/{x}/{y}", "Arr", "ange", arrangeId).then().statusCode(lessThan(300));
+        String txt = "mon12jan";
+        Response act = given().when().get(BASE + "/api/pat/{txt}", txt);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatches_returns200() {
+        String arrangeId = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/text2txt/{w}/{x}/{y}", "Warm", "Up", arrangeId).then().statusCode(lessThan(300));
+        String txt = "12.3e+45";
+        Response act = given().when().get(BASE + "/api/pat/{txt}", txt);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePattern_returns200() {
+        String arrangeId = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/text2txt/{w}/{x}/{y}", "Seed", "Call", arrangeId).then().statusCode(lessThan(300));
+        String txt = "hello";
+        Response act = given().when().get(BASE + "/api/pat/{txt}", txt);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testMalformedPattern_returns500() {
+        String arrangeId = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/text2txt/{w}/{x}/{y}", "Init", "Req", arrangeId).then().statusCode(lessThan(300));
+        String txt = "(";
+        Response act = given().when().get(BASE + "/api/pat/{txt}", txt);
+        assertEquals(500, act.getStatusCode());
+    }
+}

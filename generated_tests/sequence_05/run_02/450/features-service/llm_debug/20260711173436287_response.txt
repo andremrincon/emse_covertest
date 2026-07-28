@@ -1,0 +1,87 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "Product-Req-" + System.currentTimeMillis();
+        String feature1 = "Feature-Req-1";
+        String feature2 = "Feature-Req-2";
+
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + feature1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + feature2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "Product-Excl-" + System.currentTimeMillis();
+        String feature1 = "Feature-Excl-1";
+        String feature2 = "Feature-Excl-2";
+
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + feature1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + feature2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", feature1)
+            .formParam("excludedFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+}
+```

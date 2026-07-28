@@ -1,0 +1,106 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given().
+        when().
+            get("/api/pat/abc/ab").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given().
+        when().
+            get("/api/pat/a/abc").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevNotFound() {
+        given().
+        when().
+            get("/api/pat/hello/xyz").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevNotFound() {
+        given().
+        when().
+            get("/api/pat/helloabc/abc").
+        then().
+            statusCode(200).
+            body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundPatNotFound() {
+        given().
+        when().
+            get("/api/pat/hellocba/abc").
+        then().
+            statusCode(200).
+            body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevFoundNotAdjacent() {
+        given().
+        when().
+            get("/api/pat/abcxxxcba/abc").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevAdjacentPalindrome() {
+        given().
+        when().
+            get("/api/pat/abccba/abc").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevAndPatAdjacentPalindrome() {
+        given().
+        when().
+            get("/api/pat/cbaabc/abc").
+        then().
+            statusCode(200).
+            body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointWithSingleArg() {
+        given().
+        when().
+            get("/api/pat/a").
+        then().
+            statusCode(200);
+    }
+}

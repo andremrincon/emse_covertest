@@ -1,0 +1,182 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.SampleControllerTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testTimeConsumingAPIWithZeroDelay TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <401>.
+
+[2] METHOD=testSayHelloWithName TYPE=ERROR
+Illegal character in query at index 20: /actuator/?name=John Smith
+
+[3] METHOD=testSayHelloWithDefaultName TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "Hello Guest!!"
+  Actual: {"_links":{"self":{"href":"http://localhost:8080/actuator","templated":false},"beans":{"href":"http://localhost:8080/actuator/beans","templated":false},"caches-cache":{"href":"http://localhost:8080/actuator/caches/{cache}","templated":true},"caches":{"href":"http://localhost:8080/actuator/caches","templated":false},"health":{"href":"http://localhost:8080/actuator/health","templated":false},"health-path":{"href":"http://localhost:8080/actuator/health/{*path}","templated":true},"info":{"href":"http://localhost:8080/actuator/info","templated":false},"conditions":{"href":"http://localhost:8080/actuator/conditions","templated":false},"shutdown":{"href":"http://localhost:8080/actuator/shutdown","templated":false},"configprops":{"href":"http://localhost:8080/actuator/configprops","templated":false},"env-toMatch":{"href":"http://localhost:8080/actuator/env/{toMatch}","templated":true},"env":{"href":"http://localhost:8080/actuator/env","templated":false},"logfile":{"href":"http://localhost:8080/actuator/logfile","templated":false},"loggers-name":{"href":"http://localhost:8080/actuator/loggers/{name}","templated":true},"loggers":{"href":"http://localhost:8080/actuator/loggers","templated":false},"heapdump":{"href":"http://localhost:8080/actuator/heapdump","templated":false},"threaddump":{"href":"http://localhost:8080/actuator/threaddump","templated":false},"prometheus":{"href":"http://localhost:8080/actuator/prometheus","templated":false},"metrics":{"href":"http://localhost:8080/actuator/metrics","templated":false},"metrics-requiredMetricName":{"href":"http://localhost:8080/actuator/metrics/{requiredMetricName}","templated":true},"scheduledtasks":{"href":"http://localhost:8080/actuator/scheduledtasks","templated":false},"mappings":{"href":"http://localhost:8080/actuator/mappings","templated":false}}}
+
+[4] METHOD=testTimeConsumingAPIWithPositiveDelay TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <401>.
+
+[5] METHOD=testTimeConsumingAPIWithNegativeDelay TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <401>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testTimeConsumingAPIWithZeroDelay FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01qwen3_7_plus.SampleControllerTest.testTimeConsumingAPIWithZeroDelay(SampleControllerTest.java:46)
+CODE CONTEXT:
+    43:         .when()
+    44:             .get("/slowApi")
+    45:         .then()
+    46:             .statusCode(401)  ← FAILURE HERE
+    47:             .body(equalTo("Result"));
+    48:     }
+    49: 
+
+[2] METHOD=testSayHelloWithName FAILURE AT LINE 23
+at ts01qwen3_7_plus.SampleControllerTest.testSayHelloWithName(SampleControllerTest.java:23)
+Caused by: java.net.URISyntaxException: Illegal character in query at index 20: /actuator/?name=John Smith
+CODE CONTEXT:
+    20:         given()
+    21:             .queryParam("name", "John Smith")
+    22:         .when()
+    23:             .get("/")  ← FAILURE HERE
+    24:         .then()
+    25:             .statusCode(200)
+    26:             .body(equalTo("Hello John Smith!!"));
+
+[3] METHOD=testSayHelloWithDefaultName FAILURE AT LINE 36
+java.lang.AssertionError:
+at ts01qwen3_7_plus.SampleControllerTest.testSayHelloWithDefaultName(SampleControllerTest.java:36)
+CODE CONTEXT:
+    33:             .get("/")
+    34:         .then()
+    35:             .statusCode(200)
+    36:             .body(equalTo("Hello Guest!!"));  ← FAILURE HERE
+    37:     }
+    38: 
+    39:     @Test(timeout = 60000)
+
+[4] METHOD=testTimeConsumingAPIWithPositiveDelay FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01qwen3_7_plus.SampleControllerTest.testTimeConsumingAPIWithPositiveDelay(SampleControllerTest.java:57)
+CODE CONTEXT:
+    54:         .when()
+    55:             .get("/slowApi")
+    56:         .then()
+    57:             .statusCode(401)  ← FAILURE HERE
+    58:             .body(equalTo("Result"));
+    59:     }
+    60: 
+
+[5] METHOD=testTimeConsumingAPIWithNegativeDelay FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01qwen3_7_plus.SampleControllerTest.testTimeConsumingAPIWithNegativeDelay(SampleControllerTest.java:68)
+CODE CONTEXT:
+    65:         .when()
+    66:             .get("/slowApi")
+    67:         .then()
+    68:             .statusCode(401);  ← FAILURE HERE
+    69:     }
+    70: }
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .queryParam("name", "John Smith")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithDefaultName() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithZeroDelay() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401)
+            .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithPositiveDelay() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401)
+            .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

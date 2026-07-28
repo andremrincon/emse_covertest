@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        String envUrl = System.getenv("BASE_URL");
+        baseUrl = (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValid() {
+        String payload = "{\"amount\": 1000, \"token\": \"tok_" + UUID.randomUUID().toString() + "\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingAmount() {
+        String payload = "{\"token\": \"tok_" + UUID.randomUUID().toString() + "\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken() {
+        String payload = "{\"amount\": 1000}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeEmptyBody() {
+        String payload = "{}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidJson() {
+        String payload = "invalid json";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+}

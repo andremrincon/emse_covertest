@@ -1,0 +1,48 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenNonExistentPath_returnsNotFound() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZNONEXISTENT")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenNonExistentEndpoint_returnsNotFound() {
+        given()
+                .when()
+                .get("/v1/nonexistentendpoint123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenNonExistentSubPath_returnsNotFound() {
+        given()
+                .when()
+                .get("/v2/alpha/ZZZNOTREAL")
+                .then()
+                .statusCode(400);
+    }
+}

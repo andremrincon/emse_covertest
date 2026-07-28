@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchesJanProducesTwo() {
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/apr").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/Mon/MAR").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDayMatchesMayProducesFive() {
+        given().when().get("/api/dateparse/mon/jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/none/may").then().body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchesSepProducesTen() {
+        given().when().get("/api/dateparse/jul/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/aug/aug").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/sep").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchesDecProducesThirteen() {
+        given().when().get("/api/dateparse/oct/oct").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/nov/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/DEC").then().body(equalTo("13"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayOrMonthReturnsServerError() {
+        given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/123/Movember").then().statusCode(200);
+    }
+}

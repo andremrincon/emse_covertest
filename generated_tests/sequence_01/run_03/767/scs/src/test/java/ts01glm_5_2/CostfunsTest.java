@@ -1,0 +1,126 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFive() {
+        given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanNegative444() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/a")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/-500/a")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanOrEqualNegative333() {
+        given()
+            .when()
+                .get("/api/costfuns/-400/a")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/-400/a")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/700/baab")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/700/baab")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsNegative4AndSCompareToEqual() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/ababba")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/-4/ababba")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThanOrEqual555AndSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/600/abab")
+            .then()
+                .statusCode(lessThan(300));
+
+        String response = given()
+            .when()
+                .get("/api/costfuns/600/abab")
+            .then()
+                .extract()
+                .asString();
+
+        assertTrue(response.contains("10"));
+    }
+}

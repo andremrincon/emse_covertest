@@ -1,0 +1,170 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProductAndFeature() {
+        String productName = "Product-Set-Name-Test-" + System.currentTimeMillis();
+        String featureName = "Feature-Set-Name-Test-" + System.currentTimeMillis();
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesTriggersHibernateSetters() {
+        String productName = "Product-Get-Test-" + System.currentTimeMillis();
+        String featureName = "Feature-Get-Test-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEqualsDifferentNames() {
+        String productName = "Product-Equals-Diff-Name-" + System.currentTimeMillis();
+        String feature1 = "Feature-A-" + System.currentTimeMillis();
+        String feature2 = "Feature-B-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + feature2)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEqualsDifferentProducts() {
+        String product1 = "Product-1-" + System.currentTimeMillis();
+        String product2 = "Product-2-" + System.currentTimeMillis();
+        String featureName = "Same-Feature-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + product1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product1 + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + product2 + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "Product-Config-" + System.currentTimeMillis();
+        String configName = "Config-" + System.currentTimeMillis();
+        String featureName = "Feature-Config-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureToConfigurationTwice() {
+        String productName = "Product-Config-Twice-" + System.currentTimeMillis();
+        String configName = "Config-Twice-" + System.currentTimeMillis();
+        String featureName = "Feature-Twice-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature() {
+        String productName = "Product-Update-" + System.currentTimeMillis();
+        String featureName = "Feature-Update-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature() {
+        String productName = "Product-Delete-" + System.currentTimeMillis();
+        String featureName = "Feature-Delete-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        String productName = "Product-Constraint-" + System.currentTimeMillis();
+        String feature1 = "Feature-Source-" + System.currentTimeMillis();
+        String feature2 = "Feature-Required-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(201);
+    }
+}

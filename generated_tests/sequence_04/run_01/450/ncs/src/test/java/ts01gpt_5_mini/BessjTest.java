@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/-1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZeroReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanN_AxLessThan8Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/2/3").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanN_AxGe8NegativeXReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/-10").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanN_AxGe8PositiveXReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/10").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanN_BackwardRecurrenceReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/10/1e-10").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanN_NegativeXOddNSignFlipReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/5/-1e-10").then().statusCode(200);
+    }
+}

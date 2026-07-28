@@ -1,0 +1,32 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("rest.base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("REST_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundTimeout() {
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundTimeout() {
+        given().when().get("/v1/name/123").then().statusCode(404);
+    }
+}

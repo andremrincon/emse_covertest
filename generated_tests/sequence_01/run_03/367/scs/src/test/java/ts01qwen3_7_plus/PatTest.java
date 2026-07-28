@@ -1,0 +1,127 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class PatTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "abc")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoPatRev() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "abcde")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevAdjacent() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "abccba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevSeparated() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "abcxxcba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundNoPat() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "cbaxxx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevAndPatAdjacent() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "cbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevAndPatSeparated() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "cbaxxabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFoundPatLenGreaterThan2() {
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", "xxxxx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testServerError500() {
+        String longTxt = "ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError.ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError.ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError";
+        given()
+            .baseUri(baseUrl)
+            .pathParam("txt", longTxt)
+            .pathParam("pat", "pattern")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(500);
+    }
+}

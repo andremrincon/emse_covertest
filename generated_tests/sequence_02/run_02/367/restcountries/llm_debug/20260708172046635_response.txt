@@ -1,0 +1,90 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "123")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCapitalNotFound() {
+        given()
+            .when()
+                .get("/v1/capital/{capital}", "123")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnRegionNotFound() {
+        given()
+            .when()
+                .get("/v1/region/{region}", "123")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNameServerError() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "True")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCallingCodeNotFound() {
+        given()
+            .when()
+                .get("/v1/callingcode/{callingcode}", "abc")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnSubregionNotFound() {
+        given()
+            .when()
+                .get("/v1/subregion/{subregion}", "123")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+}

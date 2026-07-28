@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesReturnsNamesWhenProductHasFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configName = "cfg-" + UUID.randomUUID().toString();
+        String featureA = "Feature-A-" + UUID.randomUUID().toString();
+        String featureB = "Feature-B-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        List<String> features = act.jsonPath().getList("$");
+        assertThat(features, hasItems(featureA, featureB));
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesReturnsEmptyWhenProductHasNoFeatures() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configName = "cfg-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        List<String> features = act.jsonPath().getList("$");
+        assertThat(features.size(), is(0));
+    }
+}

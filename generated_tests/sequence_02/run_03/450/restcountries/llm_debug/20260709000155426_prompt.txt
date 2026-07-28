@@ -1,0 +1,347 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetCountriesByMultipleAlphaCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testGetCountriesByCapitalParis TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testGetCountriesByRegionalBlocEU TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testGetCountriesByCallingCode1 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testGetAllCountriesV2 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testGetCountriesByCurrencyEUR TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testGetCountriesBySubregionWesternEurope TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+
+[8] METHOD=testGetCountriesByLanguageSpanish TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testGetCountriesByDemonymAmerican TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testGetCountriesByRegionEurope TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testGetCountryByNameGermany TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testGetCountryByAlphaCodeUS TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetCountriesByMultipleAlphaCodes FAILURE AT LINE 42
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByMultipleAlphaCodes(LanguageTest.java:42)
+CODE CONTEXT:
+    39:             .when()
+    40:                 .get("/v2/alpha")
+    41:             .then()
+    42:                 .statusCode(404);  ← FAILURE HERE
+    43:     }
+    44: 
+    45:     @Test(timeout = 60000)
+
+[2] METHOD=testGetCountriesByCapitalParis FAILURE AT LINE 78
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByCapitalParis(LanguageTest.java:78)
+CODE CONTEXT:
+    75:             .when()
+    76:                 .get("/v2/capital/Paris")
+    77:             .then()
+    78:                 .statusCode(404);  ← FAILURE HERE
+    79:     }
+    80: 
+    81:     @Test(timeout = 60000)
+
+[3] METHOD=testGetCountriesByRegionalBlocEU FAILURE AT LINE 123
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByRegionalBlocEU(LanguageTest.java:123)
+CODE CONTEXT:
+   120:             .when()
+   121:                 .get("/v2/regionalbloc/EU")
+   122:             .then()
+   123:                 .statusCode(404);  ← FAILURE HERE
+   124:     }
+   125: }
+
+[4] METHOD=testGetCountriesByCallingCode1 FAILURE AT LINE 69
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByCallingCode1(LanguageTest.java:69)
+CODE CONTEXT:
+    66:             .when()
+    67:                 .get("/v2/callingcode/1")
+    68:             .then()
+    69:                 .statusCode(404);  ← FAILURE HERE
+    70:     }
+    71: 
+    72:     @Test(timeout = 60000)
+
+[5] METHOD=testGetAllCountriesV2 FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetAllCountriesV2(LanguageTest.java:23)
+CODE CONTEXT:
+    20:             .when()
+    21:                 .get("/v2/all")
+    22:             .then()
+    23:                 .statusCode(404);  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[6] METHOD=testGetCountriesByCurrencyEUR FAILURE AT LINE 51
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByCurrencyEUR(LanguageTest.java:51)
+CODE CONTEXT:
+    48:             .when()
+    49:                 .get("/v2/currency/EUR")
+    50:             .then()
+    51:                 .statusCode(404);  ← FAILURE HERE
+    52:     }
+    53: 
+    54:     @Test(timeout = 60000)
+
+[7] METHOD=testGetCountriesBySubregionWesternEurope FAILURE AT LINE 94
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+at ts01glm_5_2.LanguageTest.testGetCountriesBySubregionWesternEurope(LanguageTest.java:94)
+CODE CONTEXT:
+    91:     public void testGetCountriesBySubregionWesternEurope() {
+    92:         given()
+    93:             .when()
+    94:                 .get("/v2/subregion/Western Europe")  ← FAILURE HERE
+    95:             .then()
+    96:                 .statusCode(200);
+    97:     }
+
+[8] METHOD=testGetCountriesByLanguageSpanish FAILURE AT LINE 105
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByLanguageSpanish(LanguageTest.java:105)
+CODE CONTEXT:
+   102:             .when()
+   103:                 .get("/v2/lang/Spanish")
+   104:             .then()
+   105:                 .statusCode(404);  ← FAILURE HERE
+   106:     }
+   107: 
+   108:     @Test(timeout = 60000)
+
+[9] METHOD=testGetCountriesByDemonymAmerican FAILURE AT LINE 114
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByDemonymAmerican(LanguageTest.java:114)
+CODE CONTEXT:
+   111:             .when()
+   112:                 .get("/v2/demonym/American")
+   113:             .then()
+   114:                 .statusCode(404);  ← FAILURE HERE
+   115:     }
+   116: 
+   117:     @Test(timeout = 60000)
+
+[10] METHOD=testGetCountriesByRegionEurope FAILURE AT LINE 87
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountriesByRegionEurope(LanguageTest.java:87)
+CODE CONTEXT:
+    84:             .when()
+    85:                 .get("/v2/region/Europe")
+    86:             .then()
+    87:                 .statusCode(404);  ← FAILURE HERE
+    88:     }
+    89: 
+    90:     @Test(timeout = 60000)
+
+[11] METHOD=testGetCountryByNameGermany FAILURE AT LINE 60
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountryByNameGermany(LanguageTest.java:60)
+CODE CONTEXT:
+    57:             .when()
+    58:                 .get("/v2/name/Germany")
+    59:             .then()
+    60:                 .statusCode(404);  ← FAILURE HERE
+    61:     }
+    62: 
+    63:     @Test(timeout = 60000)
+
+[12] METHOD=testGetCountryByAlphaCodeUS FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testGetCountryByAlphaCodeUS(LanguageTest.java:32)
+CODE CONTEXT:
+    29:             .when()
+    30:                 .get("/v2/alpha/US")
+    31:             .then()
+    32:                 .statusCode(404);  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesV2() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeUS() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByMultipleAlphaCodes() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+            .when()
+                .get("/v2/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCurrencyEUR() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameGermany() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCallingCode1() {
+        given()
+            .when()
+                .get("/v2/callingcode/1")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCapitalParis() {
+        given()
+            .when()
+                .get("/v2/capital/Paris")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByRegionEurope() {
+        given()
+            .when()
+                .get("/v2/region/Europe")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesBySubregionWesternEurope() {
+        given()
+            .when()
+                .get("/v2/subregion/Western Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByLanguageSpanish() {
+        given()
+            .when()
+                .get("/v2/lang/Spanish")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByDemonymAmerican() {
+        given()
+            .when()
+                .get("/v2/demonym/American")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByRegionalBlocEU() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

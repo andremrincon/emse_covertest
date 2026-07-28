@@ -1,0 +1,64 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        RestAssured.given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        RestAssured.given()
+            .when()
+                .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        RestAssured.given()
+            .when()
+                .get("/api/ordered4/bbbbb/aaaaa/ddddd/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLengths() {
+        RestAssured.given()
+            .when()
+                .get("/api/ordered4/abc/bbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testServerErrorLongString() {
+        String longY = new String(new char[300]).replace('\0', 'y');
+        RestAssured.given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ccccc/" + longY)
+            .then()
+                .statusCode(500);
+    }
+}

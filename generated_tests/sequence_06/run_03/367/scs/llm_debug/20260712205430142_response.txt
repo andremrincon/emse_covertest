@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixLongValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongValueNotUserPrefix() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abcdefg/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithNonMatchingValueOrSite() {
+        given()
+            .when()
+                .get("/api/cookie/session/xyz/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownCookieName() {
+        given()
+            .when()
+                .get("/api/cookie/unknown/somevalue/example.com")
+            .then()
+                .statusCode(200);
+    }
+}

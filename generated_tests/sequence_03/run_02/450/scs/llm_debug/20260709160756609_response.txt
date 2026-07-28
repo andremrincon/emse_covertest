@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = System.getProperty("test.server.baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("TEST_SERVER_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_AbbrevMonJan_returns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "Jan");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_LowercaseSatDec_returns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup2-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "sat", "dec");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_InvalidDayAndMonth_returns500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup3-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Superday", "Movember");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_FullMonday_August_returns500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup4-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Monday", "August");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_CaseInsensitive_Tuesday_MAR_returns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup5-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "tuesday", "MAR");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_ValidDay_InvalidNumericMonth_returns500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup6-"+uid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Tue", "456");
+        assertEquals(500, resp.getStatusCode());
+    }
+}

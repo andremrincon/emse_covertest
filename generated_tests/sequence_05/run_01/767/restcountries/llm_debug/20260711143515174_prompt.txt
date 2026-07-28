@@ -1,0 +1,344 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testLanguageSetIso639_2ViaV1AlphaEndpoint TYPE=ERROR
+The parameter "iso639_2" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testLanguageSetIso639_1ViaV1AlphaEndpoint TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testLanguageSetNameViaV1AlphaEndpoint TYPE=ERROR
+The parameter "name" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testLanguageSetIso639_2ViaV1NameEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[5] METHOD=testLanguageSetNameViaV1NameEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[6] METHOD=testLanguageSetIso639_2ViaV1LangEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[7] METHOD=testLanguageSetNameViaV1LangEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[8] METHOD=testLanguageSetNativeNameViaV1NameEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[9] METHOD=testLanguageSetNativeNameViaV1LangEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[10] METHOD=testLanguageSetIso639_1ViaV1NameEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[11] METHOD=testLanguageSetNativeNameViaV1AlphaEndpoint TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[12] METHOD=testLanguageSetIso639_1ViaV1LangEndpoint TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testLanguageSetIso639_2ViaV1AlphaEndpoint FAILURE AT LINE 43
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_2ViaV1AlphaEndpoint(LanguageTest.java:43)
+CODE CONTEXT:
+    40:                 .get("/v1/alpha/US")
+    41:                 .then()
+    42:                 .statusCode(200)
+    43:                 .body("languages[0].iso639_2", equalTo("eng"));  ← FAILURE HERE
+    44:     }
+    45: 
+    46:     @Test(timeout = 60000)
+
+[2] METHOD=testLanguageSetIso639_1ViaV1AlphaEndpoint FAILURE AT LINE 33
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_1ViaV1AlphaEndpoint(LanguageTest.java:33)
+CODE CONTEXT:
+    30:                 .get("/v1/alpha/US")
+    31:                 .then()
+    32:                 .statusCode(200)
+    33:                 .body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+[3] METHOD=testLanguageSetNameViaV1AlphaEndpoint FAILURE AT LINE 53
+at ts01glm_5_2.LanguageTest.testLanguageSetNameViaV1AlphaEndpoint(LanguageTest.java:53)
+CODE CONTEXT:
+    50:                 .get("/v1/alpha/US")
+    51:                 .then()
+    52:                 .statusCode(200)
+    53:                 .body("languages[0].name", equalTo("English"));  ← FAILURE HERE
+    54:     }
+    55: 
+    56:     @Test(timeout = 60000)
+
+[4] METHOD=testLanguageSetIso639_2ViaV1NameEndpoint FAILURE AT LINE 83
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_2ViaV1NameEndpoint(LanguageTest.java:83)
+CODE CONTEXT:
+    80:                 .get("/v1/name/France")
+    81:                 .then()
+    82:                 .statusCode(200)
+    83:                 .body("languages[0].iso639_2", equalTo("fra"));  ← FAILURE HERE
+    84:     }
+    85: 
+    86:     @Test(timeout = 60000)
+
+[5] METHOD=testLanguageSetNameViaV1NameEndpoint FAILURE AT LINE 93
+at ts01glm_5_2.LanguageTest.testLanguageSetNameViaV1NameEndpoint(LanguageTest.java:93)
+CODE CONTEXT:
+    90:                 .get("/v1/name/France")
+    91:                 .then()
+    92:                 .statusCode(200)
+    93:                 .body("languages[0].name", equalTo("French"));  ← FAILURE HERE
+    94:     }
+    95: 
+    96:     @Test(timeout = 60000)
+
+[6] METHOD=testLanguageSetIso639_2ViaV1LangEndpoint FAILURE AT LINE 123
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_2ViaV1LangEndpoint(LanguageTest.java:123)
+CODE CONTEXT:
+   120:                 .get("/v1/lang/es")
+   121:                 .then()
+   122:                 .statusCode(200)
+   123:                 .body("languages[0].iso639_2", hasItem("spa"));  ← FAILURE HERE
+   124:     }
+   125: 
+   126:     @Test(timeout = 60000)
+
+[7] METHOD=testLanguageSetNameViaV1LangEndpoint FAILURE AT LINE 133
+at ts01glm_5_2.LanguageTest.testLanguageSetNameViaV1LangEndpoint(LanguageTest.java:133)
+CODE CONTEXT:
+   130:                 .get("/v1/lang/es")
+   131:                 .then()
+   132:                 .statusCode(200)
+   133:                 .body("languages[0].name", hasItem("Spanish"));  ← FAILURE HERE
+   134:     }
+   135: 
+   136:     @Test(timeout = 60000)
+
+[8] METHOD=testLanguageSetNativeNameViaV1NameEndpoint FAILURE AT LINE 103
+at ts01glm_5_2.LanguageTest.testLanguageSetNativeNameViaV1NameEndpoint(LanguageTest.java:103)
+CODE CONTEXT:
+   100:                 .get("/v1/name/France")
+   101:                 .then()
+   102:                 .statusCode(200)
+   103:                 .body("languages[0].nativeName", equalTo("français"));  ← FAILURE HERE
+   104:     }
+   105: 
+   106:     @Test(timeout = 60000)
+
+[9] METHOD=testLanguageSetNativeNameViaV1LangEndpoint FAILURE AT LINE 143
+at ts01glm_5_2.LanguageTest.testLanguageSetNativeNameViaV1LangEndpoint(LanguageTest.java:143)
+CODE CONTEXT:
+   140:                 .get("/v1/lang/es")
+   141:                 .then()
+   142:                 .statusCode(200)
+   143:                 .body("languages[0].nativeName", hasItem("Español"));  ← FAILURE HERE
+   144:     }
+   145: }
+
+[10] METHOD=testLanguageSetIso639_1ViaV1NameEndpoint FAILURE AT LINE 73
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_1ViaV1NameEndpoint(LanguageTest.java:73)
+CODE CONTEXT:
+    70:                 .get("/v1/name/France")
+    71:                 .then()
+    72:                 .statusCode(200)
+    73:                 .body("languages[0].iso639_1", equalTo("fr"));  ← FAILURE HERE
+    74:     }
+    75: 
+    76:     @Test(timeout = 60000)
+
+[11] METHOD=testLanguageSetNativeNameViaV1AlphaEndpoint FAILURE AT LINE 63
+at ts01glm_5_2.LanguageTest.testLanguageSetNativeNameViaV1AlphaEndpoint(LanguageTest.java:63)
+CODE CONTEXT:
+    60:                 .get("/v1/alpha/US")
+    61:                 .then()
+    62:                 .statusCode(200)
+    63:                 .body("languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    64:     }
+    65: 
+    66:     @Test(timeout = 60000)
+
+[12] METHOD=testLanguageSetIso639_1ViaV1LangEndpoint FAILURE AT LINE 113
+at ts01glm_5_2.LanguageTest.testLanguageSetIso639_1ViaV1LangEndpoint(LanguageTest.java:113)
+CODE CONTEXT:
+   110:                 .get("/v1/lang/es")
+   111:                 .then()
+   112:                 .statusCode(200)
+   113:                 .body("languages[0].iso639_1", hasItem("es"));  ← FAILURE HERE
+   114:     }
+   115: 
+   116:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", equalTo("fra"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", equalTo("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", equalTo("français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("es"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", hasItem("spa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", hasItem("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", hasItem("Español"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

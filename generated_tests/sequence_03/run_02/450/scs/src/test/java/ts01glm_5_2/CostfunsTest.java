@@ -1,0 +1,85 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEquals5_highString() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "zzzzzz")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsNegative4_sEqualsBaab() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iLessThanNegative444_sEqualsAbabba() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "ababba")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iGreaterThan666_lowString() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iBetweenNegative444AndNegative333() {
+        given()
+            .pathParam("i", -350)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_invalidIParameter() {
+        given()
+            .pathParam("i", "one")
+            .pathParam("s", "test")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}

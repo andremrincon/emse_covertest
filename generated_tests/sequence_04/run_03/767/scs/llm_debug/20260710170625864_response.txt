@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesUrl() {
+        String txt = "http://abc/def";
+        Response response = given()
+            .baseUri(BASE_URL)
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesDate() {
+        String txt = "mon01jan";
+        Response response = given()
+            .baseUri(BASE_URL)
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesFpe() {
+        String txt = "12.34e+56";
+        Response response = given()
+            .baseUri(BASE_URL)
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesNone() {
+        String txt = "hello";
+        Response response = given()
+            .baseUri(BASE_URL)
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        response.then().statusCode(200);
+    }
+}

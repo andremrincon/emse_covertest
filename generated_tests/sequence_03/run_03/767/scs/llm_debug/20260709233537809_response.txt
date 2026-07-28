@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CalcTest {
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String fromProp = System.getProperty("BASE_URL");
+        String fromEnv = System.getenv("BASE_URL");
+        BASE = fromProp != null ? fromProp : (fromEnv != null ? fromEnv : "http://localhost:8080");
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantReturnsMathPi() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("healthcheck", "UTF-8")).then().statusCode(lessThan(300));
+        String url = BASE + "/api/calc/" + URLEncoder.encode("pi", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8");
+        Response resp = given().when().get(url);
+        assertEquals(Double.toString(Math.PI), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstantReturnsMathE() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("ping", "UTF-8")).then().statusCode(lessThan(300));
+        String url = BASE + "/api/calc/" + URLEncoder.encode("e", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8");
+        Response resp = given().when().get(url);
+        assertEquals(Double.toString(Math.E), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryComputesSquareRoot() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("ready", "UTF-8")).then().statusCode(lessThan(300));
+        String url = BASE + "/api/calc/" + URLEncoder.encode("sqrt", "UTF-8") + "/" + URLEncoder.encode("9", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8");
+        Response resp = given().when().get(url);
+        assertEquals(Double.toString(Math.sqrt(9.0)), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSineUnaryComputesSine() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("alive", "UTF-8")).then().statusCode(lessThan(300));
+        double val = Math.PI / 2;
+        String url = BASE + "/api/calc/" + URLEncoder.encode("sine", "UTF-8") + "/" + URLEncoder.encode(Double.toString(val), "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8");
+        Response resp = given().when().get(url);
+        assertEquals(Double.toString(Math.sin(val)), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusBinaryAddsTwoNumbers() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("setup", "UTF-8")).then().statusCode(lessThan(300));
+        String url = BASE + "/api/calc/" + URLEncoder.encode("plus", "UTF-8") + "/" + URLEncoder.encode("15.5", "UTF-8") + "/" + URLEncoder.encode("4.5", "UTF-8");
+        Response resp = given().when().get(url);
+        assertEquals("20.0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProducesServerError() throws Exception {
+        given().when().get(BASE + "/api/pat/" + URLEncoder.encode("pre", "UTF-8")).then().statusCode(lessThan(300));
+        String url = BASE + "/api/calc/" + URLEncoder.encode("divide", "UTF-8") + "/" + URLEncoder.encode("100", "UTF-8") + "/" + URLEncoder.encode("0", "UTF-8");
+        Response resp = given().when().get(url);
+        resp.then().statusCode(500);
+    }
+}

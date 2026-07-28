@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class TitleTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEquals5_sEqualsBaab() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iLessThanMinus444_sLessThanAbabba() {
+        given()
+            .pathParam("i", -445)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsMinus333_sEqualsAbabba() {
+        given()
+            .pathParam("i", -333)
+            .pathParam("s", "ababba")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsMinus4_sGreaterThanAbabba() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "z")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iGreaterThan666_sEqualsAbab() {
+        given()
+            .pathParam("i", 667)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}

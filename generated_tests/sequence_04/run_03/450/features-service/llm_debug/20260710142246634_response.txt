@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("base.url");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintCreatesConstraint() {
+        String productName = "prod-requires-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given()
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM");
+        Response act = req.when().post("/products/{productName}/constraints/requires", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintCreatesConstraint() {
+        String productName = "prod-excludes-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given()
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only");
+        Response act = req.when().post("/products/{productName}/constraints/excludes", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintRemovesConstraint() {
+        String productName = "prod-del-const-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response created = RestAssured.given()
+                .formParam("sourceFeature", "CPU-i7-12700")
+                .formParam("excludedFeature", "Legacy-GPU")
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(lessThan(300)).extract().response();
+        Object idObj = created.path("id");
+        String constraintId = idObj != null ? idObj.toString() : "1";
+        Response act = RestAssured.given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId);
+        act.then().statusCode(204);
+    }
+}

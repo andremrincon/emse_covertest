@@ -1,0 +1,95 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_numericBad_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_unknown_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_France_translationsDe() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().body("[0].translations.de", equalTo("Frankreich"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_translationsEs() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().body("[0].translations.es", equalTo("Samoa Americana"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Capital_London_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/capital/London");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Region_Europe_nonEmptyList() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/region/Europe");
+        resp.then().body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Subregion_WesternEurope_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/subregion/Western%20Europe");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+}

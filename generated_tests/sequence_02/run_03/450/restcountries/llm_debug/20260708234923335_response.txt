@@ -1,0 +1,55 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class StripeRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithNullToken() {
+        String body = "{\"amount\": 100}";
+        
+        given()
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankToken() {
+        String body = "{\"token\": \"   \", \"amount\": 100}";
+        
+        given()
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidTokenFormat() {
+        String body = "{\"token\": \"tok_valid_12345\", \"amount\": 500}";
+        
+        given()
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+}

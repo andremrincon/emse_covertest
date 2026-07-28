@@ -1,0 +1,226 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CurrencyTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV1NameReturnsCurrencyWithAllFields TYPE=ERROR
+The parameter "code" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testV1CurrencyEndpointReturnsCurrencyFields TYPE=ERROR
+The parameter "code" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testV1AllReturnsCurrencyData TYPE=ERROR
+The parameter "null" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testV1RegionReturnsCurrencyFields TYPE=ERROR
+The parameter "code" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[5] METHOD=testV1AlphaReturnsCurrencyWithCodeNameSymbol TYPE=ERROR
+The parameter "code" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV1NameReturnsCurrencyWithAllFields FAILURE AT LINE 48
+at ts01glm_5_2.CurrencyTest.testV1NameReturnsCurrencyWithAllFields(CurrencyTest.java:48)
+CODE CONTEXT:
+    45:                 .get("/v1/name/France")
+    46:                 .then()
+    47:                 .statusCode(200)
+    48:                 .body("[0].currencies[0].code", equalTo("EUR"))  ← FAILURE HERE
+    49:                 .body("[0].currencies[0].name", notNullValue())
+    50:                 .body("[0].currencies[0].symbol", notNullValue());
+    51:     }
+
+[2] METHOD=testV1CurrencyEndpointReturnsCurrencyFields FAILURE AT LINE 36
+at ts01glm_5_2.CurrencyTest.testV1CurrencyEndpointReturnsCurrencyFields(CurrencyTest.java:36)
+CODE CONTEXT:
+    33:                 .get("/v1/currency/USD")
+    34:                 .then()
+    35:                 .statusCode(200)
+    36:                 .body("[0].currencies[0].code", equalTo("USD"))  ← FAILURE HERE
+    37:                 .body("[0].currencies[0].name", notNullValue())
+    38:                 .body("[0].currencies[0].symbol", notNullValue());
+    39:     }
+
+[3] METHOD=testV1AllReturnsCurrencyData FAILURE AT LINE 60
+at ts01glm_5_2.CurrencyTest.testV1AllReturnsCurrencyData(CurrencyTest.java:60)
+CODE CONTEXT:
+    57:                 .get("/v1/all")
+    58:                 .then()
+    59:                 .statusCode(200)
+    60:                 .body("currencies[0].code", notNullValue())  ← FAILURE HERE
+    61:                 .body("currencies[0].name", notNullValue())
+    62:                 .body("currencies[0].symbol", notNullValue());
+    63:     }
+
+[4] METHOD=testV1RegionReturnsCurrencyFields FAILURE AT LINE 72
+at ts01glm_5_2.CurrencyTest.testV1RegionReturnsCurrencyFields(CurrencyTest.java:72)
+CODE CONTEXT:
+    69:                 .get("/v1/region/Europe")
+    70:                 .then()
+    71:                 .statusCode(200)
+    72:                 .body("[0].currencies[0].code", notNullValue())  ← FAILURE HERE
+    73:                 .body("[0].currencies[0].name", notNullValue())
+    74:                 .body("[0].currencies[0].symbol", notNullValue());
+    75:     }
+
+[5] METHOD=testV1AlphaReturnsCurrencyWithCodeNameSymbol FAILURE AT LINE 24
+at ts01glm_5_2.CurrencyTest.testV1AlphaReturnsCurrencyWithCodeNameSymbol(CurrencyTest.java:24)
+CODE CONTEXT:
+    21:                 .get("/v1/alpha/US")
+    22:                 .then()
+    23:                 .statusCode(200)
+    24:                 .body("currencies[0].code", notNullValue())  ← FAILURE HERE
+    25:                 .body("currencies[0].name", notNullValue())
+    26:                 .body("currencies[0].symbol", notNullValue());
+    27:     }
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencyWithCodeNameSymbol() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", notNullValue())
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("USD"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsCurrencyWithAllFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsCurrencyData() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", notNullValue())
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", notNullValue())
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaReturnsCurrencyWithCodeNameSymbol() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", notNullValue())
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturnsCurrencyWithAllFields() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", notNullValue())
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

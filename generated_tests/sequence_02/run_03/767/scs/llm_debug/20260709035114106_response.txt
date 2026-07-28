@@ -1,0 +1,76 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseSatJun() {
+        given()
+            .when()
+                .get("/api/dateparse/sat/jun")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseSunJul() {
+        given()
+            .when()
+                .get("/api/dateparse/sun/jul")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMonAug() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/aug")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTueSep() {
+        given()
+            .when()
+                .get("/api/dateparse/tue/sep")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWedOct() {
+        given()
+            .when()
+                .get("/api/dateparse/wed/oct")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseNovDec() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/nov")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/dateparse/thur/dec")
+            .then()
+                .statusCode(200);
+    }
+}

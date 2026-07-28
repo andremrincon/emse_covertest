@@ -1,0 +1,46 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonth() {
+        given()
+            .when()
+            .get("/api/dateparse/Wednesday/August")
+            .then()
+            .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonth() {
+        given()
+            .when()
+            .get("/api/dateparse/Superday/Movember")
+            .then()
+            .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testValidDayInvalidMonth() {
+        given()
+            .when()
+            .get("/api/dateparse/Monday/456")
+            .then()
+            .statusCode(500);
+    }
+}

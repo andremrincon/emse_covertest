@@ -1,0 +1,111 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String prop = System.getProperty("api.base");
+        String env = System.getenv("API_BASE");
+        BASE = prop != null ? prop : (env != null ? env : "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Success() {
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_Short() {
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/1");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_MissingCodes_BadRequest() {
+        Response act = given().baseUri(BASE).when().get("/v1/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        String unique = "US,CA";
+        Response act = given().baseUri(BASE).when().get("/v1/alpha?codes=" + unique);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest_Format() {
+        Response act = given().baseUri(BASE).when().get("/v1/alpha?codes=123");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        String payload = UUID.randomUUID().toString();
+        Response act = given().baseUri(BASE).when().get("/v1/alpha?codes=[\"US\",\"CA\"]&id=" + payload);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success() {
+        Response act = given().baseUri(BASE).when().get("/v1/currency/USD");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        Response act = given().baseUri(BASE).when().get("/v1/currency/12");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Success_FullTextFalse() {
+        Response act = given().baseUri(BASE).when().get("/v1/name/France?fullText=false");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Success() {
+        Response act = given().baseUri(BASE).when().get("/v1/callingcode/1");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Success() {
+        Response act = given().baseUri(BASE).when().get("/v1/capital/London");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Subregion_Language_Successions() {
+        Response actRegion = given().baseUri(BASE).when().get("/v1/region/Europe");
+        actRegion.then().statusCode(200);
+        Response actSubregion = given().baseUri(BASE).when().get("/v1/subregion/Western%20Europe");
+        actSubregion.then().statusCode(200);
+        Response actLang = given().baseUri(BASE).when().get("/v1/lang/es");
+        actLang.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPost_MethodNotAllowed() {
+        Response act = given().baseUri(BASE).when().post("/v1");
+        act.then().statusCode(405);
+    }
+
+}

@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) url = System.getenv("BASE_URL");
+        if (url == null || url.isEmpty()) url = "http://localhost:8080/rest";
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaV1_TwoLetter_Found() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaV2_ThreeLetter_Found() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/DEU").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListV1_MultipleCodes_Returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA,MX").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListV2_DuplicateCodes_RemovedDuplicates() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,US").then().body("", hasSize(1));
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchV1_ExactName_Matches() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchV1_AltSpelling_Matches() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Deutschland?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchV1_NoMatch_Returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/NoSuchCountryExists?fullText=true").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonV1_AllEndpoint_LoadsData() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+}

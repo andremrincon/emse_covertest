@@ -1,0 +1,84 @@
+```java
+package ts01glm_5_2;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class Ordered4Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+        .then()
+            .statusCode(200)
+            .body(containsString("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+        .then()
+            .statusCode(200)
+            .body(containsString("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLength() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/aaaaa/aaaaa/ccccc/bbbbb")
+        .then()
+            .statusCode(200)
+            .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedShortW() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/abc/bbbbb/ccccc/ddddd")
+        .then()
+            .statusCode(200)
+            .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedShortY() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/aaaaa/bbbbb/ccccc/abc")
+        .then()
+            .statusCode(200)
+            .body(containsString("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedLongZ() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/ordered4/aaaaa/bbbbb/ccccccc/ddddd")
+        .then()
+            .statusCode(200)
+            .body(containsString("unordered"));
+    }
+}
+```

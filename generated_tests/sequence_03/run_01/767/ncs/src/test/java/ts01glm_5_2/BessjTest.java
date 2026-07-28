@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2Returns400() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjPositiveXGreaterThanNReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXGreaterThanNReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/-2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLargeXTriggersBessj1ElseBranch() {
+        given()
+            .when()
+                .get("/api/bessj/3/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZeroReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXLessThanOrEqualNReturns200() {
+        given()
+            .when()
+                .get("/api/bessj/5/2.5")
+            .then()
+                .statusCode(200);
+    }
+}

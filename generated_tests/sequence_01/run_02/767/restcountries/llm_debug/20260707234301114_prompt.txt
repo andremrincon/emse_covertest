@@ -1,0 +1,274 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CountryServiceBaseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByAlpha2 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testGetByAlpha3 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testLoadJson TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testSubstringSearchExact TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testFulltextSearchExact TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testFulltextSearchAltSpelling TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testGetByCodeListValid TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testSubstringSearchAltSpelling TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testGetByCodeListDuplicate TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByAlpha2 FAILURE AT LINE 16
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByAlpha2(CountryServiceBaseTest.java:16)
+CODE CONTEXT:
+    13:             .when()
+    14:                 .get("/v1/alpha/{alphacode}")
+    15:             .then()
+    16:                 .statusCode(404);  ← FAILURE HERE
+    17:     }
+    18: 
+    19:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByAlpha3 FAILURE AT LINE 26
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByAlpha3(CountryServiceBaseTest.java:26)
+CODE CONTEXT:
+    23:             .when()
+    24:                 .get("/v1/alpha/{alphacode}")
+    25:             .then()
+    26:                 .statusCode(404);  ← FAILURE HERE
+    27:     }
+    28: 
+    29:     @Test(timeout = 60000)
+
+[3] METHOD=testLoadJson FAILURE AT LINE 97
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testLoadJson(CountryServiceBaseTest.java:97)
+CODE CONTEXT:
+    94:             .when()
+    95:                 .get("/v1/all")
+    96:             .then()
+    97:                 .statusCode(404);  ← FAILURE HERE
+    98:     }
+    99: }
+
+[4] METHOD=testSubstringSearchExact FAILURE AT LINE 78
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testSubstringSearchExact(CountryServiceBaseTest.java:78)
+CODE CONTEXT:
+    75:             .when()
+    76:                 .get("/v1/name/{name}")
+    77:             .then()
+    78:                 .statusCode(404);  ← FAILURE HERE
+    79:     }
+    80: 
+    81:     @Test(timeout = 60000)
+
+[5] METHOD=testFulltextSearchExact FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testFulltextSearchExact(CountryServiceBaseTest.java:57)
+CODE CONTEXT:
+    54:             .when()
+    55:                 .get("/v1/name/{name}")
+    56:             .then()
+    57:                 .statusCode(404);  ← FAILURE HERE
+    58:     }
+    59: 
+    60:     @Test(timeout = 60000)
+
+[6] METHOD=testFulltextSearchAltSpelling FAILURE AT LINE 67
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testFulltextSearchAltSpelling(CountryServiceBaseTest.java:67)
+CODE CONTEXT:
+    64:             .when()
+    65:                 .get("/v1/name/United%20States%20of%20America")
+    66:             .then()
+    67:                 .statusCode(404);  ← FAILURE HERE
+    68:     }
+    69: 
+    70:     @Test(timeout = 60000)
+
+[7] METHOD=testGetByCodeListValid FAILURE AT LINE 36
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByCodeListValid(CountryServiceBaseTest.java:36)
+CODE CONTEXT:
+    33:             .when()
+    34:                 .get("/v1/alpha")
+    35:             .then()
+    36:                 .statusCode(404);  ← FAILURE HERE
+    37:     }
+    38: 
+    39:     @Test(timeout = 60000)
+
+[8] METHOD=testSubstringSearchAltSpelling FAILURE AT LINE 88
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testSubstringSearchAltSpelling(CountryServiceBaseTest.java:88)
+CODE CONTEXT:
+    85:             .when()
+    86:                 .get("/v1/name/States%20of%20America")
+    87:             .then()
+    88:                 .statusCode(404);  ← FAILURE HERE
+    89:     }
+    90: 
+    91:     @Test(timeout = 60000)
+
+[9] METHOD=testGetByCodeListDuplicate FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01qwen3_7_plus.CountryServiceBaseTest.testGetByCodeListDuplicate(CountryServiceBaseTest.java:46)
+CODE CONTEXT:
+    43:             .when()
+    44:                 .get("/v1/alpha")
+    45:             .then()
+    46:                 .statusCode(404);  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2() {
+        given()
+            .pathParam("alphacode", "US")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3() {
+        given()
+            .pathParam("alphacode", "USA")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExact() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/United%20States%20of%20America")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchExact() {
+        given()
+            .pathParam("name", "Fran")
+            .queryParam("fullText", false)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .queryParam("fullText", false)
+            .when()
+                .get("/v1/name/States%20of%20America")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

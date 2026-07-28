@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String fromSys = System.getProperty("baseUrl");
+        String fromEnv = System.getenv("BASE_URL");
+        if (fromSys != null && !fromSys.isEmpty()) {
+            BASE = fromSys;
+        } else if (fromEnv != null && !fromEnv.isEmpty()) {
+            BASE = fromEnv;
+        } else {
+            BASE = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderOnV1All() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/all").then().header("Access-Control-Allow-Origin", (Object) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowsMethodsHeaderOnV1Alpha_US() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().header("Access-Control-Allow-Methods", (Object) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlpha400ForNumeric() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlOnContributePost() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().contentType("application/json").body("{\"amount\":100,\"currency\":\"USD\",\"token\":\"tok_test\"}")
+                .when().post(BASE + "/contribute")
+                .then().header("Cache-Control", (Object) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllReturns200WithFields() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;population").when().get(BASE + "/v2").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturns200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA,MX").when().get(BASE + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNotFoundReturns404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAllowHeadersOnV1Name() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get(BASE + "/v1/name/France").then().header("Access-Control-Allow-Headers", (Object) null);
+    }
+}

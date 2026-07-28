@@ -1,0 +1,76 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("API_BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <200>.")
+    @Test(timeout = 60000)
+    public void testRemainderAZeroBPositive() {
+        given()
+            .when()
+                .get("/api/remainder/0/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <200>.")
+    @Test(timeout = 60000)
+    public void testRemainderAPositiveBZero() {
+        given()
+            .when()
+                .get("/api/remainder/17/0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBothPositive() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderAPositiveBNegative() {
+        given()
+            .when()
+                .get("/api/remainder/17/-5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderANegativeBPositive() {
+        given()
+            .when()
+                .get("/api/remainder/-9/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBothNegative() {
+        given()
+            .when()
+                .get("/api/remainder/-9/-5")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,83 @@
+package ts01glm_5_2;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testEConstantOperator() {
+        given().baseUri(BASE_URL).when().get("/api/calc/pi/0/0").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/e/0/0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLogOperator() {
+        given().baseUri(BASE_URL).when().get("/api/calc/sqrt/16/0").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/log/1/0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCosineOperator() {
+        given().baseUri(BASE_URL).when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/cosine/0/0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusOperator() {
+        given().baseUri(BASE_URL).when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/plus/3/4")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyOperator() {
+        given().baseUri(BASE_URL).when().get("/api/calc/subtract/10/3").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/multiply/3/4")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorDefault() {
+        given().baseUri(BASE_URL).when().get("/api/calc/divide/10/2").then().statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/calc/unknown/0/0")
+        .then()
+            .statusCode(200);
+    }
+}

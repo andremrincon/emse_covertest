@@ -1,0 +1,41 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterV1All() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterV1Alpha() {
+        Response response = given().when().get("/v1/alpha/US");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterV1Name() {
+        Response response = given().when().get("/v1/name/France");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterV2All() {
+        Response response = given().when().get("/v2/all");
+        response.then().statusCode(404);
+    }
+}

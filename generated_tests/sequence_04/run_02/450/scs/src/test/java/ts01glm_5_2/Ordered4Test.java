@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengths() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthTooShortReturnsUnordered() {
+        given()
+            .when()
+                .get("/api/ordered4/a/bbbbb/bbbbb/bbbbb")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthTooLongReturnsUnordered() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaaaa/bbbbb/bbbbb/bbbbb")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testVeryLongStringReturns500() {
+        String longStr = new String(new char[300]).replace('\0', 'y');
+        given()
+            .when()
+                .get("/api/ordered4/bbbbb/bbbbb/bbbbb/" + longStr)
+            .then()
+                .statusCode(200);
+    }
+}

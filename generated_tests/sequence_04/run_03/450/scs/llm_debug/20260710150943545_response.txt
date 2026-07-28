@@ -1,0 +1,55 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPlusOperationReturnsCorrectResult() {
+        given()
+            .when()
+                .get("/api/calc/plus/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidArg2ReturnsBadRequest() {
+        given()
+            .when()
+                .get("/api/calc/add/10/twenty")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDivideByZeroReturnsServerError() {
+        given()
+            .when()
+                .get("/api/calc/divide/100/0")
+            .then()
+                .statusCode(500);
+    }
+}
+```

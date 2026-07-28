@@ -1,0 +1,114 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseMethodWithLongString() {
+        given()
+            .pathParam("txt", "ABABABAB")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn4PalindromePatThenReverse() {
+        given()
+            .pathParam("txt", "ABCCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn5PalindromeReverseThenPat() {
+        given()
+            .pathParam("txt", "CBAABC")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn1PatFoundOnly() {
+        given()
+            .pathParam("txt", "ABCXYZ")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn2ReversePatFoundOnly() {
+        given()
+            .pathParam("txt", "CBAXYZ")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn0NeitherFound() {
+        given()
+            .pathParam("txt", "XYZXYZ")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturn3BothFoundNonConsecutive() {
+        given()
+            .pathParam("txt", "ABCXYZCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointSingleParameter() {
+        given()
+            .pathParam("txt", "test")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectPatlenLessThanThree() {
+        given()
+            .pathParam("txt", "ABAB")
+            .pathParam("pat", "AB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+}

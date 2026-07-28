@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "Product-Excl-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", feature1)
+            .formParam("excludedFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithExcludesConstraint() {
+        String productName = "Product-Excl-Get-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", feature1)
+            .formParam("excludedFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .body("constraints.type", hasItem("excludes"));
+    }
+}

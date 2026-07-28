@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.junit.Assert.*;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_returnsStatusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/name/NonExistentCountry");
+        ResponseEntity entity = res.as(ResponseEntity.class);
+        assertEquals(404, entity.getStatus());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_returnsMessageField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/name/NonExistentCountry");
+        ResponseEntity entity = res.as(ResponseEntity.class);
+        assertEquals("Not Found", entity.getMessage());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaBadRequest_messagePresent_forInvalidAlphaCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/123");
+        ResponseEntity entity = res.as(ResponseEntity.class);
+        assertEquals("Not Found", entity.getMessage());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFound_returns404StatusCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    public static class ResponseEntity {
+        private int status;
+        private String message;
+
+        public ResponseEntity() {
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+}

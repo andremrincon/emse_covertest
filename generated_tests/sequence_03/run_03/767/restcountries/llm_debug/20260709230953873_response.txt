@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionReturns202() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"currency\":\"EUR\",\"token\":\"tok_visa\",\"id\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionWithExtraFieldsReturns202() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":250,\"currency\":\"USD\",\"token\":\"tok_mastercard\",\"note\":\"thank you\",\"meta\":{\"order\":\"" + UUID.randomUUID().toString() + "\"}}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingTokenReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50,\"currency\":\"EUR\",\"id\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNullTokenFieldReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":75,\"currency\":\"EUR\",\"token\":null,\"id\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingAmountReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"currency\":\"USD\",\"token\":\"tok_abc\",\"id\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroAmountReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":0,\"currency\":\"USD\",\"token\":\"tok_zero\",\"id\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().header("Content-Type","application/json").body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

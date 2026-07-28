@@ -1,0 +1,60 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI0TrueI3True() {
+        given()
+                .pathParam("i", 28)
+                .pathParam("s", "hello")
+        .when()
+                .get("/api/notypevar/{i}/{s}")
+        .then()
+                .statusCode(200)
+                .body(equalTo("28"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI1TrueI2TrueI3True() {
+        given()
+                .pathParam("i", 7)
+                .pathParam("s", "zzz")
+        .when()
+                .get("/api/notypevar/{i}/{s}")
+        .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarAllBranchesFalse() {
+        given()
+                .pathParam("i", 0)
+                .pathParam("s", "aaa")
+        .when()
+                .get("/api/notypevar/{i}/{s}")
+        .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}
+```

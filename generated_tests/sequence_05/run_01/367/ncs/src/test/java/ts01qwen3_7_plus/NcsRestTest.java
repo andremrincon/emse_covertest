@@ -1,0 +1,96 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjValid() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNTooSmall() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNTooLarge() {
+        given()
+            .when()
+                .get("/api/bessj/1001/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValid() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMTooLarge() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNTooLarge() {
+        given()
+            .when()
+                .get("/api/fisher/10/1001/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValid() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderATooLarge() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBTooLarge() {
+        given()
+            .when()
+                .get("/api/remainder/5/10001")
+            .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,68 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    @Test(timeout = 60000)
+    public void testFileWithoutDotReturnsZero() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/filename")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffixReturnsOne() {
+        given()
+            .when()
+                .get("/api/filesuffix/text/document.txt")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffixReturnsTwo() {
+        given()
+            .when()
+                .get("/api/filesuffix/acrobat/report.pdf")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffixReturnsThree() {
+        given()
+            .when()
+                .get("/api/filesuffix/word/letter.doc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeSuffixReturnsFour() {
+        given()
+            .when()
+                .get("/api/filesuffix/bin/setup.exe")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllSuffixReturnsFive() {
+        given()
+            .when()
+                .get("/api/filesuffix/lib/module.dll")
+            .then()
+                .statusCode(200)
+                .body(equalTo("5"));
+    }
+}

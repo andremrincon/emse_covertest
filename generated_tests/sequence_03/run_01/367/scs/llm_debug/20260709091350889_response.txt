@@ -1,0 +1,69 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RegexTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternMatch() {
+        String txt = "http://abc/def";
+        
+        Response response = given()
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatch() {
+        String txt = "mon01jan";
+        
+        Response response = given()
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatch() {
+        String txt = "12.34e+56";
+        
+        Response response = given()
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoPatternMatch() {
+        String txt = "invalid";
+        
+        Response response = given()
+            .pathParam("txt", txt)
+            .when()
+            .get("/api/pat/{txt}");
+        
+        response.then().statusCode(200);
+    }
+}
+```

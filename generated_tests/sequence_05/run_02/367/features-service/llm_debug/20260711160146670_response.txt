@@ -1,0 +1,152 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConstraintRequiresTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    private void createProduct(String productName) {
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+    }
+
+    private void createRequiresConstraint(String productName, String sourceFeature, String requiredFeature) {
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConstraintSourceActiveRequiredInactive() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+        createConfiguration(productName, configName);
+        createRequiresConstraint(productName, sourceFeature, requiredFeature);
+        
+        addFeatureToConfiguration(productName, configName, sourceFeature);
+
+        given()
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+        .then()
+            .statusCode(200)
+            .body("$", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConstraintSourceInactive() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+        createConfiguration(productName, configName);
+        createRequiresConstraint(productName, sourceFeature, requiredFeature);
+
+        given()
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+        .then()
+            .statusCode(200)
+            .body("$", not(hasItem(requiredFeature)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConstraintSourceActiveRequiredAlreadyActive() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+        createConfiguration(productName, configName);
+        createRequiresConstraint(productName, sourceFeature, requiredFeature);
+
+        addFeatureToConfiguration(productName, configName, sourceFeature);
+        addFeatureToConfiguration(productName, configName, requiredFeature);
+
+        given()
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+        .then()
+            .statusCode(200)
+            .body("$", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithRequiresConstraint() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "Source-" + UUID.randomUUID().toString();
+        String requiredFeature = "Required-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+        createRequiresConstraint(productName, sourceFeature, requiredFeature);
+
+        given()
+        .when()
+            .get("/products/{productName}", productName)
+        .then()
+            .statusCode(200)
+            .body("constraints.type", hasItem("requires"));
+    }
+}

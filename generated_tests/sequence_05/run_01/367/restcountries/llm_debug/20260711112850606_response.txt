@@ -1,0 +1,130 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalid_short_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/1");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_fields_returnsJsonString() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        String body = act.getBody().asString();
+        assertTrue(body != null && body.startsWith("{"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_singleCode_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US").when().get("/v2/alpha");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_commaSeparated_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v2/alpha");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_empty_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "").when().get("/v2/alpha");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalid_length_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EU");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullText_false_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "false").when().get("/v2/name/France");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_numeric_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/name/123");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/1");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/99999");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_fields_returnsArrayJsonString() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/capital/Paris");
+        String body = act.getBody().asString();
+        assertTrue(body != null && body.startsWith("["));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/subregion/Western%20Europe");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/Spanish");
+        assertEquals(200, act.getStatusCode());
+    }
+}

@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("name", "John Smith").when().get("/");
+        resp.then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultName() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/");
+        resp.then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithSpecialCharacters() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("name", "María-José O'Connor-Smith III").when().get("/");
+        resp.then().body(equalTo("Hello María-José O'Connor-Smith III!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithExplicitDelay() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "1").when().get("/slowApi");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithZeroDelayRandomBranch() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "0").when().get("/slowApi");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNegativeDelayShouldReturn500() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "-1").when().get("/slowApi");
+        resp.then().statusCode(500);
+    }
+}

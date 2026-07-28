@@ -1,0 +1,115 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThanOrEqualTo2_returns400() {
+        given()
+            .when()
+                .get("/api/bessj/2/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nGreaterThan1000_returns400() {
+        given()
+            .when()
+                .get("/api/bessj/1001/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_validInput_returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_mGreaterThan1000_returns400() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_validInput_returns200() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_invalidX_returns400() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/-1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_validInput_returns200() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_invalidA_returns400() {
+        given()
+            .when()
+                .get("/api/gammq/-1.0/2.3")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aExceedsLimit_returns400() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_bExceedsLimit_returns400() {
+        given()
+            .when()
+                .get("/api/remainder/17/10001")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_validInput_returns200() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(200);
+    }
+}

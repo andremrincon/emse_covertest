@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import org.junit.Assert;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    private static final String BASE;
+    static {
+        String prop = System.getProperty("base.url");
+        String env = System.getenv("BASE_URL");
+        if(prop != null && !prop.isEmpty()) {
+            BASE = prop;
+        } else if(env != null && !env.isEmpty()) {
+            BASE = env;
+        } else {
+            BASE = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        String name = "John Smith";
+        Response resp = given().when().get(BASE + "/?name=" + URLEncoder.encode(name, StandardCharsets.UTF_8.toString()));
+        Assert.assertEquals("Hello John Smith!!", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultName() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/");
+        Assert.assertEquals("Hello Guest!!", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithSpecialCharacters() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        String name = "María-José O'Connor-Smith III";
+        Response resp = given().when().get(BASE + "/?name=" + URLEncoder.encode(name, StandardCharsets.UTF_8.toString()));
+        Assert.assertEquals("Hello " + name + "!!", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithZeroDelayTriggersRandomBranch() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/slowApi?delay=0");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithPositiveDelaySleepsAndReturns200() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        Response resp = given().when().get(BASE + "/slowApi?delay=1&runId=" + URLEncoder.encode(unique, StandardCharsets.UTF_8.toString()));
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithInvalidDelayReturns500() throws Exception {
+        given().when().get(BASE + "/").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/slowApi?delay=abc");
+        Assert.assertEquals(500, resp.getStatusCode());
+    }
+}

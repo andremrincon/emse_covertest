@@ -1,0 +1,46 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+    private static final String BASE = System.getProperty("base.url", System.getenv("BASE_URL")) == null ? "http://localhost:8080" : System.getProperty("base.url", System.getenv("BASE_URL"));
+
+    @BeforeClass
+    public static void init() {
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveAPositiveB_ReturnsCorrectRemainder() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/17/5");
+        resp.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveANegativeB_Returns200Status() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/17/-9");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAPositiveB_ReturnsNegativeRemainder() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/-17/5");
+        resp.then().statusCode(200).body(equalTo("-2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeANegativeB_ReturnsAbsoluteRemainder() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/-17/-5");
+        resp.then().statusCode(200).body(equalTo("2"));
+    }
+}

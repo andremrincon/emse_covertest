@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+public class CalcTest {
+
+    private static String baseUri() {
+        String b = System.getProperty("BASE_URL");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getenv("BASE_URL");
+        if (b != null && !b.isEmpty()) return b;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPiReturnsPiString() {
+        String base = baseUri();
+        given().baseUri(base).when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0");
+        act.then().body(equalTo(Double.toString(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDivideByZeroReturns500() {
+        String base = baseUri();
+        given().baseUri(base).when().get("/api/text2txt/{w}/{x}/{y}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcSqrtOfNineReturnsThree() {
+        String base = baseUri();
+        given().baseUri(base).when().get("/api/cookie/{name}/{val}/{site}", "session-id", "abc-123-xyz-789", "example.com").then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9", "0");
+        act.then().body(equalTo("3.0"));
+    }
+}

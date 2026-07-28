@@ -1,0 +1,160 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryRestV2Test {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithValidCode() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithInvalidCode() {
+        given()
+            .when()
+                .get("/v2/alpha/123")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListWithValidCodes() {
+        given()
+            .queryParam("codes", "US,CA")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListWithInvalidCodes() {
+        given()
+            .queryParam("codes", "123")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyWithValidCurrency() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyWithInvalidCurrency() {
+        given()
+            .when()
+                .get("/v2/currency/123")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameWithValidName() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeWithValidCode() {
+        given()
+            .when()
+                .get("/v2/callingcode/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalWithValidCapital() {
+        given()
+            .when()
+                .get("/v2/capital/Paris")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionWithValidRegion() {
+        given()
+            .when()
+                .get("/v2/region/Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionWithValidSubRegion() {
+        given()
+            .when()
+                .get("/v2/subregion/Western Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageWithValidLanguage() {
+        given()
+            .when()
+                .get("/v2/lang/es")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymWithValidDemonym() {
+        given()
+            .when()
+                .get("/v2/demonym/American")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocWithValidBloc() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountryWithFields() {
+        given()
+            .queryParam("fields", "name;capital")
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+}
+```

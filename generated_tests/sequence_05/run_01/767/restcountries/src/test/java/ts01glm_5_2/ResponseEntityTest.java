@@ -1,0 +1,85 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageOnNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "123")
+            .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusOnNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "123")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageOnAlphaNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/{alphacode}", "XYZ")
+            .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusOnAlphaNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/{alphacode}", "XYZ")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCurrencyNotFound() {
+        given()
+            .when()
+                .get("/v1/currency/{currency}", "XYZ")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCallingCodeNotFound() {
+        given()
+            .when()
+                .get("/v1/callingcode/{callingcode}", "99999")
+            .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+}

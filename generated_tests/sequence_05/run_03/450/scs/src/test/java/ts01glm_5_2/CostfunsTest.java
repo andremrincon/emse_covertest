@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUri = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUri;
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveBranch() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanNegative444Branch() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666Branch() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsNegativeFourBranch() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSEqualsBaabBranch() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSEqualsAbabBranch() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,76 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void createRequiresConstraint_returns201() throws Exception {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraint_responseHasId() throws Exception {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", product);
+        act.then().body("id", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraint_returns204() throws Exception {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response created = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(lessThan(300)).extract().response();
+        Number idNum = created.jsonPath().get("id");
+        long id = idNum == null ? -1L : idNum.longValue();
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", product, id);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void createRequiresConstraint_then_getProduct_returns200() throws Exception {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "Feature-A")
+                .formParam("requiredFeature", "Feature-B")
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        act.then().statusCode(200);
+    }
+}

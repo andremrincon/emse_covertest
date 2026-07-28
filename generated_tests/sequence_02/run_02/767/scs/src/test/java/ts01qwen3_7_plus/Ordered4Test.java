@@ -1,0 +1,94 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "dates")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .pathParam("w", "zzzzz")
+            .pathParam("x", "yyyyy")
+            .pathParam("z", "wwwww")
+            .pathParam("y", "xxxxx")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValues() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "avocd")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWLength() {
+        given()
+            .pathParam("w", "app")
+            .pathParam("x", "banana")
+            .pathParam("z", "dates")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedXLength() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "ban")
+            .pathParam("z", "dates")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedZLength() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "da")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .body(equalTo("unordered"));
+    }
+}

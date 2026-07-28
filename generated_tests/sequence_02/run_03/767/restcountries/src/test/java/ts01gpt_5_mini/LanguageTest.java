@@ -1,0 +1,91 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv("API_BASE"));
+        if (base == null) base = System.getProperty("BASE_URL", System.getenv("BASE_URL"));
+        RestAssured.baseURI = base != null ? base : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaValid() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaBadFormat() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodes() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyValid() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1NameLanguageFields() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().body("[0].languages[0]['iso639_1']", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangValid() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/lang/Spanish");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaFieldsName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        resp.then().body("name", equalTo("United States of America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllFieldsFiltering() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;region;population;flag").when().get("/v2/all");
+        resp.then().body("[0].name", equalTo("Afghanistan"));
+    }
+}

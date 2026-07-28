@@ -1,0 +1,674 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    private String baseUrl;
+    private String productName;
+    private String configurationName;
+    private String featureName1;
+    private String featureName2;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        productName = "TestProduct-" + System.currentTimeMillis();
+        configurationName = "TestConfig-" + System.currentTimeMillis();
+        featureName1 = "Feature1-" + System.currentTimeMillis();
+        featureName2 = "Feature2-" + System.currentTimeMillis();
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveFeatureWithString() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActivedFeatures() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasItem(featureName1));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductAndAvailableFeatures() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Test feature 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("name", equalTo(configurationName));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureWithString() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeature() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(1));
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesWithMultipleFeatures() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Test feature 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName2)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidFlag() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveFeatureWithFeatureObject() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasItem(featureName1));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureWithFeatureObject() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesFromProduct() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Test feature 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductMethod() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("name", equalTo(configurationName));
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesEmptySet() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidFlagDefaultTrue() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureReturnsFalse() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200)
+            .body("$", not(hasItem(featureName1)));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidAfterFeatureRemoval() {
+        given()
+            .pathParam("productName", productName)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "Test feature 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+}

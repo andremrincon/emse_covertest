@@ -1,0 +1,79 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNormalCase() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/bessj/5/2.5");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjSmallX() {
+        given().when().get("/api/bessj/3/1.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/bessj/3/1e-10");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLargeN() {
+        given().when().get("/api/bessj/10/5.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/bessj/100/5.0");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNormalCase() {
+        given().when().get("/api/fisher/10/5/0.75").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/10/5/0.75");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEdgeCaseXZero() {
+        given().when().get("/api/fisher/1/1/0.5").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/1/1/0.0");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSmallMN() {
+        given().when().get("/api/fisher/2/2/0.5").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/fisher/1/1/0.5");
+
+        assertEquals(200, response.getStatusCode());
+    }
+}

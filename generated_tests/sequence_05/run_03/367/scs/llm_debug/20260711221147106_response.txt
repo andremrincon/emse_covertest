@@ -1,0 +1,102 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseURI = System.getenv("API_BASE_URI");
+        if (baseURI == null || baseURI.isEmpty()) {
+            baseURI = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseURI;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatTooShort() {
+        given()
+            .when()
+                .get("/api/pat/abc/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given()
+            .when()
+                .get("/api/pat/abcdef/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPat() {
+        given()
+            .when()
+                .get("/api/pat/abcdef/fed")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/abccba/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/abcXcba/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/cbaabc/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/cbaXabc/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFirstCharMatchNoFullMatch() {
+        given()
+            .when()
+                .get("/api/pat/axcdef/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given()
+            .when()
+                .get("/api/pat/ab/abc")
+            .then()
+                .statusCode(200);
+    }
+}
+```

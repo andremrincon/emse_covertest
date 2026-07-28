@@ -1,0 +1,381 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = "Product-AddFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-Add-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test feature for addFeature method")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = "Product-RemoveFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-Remove-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Test feature for removeFeature method")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildProductWithMultipleFeatures() {
+        String productName = "Product-BuildWithFeatures-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature1 = "Feature1-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "First feature")
+            .when()
+            .post("/products/" + productName + "/features/" + feature1)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature2 = "Feature2-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Second feature")
+            .when()
+            .post("/products/" + productName + "/features/" + feature2)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature3 = "Feature3-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Third feature")
+            .when()
+            .post("/products/" + productName + "/features/" + feature3)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() {
+        String productName = "Product-RequiresConstraint-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String sourceFeature = "SourceFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Source feature")
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String requiredFeature = "RequiredFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Required feature")
+            .when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() {
+        String productName = "Product-ExcludesConstraint-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String sourceFeature = "SourceFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Source feature")
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String excludedFeature = "ExcludedFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Excluded feature")
+            .when()
+            .post("/products/" + productName + "/features/" + excludedFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureAndVerifyInProduct() {
+        String productName = "Product-VerifyFeature-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-Verify-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature to verify")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureAndVerifyFromProduct() {
+        String productName = "Product-VerifyRemove-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-VerifyRemove-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature to remove and verify")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleConstraintsToProduct() {
+        String productName = "Product-MultipleConstraints-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature1 = "Feature1-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature 1")
+            .when()
+            .post("/products/" + productName + "/features/" + feature1)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature2 = "Feature2-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature 2")
+            .when()
+            .post("/products/" + productName + "/features/" + feature2)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature3 = "Feature3-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature 3")
+            .when()
+            .post("/products/" + productName + "/features/" + feature3)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", feature2)
+            .formParam("excludedFeature", feature3)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildProductWithFeaturesAndConstraints() {
+        String productName = "Product-FullBuild-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature1 = "Feature1-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature 1")
+            .when()
+            .post("/products/" + productName + "/features/" + feature1)
+            .then()
+            .statusCode(lessThan(300));
+
+        String feature2 = "Feature2-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Feature 2")
+            .when()
+            .post("/products/" + productName + "/features/" + feature2)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithEmptyDescription() {
+        String productName = "Product-EmptyDesc-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-EmptyDesc-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithLongDescription() {
+        String productName = "Product-LongDesc-" + System.currentTimeMillis();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Feature-LongDesc-" + System.currentTimeMillis();
+        String longDescription = "This is a very long description that tests the addFeature method with a lengthy description parameter to ensure proper handling of large text inputs in the feature creation process.";
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", longDescription)
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+}
+```

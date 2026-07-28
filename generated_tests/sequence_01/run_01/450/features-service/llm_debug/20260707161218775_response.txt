@@ -1,0 +1,112 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ProductTest {
+
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            RestAssured.baseURI = "http://localhost:8080";
+        } else {
+            RestAssured.baseURI = base;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddedFeatureIsVisibleInFeaturesList() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product).then().body(containsString(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeature_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "rem-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        when().delete("/products/{productName}/features/{featureName}", product, feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamed_false_when_not_present() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String absentFeature = "absent-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product).then().body(not(containsString(absentFeature)));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", "SF-" + UUID.randomUUID().toString()).formParam("requiredFeature", "RF-" + UUID.randomUUID().toString()).when().post("/products/{productName}/constraints/requires", product).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_returns201_and_returnsId() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", "SF-" + UUID.randomUUID().toString()).formParam("excludedFeature", "EF-" + UUID.randomUUID().toString()).when().post("/products/{productName}/constraints/excludes", product).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateAndDeleteConstraint_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response r = given().formParam("sourceFeature", "S-" + UUID.randomUUID().toString()).formParam("excludedFeature", "E-" + UUID.randomUUID().toString()).when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300)).extract().response();
+        String id = r.jsonPath().getString("id");
+        when().delete("/products/{productName}/constraints/{constraintId}", product, id).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "cf-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfiguration_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "cfrem-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+        when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct_returns200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations", product).then().statusCode(200);
+    }
+}

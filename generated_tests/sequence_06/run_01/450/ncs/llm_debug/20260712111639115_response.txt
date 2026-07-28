@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+
+public class FisherTest {
+
+    private static final String BASE = System.getProperty("baseUrl", System.getenv("BASE_URL")) == null ? "http://localhost:8080" : (System.getProperty("baseUrl", System.getenv("BASE_URL")));
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_bothOdd_returns200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 1, 1, 0.75);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_mOdd_nEven_returns200() {
+        given().when().get("/api/remainder/{a}/{b}", 17, 5).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 1, 10, 0.0);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_mEven_nOdd_returns200() {
+        given().when().get("/api/expint/{n}/{x}", 3, 0.1).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_bothEven_returns200() {
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 2.3).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 2, 2, 0.0);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_invalidX_returns400() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 1.2);
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_mOdd_nOdd_zeroX_returns200() {
+        given().when().get("/api/bessj/{n}/{x}", 3, 2.5).then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/fisher/{m}/{n}/{x}", 1, 5, 0.0);
+        res.then().statusCode(200);
+    }
+}

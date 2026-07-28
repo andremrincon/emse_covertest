@@ -1,0 +1,55 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleTitles() {
+        String[] titles = {"sir", "rev", "rthon", "prof"};
+        for (String title : titles) {
+            given().when().get("/api/title/male/" + title).then().statusCode(lessThan(300));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleTitles() {
+        String[] titles = {"ms", "dr", "rev", "rthon", "prof"};
+        for (String title : titles) {
+            given().when().get("/api/title/female/" + title).then().statusCode(lessThan(300));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneTitles() {
+        String[] titles = {"dr", "rthon", "prof"};
+        for (String title : titles) {
+            given().when().get("/api/title/none/" + title).then().statusCode(lessThan(300));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleMrTitle() {
+        given().when().get("/api/title/male/mr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleMrsTitle() {
+        given().when().get("/api/title/female/mrs").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidSexTitle() {
+        given().when().get("/api/title/neuter/Jones").then().statusCode(200);
+    }
+}

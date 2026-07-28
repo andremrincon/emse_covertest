@@ -1,0 +1,150 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ConstraintRequiresTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int request(String method, String path) throws IOException {
+        URL url = new URL(baseUri + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setFixedLengthStreamingMode(0);
+            conn.connect();
+            OutputStream os = conn.getOutputStream();
+            os.write(new byte[0]);
+            os.flush();
+            os.close();
+        } else {
+            conn.connect();
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validFeature_returns201() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_nonExistentFeature_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "non-existent-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_existingFeatureInConfiguration_returns204() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_featureNotInConfiguration_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/" + productName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/features/" + featureName);
+        assertTrue(code < 300);
+
+        code = request("POST", "/products/" + productName + "/configurations/" + configurationName);
+        assertTrue(code < 300);
+
+        code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_nonExistentProduct_returns400() throws Exception {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code = request("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_nonExistentProduct_returns400() throws Exception {
+        String productName = "non-existent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code = request("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+        assertEquals(400, code);
+    }
+}

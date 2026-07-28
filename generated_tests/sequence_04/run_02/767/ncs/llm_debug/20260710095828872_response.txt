@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Test;
+
+public class ExpintTest {
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeN() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/-1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeX() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/3/-999.9")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintZeroXPositiveN() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/3/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintZeroNPositiveX() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/0/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintContinuedFractionFailed() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/10000/1.0000000001")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesFailed() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/expint/10000/0.9999999999")
+        .then()
+            .statusCode(500);
+    }
+}

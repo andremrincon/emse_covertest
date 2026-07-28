@@ -1,0 +1,105 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryRestV2Test {
+
+    private static final String BASE = Optional.ofNullable(System.getProperty("api.base"))
+            .orElse(Optional.ofNullable(System.getenv("API_BASE")).orElse("http://localhost:8080/rest"));
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/alpha/US?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequestInvalidCode() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/alpha?codes=US,CA&fields=name;capital;population").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBadRequestInvalidCodesFormat() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        String encoded = "%5B%22US%22,%22CA%22%5D";
+        given().when().get(BASE + "/v2/alpha?codes=" + encoded).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/currency/EUR?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequestInvalidCurrency() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameFullTextTrueReturns200() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/name/Germany?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;region").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/callingcode/1?fields=name;capital;region").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/capital/Paris?fields=name;capital;population").then().body(containsString("\"capital\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/region/Europe?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionSuccessStatus200() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/subregion/Western%20Europe?fields=name;capital;population").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccessWithFields() {
+        given().when().get(BASE + "/v2/all?fields=name;capital;population").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/lang/Spanish?fields=name;capital;population").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymNotFoundNumeric() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/demonym/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostOnV2ReturnsMethodNotAllowed() {
+        given().when().get(BASE + "/v2/all").then().statusCode(lessThan(300));
+        given().when().post(BASE + "/v2").then().statusCode(405);
+    }
+}

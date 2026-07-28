@@ -1,0 +1,163 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("basePort", "8080"));
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithValidPayloadReturnsAccepted() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":1000,\"currency\":\"USD\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingAmountReturnsBadRequest() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"currency\":\"USD\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingTokenReturnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":500,\"currency\":\"USD\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingCurrencyReturnsBadRequest() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":500,\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyBodyReturnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithInvalidAmountTypeReturnsBadRequest() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":\"notanumber\",\"currency\":\"USD\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithZeroAmountReturnsBadRequest() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":0,\"currency\":\"USD\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithNegativeAmountReturnsBadRequest() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":-100,\"currency\":\"USD\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyTokenReturnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":1000,\"currency\":\"USD\",\"token\":\"\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithExtraFieldsReturnsAccepted() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":2500,\"currency\":\"EUR\",\"token\":\"" + token + "\",\"extraField\":\"value\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithLargeAmountReturnsAccepted() {
+        String token = "tok_" + UUID.randomUUID().toString().replace("-", "");
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"amount\":999999,\"currency\":\"GBP\",\"token\":\"" + token + "\"}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMalformedJsonReturnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{amount:1000,currency:USD,token:tok_123}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+}
+```

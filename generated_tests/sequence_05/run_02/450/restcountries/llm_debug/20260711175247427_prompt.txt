@@ -1,0 +1,384 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetEsViaV1AlphaDE TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testSetDeViaV1NameGermany TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testSetJaViaV1AlphaMultiple TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testSetDeViaV1Alpha TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testSetEsViaV1Name TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testSetJaViaV1CallingCode TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testSetItViaV1AlphaGB TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testSetItViaV1NameGermany TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testSetFrViaV1NameGermany TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testSetJaViaV1NameFrance TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[11] METHOD=testSetEsViaV1Subregion TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[12] METHOD=testSetDeViaV1Region TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[13] METHOD=testSetFrViaV1Lang TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[14] METHOD=testSetItViaV1Capital TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[15] METHOD=testSetFrViaV1Currency TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetEsViaV1AlphaDE FAILURE AT LINE 91
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaV1AlphaDE(CountryTranslationsTest.java:91)
+CODE CONTEXT:
+    88: 
+    89:     @Test(timeout = 60000)
+    90:     public void testSetEsViaV1AlphaDE() {
+    91:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    92:         given().when().get("/v1/alpha/DE").then().statusCode(200).body("translations.es", equalTo("Alemania"));
+    93:     }
+    94: 
+
+[2] METHOD=testSetDeViaV1NameGermany FAILURE AT LINE 85
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaV1NameGermany(CountryTranslationsTest.java:85)
+CODE CONTEXT:
+    82: 
+    83:     @Test(timeout = 60000)
+    84:     public void testSetDeViaV1NameGermany() {
+    85:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    86:         given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.de[0]", equalTo("Deutschland"));
+    87:     }
+    88: 
+
+[3] METHOD=testSetJaViaV1AlphaMultiple FAILURE AT LINE 73
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaV1AlphaMultiple(CountryTranslationsTest.java:73)
+CODE CONTEXT:
+    70: 
+    71:     @Test(timeout = 60000)
+    72:     public void testSetJaViaV1AlphaMultiple() {
+    73:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    74:         given().when().get("/v1/alpha?codes=US,CA").then().statusCode(200).body("translations.ja[0]", equalTo("アメリカ合衆国"));
+    75:     }
+    76: 
+
+[4] METHOD=testSetDeViaV1Alpha FAILURE AT LINE 25
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaV1Alpha(CountryTranslationsTest.java:25)
+CODE CONTEXT:
+    22: 
+    23:     @Test(timeout = 60000)
+    24:     public void testSetDeViaV1Alpha() {
+    25:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    26:         given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    27:     }
+    28: 
+
+[5] METHOD=testSetEsViaV1Name FAILURE AT LINE 31
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaV1Name(CountryTranslationsTest.java:31)
+CODE CONTEXT:
+    28: 
+    29:     @Test(timeout = 60000)
+    30:     public void testSetEsViaV1Name() {
+    31:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    32:         given().when().get("/v1/name/France").then().statusCode(200).body("translations.es", equalTo("Francia"));
+    33:     }
+    34: 
+
+[6] METHOD=testSetJaViaV1CallingCode FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaV1CallingCode(CountryTranslationsTest.java:43)
+CODE CONTEXT:
+    40: 
+    41:     @Test(timeout = 60000)
+    42:     public void testSetJaViaV1CallingCode() {
+    43:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    44:         given().when().get("/v1/callingcode/1").then().statusCode(200).body("translations.ja[0]", equalTo("アメリカ合衆国"));
+    45:     }
+    46: 
+
+[7] METHOD=testSetItViaV1AlphaGB FAILURE AT LINE 79
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaV1AlphaGB(CountryTranslationsTest.java:79)
+CODE CONTEXT:
+    76: 
+    77:     @Test(timeout = 60000)
+    78:     public void testSetItViaV1AlphaGB() {
+    79:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    80:         given().when().get("/v1/alpha/GB").then().statusCode(200).body("translations.it", equalTo("Regno Unito"));
+    81:     }
+    82: 
+
+[8] METHOD=testSetItViaV1NameGermany FAILURE AT LINE 109
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaV1NameGermany(CountryTranslationsTest.java:109)
+CODE CONTEXT:
+   106: 
+   107:     @Test(timeout = 60000)
+   108:     public void testSetItViaV1NameGermany() {
+   109:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   110:         given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.it[0]", equalTo("Germania"));
+   111:     }
+   112: }
+
+[9] METHOD=testSetFrViaV1NameGermany FAILURE AT LINE 97
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaV1NameGermany(CountryTranslationsTest.java:97)
+CODE CONTEXT:
+    94: 
+    95:     @Test(timeout = 60000)
+    96:     public void testSetFrViaV1NameGermany() {
+    97:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    98:         given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.fr[0]", equalTo("Allemagne"));
+    99:     }
+   100: 
+
+[10] METHOD=testSetJaViaV1NameFrance FAILURE AT LINE 103
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetJaViaV1NameFrance(CountryTranslationsTest.java:103)
+CODE CONTEXT:
+   100: 
+   101:     @Test(timeout = 60000)
+   102:     public void testSetJaViaV1NameFrance() {
+   103:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   104:         given().when().get("/v1/name/France").then().statusCode(200).body("translations.ja[0]", equalTo("フランス"));
+   105:     }
+   106: 
+
+[11] METHOD=testSetEsViaV1Subregion FAILURE AT LINE 61
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetEsViaV1Subregion(CountryTranslationsTest.java:61)
+CODE CONTEXT:
+    58: 
+    59:     @Test(timeout = 60000)
+    60:     public void testSetEsViaV1Subregion() {
+    61:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    62:         given().when().get("/v1/subregion/Western Europe").then().statusCode(200).body("translations.es[0]", equalTo("Alemania"));
+    63:     }
+    64: 
+
+[12] METHOD=testSetDeViaV1Region FAILURE AT LINE 55
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetDeViaV1Region(CountryTranslationsTest.java:55)
+CODE CONTEXT:
+    52: 
+    53:     @Test(timeout = 60000)
+    54:     public void testSetDeViaV1Region() {
+    55:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    56:         given().when().get("/v1/region/Europe").then().statusCode(200).body("translations.de[0]", equalTo("Deutschland"));
+    57:     }
+    58: 
+
+[13] METHOD=testSetFrViaV1Lang FAILURE AT LINE 67
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaV1Lang(CountryTranslationsTest.java:67)
+CODE CONTEXT:
+    64: 
+    65:     @Test(timeout = 60000)
+    66:     public void testSetFrViaV1Lang() {
+    67:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    68:         given().when().get("/v1/lang/es").then().statusCode(200).body("translations.fr[0]", equalTo("Espagne"));
+    69:     }
+    70: 
+
+[14] METHOD=testSetItViaV1Capital FAILURE AT LINE 49
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetItViaV1Capital(CountryTranslationsTest.java:49)
+CODE CONTEXT:
+    46: 
+    47:     @Test(timeout = 60000)
+    48:     public void testSetItViaV1Capital() {
+    49:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    50:         given().when().get("/v1/capital/Paris").then().statusCode(200).body("translations.it[0]", equalTo("Francia"));
+    51:     }
+    52: 
+
+[15] METHOD=testSetFrViaV1Currency FAILURE AT LINE 37
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testSetFrViaV1Currency(CountryTranslationsTest.java:37)
+CODE CONTEXT:
+    34: 
+    35:     @Test(timeout = 60000)
+    36:     public void testSetFrViaV1Currency() {
+    37:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    38:         given().when().get("/v1/currency/USD").then().statusCode(200).body("translations.fr", equalTo("États-Unis"));
+    39:     }
+    40: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaV1Alpha() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaV1Name() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().statusCode(200).body("translations.es", equalTo("Francia"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaV1Currency() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaV1CallingCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().statusCode(200).body("translations.ja[0]", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaV1Capital() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/Paris").then().statusCode(200).body("translations.it[0]", equalTo("Francia"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaV1Region() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().statusCode(200).body("translations.de[0]", equalTo("Deutschland"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaV1Subregion() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/subregion/Western Europe").then().statusCode(200).body("translations.es[0]", equalTo("Alemania"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaV1Lang() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200).body("translations.fr[0]", equalTo("Espagne"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaV1AlphaMultiple() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(200).body("translations.ja[0]", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaV1AlphaGB() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/GB").then().statusCode(200).body("translations.it", equalTo("Regno Unito"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaV1NameGermany() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.de[0]", equalTo("Deutschland"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaV1AlphaDE() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/DE").then().statusCode(200).body("translations.es", equalTo("Alemania"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaV1NameGermany() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.fr[0]", equalTo("Allemagne"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaV1NameFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().statusCode(200).body("translations.ja[0]", equalTo("フランス"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaV1NameGermany() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Germany").then().statusCode(200).body("translations.it[0]", equalTo("Germania"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

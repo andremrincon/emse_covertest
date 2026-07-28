@@ -1,0 +1,78 @@
+```java
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeaderOnV1All() {
+        given().when().get(baseUrl + "/v1/all").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeaderOnV1All() {
+        given().when().get(baseUrl + "/v1/all").then().header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeaderOnV1All() {
+        given().when().get(baseUrl + "/v1/all").then().header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1All() {
+        given().when().get(baseUrl + "/v1/all").then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOn404Response() {
+        given().when().get(baseUrl + "/v1/alpha/XYZ").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlOn400Response() {
+        given().when().get(baseUrl + "/v1/alpha/123").then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV2All() {
+        given().when().get(baseUrl + "/v2/all").then().header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1Name() {
+        given().when().get(baseUrl + "/v1/name/France").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersOnV1Region() {
+        given().when().get(baseUrl + "/v1/region/Europe").then().header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlOnV1Capital() {
+        given().when().get(baseUrl + "/v1/capital/London").then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1Currency() {
+        given().when().get(baseUrl + "/v1/currency/USD").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV1CallingCode() {
+        given().when().get(baseUrl + "/v1/callingcode/1").then().header("Access-Control-Allow-Methods", "GET");
+    }
+}
+```

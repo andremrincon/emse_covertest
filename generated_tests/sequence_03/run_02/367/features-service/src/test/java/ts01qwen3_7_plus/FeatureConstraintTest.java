@@ -1,0 +1,59 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        if (envUrl != null && !envUrl.isEmpty()) {
+            return envUrl;
+        }
+        return System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIdViaRequiresConstraint() {
+        String baseUrl = getBaseUrl();
+        String productName = "Product-Req-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given().baseUri(baseUrl).when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+                .baseUri(baseUrl)
+                .formParam("sourceFeature", feature1)
+                .formParam("requiredFeature", feature2)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIdViaExcludesConstraint() {
+        String baseUrl = getBaseUrl();
+        String productName = "Product-Excl-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given().baseUri(baseUrl).when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+                .baseUri(baseUrl)
+                .formParam("sourceFeature", feature1)
+                .formParam("excludedFeature", feature2)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+}

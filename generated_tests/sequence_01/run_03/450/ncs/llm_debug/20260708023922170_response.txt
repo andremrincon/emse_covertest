@@ -1,0 +1,86 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThan2_throwsException() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xZero_returnsZero() {
+        given()
+            .when()
+                .get("/api/bessj/3/0.0")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_normalPath() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axLessThanOrEqualN_elseBranch() {
+        given()
+            .when()
+                .get("/api/bessj/3/1.0")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeXLargeMagnitude_coversBessj1Line114() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeXOddN_elseBranchNegation() {
+        given()
+            .when()
+                .get("/api/bessj/3/-2.5")
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+}
+```

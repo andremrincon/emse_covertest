@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = System.getProperty("test.server");
+        if (base == null) base = System.getenv("TEST_SERVER");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testRegexDateBranchReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/text2txt/{w}/{x}/{y}", uid, "quick", "brown").then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "mon12jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegexFpeBranchReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "12.34e+56").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegexNoneBranchReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/title/{sex}/{title}", "male", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "nonsense").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegexUrlBranchReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/filesuffix/{directory}/{file}", "/tmp", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "http://abc/def").then().statusCode(200);
+    }
+}

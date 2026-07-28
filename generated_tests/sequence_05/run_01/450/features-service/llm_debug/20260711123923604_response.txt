@@ -1,0 +1,81 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ConstraintRequiresTest {
+
+    private static final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_nonOptionsRequest_passesThroughFilter() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequest_skipsChainDoFilter() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_setsAccessControlAllowOriginHeaderOnGetRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_setsAccessControlAllowMethodsHeaderOnOptionsRequest() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_setsAccessControlMaxAgeHeaderOnPostRequest() {
+        String productName = "cors-test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .header("Access-Control-Max-Age", equalTo("3600"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_setsAccessControlAllowHeadersHeaderOnDeleteRequest() {
+        String productName = "cors-del-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/" + productName)
+            .then()
+                .header("Access-Control-Allow-Headers", equalTo("x-requested-with"));
+    }
+}

@@ -1,0 +1,260 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeUS_ReturnsTranslations() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeGB_ReturnsTranslations() {
+        given()
+            .pathParam("alphacode", "GB")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAll_ReturnsCountriesWithTranslations() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetNameFrance_ReturnsTranslations() {
+        given()
+            .pathParam("name", "France")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetNameUnitedStates_ReturnsTranslations() {
+        given()
+            .pathParam("name", "United%20States%20of%20America")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetCurrencyUSD_ReturnsTranslations() {
+        given()
+            .pathParam("currency", "USD")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetCurrencyXOF_ReturnsTranslations() {
+        given()
+            .pathParam("currency", "XOF")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetCallingCode1_ReturnsTranslations() {
+        given()
+            .pathParam("callingcode", "1")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetCallingCode44_ReturnsTranslations() {
+        given()
+            .pathParam("callingcode", "44")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetCapitalLondon_ReturnsTranslations() {
+        given()
+            .pathParam("capital", "London")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetRegionEurope_ReturnsTranslations() {
+        given()
+            .pathParam("region", "Europe")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodesMultiple_ReturnsTranslations() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeDE_ReturnsTranslations() {
+        given()
+            .pathParam("alphacode", "DE")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeFR_ReturnsTranslations() {
+        given()
+            .pathParam("alphacode", "FR")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeJP_ReturnsTranslations() {
+        given()
+            .pathParam("alphacode", "JP")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+}

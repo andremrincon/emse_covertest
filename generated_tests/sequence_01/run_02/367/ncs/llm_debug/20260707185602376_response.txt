@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAEqualsZeroProducesBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/0/5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBEqualsZeroProducesBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveAAndPositiveBReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveAAndNegativeBReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/-9");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAAndPositiveBReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/-17/5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAAndNegativeBReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/-17/-5");
+        act.then().statusCode(200);
+    }
+}

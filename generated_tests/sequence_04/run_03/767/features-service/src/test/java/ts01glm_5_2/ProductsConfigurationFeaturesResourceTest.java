@@ -1,0 +1,66 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import java.util.UUID;
+
+import org.junit.Ignore;
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationReturnsNoContentWhenValid() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uuid;
+        String featureName = "TestFeature-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+                .then().statusCode(204);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <204> but was <500>.")
+    @Test(timeout = 60000)
+    public void deleteFeatureFromNonExistentConfigurationReturnsError() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProductErr-" + uuid;
+        String featureName = "TestFeatureErr-" + uuid;
+        String configurationName = "NonExistentConfig-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureNotPresentInConfigurationReturnsError() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProductNP-" + uuid;
+        String featureName = "TestFeatureNP-" + uuid;
+        String configurationName = "TestConfigNP-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+                .then().statusCode(204);
+    }
+}

@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrderProducesIncreasing() {
+        given().when().get("/api/pat/{txt}", "healthcheck-" + UUID.randomUUID()).then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "aaaaa", "bbbbb", "ccccc", "ddddd");
+        r.then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrderProducesDecreasing() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "chk1-" + UUID.randomUUID(), "chk2", "chk3").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "zzzzz", "yyyyy", "xxxxx", "wwwww");
+        r.then().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthOutOfRangeYieldsUnordered() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "tiny", "bbbbb", "ccccc", "ddddd");
+        r.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWithinRangeButNotOrderedYieldsUnordered() {
+        given().when().get("/api/pat/{txt}/{pat}", "ABABCABAB-" + UUID.randomUUID(), "ABAB").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "aaaaa", "ccccc", "bbbbb", "ddddd");
+        r.then().body(equalTo("unordered"));
+    }
+}

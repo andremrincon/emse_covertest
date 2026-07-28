@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsDeForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsEsForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsFrForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsJaForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTranslationsItForAlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaInvalidFormatReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaUnknownCodeReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/XYZ");
+        act.then().statusCode(404);
+    }
+}

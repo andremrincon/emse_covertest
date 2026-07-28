@@ -1,0 +1,122 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("test.host", "localhost");
+        String port = System.getProperty("test.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/pat/http://abc/def")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .extract()
+                .response();
+
+        assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/12.34e+56")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/12.34e+56")
+            .then()
+                .extract()
+                .response();
+
+        assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .extract()
+                .response();
+
+        assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchFtp() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/pat/ftp://xyz/abc")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatchWedAug() {
+        given()
+            .when()
+                .get("/api/pat/wed15aug")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/wed15aug")
+            .then()
+                .extract()
+                .response();
+
+        assertTrue(response.getStatusCode() == 200 || response.getStatusCode() == 500);
+    }
+}

@@ -1,0 +1,122 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConstraintsResourceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("api.base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "product-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String requiredFeature = "req-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given();
+        req = req.formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+
+        Response resp = req.when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .extract().response();
+
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "product-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String excludedFeature = "excl-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given();
+        req = req.formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature);
+
+        Response resp = req.when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .extract().response();
+
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintLocationHeaderContainsConstraintsSegment() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "product-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String requiredFeature = "req-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given();
+        req = req.formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+
+        Response resp = req.when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .extract().response();
+
+        String location = resp.getHeader("Location");
+        assertTrue(location != null && location.contains("/products/" + productName + "/constraints/"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintLocationHeaderContainsConstraintSegment() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "product-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String excludedFeature = "excl-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given();
+        req = req.formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature);
+
+        Response resp = req.when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .extract().response();
+
+        String location = resp.getHeader("Location");
+        assertTrue(location != null && location.contains("/products/" + productName + "/constraint/"));
+    }
+}

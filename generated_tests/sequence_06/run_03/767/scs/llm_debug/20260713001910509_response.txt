@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/5/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanNegative444SEqualsAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/-445/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsNegativeFourSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666SEqualsA() {
+        given()
+            .when()
+                .get("/api/costfuns/667/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEquals555SEqualsAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/555/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsNegative333SEqualsAlgorithm() {
+        given()
+            .when()
+                .get("/api/costfuns/-333/algorithm")
+            .then()
+                .statusCode(200);
+    }
+}
+```

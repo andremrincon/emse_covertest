@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddNWithBothLoopsExecuting() {
+        given()
+            .when()
+                .get("/api/fisher/3/5/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMEvenNNoLoops() {
+        given()
+            .when()
+                .get("/api/fisher/1/2/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddNNoFinalLoop() {
+        given()
+            .when()
+                .get("/api/fisher/2/1/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMEvenNWithFinalLoop() {
+        given()
+            .when()
+                .get("/api/fisher/4/2/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturnsOneWhenPGreaterThanOne() {
+        given()
+            .when()
+                .get("/api/fisher/1/5/100")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturnsZeroWhenPLessThanZero() {
+        given()
+            .when()
+                .get("/api/fisher/199/3/10")
+            .then()
+                .statusCode(200);
+    }
+}

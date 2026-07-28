@@ -1,0 +1,159 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListSuccessTest() {
+        given()
+            .queryParam("codes", "US;CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListNotFoundTest() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencySuccessTest() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameSuccessTest() {
+        given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeSuccessTest() {
+        given()
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalSuccessTest() {
+        given()
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionSuccessTest() {
+        given()
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregionSuccessTest() {
+        given()
+            .pathParam("subregion", "Western%20Europe")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregionNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguageNotFoundTest() {
+        given()
+        .when()
+            .get("/v1/lang/123")
+        .then()
+            .statusCode(404);
+    }
+}

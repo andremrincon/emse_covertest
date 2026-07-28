@@ -1,0 +1,62 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "http://a/a")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "mon01jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "12.34e-56")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectErrorPath() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "(abc")
+            .then()
+                .statusCode(200);
+    }
+}

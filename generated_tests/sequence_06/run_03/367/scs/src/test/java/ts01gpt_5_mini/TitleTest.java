@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base.replaceAll("/+$", "");
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleTitleMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "male", "mr");
+        Assert.assertEquals("1", r.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleTitleNoMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "male", "queen");
+        Assert.assertEquals("-1", r.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleTitleMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "female", "mrs");
+        Assert.assertEquals("0", r.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleTitleNoMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "female", "king");
+        Assert.assertEquals("-1", r.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneTitleMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "none", "dr");
+        Assert.assertEquals("2", r.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneTitleNoMatch() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/title/{sex}/{title}", "none", "mr");
+        Assert.assertEquals("-1", r.getBody().asString());
+    }
+}

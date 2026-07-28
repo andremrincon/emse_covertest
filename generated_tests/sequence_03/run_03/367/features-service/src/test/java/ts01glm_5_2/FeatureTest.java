@@ -1,0 +1,221 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String uniqueProductName() {
+        return "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueFeatureName() {
+        return "Feat-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueConfigName() {
+        return "Cfg-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private void createProduct(String productName) {
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void createFeatureSetsNameAndProduct() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void updateFeatureCallsSetName() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().contentType(ContentType.URLENC)
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getFeaturesTriggersGetProductAndEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().when()
+            .get("/products/{productName}/features", productName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationTriggersEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        String configName = uniqueConfigName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+        createConfiguration(productName, configName);
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigFeaturesTriggersGetProductAndEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        String configName = uniqueConfigName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+
+        given().when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureTriggersEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().when()
+            .delete("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateFeatureCreationTriggersEqualsSameNameAndProduct() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void multipleFeaturesTriggersEqualsDifferentName() {
+        String productName = uniqueProductName();
+        String featureName1 = uniqueFeatureName();
+        String featureName2 = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName1);
+        createFeature(productName, featureName2);
+
+        given().when()
+            .get("/products/{productName}/features", productName)
+            .then()
+            .statusCode(200)
+            .body("size()", is(2));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationTriggersEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        String configName = uniqueConfigName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductTriggersGetProductAndEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().when()
+            .get("/products/{productName}", productName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void updateFeatureWithDescriptionTriggersSetName() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        given().contentType(ContentType.URLENC)
+            .formParam("description", "A test feature description")
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsTriggersEquals() {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        String configName = uniqueConfigName();
+        createProduct(productName);
+        createFeature(productName, featureName);
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+
+        given().when()
+            .get("/products/{productName}/configurations", productName)
+            .then()
+            .statusCode(200);
+    }
+}

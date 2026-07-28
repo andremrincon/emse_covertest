@@ -1,0 +1,85 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NcsRestTest {
+
+    private static final String BASE;
+    static {
+        String env = System.getenv("API_BASE_URL");
+        if(env == null || env.isEmpty()){
+            env = System.getProperty("api.base.url");
+        }
+        if(env == null || env.isEmpty()){
+            env = "http://localhost:8080";
+        }
+        BASE = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200ForValidParameters() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/bessj/3/2.5");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns400ForNLessOrEqualTwo() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/bessj/2/2.5");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns200ForValidParameters() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/fisher/10/5/0.75");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns400WhenMExceedsLimit() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/fisher/1001/5/0.75");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherReturns400OnInvalidXCausingRuntimeException() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/fisher/10/5/1.2");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqReturns200ForValidParameters() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/gammq/5.5/2.3");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqReturns400ForNegativeA() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/gammq/-1.0/2.3");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderReturns200ForValidParameters() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/17/5");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderReturns400WhenValueExceedsLimit() {
+        given().when().get(BASE + "/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/remainder/20000/5");
+        assertEquals(400, resp.getStatusCode());
+    }
+}

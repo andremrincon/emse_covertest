@@ -1,0 +1,78 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValid() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        String json = "{\"amount\": 1000, \"token\": \"" + token + "\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(json)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken() {
+        String json = "{\"amount\": 1000}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(json)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingAmount() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        String json = "{\"token\": \"" + token + "\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(json)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidAmount() {
+        String token = "tok_" + UUID.randomUUID().toString();
+        String json = "{\"amount\": \"invalid\", \"token\": \"" + token + "\"}";
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(json)
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+}

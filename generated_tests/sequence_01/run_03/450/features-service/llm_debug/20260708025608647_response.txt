@@ -1,0 +1,344 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaProductCreation() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequires() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .contentType("application/x-www-form-urlencoded")
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintExcludes() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .contentType("application/x-www-form-urlencoded")
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesAfterAdd() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/features", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureWithMultipleFeatures() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "Feature1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "Feature2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feature1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feature2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/features/{featureName}", productName, feature1)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequiresWithDescription() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .contentType("application/x-www-form-urlencoded")
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintExcludesWithDescription() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcFeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .contentType("application/x-www-form-urlencoded")
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaGetAllProducts() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureThenDeleteThenReAdd() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(201);
+    }
+}
+```

@@ -1,0 +1,75 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("BASE_URL");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NLessThanTwo_Returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", -5, 2.5);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_XZero_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 2, 0.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_AxGe8_NegativeOdd_ReturnsNegativeValue() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, -10.0);
+        act.then().body("value", lessThan(0.0));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_AxGe8_Positive_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, 10.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxLessOrEqualN_BackwardRecurrence_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 10, 1.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_AxLt8_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        Response act = given().when().get("/api/bessj/{n}/{x}", 2, 3.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_InvalidN_NonInteger_Returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", "abc", 2.5);
+        act.then().statusCode(400);
+    }
+}

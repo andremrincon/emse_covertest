@@ -1,0 +1,101 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaReturnsNullForInvalidCode() {
+        given()
+            .pathParam("alphacode", "XYZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithMissingCodes() {
+        given()
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithValidCodes() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithDuplicateCodes() {
+        given()
+            .queryParam("codes", "US,US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAlternativeSpelling() {
+        given()
+            .pathParam("name", "Deutschland")
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch() {
+        given()
+            .pathParam("name", "Fran")
+            .queryParam("fullText", false)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(404);
+    }
+}

@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import org.junit.Test;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5_sEqualsBaab() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/5/baab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444_sLessThanAbabba() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/-500/a")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666_sGreaterThanAbabba() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/700/z")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsAbabba() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/-4/ababba")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan555_sLessThanAbabba() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/600/ab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iZero_sLessThanAbabba() {
+        given()
+        .when()
+            .get(BASE_URL + "/api/costfuns/0/abab")
+        .then()
+            .statusCode(200);
+    }
+}

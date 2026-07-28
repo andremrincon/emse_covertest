@@ -1,0 +1,62 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testTwoConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/two/any/any");
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testForConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/for/any/any");
+        response.then().statusCode(200).body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFourConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/four/any/any");
+        response.then().statusCode(200).body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testYouConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/you/any/any");
+        response.then().statusCode(200).body(equalTo("u"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAndConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/and/any/any");
+        response.then().statusCode(200).body(equalTo("n"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAreConversion() {
+        given().when().get("/api/text2txt/any/any/any").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/are/any/any");
+        response.then().statusCode(200).body(equalTo("r"));
+    }
+}
+```

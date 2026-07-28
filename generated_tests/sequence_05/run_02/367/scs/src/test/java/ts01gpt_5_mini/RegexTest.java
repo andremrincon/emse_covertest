@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectRecognizesUrl_returns200() {
+        given().when().get("/api/calc/add/1/2").then().statusCode(lessThan(300));
+        String txt = "http://a/b";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectRecognizesDate_returns200() {
+        given().when().get("/api/calc/add/1/2").then().statusCode(lessThan(300));
+        String txt = "mon12jan";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectRecognizesFpe_returns200() {
+        given().when().get("/api/calc/add/1/2").then().statusCode(lessThan(300));
+        String txt = "12.34e+56";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectRecognizesNone_returns200() {
+        given().when().get("/api/calc/add/1/2").then().statusCode(lessThan(300));
+        String txt = "xyz";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        assertEquals(200, resp.getStatusCode());
+    }
+}

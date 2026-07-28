@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryTranslationsTest {
+
+    private String base() {
+        String p = System.getProperty("BASE_URL");
+        if (p != null && !p.isEmpty()) return p;
+        String e = System.getenv("BASE_URL");
+        if (e != null && !e.isEmpty()) return e;
+        String q = System.getProperty("base.url");
+        if (q != null && !q.isEmpty()) return q;
+        String r = System.getenv("BASE_URL_ALT");
+        if (r != null && !r.isEmpty()) return r;
+        return "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void test_setDe_v1Alpha_US_translations_de() {
+        String b = base();
+        Response arrange = given().baseUri(b).when().get("/v1/all");
+        arrange.then().statusCode(lessThan(300));
+        Response act = given().baseUri(b).when().get("/v1/alpha/US");
+        act.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_setEs_v1Alpha_US_translations_es() {
+        String b = base();
+        Response arrange = given().baseUri(b).when().get("/v1/all");
+        arrange.then().statusCode(lessThan(300));
+        Response act = given().baseUri(b).when().get("/v1/alpha/US");
+        act.then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_setFr_v1Alpha_US_translations_fr() {
+        String b = base();
+        Response arrange = given().baseUri(b).when().get("/v1/all");
+        arrange.then().statusCode(lessThan(300));
+        Response act = given().baseUri(b).when().get("/v1/alpha/US");
+        act.then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_setJa_v1Alpha_US_translations_ja() {
+        String b = base();
+        Response arrange = given().baseUri(b).when().get("/v1/all");
+        arrange.then().statusCode(lessThan(300));
+        Response act = given().baseUri(b).when().get("/v1/alpha/US");
+        act.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_setIt_v1Alpha_US_translations_it() {
+        String b = base();
+        Response arrange = given().baseUri(b).when().get("/v1/all");
+        arrange.then().statusCode(lessThan(300));
+        Response act = given().baseUri(b).when().get("/v1/alpha/US");
+        act.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+}

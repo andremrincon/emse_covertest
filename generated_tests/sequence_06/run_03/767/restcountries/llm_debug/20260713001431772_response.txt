@@ -1,0 +1,38 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Test(timeout = 60000)
+    public void testV1NameNotFound() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalNotFound() {
+        given()
+            .pathParam("capital", "123")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyBadRequest() {
+        given()
+            .pathParam("currency", "123")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+}

@@ -1,0 +1,62 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcValidOperation() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/plus/15.5/4.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidNumberFormat() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/plus/10/twenty")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDivisionByZero() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/divide/100/0")
+            .then()
+                .statusCode(200);
+    }
+}

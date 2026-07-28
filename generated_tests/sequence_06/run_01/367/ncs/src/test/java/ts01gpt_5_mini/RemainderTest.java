@@ -1,0 +1,48 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("ncs.baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("NCS_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_PositivePositive_ResultValue() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+        resp.then().statusCode(200).body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_PositiveNegative_ResultValue() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 10, -3);
+        resp.then().statusCode(200).body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_NegativePositive_ResultValue() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", -9, 5);
+        resp.then().statusCode(200).body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_NegativeNegative_Status200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", -9, -4);
+        resp.then().statusCode(200);
+    }
+}

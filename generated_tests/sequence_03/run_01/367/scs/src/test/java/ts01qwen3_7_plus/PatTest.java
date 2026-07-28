@@ -1,0 +1,87 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testInitCoverage() {
+        given()
+            .when()
+                .get("/api/pat/hello/world")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternLengthLessThanOrEqualToTwo() {
+        given()
+            .when()
+                .get("/api/pat/abc/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternNotFound() {
+        given()
+            .when()
+                .get("/api/pat/abcdef/xyzw")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundThenReverseFoundWithGap() {
+        given()
+            .when()
+                .get("/api/pat/ABABxxBABA/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundThenReverseFoundAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABABBABA/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundThenPatFoundAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/BABAABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundThenPatFoundWithGap() {
+        given()
+            .when()
+                .get("/api/pat/BABAxxABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTextShorterThanPattern() {
+        given()
+            .when()
+                .get("/api/pat/ab/abcd")
+            .then()
+                .statusCode(200);
+    }
+}

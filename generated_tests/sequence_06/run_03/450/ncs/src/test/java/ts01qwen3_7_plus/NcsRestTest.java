@@ -1,0 +1,78 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        io.restassured.RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjValid() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidN() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValid() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidMN() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherException() {
+        given()
+            .when()
+                .get("/api/fisher/10/-3/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValid() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderInvalid() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+}

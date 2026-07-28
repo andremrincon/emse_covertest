@@ -1,0 +1,265 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryRestV1Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getByCurrency_internalServerError_mixedCase TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[2] METHOD=getByAlphaList_internalServerError_pipeDelimiter TYPE=ERROR
+Illegal character in query at index 24: /rest/v1/alpha/?codes=US|CA|MX
+
+[3] METHOD=getByAlphaList_notFound_unknownCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <404> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getByCurrency_internalServerError_mixedCase FAILURE AT LINE 118
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByCurrency_internalServerError_mixedCase(CountryRestV1Test.java:118)
+CODE CONTEXT:
+   115:                 .when()
+   116:                 .get("/v1/currency/{currency}")
+   117:                 .then()
+   118:                 .statusCode(404);  ← FAILURE HERE
+   119:     }
+   120: 
+   121:     @Test(timeout = 60000)
+
+[2] METHOD=getByAlphaList_internalServerError_pipeDelimiter FAILURE AT LINE 83
+at ts01glm_5_2.CountryRestV1Test.getByAlphaList_internalServerError_pipeDelimiter(CountryRestV1Test.java:83)
+Caused by: java.net.URISyntaxException: Illegal character in query at index 24: /rest/v1/alpha/?codes=US|CA|MX
+CODE CONTEXT:
+    80:                 .accept(ContentType.JSON)
+    81:                 .queryParam("codes", "US|CA|MX")
+    82:                 .when()
+    83:                 .get("/v1/alpha/")  ← FAILURE HERE
+    84:                 .then()
+    85:                 .statusCode(500);
+    86:     }
+
+[3] METHOD=getByAlphaList_notFound_unknownCodes FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByAlphaList_notFound_unknownCodes(CountryRestV1Test.java:74)
+CODE CONTEXT:
+    71:                 .when()
+    72:                 .get("/v1/alpha/")
+    73:                 .then()
+    74:                 .statusCode(200);  ← FAILURE HERE
+    75:     }
+    76: 
+    77:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_badRequest_shortAlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("alphacode", "1")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFound_unknownAlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US;CA")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_badRequest_shortCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "1")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFound_unknownCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "XX;YY;ZZ")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_internalServerError_pipeDelimiter() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US|CA|MX")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_badRequest_invalidLength() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "12")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFound_unknownCurrency() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "XYZ")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_internalServerError_mixedCase() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("currency", "XyZ")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFound_unknownName() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("name", "nonexistentcountry12345")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFound_unknownCallingCode() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("callingcode", "99999")
+                .when()
+                .get("/v1/callingcode/{callingcode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFound_unknownCapital() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("capital", "nonexistentcapital12345")
+                .when()
+                .get("/v1/capital/{capital}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFound_unknownRegion() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("region", "nonexistentregion12345")
+                .when()
+                .get("/v1/region/{region}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_notFound_unknownSubregion() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("subregion", "nonexistentsubregion12345")
+                .when()
+                .get("/v1/subregion/{subregion}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_notFound_unknownLanguage() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("lang", "nonexistentlang12345")
+                .when()
+                .get("/v1/lang/{lang}")
+                .then()
+                .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

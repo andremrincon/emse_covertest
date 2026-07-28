@@ -1,0 +1,204 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.PatTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testPatAndPatRevFoundNotAdjacent TYPE=ERROR
+Illegal character in path at index 35: http://localhost:8080/api/pat/world hello dlrow/world
+
+[2] METHOD=testRegexEndpoint TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox
+
+[3] METHOD=testPatFoundOnly TYPE=ERROR
+Illegal character in path at index 35: http://localhost:8080/api/pat/world hello/world
+
+[4] METHOD=testPatRevFoundOnly TYPE=ERROR
+Illegal character in path at index 35: http://localhost:8080/api/pat/dlrow hello/world
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testPatAndPatRevFoundNotAdjacent FAILURE AT LINE 49
+java.net.URISyntaxException: Illegal character in path at index 35: http://localhost:8080/api/pat/world hello dlrow/world
+at ts01qwen3_7_plus.PatTest.testPatAndPatRevFoundNotAdjacent(PatTest.java:49)
+CODE CONTEXT:
+    46:         String pat = "world";
+    47:         given()
+    48:             .when()
+    49:                 .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    50:             .then()
+    51:                 .statusCode(200)
+    52:                 .body(equalTo("0"));
+
+[2] METHOD=testRegexEndpoint FAILURE AT LINE 108
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox
+at ts01qwen3_7_plus.PatTest.testRegexEndpoint(PatTest.java:108)
+CODE CONTEXT:
+   105:         String txt = "The quick brown fox";
+   106:         given()
+   107:             .when()
+   108:                 .get("/api/pat/{txt}", txt)  ← FAILURE HERE
+   109:             .then()
+   110:                 .statusCode(lessThan(300));
+   111:     }
+
+[3] METHOD=testPatFoundOnly FAILURE AT LINE 25
+java.net.URISyntaxException: Illegal character in path at index 35: http://localhost:8080/api/pat/world hello/world
+at ts01qwen3_7_plus.PatTest.testPatFoundOnly(PatTest.java:25)
+CODE CONTEXT:
+    22:         String pat = "world";
+    23:         given()
+    24:             .when()
+    25:                 .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    26:             .then()
+    27:                 .statusCode(200)
+    28:                 .body(equalTo("1"));
+
+[4] METHOD=testPatRevFoundOnly FAILURE AT LINE 37
+java.net.URISyntaxException: Illegal character in path at index 35: http://localhost:8080/api/pat/dlrow hello/world
+at ts01qwen3_7_plus.PatTest.testPatRevFoundOnly(PatTest.java:37)
+CODE CONTEXT:
+    34:         String pat = "world";
+    35:         given()
+    36:             .when()
+    37:                 .get("/api/pat/{txt}/{pat}", txt, pat)  ← FAILURE HERE
+    38:             .then()
+    39:                 .statusCode(200)
+    40:                 .body(equalTo("2"));
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundOnly() {
+        String txt = "world hello";
+        String pat = "world";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundOnly() {
+        String txt = "dlrow hello";
+        String pat = "world";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevFoundNotAdjacent() {
+        String txt = "world hello dlrow";
+        String pat = "world";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByPatRevAdjacent() {
+        String txt = "worlddlrow";
+        String pat = "world";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFollowedByPatAdjacent() {
+        String txt = "dlrowworld";
+        String pat = "world";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        String txt = "hello";
+        String pat = "xyz";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanThree() {
+        String txt = "hello";
+        String pat = "ab";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegexEndpoint() {
+        String txt = "The quick brown fox";
+        given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(lessThan(300));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

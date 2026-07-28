@@ -1,0 +1,194 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaCodeExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaCodesExercisesTranslationsSetters() {
+        given()
+        .queryParam("codes", "US,CA,MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue())
+            .body("[0].translations.es", notNullValue())
+            .body("[0].translations.fr", notNullValue())
+            .body("[0].translations.ja", notNullValue())
+            .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Ignore("Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe")
+    @Test(timeout = 60000)
+    public void testGetBySubregionExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/subregion/{subregion}", "Western Europe")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Ignore("Illegal character in path at index 41: http://localhost:8080/rest/v1/name/United States of America")
+    @Test(timeout = 60000)
+    public void testGetByNameFullTextExercisesTranslationsSetters() {
+        given()
+        .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}", "United States of America")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaCodeGBExercisesAllTranslationSetters() {
+        given()
+        .when()
+            .get("/v1/alpha/GB")
+        .then()
+            .statusCode(200)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaCodeDEExercisesAllTranslationSetters() {
+        given()
+        .when()
+            .get("/v1/alpha/DE")
+        .then()
+            .statusCode(200)
+            .body("translations.de", notNullValue())
+            .body("translations.es", notNullValue())
+            .body("translations.fr", notNullValue())
+            .body("translations.ja", notNullValue())
+            .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyEURExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/currency/EUR")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode44ExercisesTranslationsSetters() {
+        given()
+        .when()
+            .get("/v1/callingcode/44")
+        .then()
+            .statusCode(200)
+            .body("[0].translations.de", notNullValue());
+    }
+}

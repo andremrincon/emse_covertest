@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintRequiresTest {
+
+    private String productName;
+    private String sourceFeatureName;
+    private String requiredFeatureName;
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        String uuid = UUID.randomUUID().toString();
+        productName = "Product-" + uuid;
+        sourceFeatureName = "Source-" + uuid;
+        requiredFeatureName = "Required-" + uuid;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetSourceAndRequiredFeatureNames() {
+        given()
+                .pathParam("productName", productName)
+                .when()
+                .post("/products/{productName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .pathParam("featureName", sourceFeatureName)
+                .when()
+                .post("/products/{productName}/features/{featureName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .pathParam("featureName", requiredFeatureName)
+                .when()
+                .post("/products/{productName}/features/{featureName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeatureName)
+                .formParam("requiredFeature", requiredFeatureName)
+                .when()
+                .post("/products/{productName}/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+}

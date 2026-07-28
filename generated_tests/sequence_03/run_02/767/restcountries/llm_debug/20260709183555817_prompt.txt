@@ -1,0 +1,298 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryRestV1Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getByCurrency_returns400_whenInvalidLength TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[2] METHOD=getByAlphaList_returns200_whenValidCodesWithSemicolon TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=getByAlphaList_returns400_whenCodesEmpty TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[4] METHOD=getByCurrency_returns200_whenValidCurrency TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=getByAlpha_returns200_whenValidCode TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=getByAlpha_returns400_whenCodeTooLong TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getByCurrency_returns400_whenInvalidLength FAILURE AT LINE 98
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByCurrency_returns400_whenInvalidLength(CountryRestV1Test.java:98)
+CODE CONTEXT:
+    95:         .when()
+    96:             .get("/v1/currency/XX")
+    97:         .then()
+    98:             .statusCode(404);  ← FAILURE HERE
+    99:     }
+   100: 
+   101:     @Test(timeout = 60000)
+
+[2] METHOD=getByAlphaList_returns200_whenValidCodesWithSemicolon FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByAlphaList_returns200_whenValidCodesWithSemicolon(CountryRestV1Test.java:56)
+CODE CONTEXT:
+    53:         .when()
+    54:             .get("/v1/alpha/")
+    55:         .then()
+    56:             .statusCode(404);  ← FAILURE HERE
+    57:     }
+    58: 
+    59:     @Test(timeout = 60000)
+
+[3] METHOD=getByAlphaList_returns400_whenCodesEmpty FAILURE AT LINE 67
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByAlphaList_returns400_whenCodesEmpty(CountryRestV1Test.java:67)
+CODE CONTEXT:
+    64:         .when()
+    65:             .get("/v1/alpha/")
+    66:         .then()
+    67:             .statusCode(404);  ← FAILURE HERE
+    68:     }
+    69: 
+    70:     @Test(timeout = 60000)
+
+[4] METHOD=getByCurrency_returns200_whenValidCurrency FAILURE AT LINE 88
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByCurrency_returns200_whenValidCurrency(CountryRestV1Test.java:88)
+CODE CONTEXT:
+    85:         .when()
+    86:             .get("/v1/currency/USD")
+    87:         .then()
+    88:             .statusCode(404);  ← FAILURE HERE
+    89:     }
+    90: 
+    91:     @Test(timeout = 60000)
+
+[5] METHOD=getByAlpha_returns200_whenValidCode FAILURE AT LINE 25
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByAlpha_returns200_whenValidCode(CountryRestV1Test.java:25)
+CODE CONTEXT:
+    22:         .when()
+    23:             .get("/v1/alpha/US")
+    24:         .then()
+    25:             .statusCode(404);  ← FAILURE HERE
+    26:     }
+    27: 
+    28:     @Test(timeout = 60000)
+
+[6] METHOD=getByAlpha_returns400_whenCodeTooLong FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV1Test.getByAlpha_returns400_whenCodeTooLong(CountryRestV1Test.java:45)
+CODE CONTEXT:
+    42:         .when()
+    43:             .get("/v1/alpha/XXXXX")
+    44:         .then()
+    45:             .statusCode(404);  ← FAILURE HERE
+    46:     }
+    47: 
+    48:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl",
+            System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns200_whenValidCode() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns404_whenCountryNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns400_whenCodeTooLong() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/alpha/XXXXX")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returns200_whenValidCodesWithSemicolon() {
+        given()
+            .accept("application/json")
+            .queryParam("codes", "US;CA")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returns400_whenCodesEmpty() {
+        given()
+            .accept("application/json")
+            .queryParam("codes", "")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returns404_whenNoCountriesFound() {
+        given()
+            .accept("application/json")
+            .queryParam("codes", "XX")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns200_whenValidCurrency() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns400_whenInvalidLength() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/currency/XX")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns404_whenCurrencyNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_returns404_whenNameNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_returns404_whenCallingCodeNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_returns404_whenCapitalNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_returns404_whenRegionNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_returns404_whenSubregionNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_returns404_whenLanguageNotFound() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/v1/lang/123")
+        .then()
+            .statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,90 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByReversePatImmediately() {
+        given()
+            .when()
+            .get("/api/pat/abccba/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFollowedByPatImmediately() {
+        given()
+            .when()
+            .get("/api/pat/cbaabc/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundOnly() {
+        given()
+            .when()
+            .get("/api/pat/xyzcba/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanThree() {
+        given()
+            .when()
+            .get("/api/pat/abc/ab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundOnly() {
+        given()
+            .when()
+            .get("/api/pat/abcxyz/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReversePatFoundNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/abcxyzcba/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatAndPatFoundNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/cbaxyzabc/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatNotFound() {
+        given()
+            .when()
+            .get("/api/pat/xyz/abc")
+            .then()
+            .statusCode(200);
+    }
+}

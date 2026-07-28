@@ -1,0 +1,84 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String prop = System.getProperty("baseUrl");
+        String env = System.getenv("BASE_URL");
+        base = prop != null ? prop : (env != null ? env : "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_twoLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_threeLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "USA");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_multipleCodes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_matchesAlternativeSpelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v1/name/{name}", "Federal Republic of Germany");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_matchesAlternativeSpelling_contains_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "false").when().get("/v1/name/{name}", "Republic");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_v1All_returns200() {
+        given().when().get("/v1/alpha/{alphacode}", "US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all");
+        act.then().statusCode(200);
+    }
+}

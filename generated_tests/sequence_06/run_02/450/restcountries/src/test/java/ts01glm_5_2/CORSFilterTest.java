@@ -1,0 +1,139 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CORSFilterTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", System.getenv().getOrDefault("baseUrl", "http://localhost:8080/rest"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowOriginHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowMethodsHeaderOnV1Alpha() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowHeadersHeaderOnV1Name() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCacheControlHeaderOnV1Region() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOn404Response() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOn400Response() {
+        given()
+                .when()
+                .get("/v1/alpha/123")
+                .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV2All() {
+        given()
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV2Alpha() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV1CallingCode() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV1Capital() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV1Currency() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV1Subregion() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+}

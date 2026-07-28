@@ -1,0 +1,79 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String src = "SRC-" + UUID.randomUUID().toString();
+        String excl = "EXCL-" + UUID.randomUUID().toString();
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", src).formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostResponseContainsSourceFeatureName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String src = "SRC-" + UUID.randomUUID().toString();
+        String excl = "EXCL-" + UUID.randomUUID().toString();
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", src).formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductIncludesConstraintSourceFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String src = "SRC-" + UUID.randomUUID().toString();
+        String excl = "EXCL-" + UUID.randomUUID().toString();
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", src).formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product).then().body(containsString(src));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetTypeIsExcludesInProductConstraints() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String src = "SRC-" + UUID.randomUUID().toString();
+        String excl = "EXCL-" + UUID.randomUUID().toString();
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", src).formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product).then().body(containsString("excludes"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductIncludesExcludedFeatureName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String src = "SRC-" + UUID.randomUUID().toString();
+        String excl = "EXCL-" + UUID.randomUUID().toString();
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", src).formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product).then().body(containsString(excl));
+    }
+}

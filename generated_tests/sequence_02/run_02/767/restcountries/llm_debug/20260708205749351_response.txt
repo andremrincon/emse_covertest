@@ -1,0 +1,113 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("API_BASE");
+        if (cfg == null) cfg = System.getenv("API_BASE");
+        if (cfg == null) cfg = System.getProperty("api.base");
+        if (cfg == null) cfg = System.getenv("API_BASE_URL");
+        if (cfg == null) cfg = "http://localhost:8080/rest";
+        BASE = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid_US() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badRequest_short() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/1");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_XYZ() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_valid_US_CA() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha?codes=US,CA");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest_123() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha?codes=123");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_USD() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badRequest_short() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/12");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_valid_France_fullTextFalse() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/name/France?fullText=false");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid_1() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_valid_London() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/capital/London");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_valid_Europe() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/region/Europe");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_valid_Western_Europe() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/subregion/Western%20Europe");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_valid_es() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+}

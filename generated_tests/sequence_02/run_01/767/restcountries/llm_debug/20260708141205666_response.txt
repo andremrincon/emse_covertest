@@ -1,0 +1,41 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class ResponseEntityTest {
+
+    private final String baseUrl = System.getProperty("test.base.url", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testResponseEntityOnNameNotFound() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityOnCapitalNotFound() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityOnPostNotAllowed() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .post("/")
+        .then()
+            .statusCode(405);
+    }
+}
+```

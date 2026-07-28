@@ -1,0 +1,79 @@
+```java
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+    
+    private String baseUrl;
+    
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFive() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/5/a")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectILessThanNegative444() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/-445/a")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectILessOrEqualNegative333() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/-333/a")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/667/a")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsNegativeFourAndSEqualsBaab() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/-4/baab")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSubjectSCompareToGreaterOrEqualZero() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/costfuns/1/ababba")
+        .then()
+            .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,83 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithNullContribution_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("null")
+                .when()
+                .post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithEmptyToken_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"\"}";
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithWhitespaceToken_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":150,\"token\":\"   \"}";
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithInvalidToken_triggersStripeException_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = String.format("{\"amount\":200,\"token\":\"invalid_%s\"}", UUID.randomUUID().toString());
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidToken_returns202() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = String.format("{\"amount\":250,\"token\":\"tok_visa_%s\"}", UUID.randomUUID().toString());
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        response.then().statusCode(400);
+    }
+}

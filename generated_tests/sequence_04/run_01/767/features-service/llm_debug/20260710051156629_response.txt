@@ -1,0 +1,313 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureExercisesSetNameAndSetProduct() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureExercisesSetName() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesExercisesGetProduct() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturnsCorrectFeatureName() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features")
+            .then()
+            .body("[0].name", equalTo(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureWithDescriptionExercisesSetName() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test description")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureExercisesProductRelationship() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .delete("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesAfterUpdateExercisesGetProduct() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated")
+            .when()
+            .put("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateMultipleFeaturesExercisesEquals() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName1 = "Feature1-" + System.currentTimeMillis();
+        String featureName2 = "Feature2-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturnsMultipleFeatures() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName1 = "Feature1-" + System.currentTimeMillis();
+        String featureName2 = "Feature2-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features")
+            .then()
+            .body("size()", greaterThanOrEqualTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescriptionExercisesSetName() {
+        String productName = "Product-" + System.currentTimeMillis();
+        String featureName = "Feature-" + System.currentTimeMillis();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "New description")
+            .when()
+            .put("/products/{productName}/features/{featureName}")
+            .then()
+            .body("description", equalTo("New description"));
+    }
+}

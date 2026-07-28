@@ -1,0 +1,68 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080/rest";
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testSetIso639_1() {
+        Response resp = given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200)
+            .extract().response();
+        assertEquals("en", resp.path("languages[0].iso639_1"));
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testSetIso639_2() {
+        Response resp = given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200)
+            .extract().response();
+        assertEquals("eng", resp.path("languages[0].iso639_2"));
+    }
+
+    @Ignore("The parameter \"null\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testSetName() {
+        Response resp = given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(200)
+            .extract().response();
+        assertEquals("French", resp.path("languages[0].name"));
+    }
+
+    @Ignore("The parameter \"null\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testSetNativeName() {
+        Response resp = given()
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(200)
+            .extract().response();
+        assertEquals("Español", resp.path("languages[0].nativeName"));
+    }
+}

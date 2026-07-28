@@ -1,0 +1,60 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintRequiresTest {
+
+    private String productName;
+    private String sourceFeature;
+    private String requiredFeature;
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        productName = "Product-" + System.nanoTime();
+        sourceFeature = "SourceFeature-" + System.nanoTime();
+        requiredFeature = "RequiredFeature-" + System.nanoTime();
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        given()
+                .pathParam("productName", productName)
+                .when()
+                .post("/products/{productName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .pathParam("featureName", sourceFeature)
+                .formParam("description", "Source feature description")
+                .when()
+                .post("/products/{productName}/features/{featureName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .pathParam("featureName", requiredFeature)
+                .formParam("description", "Required feature description")
+                .when()
+                .post("/products/{productName}/features/{featureName}")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("productName", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+}

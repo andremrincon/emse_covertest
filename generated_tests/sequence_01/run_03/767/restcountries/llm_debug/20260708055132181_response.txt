@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.Map;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIso6391SetViaV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().statusCode(200).extract().response();
+        String iso = act.jsonPath().getString("languages[0].iso639_1");
+        assertEquals("en", iso);
+    }
+
+    @Test(timeout = 60000)
+    public void testIso6392SetViaV1LangEs() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/lang/es").then().statusCode(200).extract().response();
+        String iso2 = act.jsonPath().getString("[0].languages[0].iso639_2");
+        assertEquals("spa", iso2);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameSetViaV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").then().statusCode(200).extract().response();
+        String name = act.jsonPath().getString("languages[0].name");
+        assertEquals("English", name);
+    }
+
+    @Test(timeout = 60000)
+    public void testNativeNameSetViaV1NameFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France").then().statusCode(200).extract().response();
+        String nativeName = act.jsonPath().getString("[0].languages[0].nativeName");
+        assertEquals("français", nativeName);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdReturnsOkStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangSpanishIso6391() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/Spanish").then().statusCode(200).extract().response();
+        String iso = act.jsonPath().getString("[0].languages[0].iso639_1");
+        assertEquals(null, iso);
+    }
+}

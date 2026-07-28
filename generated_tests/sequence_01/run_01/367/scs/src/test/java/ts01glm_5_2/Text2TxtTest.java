@@ -1,0 +1,83 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class Text2TxtTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testText2Txt_two_returns2() {
+        given()
+            .when()
+                .get("/api/text2txt/two/three/four")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2txt_four_returns4() {
+        given()
+            .when()
+                .get("/api/text2txt/four/score/seven")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2txt_are_returnsR() {
+        given()
+            .when()
+                .get("/api/text2txt/are/you/ready")
+            .then()
+                .statusCode(200)
+                .body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2txt_seeYou_returnsCu() {
+        given()
+            .when()
+                .get("/api/text2txt/see/you/later")
+            .then()
+                .statusCode(200)
+                .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2txt_byTheWay_returnsBtw() {
+        given()
+            .when()
+                .get("/api/text2txt/by/the/way")
+            .then()
+                .statusCode(200)
+                .body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2txt_noMatch_returnsEmpty() {
+        given()
+            .when()
+                .get("/api/text2txt/hello/world/test")
+            .then()
+                .statusCode(200)
+                .body(equalTo(""));
+    }
+}

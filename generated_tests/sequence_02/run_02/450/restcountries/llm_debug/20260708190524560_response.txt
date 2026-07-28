@@ -1,0 +1,89 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNull;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeader() {
+        String header = given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Access-Control-Allow-Origin");
+        assertNull(header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeader() {
+        String header = given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Access-Control-Allow-Methods");
+        assertNull(header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeader() {
+        String header = given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Access-Control-Allow-Headers");
+        assertNull(header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeader() {
+        String header = given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Cache-Control");
+        assertNull(header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnAlphaEndpoint() {
+        String header = given()
+            .when()
+            .get("/v1/alpha/US")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Access-Control-Allow-Origin");
+        assertNull(header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnNameEndpoint() {
+        String header = given()
+            .when()
+            .get("/v1/name/France")
+            .then()
+            .statusCode(404)
+            .extract()
+            .header("Access-Control-Allow-Origin");
+        assertNull(header);
+    }
+}

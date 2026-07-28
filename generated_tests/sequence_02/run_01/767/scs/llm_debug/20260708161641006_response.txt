@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_short_pattern_returns_zero() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", "nooccurrence", "ab").then().extract().response();
+        Assert.assertEquals("0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_found_without_reverse_returns_one() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        String uid = UUID.randomUUID().toString();
+        String pat = "ABC";
+        String txt = "pre" + uid + "XYZ" + pat + "post";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().extract().response();
+        Assert.assertEquals("1", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_found_only_returns_two() {
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session-id", "1", "example.com").then().statusCode(lessThan(300));
+        String pat = "ABC";
+        String txt = "xxCBAyy";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().extract().response();
+        Assert.assertEquals("2", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_then_reverse_nonadjacent_returns_index() {
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "zebra", "yak", "x-ray", "wolf").then().statusCode(lessThan(300));
+        String pat = "ABC";
+        String txt = "xxABCyyCBAzz";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().extract().response();
+        Assert.assertEquals("2", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_then_pat_adjacent_returns_index() {
+        given().when().get("/api/filesuffix/{directory}/{file}", "/tmp", "file.txt").then().statusCode(lessThan(300));
+        String pat = "ABC";
+        String txt = "xxCBAABCzz";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().extract().response();
+        Assert.assertEquals("2", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_single_argument_endpoint_status_ok() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "A", "B", "C").then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "The quick brown fox").then().statusCode(200);
+    }
+}

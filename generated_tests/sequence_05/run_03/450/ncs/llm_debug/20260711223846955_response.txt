@@ -1,0 +1,80 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/1/1/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidTriangleMaxIsA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/10/1/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidTriangleMaxIsB() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/1/10/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidTriangleMaxIsC() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/1/1/10")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangleABEqual() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/2/2/3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangleBCEqual() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/triangle/3/2/2")
+        .then()
+            .statusCode(200);
+    }
+}
+```

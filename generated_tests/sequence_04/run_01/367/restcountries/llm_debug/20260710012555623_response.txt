@@ -1,0 +1,78 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_twoCharCode_returns200() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_threeCharCode_returns200() {
+        given()
+            .pathParam("lang", "spa")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_invalidThreeCharCode_returns404() {
+        given()
+            .pathParam("lang", "123")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_validAcronym_returns200() {
+        given()
+            .pathParam("regionalbloc", "EU")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_notFound_returns404() {
+        given()
+            .pathParam("regionalbloc", "123")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_caseInsensitive_returns200() {
+        given()
+            .pathParam("regionalbloc", "eu")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

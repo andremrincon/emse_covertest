@@ -1,0 +1,129 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Header;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeaderOnV1Alpha() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeaderOnV1Name() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1Capital() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV1Region() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV1CallingCode() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV1Currency() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV2Alpha() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV2Name() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV2Region() {
+        given()
+            .when()
+                .get("/v2/region/Europe")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnV2Capital() {
+        given()
+            .when()
+                .get("/v2/capital/Paris")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+}
+```

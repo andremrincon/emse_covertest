@@ -1,0 +1,81 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CORSFilterTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterProcessesGetRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterHandlesOptionsRequest() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersSetOnGetRequest() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersSetOnOptionsRequest() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterProcessesPostRequest() {
+        String productName = "CORS-Test-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterProcessesDeleteRequest() {
+        String productName = "CORS-Del-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .delete("/products/" + productName)
+            .then()
+                .statusCode(204);
+    }
+}
+```

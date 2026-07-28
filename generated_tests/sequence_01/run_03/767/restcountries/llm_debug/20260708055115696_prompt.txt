@@ -1,0 +1,259 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetV1AllCorsAllowOrigin TYPE=FAILURE
+expected:<*> but was:<null>
+
+[2] METHOD=testV1AlphaInvalidFormatReturns400 TYPE=FAILURE
+expected:<400> but was:<404>
+
+[3] METHOD=testV1CallingCodeOriginHeaderPresent TYPE=FAILURE
+
+
+[4] METHOD=testV1AlphaNotFoundReturns404 TYPE=FAILURE
+expected:<404> but was:<400>
+
+[5] METHOD=testV1CurrencyUSDCorsAllowHeaders TYPE=FAILURE
+expected:<Accept, X-Requested-With> but was:<null>
+
+[6] METHOD=testV1NameFullTextFalseCorsOrigin TYPE=FAILURE
+expected:<*> but was:<null>
+
+[7] METHOD=testV1AlphaCodesCacheControlHeader TYPE=FAILURE
+expected:<public, max-age=86400> but was:<null>
+
+[8] METHOD=testV1AlphaUSCorsAllowMethods TYPE=FAILURE
+expected:<GET> but was:<null>
+
+[9] METHOD=testV1RegionAllowMethodsValue TYPE=FAILURE
+expected:<GET> but was:<null>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetV1AllCorsAllowOrigin FAILURE AT LINE 26
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testGetV1AllCorsAllowOrigin(CORSFilterTest.java:26)
+CODE CONTEXT:
+    23:     public void testGetV1AllCorsAllowOrigin() {
+    24:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    25:         Response resp = given().when().get("/v1/all");
+    26:         assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    27:     }
+    28: 
+    29:     @Test(timeout = 60000)
+
+[2] METHOD=testV1AlphaInvalidFormatReturns400 FAILURE AT LINE 40
+java.lang.AssertionError: expected:<400> but was:<404>
+at ts01gpt_5_mini.CORSFilterTest.testV1AlphaInvalidFormatReturns400(CORSFilterTest.java:40)
+CODE CONTEXT:
+    37:     public void testV1AlphaInvalidFormatReturns400() {
+    38:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    39:         Response resp = given().when().get("/v1/alpha/123");
+    40:         assertEquals(400, resp.getStatusCode());  ← FAILURE HERE
+    41:     }
+    42: 
+    43:     @Test(timeout = 60000)
+
+[3] METHOD=testV1CallingCodeOriginHeaderPresent FAILURE AT LINE 76
+java.lang.AssertionError
+at ts01gpt_5_mini.CORSFilterTest.testV1CallingCodeOriginHeaderPresent(CORSFilterTest.java:76)
+CODE CONTEXT:
+    73:     public void testV1CallingCodeOriginHeaderPresent() {
+    74:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    75:         Response resp = given().when().get("/v1/callingcode/1");
+    76:         assertNotNull(resp.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    77:     }
+    78: 
+    79:     @Test(timeout = 60000)
+
+[4] METHOD=testV1AlphaNotFoundReturns404 FAILURE AT LINE 48
+java.lang.AssertionError: expected:<404> but was:<400>
+at ts01gpt_5_mini.CORSFilterTest.testV1AlphaNotFoundReturns404(CORSFilterTest.java:48)
+CODE CONTEXT:
+    45:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    46:         String uuid = UUID.randomUUID().toString().substring(0,8);
+    47:         Response resp = given().when().get("/v1/alpha/XYZ" + uuid);
+    48:         assertEquals(404, resp.getStatusCode());  ← FAILURE HERE
+    49:     }
+    50: 
+    51:     @Test(timeout = 60000)
+
+[5] METHOD=testV1CurrencyUSDCorsAllowHeaders FAILURE AT LINE 55
+java.lang.AssertionError: expected:<Accept, X-Requested-With> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testV1CurrencyUSDCorsAllowHeaders(CORSFilterTest.java:55)
+CODE CONTEXT:
+    52:     public void testV1CurrencyUSDCorsAllowHeaders() {
+    53:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    54:         Response resp = given().when().get("/v1/currency/USD");
+    55:         assertEquals("Accept, X-Requested-With", resp.getHeader("Access-Control-Allow-Headers"));  ← FAILURE HERE
+    56:     }
+    57: 
+    58:     @Test(timeout = 60000)
+
+[6] METHOD=testV1NameFullTextFalseCorsOrigin FAILURE AT LINE 62
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testV1NameFullTextFalseCorsOrigin(CORSFilterTest.java:62)
+CODE CONTEXT:
+    59:     public void testV1NameFullTextFalseCorsOrigin() {
+    60:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    61:         Response resp = given().queryParam("fullText", "false").when().get("/v1/name/France");
+    62:         assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    63:     }
+    64: 
+    65:     @Test(timeout = 60000)
+
+[7] METHOD=testV1AlphaCodesCacheControlHeader FAILURE AT LINE 69
+java.lang.AssertionError: expected:<public, max-age=86400> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testV1AlphaCodesCacheControlHeader(CORSFilterTest.java:69)
+CODE CONTEXT:
+    66:     public void testV1AlphaCodesCacheControlHeader() {
+    67:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    68:         Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+    69:         assertEquals("public, max-age=86400", resp.getHeader("Cache-Control"));  ← FAILURE HERE
+    70:     }
+    71: 
+    72:     @Test(timeout = 60000)
+
+[8] METHOD=testV1AlphaUSCorsAllowMethods FAILURE AT LINE 33
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testV1AlphaUSCorsAllowMethods(CORSFilterTest.java:33)
+CODE CONTEXT:
+    30:     public void testV1AlphaUSCorsAllowMethods() {
+    31:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    32:         Response resp = given().when().get("/v1/alpha/US");
+    33:         assertEquals("GET", resp.getHeader("Access-Control-Allow-Methods"));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+[9] METHOD=testV1RegionAllowMethodsValue FAILURE AT LINE 83
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01gpt_5_mini.CORSFilterTest.testV1RegionAllowMethodsValue(CORSFilterTest.java:83)
+CODE CONTEXT:
+    80:     public void testV1RegionAllowMethodsValue() {
+    81:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    82:         Response resp = given().when().get("/v1/region/Europe");
+    83:         assertEquals("GET", resp.getHeader("Access-Control-Allow-Methods"));  ← FAILURE HERE
+    84:     }
+    85: 
+    86:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class CORSFilterTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1AllCorsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUSCorsAllowMethods() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        assertEquals("GET", resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaInvalidFormatReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNotFoundReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String uuid = UUID.randomUUID().toString().substring(0,8);
+        Response resp = given().when().get("/v1/alpha/XYZ" + uuid);
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDCorsAllowHeaders() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        assertEquals("Accept, X-Requested-With", resp.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFullTextFalseCorsOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "false").when().get("/v1/name/France");
+        assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        assertEquals("public, max-age=86400", resp.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeOriginHeaderPresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/callingcode/1");
+        assertNotNull(resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionAllowMethodsValue() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/region/Europe");
+        assertEquals("GET", resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaWithFieldsReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        assertEquals(200, resp.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

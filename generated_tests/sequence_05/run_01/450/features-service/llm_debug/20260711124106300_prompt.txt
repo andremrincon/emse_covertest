@@ -1,0 +1,291 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductConfigurationTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=addSameFeatureTwiceCoversActiveWhenAlreadyActive TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[2] METHOD=addMultipleFeaturesCoversCollectFeatureNamesLoopWithMultipleFeatures TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: (a collection containing "t36e5e4fe18f3" and a collection containing "te496782a37ce")
+  Actual: ["t36e5e4fe18f3","te496782a37ce"]
+
+[3] METHOD=getConfigurationFeaturesAfterAddingCoversActivedFeaturesWithFeaturesAndCollectFeatureNames TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "t2030a9cf1246"
+  Actual: ["t2030a9cf1246"]
+
+[4] METHOD=addExcludesConstraintAndConflictingFeaturesCoversSetValidFalse TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=addSameFeatureTwiceCoversActiveWhenAlreadyActive FAILURE AT LINE 144
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.addSameFeatureTwiceCoversActiveWhenAlreadyActive(ProductConfigurationTest.java:144)
+CODE CONTEXT:
+   141:         given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+   142:         given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+   143:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+   144:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(500);  ← FAILURE HERE
+   145:     }
+   146: 
+   147:     @Test(timeout = 60000)
+
+[2] METHOD=addMultipleFeaturesCoversCollectFeatureNamesLoopWithMultipleFeatures FAILURE AT LINE 121
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.addMultipleFeaturesCoversCollectFeatureNamesLoopWithMultipleFeatures(ProductConfigurationTest.java:121)
+CODE CONTEXT:
+   118:         given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+   119:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+   120:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));
+   121:         given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItems(feature1, feature2));  ← FAILURE HERE
+   122:     }
+   123: 
+   124:     @Test(timeout = 60000)
+
+[3] METHOD=getConfigurationFeaturesAfterAddingCoversActivedFeaturesWithFeaturesAndCollectFeatureNames FAILURE AT LINE 60
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.getConfigurationFeaturesAfterAddingCoversActivedFeaturesWithFeaturesAndCollectFeatureNames(ProductConfigurationTest.java:60)
+CODE CONTEXT:
+    57:         given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+    58:         given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+    59:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+    60:         given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItem(featureName));  ← FAILURE HERE
+    61:     }
+    62: 
+    63:     @Test(timeout = 60000)
+
+[4] METHOD=addExcludesConstraintAndConflictingFeaturesCoversSetValidFalse FAILURE AT LINE 179
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.addExcludesConstraintAndConflictingFeaturesCoversSetValidFalse(ProductConfigurationTest.java:179)
+CODE CONTEXT:
+   176:         given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+   177:         given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", feature1).formParam("excludedFeature", feature2).when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+   178:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+   179:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));  ← FAILURE HERE
+   180:         given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+   181:     }
+   182: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uid() {
+        return "t" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    }
+
+    @Test(timeout = 60000)
+    public void createConfigurationCoversSetValidAndSetProduct() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesWhenEmptyCoversActivedFeaturesAndCollectFeatureNamesEmpty() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationCoversActiveStringAndActiveFeature() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesAfterAddingCoversActivedFeaturesWithFeaturesAndCollectFeatureNames() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationCoversDeactiveStringAndDeactiveFeature() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesAfterDeletionCoversActivedFeaturesAfterRemoval() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(not(hasItem(featureName)));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsCoversGetProductAndHasActiveFeatureFalse() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsWithActiveFeatureCoversHasActiveFeatureTrue() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addMultipleFeaturesCoversCollectFeatureNamesLoopWithMultipleFeatures() {
+        String productName = uid();
+        String configName = uid();
+        String feature1 = uid();
+        String feature2 = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItems(feature1, feature2));
+    }
+
+    @Test(timeout = 60000)
+    public void availableFeaturesWithProductFeaturesCoversAvailableFeaturesMethod() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addSameFeatureTwiceCoversActiveWhenAlreadyActive() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteNonExistentFeatureCoversDeactiveWhenNotInSet() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsListForProductCoversGetProductViaList() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintAndConflictingFeaturesCoversSetValidFalse() {
+        String productName = uid();
+        String configName = uid();
+        String feature1 = uid();
+        String feature2 = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", feature1).formParam("excludedFeature", feature2).when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConfigurationCoversSetValidFalseOnDeletion() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName).then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

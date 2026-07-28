@@ -1,0 +1,165 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getBySubRegion_returns200_forValidSubRegion TYPE=ERROR
+Illegal character in path at index 47: http://localhost:8080/rest/v2/subregion/Western Europe
+
+[2] METHOD=getByAlphaList_returns404_forNonExistentCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <404> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getBySubRegion_returns200_forValidSubRegion FAILURE AT LINE 80
+java.net.URISyntaxException: Illegal character in path at index 47: http://localhost:8080/rest/v2/subregion/Western Europe
+at ts01glm_5_2.CountryRestV2Test.getBySubRegion_returns200_forValidSubRegion(CountryRestV2Test.java:80)
+CODE CONTEXT:
+    77: 
+    78:     @Test(timeout = 60000)
+    79:     public void getBySubRegion_returns200_forValidSubRegion() {
+    80:         given().baseUri(baseUrl).when().get("/v2/subregion/Western Europe").then().statusCode(200);  ← FAILURE HERE
+    81:     }
+    82: 
+    83:     @Test(timeout = 60000)
+
+[2] METHOD=getByAlphaList_returns404_forNonExistentCodes FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01glm_5_2.CountryRestV2Test.getByAlphaList_returns404_forNonExistentCodes(CountryRestV2Test.java:39)
+CODE CONTEXT:
+    36:     @Test(timeout = 60000)
+    37:     public void getByAlphaList_returns404_forNonExistentCodes() {
+    38:         given().baseUri(baseUrl).queryParam("codes", "US;CA").queryParam("fields", "name;capital").when().get("/v2/alpha").then().statusCode(lessThan(300));
+    39:         given().baseUri(baseUrl).queryParam("codes", "XX;YY").when().get("/v2/alpha").then().statusCode(200);  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("base.url");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns404_forNonExistentAlphaCode() {
+        given().baseUri(baseUrl).when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().get("/v2/alpha/US?fields=name;capital").then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns400_forInvalidAlphaCode() {
+        given().baseUri(baseUrl).when().get("/v2/alpha/12345").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returns404_forNonExistentCodes() {
+        given().baseUri(baseUrl).queryParam("codes", "US;CA").queryParam("fields", "name;capital").when().get("/v2/alpha").then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).queryParam("codes", "XX;YY").when().get("/v2/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returns400_forInvalidCodes() {
+        given().baseUri(baseUrl).queryParam("codes", "1").when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns404_forNonExistentCurrency() {
+        given().baseUri(baseUrl).when().get("/v2/currency/EUR").then().statusCode(lessThan(300));
+        given().baseUri(baseUrl).when().get("/v2/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns400_forInvalidCurrency() {
+        given().baseUri(baseUrl).when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_returns200_forValidName() {
+        given().baseUri(baseUrl).when().get("/v2/name/Germany").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_returns200_forValidCallingCode() {
+        given().baseUri(baseUrl).when().get("/v2/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_returns200_forValidCapital() {
+        given().baseUri(baseUrl).when().get("/v2/capital/Paris").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_returns200_forValidRegion() {
+        given().baseUri(baseUrl).when().get("/v2/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_returns200_forValidSubRegion() {
+        given().baseUri(baseUrl).when().get("/v2/subregion/Western Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_returns200_forValidLanguage() {
+        given().baseUri(baseUrl).when().get("/v2/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonym_returns200_forValidDemonym() {
+        given().baseUri(baseUrl).when().get("/v2/demonym/American").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_returns200_forValidRegionalBloc() {
+        given().baseUri(baseUrl).when().get("/v2/regionalbloc/EU").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getCountries_returns200_withFieldsFilter() {
+        given().baseUri(baseUrl).queryParam("fields", "name;capital;population").when().get("/v2").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

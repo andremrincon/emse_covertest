@@ -1,0 +1,81 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class ExpintTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeN() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", -1)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeX() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", 3)
+            .pathParam("x", -2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintZeroXZeroN() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", 0)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintZeroXOneN() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", 1)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOne() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", 3)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXLessThanOrEqualToOne() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("n", 3)
+            .pathParam("x", 0.1)
+        .when()
+            .get("/api/expint/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}

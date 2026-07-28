@@ -1,0 +1,45 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturns404Status() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundBodyContainsMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundReturns404Status() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/capital/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundBodyStatusFieldValue() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/capital/123");
+        act.then().body("status", equalTo(404));
+    }
+}

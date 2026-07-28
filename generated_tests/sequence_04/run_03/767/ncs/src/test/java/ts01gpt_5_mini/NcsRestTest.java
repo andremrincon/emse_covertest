@@ -1,0 +1,80 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_Valid_n3_x2_5_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nTooSmall_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/2/1.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nTooLarge_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/1001/1.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_Valid_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/10/5/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_mTooLarge_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/1001/5/0.75").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_runtimeException_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/8/6/1.2").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_Valid_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_runtimeException_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/-1.0/2.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_Valid_returnsBodyResult() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/17/5").then().body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_outOfBounds_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/10001/1").then().statusCode(400);
+    }
+}

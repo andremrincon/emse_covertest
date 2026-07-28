@@ -1,0 +1,195 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetName_v1AlphaUS_3 TYPE=ERROR
+The parameter "name" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testSetIso639_2_v1AlphaUS_2 TYPE=ERROR
+The parameter "iso639_2" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testSetIso639_1_v1AlphaUS_1 TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testSetNativeName_v1AlphaUS_4 TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetName_v1AlphaUS_3 FAILURE AT LINE 48
+at ts01gpt_5_mini.LanguageTest.testSetName_v1AlphaUS_3(LanguageTest.java:48)
+CODE CONTEXT:
+    45:     public void testSetName_v1AlphaUS_3() {
+    46:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    47:         Response act = given().when().get("/v1/alpha/US");
+    48:         act.then().body("languages[0].name", equalTo("English"));  ← FAILURE HERE
+    49:         Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+    50:         if (lang == null) {
+    51:             throw new AssertionError("Language mapping failed");
+
+[2] METHOD=testSetIso639_2_v1AlphaUS_2 FAILURE AT LINE 37
+at ts01gpt_5_mini.LanguageTest.testSetIso639_2_v1AlphaUS_2(LanguageTest.java:37)
+CODE CONTEXT:
+    34:     public void testSetIso639_2_v1AlphaUS_2() {
+    35:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    36:         Response act = given().when().get("/v1/alpha/US");
+    37:         act.then().body("languages[0].iso639_2", equalTo("eng"));  ← FAILURE HERE
+    38:         Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+    39:         if (lang == null) {
+    40:             throw new AssertionError("Language mapping failed");
+
+[3] METHOD=testSetIso639_1_v1AlphaUS_1 FAILURE AT LINE 26
+at ts01gpt_5_mini.LanguageTest.testSetIso639_1_v1AlphaUS_1(LanguageTest.java:26)
+CODE CONTEXT:
+    23:     public void testSetIso639_1_v1AlphaUS_1() {
+    24:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    25:         Response act = given().when().get("/v1/alpha/US");
+    26:         act.then().body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    27:         Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+    28:         if (lang == null) {
+    29:             throw new AssertionError("Language mapping failed");
+
+[4] METHOD=testSetNativeName_v1AlphaUS_4 FAILURE AT LINE 59
+at ts01gpt_5_mini.LanguageTest.testSetNativeName_v1AlphaUS_4(LanguageTest.java:59)
+CODE CONTEXT:
+    56:     public void testSetNativeName_v1AlphaUS_4() {
+    57:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    58:         Response act = given().when().get("/v1/alpha/US");
+    59:         act.then().body("languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    60:         Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+    61:         if (lang == null) {
+    62:             throw new AssertionError("Language mapping failed");
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1_v1AlphaUS_1() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_1", equalTo("en"));
+        Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+        if (lang == null) {
+            throw new AssertionError("Language mapping failed");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2_v1AlphaUS_2() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_2", equalTo("eng"));
+        Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+        if (lang == null) {
+            throw new AssertionError("Language mapping failed");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName_v1AlphaUS_3() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].name", equalTo("English"));
+        Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+        if (lang == null) {
+            throw new AssertionError("Language mapping failed");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName_v1AlphaUS_4() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].nativeName", equalTo("English"));
+        Language lang = act.jsonPath().getObject("languages[0]", Language.class);
+        if (lang == null) {
+            throw new AssertionError("Language mapping failed");
+        }
+    }
+
+    public static class Language {
+        public String iso639_1;
+        public String iso639_2;
+        public String name;
+        public String nativeName;
+
+        public Language() {
+        }
+
+        public String getIso639_1() {
+            return iso639_1;
+        }
+
+        public void setIso639_1(String iso639_1) {
+            this.iso639_1 = iso639_1;
+        }
+
+        public String getIso639_2() {
+            return iso639_2;
+        }
+
+        public void setIso639_2(String iso639_2) {
+            this.iso639_2 = iso639_2;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getNativeName() {
+            return nativeName;
+        }
+
+        public void setNativeName(String nativeName) {
+            this.nativeName = nativeName;
+        }
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

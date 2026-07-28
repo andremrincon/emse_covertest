@@ -1,0 +1,71 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonInitialization() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithInvalidCode() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/v1/alpha/XX")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithValidCodes() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;CA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchWithExactName() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/v1/name/France?fullText=true")
+            .then()
+                .statusCode(200);
+    }
+}

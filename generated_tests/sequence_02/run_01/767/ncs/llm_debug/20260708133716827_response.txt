@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_MGreaterThan1000_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_NGreaterThan1000_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/fisher/10/1001/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_AGreaterThanLimit_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_ALessThanNegativeLimit_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/remainder/-10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_BGreaterThanLimit_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/remainder/17/10001")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_BLessThanNegativeLimit_Returns400() {
+        RestAssured
+            .given()
+            .when()
+                .get("/api/remainder/17/-10001")
+            .then()
+                .statusCode(400);
+    }
+}

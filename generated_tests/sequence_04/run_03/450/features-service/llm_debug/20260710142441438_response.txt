@@ -1,0 +1,117 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class ProductsDAOTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertExcludesConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only");
+        Response arrangeResp = req.when().post("/products/{productName}/constraints/excludes", productName);
+        arrangeResp.then().statusCode(lessThan(300));
+        RequestSpecification req2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only");
+        req2.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertRequiresConstraint_responseContainsSuccessStatus() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM");
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        RequestSpecification req2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM");
+        Response act = req2.when().post("/products/{productName}/constraints/requires", productName);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteSingleConstraint_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i7")
+                .formParam("excludedFeature", "Legacy-GPU");
+        Response createResp = req.when().post("/products/{productName}/constraints/excludes", productName);
+        createResp.then().statusCode(lessThan(300));
+        Number idNum = createResp.jsonPath().get("id");
+        Long constraintId = idNum == null ? null : idNum.longValue();
+        if (constraintId == null) {
+            String loc = createResp.getHeader("Location");
+            if (loc != null) {
+                try {
+                    String seg = loc.substring(loc.lastIndexOf('/') + 1);
+                    constraintId = Long.valueOf(seg);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (constraintId == null) {
+            Response listResp = given().when().get("/products/{productName}/constraints", productName);
+            listResp.then().statusCode(lessThan(300));
+            java.util.List<?> ids = listResp.jsonPath().getList("id");
+            if (ids != null && !ids.isEmpty()) {
+                Object first = ids.get(0);
+                if (first instanceof Number) {
+                    constraintId = ((Number) first).longValue();
+                } else {
+                    constraintId = Long.valueOf(String.valueOf(first));
+                }
+            } else {
+                java.util.List<java.util.Map<String, Object>> list = listResp.jsonPath().getList("", java.util.Map.class);
+                if (list != null && !list.isEmpty()) {
+                    Object idObj = list.get(0).get("id");
+                    if (idObj instanceof Number) {
+                        constraintId = ((Number) idObj).longValue();
+                    } else if (idObj != null) {
+                        constraintId = Long.valueOf(String.valueOf(idObj));
+                    }
+                }
+            }
+        }
+        assertNotNull(constraintId);
+        given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProduct_removesAllConstraints_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification r1 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "Feature-A")
+                .formParam("requiredFeature", "Feature-B");
+        r1.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        RequestSpecification r2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "Feature-C")
+                .formParam("excludedFeature", "Feature-D");
+        r2.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}", productName).then().statusCode(204);
+    }
+}

@@ -1,0 +1,47 @@
+package ts01gpt_5_mini;
+
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    private final String base;
+
+    public FeatureConstraintTest() {
+        String b = System.getenv("BASE_URL");
+        if (b == null || b.isEmpty()) b = System.getProperty("api.base", "http://localhost:8080");
+        base = b;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post(base + "/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given()
+                .formParam("sourceFeature", "CPU-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "Integrated-Graphics-" + UUID.randomUUID().toString())
+                .when()
+                .post(base + "/products/{productName}/constraints/excludes", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintReturns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post(base + "/products/{productName}", productName).then().statusCode(lessThan(300));
+        String respBody = given()
+                .formParam("sourceFeature", "SF-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "EF-" + UUID.randomUUID().toString())
+                .when()
+                .post(base + "/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(lessThan(300))
+                .extract().asString();
+        String constraintId = new JsonPath(respBody).getString("id");
+        Response act = given().when().delete(base + "/products/{productName}/constraints/{constraintId}", productName, constraintId);
+        act.then().statusCode(204);
+    }
+}

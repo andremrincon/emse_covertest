@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("REST_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("REST_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("rest.base");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("rest.base");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameNotFoundReturnsStatusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/123");
+        resp.then().statusCode(404).body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameServerErrorReturnsMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/True");
+        resp.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaBadRequestReturnsMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsOkStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        resp.then().statusCode(200);
+    }
+}

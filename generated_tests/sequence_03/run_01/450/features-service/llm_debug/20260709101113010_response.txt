@@ -1,0 +1,48 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasItem;
+
+public class EvaluationResultTest {
+
+    private String base() {
+        String cfg = System.getProperty("api.base");
+        if (cfg != null && !cfg.isEmpty()) return cfg;
+        String env = System.getenv("API_BASE");
+        if (env != null && !env.isEmpty()) return env;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String base = base();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddConfigurationToProduct_returns201() {
+        String base = base();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_includesAddedFeature() {
+        String base = base();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+        given().baseUri(base).when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().body("$", hasItem(featureName));
+    }
+}

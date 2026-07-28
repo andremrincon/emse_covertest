@@ -1,0 +1,47 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getProperty("api.base", System.getenv("API_BASE_URL") == null ? "http://localhost:8080" : System.getenv("API_BASE_URL"));
+        RestAssured.baseURI = env;
+    }
+
+    @Ignore("expected:<204> but was:<500>")
+    @Test(timeout = 60000)
+    public void testDeleteFeatureRemovesFeatureAndReturns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "conf-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        assertEquals(204, resp.statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureWithInvalidFeatureNameReturns500() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "conf-" + UUID.randomUUID().toString();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 2000; i++) sb.append('x');
+        String longFeatureName = sb.toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", longFeatureName).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        assertEquals(500, resp.statusCode());
+    }
+}

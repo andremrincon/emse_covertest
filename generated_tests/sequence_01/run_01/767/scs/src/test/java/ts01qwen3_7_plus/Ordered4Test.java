@@ -1,0 +1,81 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import io.restassured.RestAssured;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "delta")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .pathParam("w", "delta")
+            .pathParam("x", "cherry")
+            .pathParam("z", "apple")
+            .pathParam("y", "banana")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "cherry")
+            .pathParam("z", "delta")
+            .pathParam("y", "banana")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedTooShort() {
+        given()
+            .pathParam("w", "app")
+            .pathParam("x", "banana")
+            .pathParam("z", "delta")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedTooLong() {
+        given()
+            .pathParam("w", "appleee")
+            .pathParam("x", "banana")
+            .pathParam("z", "delta")
+            .pathParam("y", "cherry")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+}

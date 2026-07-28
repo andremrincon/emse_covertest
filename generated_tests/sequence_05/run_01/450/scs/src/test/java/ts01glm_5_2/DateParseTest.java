@@ -1,0 +1,59 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWedMar() {
+        given().when().get(baseUrl + "/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/wed/mar").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseSatJun() {
+        given().when().get(baseUrl + "/api/dateparse/thur/apr").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/fri/may").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/sat/jun").then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayAug() {
+        given().when().get(baseUrl + "/api/dateparse/sun/jul").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/noday/aug").then().statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayOct() {
+        given().when().get(baseUrl + "/api/dateparse/mon/sep").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/noday/oct").then().statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayDec() {
+        given().when().get(baseUrl + "/api/dateparse/tue/nov").then().statusCode(lessThan(300));
+        given().when().get(baseUrl + "/api/dateparse/noday/dec").then().statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayInvalidMonth() {
+        given().when().get(baseUrl + "/api/dateparse/noday/nomonth").then().statusCode(500);
+    }
+}

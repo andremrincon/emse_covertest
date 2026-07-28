@@ -1,0 +1,59 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductConfigurationTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsTriggersAvailableFeatures() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        String featureName = "TestFeature-" + java.util.UUID.randomUUID();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationTriggersAvailableFeatures() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        String featureName = "TestFeature-" + java.util.UUID.randomUUID();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersAvailableFeatures() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        String featureName = "TestFeature-" + java.util.UUID.randomUUID();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configurationName + "/features").then().statusCode(200);
+    }
+}
+```

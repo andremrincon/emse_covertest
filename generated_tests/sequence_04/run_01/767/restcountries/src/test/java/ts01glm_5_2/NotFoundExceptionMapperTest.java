@@ -1,0 +1,48 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenNonExistentPathRequested() {
+        given()
+            .when()
+                .get("/v1/nonexistentpath_" + java.util.UUID.randomUUID().toString())
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenNonExistentV2PathRequested() {
+        given()
+            .when()
+                .get("/v2/nonexistentpath_" + java.util.UUID.randomUUID().toString())
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenRootNonExistentPathRequested() {
+        given()
+            .when()
+                .get("/nonexistentpath_" + java.util.UUID.randomUUID().toString())
+            .then()
+                .statusCode(404);
+    }
+
+    private RequestSpecification given() {
+        return RestAssured.given();
+    }
+}

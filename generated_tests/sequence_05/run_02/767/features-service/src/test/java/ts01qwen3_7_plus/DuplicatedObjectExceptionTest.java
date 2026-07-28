@@ -1,0 +1,50 @@
+package ts01glm_5_2;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DuplicatedObjectExceptionTest {
+
+    @Test(timeout = 60000)
+    public void testDuplicatedProductCreation() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicatedFeatureCreation() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(500);
+    }
+}

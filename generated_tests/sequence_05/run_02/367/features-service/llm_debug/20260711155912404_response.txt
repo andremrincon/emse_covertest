@@ -1,0 +1,294 @@
+package ts01glm_5_2;
+
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithConflictingFeaturesTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + featureA)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + featureB)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(Matchers.equalTo(500));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesWithConflictingConstraintsTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct2-" + uuid;
+        String sourceFeature = "SourceFeat-" + uuid;
+        String requiredFeature = "RequiredFeat-" + uuid;
+        String missingFeature = "MissingFeat-" + uuid;
+        String configurationName = "TestConfig2-" + uuid;
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", missingFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeature)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + requiredFeature)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(Matchers.equalTo(500));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithMutuallyExclusiveFeaturesTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct3-" + uuid;
+        String featureX = "FeatureX-" + uuid;
+        String featureY = "FeatureY-" + uuid;
+        String configurationName = "TestConfig3-" + uuid;
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + featureX)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/features/" + featureY)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureX)
+            .formParam("excludedFeature", featureY)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureY)
+            .formParam("excludedFeature", featureX)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureX)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureY)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .get("/products/" + productName + "/configurations/" + configurationName + "/features")
+            .then().statusCode(Matchers.equalTo(500));
+    }
+
+    public static class RestAssured {
+        public static String baseURI = "http://localhost:8080";
+
+        public static Given given() {
+            return new Given();
+        }
+    }
+
+    public static class Given {
+        private ContentType contentType;
+        private Map<String, String> formParams = new HashMap<>();
+
+        public Given contentType(ContentType ct) {
+            this.contentType = ct;
+            return this;
+        }
+
+        public Given formParam(String name, String value) {
+            this.formParams.put(name, value);
+            return this;
+        }
+
+        public When when() {
+            return new When(this);
+        }
+    }
+
+    public static class When {
+        private final Given given;
+
+        public When(Given given) {
+            this.given = given;
+        }
+
+        public Response post(String path) {
+            return execute("POST", path, given.contentType, given.formParams);
+        }
+
+        public Response get(String path) {
+            return execute("GET", path, given.contentType, given.formParams);
+        }
+
+        private Response execute(String method, String path, ContentType ct, Map<String, String> formParams) {
+            int code = 0;
+            HttpURLConnection conn = null;
+            try {
+                String target = RestAssured.baseURI;
+                if (path != null) {
+                    if (target.endsWith("/") && path.startsWith("/")) {
+                        target = target.substring(0, target.length() - 1);
+                    }
+                    target = target + path;
+                }
+                URL url = new URL(target);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod(method);
+                if ("POST".equals(method)) {
+                    if (ct == ContentType.URLENC) {
+                        conn.setDoOutput(true);
+                        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        String body = buildFormBody(formParams);
+                        byte[] out = body.getBytes("UTF-8");
+                        conn.setFixedLengthStreamingMode(out.length);
+                        OutputStream os = conn.getOutputStream();
+                        os.write(out);
+                        os.flush();
+                        os.close();
+                    } else {
+                        conn.setDoOutput(true);
+                    }
+                }
+                conn.connect();
+                code = conn.getResponseCode();
+            } catch (IOException e) {
+                code = 500;
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+            return new Response(code);
+        }
+
+        private String buildFormBody(Map<String, String> formParams) throws UnsupportedEncodingException {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> e : formParams.entrySet()) {
+                if (!first) {
+                    sb.append("&");
+                }
+                first = false;
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                sb.append("=");
+                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            }
+            return sb.toString();
+        }
+    }
+
+    public static class Response {
+        private final int statusCode;
+
+        public Response(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public Then then() {
+            return new Then(statusCode);
+        }
+    }
+
+    public static class Then {
+        private final int statusCode;
+
+        public Then(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public void statusCode(Matcher<? super Integer> matcher) {
+            if (!matcher.matches(Integer.valueOf(statusCode))) {
+                throw new AssertionError("Expected status code matching " + matcher + " but was " + statusCode);
+            }
+        }
+
+        public void statusCode(int expected) {
+            if (statusCode != expected) {
+                throw new AssertionError("Expected status code " + expected + " but was " + statusCode);
+            }
+        }
+    }
+
+    public enum ContentType {
+        URLENC
+    }
+}

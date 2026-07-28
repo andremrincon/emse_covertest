@@ -1,0 +1,44 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPlusOperation() {
+        given()
+            .when()
+            .get("/api/calc/plus/15.5/4.5")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPiConstant() {
+        given()
+            .when()
+            .get("/api/calc/pi/0.0/0.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidNumberFormat() {
+        given()
+            .when()
+            .get("/api/calc/plus/10.0/twenty")
+            .then()
+            .statusCode(400);
+    }
+}
+```

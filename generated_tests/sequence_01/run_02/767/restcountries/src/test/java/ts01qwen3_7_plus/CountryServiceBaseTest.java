@@ -1,0 +1,99 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2() {
+        given()
+            .pathParam("alphacode", "US")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3() {
+        given()
+            .pathParam("alphacode", "USA")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExact() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/United%20States%20of%20America")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchExact() {
+        given()
+            .pathParam("name", "Fran")
+            .queryParam("fullText", false)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .queryParam("fullText", false)
+            .when()
+                .get("/v1/name/States%20of%20America")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404);
+    }
+}

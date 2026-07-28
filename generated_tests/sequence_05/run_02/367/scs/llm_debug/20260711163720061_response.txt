@@ -1,0 +1,83 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CookieTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdValidLongValueStartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdLongValueNotStartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/admin12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdShortValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionValidAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionElseBranch() {
+        given()
+            .when()
+                .get("/api/cookie/session/xyz/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherUserIdNorSession() {
+        given()
+            .when()
+                .get("/api/cookie/auth_token/some-value/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+}
+```

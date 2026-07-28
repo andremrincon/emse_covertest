@@ -1,0 +1,297 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.FeatureConstraintTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCreateDuplicateExcludesConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <201>.
+
+[2] METHOD=testCreateDuplicateRequiresConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <201>.
+
+[3] METHOD=testDeleteNonExistentConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <204>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCreateDuplicateExcludesConstraint FAILURE AT LINE 216
+java.lang.AssertionError:
+at ts01glm_5_2.FeatureConstraintTest.testCreateDuplicateExcludesConstraint(FeatureConstraintTest.java:216)
+CODE CONTEXT:
+   213:         .when()
+   214:             .post("/products/{productName}/constraints/excludes", productName)
+   215:         .then()
+   216:             .statusCode(201);  ← FAILURE HERE
+   217:     }
+   218: }
+
+[2] METHOD=testCreateDuplicateRequiresConstraint FAILURE AT LINE 190
+java.lang.AssertionError:
+at ts01glm_5_2.FeatureConstraintTest.testCreateDuplicateRequiresConstraint(FeatureConstraintTest.java:190)
+CODE CONTEXT:
+   187:         .when()
+   188:             .post("/products/{productName}/constraints/requires", productName)
+   189:         .then()
+   190:             .statusCode(201);  ← FAILURE HERE
+   191:     }
+   192: 
+   193:     @Test(timeout = 60000)
+
+[3] METHOD=testDeleteNonExistentConstraint FAILURE AT LINE 164
+java.lang.AssertionError:
+at ts01glm_5_2.FeatureConstraintTest.testDeleteNonExistentConstraint(FeatureConstraintTest.java:164)
+CODE CONTEXT:
+   161:         when()
+   162:             .delete("/products/{productName}/constraints/{constraintId}", productName, 999999)
+   163:         .then()
+   164:             .statusCode(204);  ← FAILURE HERE
+   165:     }
+   166: 
+   167:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintCoversSetIdSetForProduct() {
+        String productName = "TestProduct-Req-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintCoversSetIdSetForProduct() {
+        String productName = "TestProduct-Excl-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "ExclSource-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedFeat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithConstraintsCoversGetId() {
+        String productName = "TestProduct-Get-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "GetSource-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "GetRequired-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        when()
+            .get("/products/{productName}", productName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintCoversGetId() {
+        String productName = "TestProduct-Del-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "DelSource-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "DelRequired-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        String location = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201)
+            .extract().header("Location");
+
+        Integer constraintId = null;
+        if (location != null && !location.isEmpty()) {
+            String[] parts = location.split("/");
+            constraintId = Integer.parseInt(parts[parts.length - 1]);
+        } else {
+            constraintId = 1;
+        }
+
+        when()
+            .delete("/products/{productName}/constraints/{constraintId}", productName, constraintId)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintWithNonExistentProduct() {
+        String productName = "NonExistentProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatA-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "FeatB-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithNonExistentProduct() {
+        String productName = "NonExistentExcl-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "ExclA-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExclB-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteNonExistentConstraint() {
+        String productName = "TestProduct-NoConstraint-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        when()
+            .delete("/products/{productName}/constraints/{constraintId}", productName, 999999)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateDuplicateRequiresConstraint() {
+        String productName = "TestProduct-DupReq-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "DupSrc-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "DupReq-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateDuplicateExcludesConstraint() {
+        String productName = "TestProduct-DupExcl-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "DupExclSrc-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "DupExcluded-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

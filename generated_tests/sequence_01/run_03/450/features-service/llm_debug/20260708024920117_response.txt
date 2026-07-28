@@ -1,0 +1,106 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductConfigurationTest {
+
+    @Before
+    public void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationCoversAvailableFeatures() {
+        String p = "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String c = "Conf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+
+        given()
+            .when().get("/products/" + p + "/configurations/" + c)
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivateFeatureCoversActiveByName() {
+        String p = "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String f = "Feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String c = "Conf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+
+        given()
+            .when().post("/products/" + p + "/configurations/" + c + "/features/" + f)
+            .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactivateFeatureCoversDeactiveByName() {
+        String p = "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String f = "Feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String c = "Conf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + f).then().statusCode(lessThan(300));
+
+        given()
+            .when().delete("/products/" + p + "/configurations/" + c + "/features/" + f)
+            .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActivatedFeaturesCoversActivedFeaturesMethod() {
+        String p = "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String f = "Feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String c = "Conf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + f).then().statusCode(lessThan(300));
+
+        given()
+            .when().get("/products/" + p + "/configurations/" + c + "/features")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintViolationCoversSetValidAndHasActiveFeature() {
+        String p = "Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String f2 = "Feat2-" + UUID.randomUUID().toString().substring(0, 8);
+        String c = "Conf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", f1)
+            .formParam("excludedFeature", f2)
+            .when().post("/products/" + p + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + f1).then().statusCode(lessThan(300));
+
+        given()
+            .when().post("/products/" + p + "/configurations/" + c + "/features/" + f2)
+            .then().statusCode(500);
+    }
+}

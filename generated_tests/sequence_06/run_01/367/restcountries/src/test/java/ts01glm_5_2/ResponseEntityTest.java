@@ -1,0 +1,77 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNameServerError() {
+        given()
+            .when()
+                .get("/v1/name/True")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCapitalNotFound() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnRegionNotFound() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnRegionServerError() {
+        given()
+            .when()
+                .get("/v1/region/True")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnCallingCodeServerError() {
+        given()
+            .when()
+                .get("/v1/callingcode/True")
+            .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+}

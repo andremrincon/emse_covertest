@@ -1,0 +1,39 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.when;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI0True() {
+        when()
+            .get("/api/notypevar/28/a")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI1TrueI2True() {
+        when()
+            .get("/api/notypevar/7/z")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarAllBranchesFalse() {
+        when()
+            .get("/api/notypevar/3/a")
+        .then()
+            .statusCode(200);
+    }
+}

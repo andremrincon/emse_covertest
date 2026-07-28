@@ -1,0 +1,276 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returns200AndGuestGreeting() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello Guest"));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withNameParam_returns200AndCustomGreeting() {
+        given()
+            .queryParam("name", "John Smith")
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello John Smith"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayZero_triggersRandomDelayBranch() {
+        given()
+            .queryParam("delay", 0)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200)
+                .body(containsString("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNonZeroDelay_triggersDirectSleepBranch() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200)
+                .body(containsString("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withInvalidDelayType_returnsErrorStatus() {
+        given()
+            .queryParam("delay", "abc")
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(lessThan(300) == false ? 500 : 400);
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withSpecialCharactersInName_returns200() {
+        given()
+            .queryParam("name", "María-José O'Connor-Smith III")
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello María-José O'Connor-Smith III"));
+    }
+}
+```
+
+Wait, that last test has a syntax issue. Let me fix the invalid assertion. Let me rewrite properly.
+
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
+public class SampleControllerTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returns200AndGuestGreeting() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello Guest"));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withNameParam_returns200AndCustomGreeting() {
+        given()
+            .queryParam("name", "John Smith")
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello John Smith"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayZero_triggersRandomDelayBranch() {
+        given()
+            .queryParam("delay", 0)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200)
+                .body(containsString("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNonZeroDelay_triggersDirectSleepBranch() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200)
+                .body(containsString("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withInvalidDelayType_returnsErrorStatus() {
+        given()
+            .queryParam("delay", "abc")
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withSpecialCharactersInName_returns200() {
+        given()
+            .queryParam("name", "María-José O'Connor-Smith III")
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200)
+                .body(containsString("Hello María-José O'Connor-Smith III"));
+    }
+}
+```
+
+Wait, I need to import `given()` and `when()` from RestAssured. Let me add those static imports. Also, the `anyOf` and `is` need proper imports.
+
+Actually, looking at the constraints again: "Each @Test method MUST test exactly ONE behavior or scenario" and "ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked."
+
+So I should not chain both statusCode and body in the same test. Let me separate them. But that would require more tests... I have at most 6. Let me think about what's most important for coverage.
+
+For `sayHello` (line 15): just need to call GET / - one test with default, one with name param covers the branch.
+For `timeConsumingAPI` (lines 20, 21, 22, 25, 26): need delay==0 branch (lines 21, 22) and delay!=0 branch (line 25), and line 26 (sleep + return).
+
+So minimum 4 tests for coverage. I can use 2 more for error cases or special scenarios.
+
+Let me restructure to follow the single assertion rule:
+
+1. sayHello default → statusCode 200
+2. sayHello with name → body contains name
+3. timeConsumingAPI delay=0 → statusCode 200
+4. timeConsumingAPI delay=1 → body contains "Result"
+5. timeConsumingAPI invalid delay → error status
+6. sayHello special chars → statusCode 200
+
+That works. Let me finalize.```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returns200() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withNameParam_returnsCustomGreeting() {
+        given()
+            .queryParam("name", "John Smith")
+            .when()
+                .get("/")
+            .then()
+                .body(containsString("Hello John Smith"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayZero_triggersRandomDelayBranch() {
+        given()
+            .queryParam("delay", 0)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNonZeroDelay_triggersDirectSleepBranch() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(containsString("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withInvalidDelayType_returnsErrorStatus() {
+        given()
+            .queryParam("delay", "abc")
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(anyOf(is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withSpecialCharactersInName_returns200() {
+        given()
+            .queryParam("name", "María-José O'Connor-Smith III")
+            .when()
+                .get("/")
+            .then()
+                .statusCode(200);
+    }
+}
+```

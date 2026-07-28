@@ -1,0 +1,47 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class StripeRestTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("API_BASE_URL");
+        if (env == null || env.isEmpty()) env = System.getenv("API_BASE_URL");
+        if (env == null || env.isEmpty()) env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) env = "http://localhost:8080/rest";
+        BASE = env;
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_blankToken_returnsBadRequest() {
+        given().baseUri(BASE).when().get("/v2").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"\"}";
+        Response act = given().baseUri(BASE).contentType("application/json;charset=utf-8").body(payload).when().post("/contribute");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_chargeDeclined_returnsBadRequest() {
+        given().baseUri(BASE).when().get("/v2").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":150,\"token\":\"tok_chargeDeclined-" + UUID.randomUUID().toString() + "\"}";
+        Response act = given().baseUri(BASE).contentType("application/json;charset=utf-8").body(payload).when().post("/contribute");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validToken_returnsAccepted() {
+        given().baseUri(BASE).when().get("/v2").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":200,\"token\":\"tok_visa-" + UUID.randomUUID().toString() + "\"}";
+        Response act = given().baseUri(BASE).contentType("application/json;charset=utf-8").body(payload).when().post("/contribute");
+        assertEquals(202, act.getStatusCode());
+    }
+}

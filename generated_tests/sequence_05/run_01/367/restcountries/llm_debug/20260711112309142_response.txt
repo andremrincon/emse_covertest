@@ -1,0 +1,67 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityStatusNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .pathParam("name", "123")
+            .when()
+                .get("/v1/name/{name}");
+
+        response.then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityMessageMethodNotAllowed() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .post("/");
+
+        response.then().body("message", equalTo("POST method is not allowed for this endpoint"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityStatusBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .pathParam("currency", "123")
+            .when()
+                .get("/v2/currency/{currency}");
+
+        response.then().body("status", equalTo(400));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityMessageServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .pathParam("name", "True")
+            .when()
+                .get("/v1/name/{name}");
+
+        response.then().body("message", equalTo("Internal Server Error"));
+    }
+}
+```

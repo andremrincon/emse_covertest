@@ -1,0 +1,49 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testSetLanguageFieldsViaAlphaCode() {
+        Response response = given()
+                .when()
+                .get("/v1/alpha/US");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetLanguageFieldsViaCurrency() {
+        Response response = given()
+                .when()
+                .get("/v1/currency/USD");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetLanguageFieldsViaName() {
+        Response response = given()
+                .when()
+                .get("/v1/name/France");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetLanguageFieldsViaLang() {
+        Response response = given()
+                .when()
+                .get("/v1/lang/es");
+        response.then().statusCode(404);
+    }
+}

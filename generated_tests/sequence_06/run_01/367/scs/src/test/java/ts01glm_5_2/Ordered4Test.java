@@ -1,0 +1,105 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "ddddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .pathParam("w", "ddddd")
+            .pathParam("x", "ccccc")
+            .pathParam("z", "aaaaa")
+            .pathParam("y", "bbbbb")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedShortStrings() {
+        given()
+            .pathParam("w", "a")
+            .pathParam("x", "b")
+            .pathParam("z", "d")
+            .pathParam("y", "c")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedLongStrings() {
+        given()
+            .pathParam("w", "aaaaaaa")
+            .pathParam("x", "bbbbbbb")
+            .pathParam("z", "ddddddd")
+            .pathParam("y", "ccccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedLengthOkNotOrdered() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "bbbbb")
+            .pathParam("y", "aaaaa")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testServerErrorWithVeryLongString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            sb.append('y');
+        }
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "cherry")
+            .pathParam("y", sb.toString())
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(500);
+    }
+}

@@ -1,0 +1,290 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ProductsConfigurationsServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddFeatureToConfigurationDuplicateReturns500 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[2] METHOD=testRemoveFeatureFromConfigurationReturns204 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=testAddFeatureToConfigurationSetsConfigurationInvalidWhenMissingRequiredFeature TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[4] METHOD=testAddFeatureToConfigurationReturns201 TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[5] METHOD=testAddFeatureToConfigurationValidWhenRequirementsMet TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[6] METHOD=testGetConfigurationActivedFeaturesReturnsFeatureList TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[7] METHOD=testRemoveFeatureFromConfigurationSecondDeleteReturns500 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddFeatureToConfigurationDuplicateReturns500 FAILURE AT LINE 90
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.arrangeAddFeatureToConfiguration(ProductsConfigurationsServiceTest.java:41)
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToConfigurationDuplicateReturns500(ProductsConfigurationsServiceTest.java:90)
+CODE CONTEXT:
+    87:         String feature = unique("feat");
+    88:         arrangeCreateProduct(product);
+    89:         arrangeCreateConfiguration(product, config);
+    90:         arrangeAddFeatureToConfiguration(product, config, feature);  ← FAILURE HERE
+    91:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+    92:     }
+    93: 
+
+[2] METHOD=testRemoveFeatureFromConfigurationReturns204 FAILURE AT LINE 101
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.arrangeAddFeatureToConfiguration(ProductsConfigurationsServiceTest.java:41)
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testRemoveFeatureFromConfigurationReturns204(ProductsConfigurationsServiceTest.java:101)
+CODE CONTEXT:
+    98:         String feature = unique("feat");
+    99:         arrangeCreateProduct(product);
+   100:         arrangeCreateConfiguration(product, config);
+   101:         arrangeAddFeatureToConfiguration(product, config, feature);  ← FAILURE HERE
+   102:         given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(204);
+   103:     }
+   104: 
+
+[3] METHOD=testAddFeatureToConfigurationSetsConfigurationInvalidWhenMissingRequiredFeature FAILURE AT LINE 126
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToConfigurationSetsConfigurationInvalidWhenMissingRequiredFeature(ProductsConfigurationsServiceTest.java:126)
+CODE CONTEXT:
+   123:         arrangeCreateProduct(product);
+   124:         arrangeCreateConfiguration(product, config);
+   125:         arrangeAddRequiresConstraint(product, source, required);
+   126:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(500);  ← FAILURE HERE
+   127:     }
+   128: 
+   129:     @Test(timeout = 60000)
+
+[4] METHOD=testAddFeatureToConfigurationReturns201 FAILURE AT LINE 80
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToConfigurationReturns201(ProductsConfigurationsServiceTest.java:80)
+CODE CONTEXT:
+    77:         String feature = unique("feat");
+    78:         arrangeCreateProduct(product);
+    79:         arrangeCreateConfiguration(product, config);
+    80:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);  ← FAILURE HERE
+    81:     }
+    82: 
+    83:     @Test(timeout = 60000)
+
+[5] METHOD=testAddFeatureToConfigurationValidWhenRequirementsMet FAILURE AT LINE 138
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.arrangeAddFeatureToConfiguration(ProductsConfigurationsServiceTest.java:41)
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToConfigurationValidWhenRequirementsMet(ProductsConfigurationsServiceTest.java:138)
+CODE CONTEXT:
+   135:         arrangeCreateProduct(product);
+   136:         arrangeCreateConfiguration(product, config);
+   137:         arrangeAddRequiresConstraint(product, source, required);
+   138:         arrangeAddFeatureToConfiguration(product, config, required);  ← FAILURE HERE
+   139:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(201);
+   140:     }
+   141: }
+
+[6] METHOD=testGetConfigurationActivedFeaturesReturnsFeatureList FAILURE AT LINE 69
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.arrangeAddFeatureToConfiguration(ProductsConfigurationsServiceTest.java:41)
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testGetConfigurationActivedFeaturesReturnsFeatureList(ProductsConfigurationsServiceTest.java:69)
+CODE CONTEXT:
+    66:         String feature = unique("feat");
+    67:         arrangeCreateProduct(product);
+    68:         arrangeCreateConfiguration(product, config);
+    69:         arrangeAddFeatureToConfiguration(product, config, feature);  ← FAILURE HERE
+    70:         given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("", hasItem(feature));
+    71:     }
+    72: 
+
+[7] METHOD=testRemoveFeatureFromConfigurationSecondDeleteReturns500 FAILURE AT LINE 112
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.arrangeAddFeatureToConfiguration(ProductsConfigurationsServiceTest.java:41)
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testRemoveFeatureFromConfigurationSecondDeleteReturns500(ProductsConfigurationsServiceTest.java:112)
+CODE CONTEXT:
+   109:         String feature = unique("feat");
+   110:         arrangeCreateProduct(product);
+   111:         arrangeCreateConfiguration(product, config);
+   112:         arrangeAddFeatureToConfiguration(product, config, feature);  ← FAILURE HERE
+   113:         arrangeDeleteFeatureFromConfiguration(product, config, feature);
+   114:         given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+   115:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    private String unique(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString().replaceAll("[^a-zA-Z0-9\\-]", "").substring(0, 8);
+    }
+
+    private void arrangeCreateProduct(String productName) {
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    }
+
+    private void arrangeCreateConfiguration(String productName, String configurationName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    }
+
+    private void arrangeAddFeatureToConfiguration(String productName, String configurationName, String featureName) {
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+    }
+
+    private void arrangeDeleteFeatureFromConfiguration(String productName, String configurationName, String featureName) {
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+    }
+
+    private void arrangeAddRequiresConstraint(String productName, String sourceFeature, String requiredFeature) {
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProductReturns200() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        given().when().get("/products/{productName}/configurations", product).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesReturnsFeatureList() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String feature = unique("feat");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddFeatureToConfiguration(product, config, feature);
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config).then().body("", hasItem(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String feature = unique("feat");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationDuplicateReturns500() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String feature = unique("feat");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddFeatureToConfiguration(product, config, feature);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationReturns204() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String feature = unique("feat");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddFeatureToConfiguration(product, config, feature);
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationSecondDeleteReturns500() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String feature = unique("feat");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddFeatureToConfiguration(product, config, feature);
+        arrangeDeleteFeatureFromConfiguration(product, config, feature);
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSetsConfigurationInvalidWhenMissingRequiredFeature() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String source = unique("src");
+        String required = unique("req");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddRequiresConstraint(product, source, required);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationValidWhenRequirementsMet() {
+        String product = unique("prod");
+        String config = unique("cfg");
+        String source = unique("src");
+        String required = unique("req");
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, config);
+        arrangeAddRequiresConstraint(product, source, required);
+        arrangeAddFeatureToConfiguration(product, config, required);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(201);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,59 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getProperty("api.base");
+        if(env == null || env.isEmpty()){
+            env = System.getenv("API_BASE");
+        }
+        if(env == null || env.isEmpty()){
+            env = "http://localhost:8080";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_runtimeExceptionReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/10/5/1.2");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_paramTooLargeReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/1001/5/0.75");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_successReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/10/5/0.75");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_validInputsReturnsResult() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/5");
+        act.then().body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_outOfLimitsReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/10001/5");
+        act.then().statusCode(400);
+    }
+}

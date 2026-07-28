@@ -1,0 +1,189 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URI = "http://localhost:8080/rest";
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/alpha/1")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "XX,YY,ZZ")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "US|CA|MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/subregion/Western Europe")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_NotFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v1/lang/123")
+        .then()
+            .statusCode(404);
+    }
+}

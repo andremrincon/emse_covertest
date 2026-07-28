@@ -1,0 +1,135 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.NcsRestTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testFisherRuntimeException TYPE=FAILURE
+expected:<400> but was:<200>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testFisherRuntimeException FAILURE AT LINE 58
+java.lang.AssertionError: expected:<400> but was:<200>
+at ts01gpt_5_mini.NcsRestTest.testFisherRuntimeException(NcsRestTest.java:58)
+CODE CONTEXT:
+    55:     public void testFisherRuntimeException() {
+    56:         given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+    57:         Response act = given().when().get(BASE + "/api/fisher/1/1/1.2");
+    58:         assertEquals(400, act.getStatusCode());  ← FAILURE HERE
+    59:     }
+    60: 
+    61:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static io.restassured.RestAssured.given;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    private static final String BASE;
+    static {
+        String v = System.getProperty("API_BASE_URL");
+        if (v == null || v.isEmpty()) v = System.getenv("API_BASE_URL");
+        if (v == null || v.isEmpty()) v = "http://localhost:8080";
+        BASE = v;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjSuccess() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/bessj/3/2.5");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBadNLow() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/bessj/2/0.0000000001");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBadNHigh() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/bessj/1001/2.5");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccess() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/10/5/0.75");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMTooLarge() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/1001/5/0.75");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherRuntimeException() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/1/1/1.2");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqSuccess() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/gammq/5.5/2.3");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqRuntimeException() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/gammq/-1.0/2.0");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderSuccess() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/remainder/17/5");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderOutOfBounds() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/remainder/10001/5");
+        assertEquals(400, act.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,87 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    static {
+        RestAssured.baseURI = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsTrueBranchLine63() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "test")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsFalseBranchLine63() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIEquals5AndSEqualsBaab() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsILessThanMinus444() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "test")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIGreaterThan666() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "test")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsIEqualsMinus4() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+}

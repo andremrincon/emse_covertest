@@ -1,0 +1,117 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        given()
+            .pathParam("txt", "hello")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInnerLoopReverseCharMatchNotFull() {
+        given()
+            .pathParam("txt", "abccbx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstInnerLoopPatCharMatchNotFull() {
+        given()
+            .pathParam("txt", "cbaaxx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseAdjacent() {
+        given()
+            .pathParam("txt", "abccba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNonAdjacent() {
+        given()
+            .pathParam("txt", "abcXcba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatAdjacent() {
+        given()
+            .pathParam("txt", "cbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatNonAdjacent() {
+        given()
+            .pathParam("txt", "cbaXabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatchFound() {
+        given()
+            .pathParam("txt", "xxxxx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPartialMatchBothBranches() {
+        given()
+            .pathParam("txt", "abcaxx")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

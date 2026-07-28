@@ -1,0 +1,71 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getNameNotFoundReturnsResponseEntityStatus() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/name/123")
+        .then()
+            .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void getCapitalNotFoundReturnsResponseEntityMessage() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/capital/123")
+        .then()
+            .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void getRegionNotFoundReturnsStatusCode404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getNameInvalidReturnsStatusCode500() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/name/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getRegionInvalidReturnsStatusCode500() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/region/True")
+        .then()
+            .statusCode(500);
+    }
+}
+```

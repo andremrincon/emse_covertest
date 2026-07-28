@@ -1,0 +1,51 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testValidDayAndValidMonth() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        io.restassured.response.Response response = given()
+            .pathParam("dayname", "Wednesday")
+            .pathParam("monthname", "August")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndValidMonth() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        io.restassured.response.Response response = given()
+            .pathParam("dayname", "Superday")
+            .pathParam("monthname", "August")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndInvalidMonth() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        io.restassured.response.Response response = given()
+            .pathParam("dayname", "Wednesday")
+            .pathParam("monthname", "Movember")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}");
+
+        response.then().statusCode(200);
+    }
+}

@@ -1,0 +1,130 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.DateParseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testTuesdayMovember_returns500 TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testTuesdayMovember_returns500 FAILURE AT LINE 81
+java.lang.AssertionError:
+at ts01gpt_5_mini.DateParseTest.testTuesdayMovember_returns500(DateParseTest.java:81)
+CODE CONTEXT:
+    78:         given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+    79:         given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+    80:         given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+    81:         given().when().get("/api/dateparse/tuesday/Movember").then().statusCode(200);  ← FAILURE HERE
+    82:     }
+    83: }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testWedAug_returns9() {
+        given().when().get("/api/pat/TheQuickBrownFox").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/apr").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/jun").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Wed/Aug");
+        assertEquals("9", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testThurDec_returns13() {
+        given().when().get("/api/pat/alpha").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/oct").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/thur/Dec");
+        assertEquals("13", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTUEFeb_returns3() {
+        given().when().get("/api/pat/sample").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thu/oct").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/TUE/FEB");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSunNov_returns12() {
+        given().when().get("/api/pat/check").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/jul/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/aug/aug").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/sun/Nov");
+        assertEquals("12", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testWednesdayMar_noDayMatch_returns3() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/jun").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Wednesday/MAR");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTuesdayMovember_returns500() {
+        given().when().get("/api/pat/ready").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tuesday/Movember").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

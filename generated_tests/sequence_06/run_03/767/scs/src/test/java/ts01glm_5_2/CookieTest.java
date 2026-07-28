@@ -1,0 +1,79 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixAndLongValue() {
+        given()
+                .when()
+                .get("/api/cookie/userid/user1234/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongValueNotStartingWithUser() {
+        given()
+                .when()
+                .get("/api/cookie/userid/test1234/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValue() {
+        given()
+                .when()
+                .get("/api/cookie/userid/abc/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmAndAbcCom() {
+        given()
+                .when()
+                .get("/api/cookie/session/am/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmAndDifferentSite() {
+        given()
+                .when()
+                .get("/api/cookie/session/am/other.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNonUserIdNonSessionName() {
+        given()
+                .when()
+                .get("/api/cookie/other/test/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}

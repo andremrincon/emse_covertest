@@ -1,0 +1,87 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanOrEqualTo2() {
+        given()
+            .when()
+            .get("/api/pat/hello/ab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatNotFound() {
+        given()
+            .when()
+            .get("/api/pat/hello/xyz")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundOnly() {
+        given()
+            .when()
+            .get("/api/pat/helloworld/world")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundOnly() {
+        given()
+            .when()
+            .get("/api/pat/hellodlrow/world")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/worlddlrow/world")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/dlrowworld/world")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/worldXYZdlrow/world")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/dlrowXYZworld/world")
+            .then()
+            .statusCode(200);
+    }
+}

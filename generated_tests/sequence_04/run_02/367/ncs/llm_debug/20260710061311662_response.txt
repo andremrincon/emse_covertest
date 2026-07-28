@@ -1,0 +1,114 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nLessThan2_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nZero_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/0/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_xZero_returns200WithValue0() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/3/0")
+        .then()
+            .statusCode(200)
+            .body("value", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_axGreaterOrEqual8_positiveX_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/3/10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_axGreaterOrEqual8_negativeX_oddN_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_axGreaterOrEqual8_negativeX_evenN_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/4/-10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessOrEqualN_positiveX_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/5/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessOrEqualN_negativeX_oddN_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/5/-2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessOrEqualN_negativeX_evenN_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/bessj/4/-2.5")
+        .then()
+            .statusCode(200);
+    }
+}
+```

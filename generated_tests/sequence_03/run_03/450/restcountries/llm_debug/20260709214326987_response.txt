@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String base = env != null && !env.isEmpty() ? env : System.getProperty("base.url", "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaUS_returnsTranslationsDe() {
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(404).and().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaUS_returnsTranslationsEs() {
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(404).and().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaUS_returnsTranslationsFr() {
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(404).and().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaUS_returnsTranslationsJa() {
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(404).and().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaUS_returnsTranslationsIt() {
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(404).and().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+}

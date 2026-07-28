@@ -1,0 +1,446 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.util.UUID;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+public class ProductConfigurationTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setup() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static class SimpleResponse {
+        int status;
+        String body;
+        SimpleResponse(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private SimpleResponse sendRequest(String method, String pathTemplate, String[] pathParams, String body, String contentType) throws Exception {
+        String path = formatPath(pathTemplate, pathParams);
+        String urlStr = baseUri + path;
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(60000);
+        conn.setReadTimeout(60000);
+        if (body != null && contentType != null) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", contentType);
+            byte[] out = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+            OutputStream os = conn.getOutputStream();
+            os.write(out);
+            os.flush();
+            os.close();
+        }
+        int status = conn.getResponseCode();
+        InputStream is;
+        try {
+            if (status >= 400) {
+                is = conn.getErrorStream();
+            } else {
+                is = conn.getInputStream();
+            }
+        } catch (Exception e) {
+            is = conn.getErrorStream();
+        }
+        String respBody = "";
+        if (is != null) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            in.close();
+            respBody = sb.toString();
+        }
+        conn.disconnect();
+        return new SimpleResponse(status, respBody);
+    }
+
+    private String formatPath(String template, String[] params) throws Exception {
+        if (params == null || params.length == 0) return template;
+        StringBuilder sb = new StringBuilder();
+        int paramIndex = 0;
+        for (int i = 0; i < template.length(); ) {
+            int start = template.indexOf('{', i);
+            if (start == -1) {
+                sb.append(template.substring(i));
+                break;
+            }
+            int end = template.indexOf('}', start);
+            if (end == -1) {
+                sb.append(template.substring(i));
+                break;
+            }
+            sb.append(template.substring(i, start));
+            if (paramIndex < params.length) {
+                sb.append(URLEncoder.encode(params[paramIndex++], "UTF-8"));
+            } else {
+                sb.append(template.substring(start, end + 1));
+            }
+            i = end + 1;
+        }
+        return sb.toString();
+    }
+
+    private String formEncode(Map<String, String> map) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : map.entrySet()) {
+            if (!first) sb.append("&");
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+
+    private void assertStatusLessThan(SimpleResponse r, int value) {
+        Assert.assertTrue("Expected status < " + value + " but was " + r.status, r.status < value);
+    }
+
+    private void assertStatusEquals(SimpleResponse r, int expected) {
+        Assert.assertEquals(expected, r.status);
+    }
+
+    private void assertBodyHasItem(SimpleResponse r, String item) {
+        String marker = "\"" + item + "\"";
+        Assert.assertTrue("Response body did not contain item " + item + ". Body: " + r.body, r.body != null && r.body.contains(marker));
+    }
+
+    private void assertBodyNotHasItem(SimpleResponse r, String item) {
+        String marker = "\"" + item + "\"";
+        Assert.assertTrue("Response body contained item " + item + " but should not. Body: " + r.body, r.body == null || !r.body.contains(marker));
+    }
+
+    private void assertBodyArraySize(SimpleResponse r, int expectedSize) {
+        String b = r.body == null ? "" : r.body.trim();
+        if (!b.startsWith("[")) {
+            Assert.fail("Response body is not a JSON array: " + r.body);
+        }
+        int quotes = 0;
+        for (int i = 0; i < b.length(); i++) {
+            if (b.charAt(i) == '"') quotes++;
+        }
+        int size = quotes / 2;
+        Assert.assertEquals(expectedSize, size);
+    }
+
+    private void assertBodyFieldEquals(SimpleResponse r, String field, String expectedValue) {
+        String search = "\"" + field + "\"";
+        int idx = r.body == null ? -1 : r.body.indexOf(search);
+        if (idx == -1) {
+            Assert.fail("Field " + field + " not found in body: " + r.body);
+        }
+        int colon = r.body.indexOf(':', idx + search.length());
+        if (colon == -1) {
+            Assert.fail("No colon after field " + field + " in body: " + r.body);
+        }
+        int startQuote = r.body.indexOf('"', colon);
+        if (startQuote == -1) {
+            Assert.fail("No starting quote for field value of " + field + " in body: " + r.body);
+        }
+        int endQuote = r.body.indexOf('"', startQuote + 1);
+        if (endQuote == -1) {
+            Assert.fail("No ending quote for field value of " + field + " in body: " + r.body);
+        }
+        String value = r.body.substring(startQuote + 1, endQuote);
+        Assert.assertEquals(expectedValue, value);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfigurationCoversSetValid() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r2, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationCoversGetProductAndAvailableFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r2, 300);
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r3, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithProductFeaturesCoversCollectFeatureNames() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+
+        SimpleResponse r4 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r4, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActivedFeaturesCoversActivedFeaturesMethod() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r2, 300);
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r3, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversActiveString() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusEquals(r4, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationCoversDeactiveString() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusLessThan(r4, 300);
+
+        SimpleResponse r5 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusEquals(r5, 204);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureTrueAfterAdd() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusLessThan(r4, 300);
+
+        SimpleResponse r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r5, 200);
+        assertBodyHasItem(r5, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureFalseAfterDelete() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusLessThan(r4, 300);
+        SimpleResponse r5 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusLessThan(r5, 300);
+
+        SimpleResponse r6 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r6, 200);
+        assertBodyNotHasItem(r6, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveFeatureAlreadyActiveCoversActiveFeatureAdd() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusLessThan(r4, 300);
+
+        SimpleResponse r5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusEquals(r5, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureNotActiveCoversDeactiveFeatureRemove() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r3, 300);
+
+        SimpleResponse r4 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null, null);
+        assertStatusEquals(r4, 204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithMultipleProductFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature1 }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature2 }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r4, 300);
+
+        SimpleResponse r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r5, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsListForProduct() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r2, 300);
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations", new String[] { productName }, null, null);
+        assertStatusEquals(r3, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidFalseViaExcludesConstraint() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature1 }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature2 }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r4, 300);
+        SimpleResponse r5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, feature1 }, null, null);
+        assertStatusLessThan(r5, 300);
+        SimpleResponse r6 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, feature2 }, null, null);
+        assertStatusLessThan(r6, 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", feature1);
+        form.put("excludedFeature", feature2);
+        String formBody = formEncode(form);
+        SimpleResponse r7 = sendRequest("POST", "/products/{productName}/constraints/excludes", new String[] { productName }, formBody, "application/x-www-form-urlencoded");
+        assertStatusLessThan(r7, 300);
+
+        SimpleResponse r8 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r8, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesWithMultipleActiveFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature1 }, null, null);
+        assertStatusLessThan(r2, 300);
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, feature2 }, null, null);
+        assertStatusLessThan(r3, 300);
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r4, 300);
+        SimpleResponse r5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, feature1 }, null, null);
+        assertStatusLessThan(r5, 300);
+        SimpleResponse r6 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, feature2 }, null, null);
+        assertStatusLessThan(r6, 300);
+
+        SimpleResponse r7 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r7, 200);
+        assertBodyArraySize(r7, 2);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationReturnsProductInfo() throws Exception {
+        String productName = "prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null, null);
+        assertStatusLessThan(r1, 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusLessThan(r2, 300);
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null, null);
+        assertStatusEquals(r3, 200);
+        assertBodyFieldEquals(r3, "name", configName);
+    }
+}

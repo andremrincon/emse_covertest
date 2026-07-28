@@ -1,0 +1,76 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) env = "http://localhost:8080/rest";
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_TwoLetter_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_InvalidFormat_BadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_MalformedArray_ServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v1/alpha");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_NameExactMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "true").when().get("/v1/name/Germany");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_AlternativeSpellingMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "true").when().get("/v1/name/DE");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_PipeSeparated_ServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US|CA|MX").when().get("/v1/alpha");
+        resp.then().statusCode(500);
+    }
+}

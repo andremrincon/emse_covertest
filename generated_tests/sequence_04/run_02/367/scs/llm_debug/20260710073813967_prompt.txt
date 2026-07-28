@@ -1,0 +1,171 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CalcTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSqrtAndLogUnaryOperators TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a string containing "0.9999999999999999"
+  Actual: 1.0
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSqrtAndLogUnaryOperators FAILURE AT LINE 54
+java.lang.AssertionError:
+at ts01glm_5_2.CalcTest.testSqrtAndLogUnaryOperators(CalcTest.java:54)
+CODE CONTEXT:
+    51:                 .get("/api/calc/log/2.718281828459045/0")
+    52:             .then()
+    53:                 .statusCode(200)
+    54:                 .body(containsString("0.9999999999999999"));  ← FAILURE HERE
+    55:     }
+    56: 
+    57:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200)
+                .body(containsString("3.141592653589793"));
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/e/0/0")
+            .then()
+                .statusCode(200)
+                .body(containsString("2.718281828459045"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtAndLogUnaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/sqrt/16/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4.0"));
+
+        given()
+            .when()
+                .get("/api/calc/log/2.718281828459045/0")
+            .then()
+                .statusCode(200)
+                .body(containsString("0.9999999999999999"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTrigonometricOperators() {
+        given()
+            .when()
+                .get("/api/calc/sine/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+
+        given()
+            .when()
+                .get("/api/calc/cosine/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1.0"));
+
+        given()
+            .when()
+                .get("/api/calc/tangent/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/plus/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("20.0"));
+
+        given()
+            .when()
+                .get("/api/calc/subtract/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("11.0"));
+
+        given()
+            .when()
+                .get("/api/calc/multiply/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("69.75"));
+
+        given()
+            .when()
+                .get("/api/calc/divide/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(containsString("3.4444444444444446"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorReturnsDefault() {
+        given()
+            .when()
+                .get("/api/calc/unknown/10/5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

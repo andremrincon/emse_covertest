@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        RestAssured.baseURI = base != null ? base : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleAllowedTitle() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "male", "mr");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleAllowedTitle() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "female", "miss");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneAllowedTitle() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "none", "dr");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleDisallowedTitleReturnsServerError() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "male", "mrs");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexReturnsServerError() {
+        given().when().get("/api/pat/{txt}", UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "unknown", "dr");
+        resp.then().statusCode(500);
+    }
+}

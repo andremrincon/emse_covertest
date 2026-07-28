@@ -1,0 +1,119 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validResult_returns201() {
+        String uuid = java.util.UUID.randomUUID().toString();
+        String productName = "test-prod-" + uuid;
+        String featureName = "test-feat-" + uuid;
+        String configurationName = "test-cfg-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_invalidResult_returns400() {
+        String uuid = java.util.UUID.randomUUID().toString();
+        String productName = "test-prod-" + uuid;
+        String featureA = "feat-a-" + uuid;
+        String featureB = "feat-b-" + uuid;
+        String configurationName = "test-cfg-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_validResult_returns204() {
+        String uuid = java.util.UUID.randomUUID().toString();
+        String productName = "test-prod-" + uuid;
+        String featureName = "test-feat-" + uuid;
+        String configurationName = "test-cfg-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_invalidResult_returns400() {
+        String uuid = java.util.UUID.randomUUID().toString();
+        String productName = "test-prod-" + uuid;
+        String featureA = "feat-a-" + uuid;
+        String featureB = "feat-b-" + uuid;
+        String configurationName = "test-cfg-" + uuid;
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then()
+            .statusCode(400);
+    }
+}
+```

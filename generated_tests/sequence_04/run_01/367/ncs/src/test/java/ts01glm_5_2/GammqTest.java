@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZeroPath() {
+        given()
+            .when()
+                .get("/api/gammq/0.001/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalPath() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfSmallALargeXPath() {
+        given()
+            .when()
+                .get("/api/gammq/0.001/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAThrowsException() {
+        given()
+            .when()
+                .get("/api/gammq/-1.0/2.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidXThrowsException() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/-1.0")
+            .then()
+                .statusCode(400);
+    }
+}

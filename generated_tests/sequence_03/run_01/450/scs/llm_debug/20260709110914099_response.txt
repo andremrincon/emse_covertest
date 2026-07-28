@@ -1,0 +1,73 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleProf() {
+        given()
+            .when()
+            .get("/api/title/male/prof")
+            .then()
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleSmith() {
+        given()
+            .when()
+            .get("/api/title/male/Smith")
+            .then()
+            .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleProf() {
+        given()
+            .when()
+            .get("/api/title/female/prof")
+            .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleSmith() {
+        given()
+            .when()
+            .get("/api/title/female/Smith")
+            .then()
+            .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneProf() {
+        given()
+            .when()
+            .get("/api/title/none/prof")
+            .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneSmith() {
+        given()
+            .when()
+            .get("/api/title/none/Smith")
+            .then()
+            .body(equalTo("-1"));
+    }
+}
+```

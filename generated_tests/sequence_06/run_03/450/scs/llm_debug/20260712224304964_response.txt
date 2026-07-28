@@ -1,0 +1,72 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testMaleWithMatchingTitleMr() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/male/mr");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithNonMatchingTitleMs() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/male/ms");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithMatchingTitleMrs() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/female/mrs");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithNonMatchingTitleMr() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/female/mr");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithMatchingTitleDr() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/none/dr");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithNonMatchingTitleMr() {
+        Response response = given()
+            .basePath(BASE_URL)
+        .when()
+            .get("/api/title/none/mr");
+
+        response.then().statusCode(200);
+    }
+}
+```

@@ -1,0 +1,162 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class CORSFilterTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl");
+        if (base != null && !base.isEmpty()) {
+            baseUrl = base;
+        } else {
+            baseUrl = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validResult_returns201() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int r1 = sendRequest("POST", "/products/" + productName, null);
+        Assert.assertTrue(r1 < 300);
+
+        int r2 = sendRequest("POST", "/products/" + productName + "/features/" + featureName, null);
+        Assert.assertTrue(r2 < 300);
+
+        int r3 = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null);
+        Assert.assertTrue(r3 < 300);
+
+        int r4 = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null);
+        Assert.assertEquals(201, r4);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_invalidResult_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", featureA);
+        params.put("excludedFeature", featureB);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/constraints/excludes", params) < 300);
+
+        int r = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null);
+        Assert.assertEquals(400, r);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_validResult_returns204() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null) < 300);
+
+        int r = sendRequest("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null);
+        Assert.assertEquals(204, r);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_invalidResult_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", featureA);
+        params.put("requiredFeature", featureB);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/constraints/requires", params) < 300);
+
+        int r = sendRequest("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null);
+        Assert.assertEquals(400, r);
+    }
+
+    private int sendRequest(String method, String path, Map<String, String> formParams) throws Exception {
+        String full = baseUrl + path;
+        URL url = new URL(full);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(15000);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            if (formParams != null && !formParams.isEmpty()) {
+                String body = buildForm(formParams);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    try {
+                        os.close();
+                    } catch (Exception e) {
+                    }
+                }
+            } else {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Length", "0");
+            }
+        }
+        conn.connect();
+        int code;
+        try {
+            code = conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+        return code;
+    }
+
+    private String buildForm(Map<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+}

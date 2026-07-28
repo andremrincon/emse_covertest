@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RegexTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+
+
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "ab")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundButPatRevNotFound() {
+
+
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "abcXYZ")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundButPatNotFound() {
+
+
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "cbaXYZ")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundImmediatelyFollowedByPat() {
+
+
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "cbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundFollowedByPatWithGap() {
+
+
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "cbaXYZabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}

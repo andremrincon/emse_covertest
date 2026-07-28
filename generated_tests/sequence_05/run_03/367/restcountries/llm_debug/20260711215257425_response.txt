@@ -1,0 +1,105 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.defaultParser = Parser.JSON;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencyCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencyName() {
+        given()
+            .when()
+                .get("/v1/alpha/GB")
+            .then()
+                .body("currencies[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencySymbol() {
+        given()
+            .when()
+                .get("/v1/alpha/FR")
+            .then()
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyCode() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .body("[0].currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsCurrencyName() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .body("[0].currencies[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsCurrencySymbol() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaReturnsCurrencyCode() {
+        given()
+            .queryParam("fields", "name;currencies")
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyReturnsCurrencyName() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .body("[0].currencies[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencySymbol() {
+        given()
+            .queryParam("fields", "name;capital;currencies")
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+}

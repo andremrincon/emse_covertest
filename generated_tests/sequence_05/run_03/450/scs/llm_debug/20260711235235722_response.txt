@@ -1,0 +1,54 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayAndMonth() {
+        given()
+            .pathParam("dayname", "wed")
+            .pathParam("monthname", "aug")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayAndMonth() {
+        given()
+            .pathParam("dayname", "invalid")
+            .pathParam("monthname", "invalid")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayInvalidMonth() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "xyz")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(500);
+    }
+}
+```

@@ -1,0 +1,66 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanThree() {
+        given().when().get("/api/pat/abcdef/ab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given().when().get("/api/pat/abcXYZ/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfter() {
+        given().when().get("/api/pat/abccba/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLater() {
+        given().when().get("/api/pat/abcXYZcba/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfter() {
+        given().when().get("/api/pat/cbaabc/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLater() {
+        given().when().get("/api/pat/cbaXYZabc/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPatAfter() {
+        given().when().get("/api/pat/cbaXYZ/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given().when().get("/api/pat/XYZXYZ/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given().when().get("/api/pat/ab/abcdef").then().statusCode(200);
+    }
+}
+```

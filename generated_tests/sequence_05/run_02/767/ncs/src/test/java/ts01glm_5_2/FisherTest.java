@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv("API_HOST");
+        if (host == null || host.isEmpty()) {
+            host = "localhost";
+        }
+        String port = System.getenv("API_PORT");
+        if (port == null || port.isEmpty()) {
+            port = "8080";
+        }
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBOdd() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBOddWithJLoop() {
+        given()
+            .when()
+                .get("/api/fisher/1/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBOdd() {
+        given()
+            .when()
+                .get("/api/fisher/10/1/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBEven() {
+        given()
+            .when()
+                .get("/api/fisher/10/2/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBEven() {
+        given()
+            .when()
+                .get("/api/fisher/1/2/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidParameter() {
+        given()
+            .when()
+                .get("/api/fisher/abc/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,193 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uid() {
+        return "t" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    }
+
+    @Test(timeout = 60000)
+    public void createConfigurationCoversSetValidAndSetProduct() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesWhenEmptyCoversActivedFeaturesAndCollectFeatureNamesEmpty() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationCoversActiveStringAndActiveFeature() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesAfterAddingCoversActivedFeaturesWithFeaturesAndCollectFeatureNames() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationCoversDeactiveStringAndDeactiveFeature() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesAfterDeletionCoversActivedFeaturesAfterRemoval() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(not(hasItem(featureName)));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsCoversGetProductAndHasActiveFeatureFalse() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsWithActiveFeatureCoversHasActiveFeatureTrue() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addMultipleFeaturesCoversCollectFeatureNamesLoopWithMultipleFeatures() {
+        String productName = uid();
+        String configName = uid();
+        String feature1 = uid();
+        String feature2 = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200).body(hasItems(feature1, feature2));
+    }
+
+    @Test(timeout = 60000)
+    public void availableFeaturesWithProductFeaturesCoversAvailableFeaturesMethod() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addSameFeatureTwiceCoversActiveWhenAlreadyActive() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteNonExistentFeatureCoversDeactiveWhenNotInSet() {
+        String productName = uid();
+        String configName = uid();
+        String featureName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsListForProductCoversGetProductViaList() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintAndConflictingFeaturesCoversSetValidFalse() {
+        String productName = uid();
+        String configName = uid();
+        String feature1 = uid();
+        String feature2 = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", feature1).formParam("excludedFeature", feature2).when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(lessThan(300));
+        given().when().get("/products/" + productName + "/configurations/" + configName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConfigurationCoversSetValidFalseOnDeletion() {
+        String productName = uid();
+        String configName = uid();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + productName + "/configurations/" + configName).then().statusCode(204);
+    }
+}
+```

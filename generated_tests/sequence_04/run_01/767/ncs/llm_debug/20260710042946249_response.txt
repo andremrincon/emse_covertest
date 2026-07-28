@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class RemainderTest {
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void init() {
+        String b = System.getProperty("api.base");
+        if (b == null || b.isEmpty()) b = System.getenv("API_BASE_URL");
+        if (b == null || b.isEmpty()) b = "http://localhost:8080";
+        baseUrl = b;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositivePositive_remainderResult2() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", 17, 5);
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveNegative_remainderResult8() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", 17, -9);
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativePositive_remainderResultMinus1() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", -9, 4);
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeNegative_remainderResult2() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", -17, -5);
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBZero_badRequest() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", 3, 0);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAZero_badRequest() {
+        given().when().get(baseUrl + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/api/remainder/{a}/{b}", 0, 5);
+        resp.then().statusCode(200);
+    }
+}

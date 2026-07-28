@@ -1,0 +1,47 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("base.url", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageIso639_1() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageIso639_2() {
+        given()
+            .pathParam("lang", "eng")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc() {
+        given()
+            .pathParam("regionalbloc", "EU")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(404);
+    }
+}

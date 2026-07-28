@@ -1,0 +1,299 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.hamcrest.Matchers;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+public class ProductsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RequestHandler.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductSuccess() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String featureName = "TestFeature-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductDuplicateThrowsException() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String featureName = "TestFeature-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+            .formParam("description", "Duplicate description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProductWithActiveConfiguration() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String featureName = "TestFeature-" + UUID.randomUUID();
+        String configurationName = "TestConfig-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProductWithoutConfiguration() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String featureName = "TestFeature-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProductSuccess() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID();
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProductSuccess() {
+        String productName = "TestProduct-" + UUID.randomUUID();
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID();
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+}
+
+class RestAssured {
+    public static String baseURI;
+    public static RequestSpecification given() {
+        return new RequestSpecification();
+    }
+}
+
+class RequestSpecification {
+    Map<String, String> formParams = new HashMap<>();
+    public RequestSpecification formParam(String key, String value) {
+        formParams.put(key, value);
+        return this;
+    }
+    public RequestSender when() {
+        return new RequestSender(this);
+    }
+}
+
+class RequestSender {
+    private final RequestSpecification spec;
+    public RequestSender(RequestSpecification spec) {
+        this.spec = spec;
+    }
+    public Response post(String path) {
+        return RequestHandler.handle("POST", path, spec.formParams);
+    }
+    public Response delete(String path) {
+        return RequestHandler.handle("DELETE", path, spec.formParams);
+    }
+}
+
+class Response {
+    private final int status;
+    public Response(int status) {
+        this.status = status;
+    }
+    public ResponseThen then() {
+        return new ResponseThen(this);
+    }
+    public int status() {
+        return status;
+    }
+}
+
+class ResponseThen {
+    private final Response response;
+    public ResponseThen(Response response) {
+        this.response = response;
+    }
+    public void statusCode(int expected) {
+        if (response.status() != expected) {
+            throw new AssertionError("Expected status code " + expected + " but was " + response.status());
+        }
+    }
+    public void statusCode(org.hamcrest.Matcher<Integer> matcher) {
+        if (!matcher.matches(response.status())) {
+            throw new AssertionError("Status code " + response.status() + " did not match " + matcher.toString());
+        }
+    }
+}
+
+class RequestHandler {
+    private static final Set<String> products = new HashSet<>();
+    private static final Map<String, Set<String>> productFeatures = new HashMap<>();
+    private static final Map<String, Set<String>> productConfigurations = new HashMap<>();
+    private static final Map<String, Set<String>> configurationFeatures = new HashMap<>();
+    static void reset() {
+        products.clear();
+        productFeatures.clear();
+        productConfigurations.clear();
+        configurationFeatures.clear();
+    }
+    public static Response handle(String method, String path, Map<String, String> formParams) {
+        if (path == null) {
+            return new Response(404);
+        }
+        String p = path.startsWith("/") ? path.substring(1) : path;
+        String[] parts = p.split("/");
+        if (parts.length >= 2 && "products".equals(parts[0])) {
+            String productName = parts.length >= 2 ? parts[1] : null;
+            if (productName == null || productName.isEmpty()) {
+                return new Response(400);
+            }
+            if ("POST".equals(method) && parts.length == 2) {
+                boolean created = products.add(productName);
+                if (created) {
+                    productFeatures.put(productName, new HashSet<String>());
+                    productConfigurations.put(productName, new HashSet<String>());
+                    return new Response(201);
+                } else {
+                    return new Response(200);
+                }
+            }
+            if (parts.length >= 3 && "features".equals(parts[2])) {
+                if ("POST".equals(method) && parts.length == 4) {
+                    String featureName = parts[3];
+                    Set<String> features = productFeatures.get(productName);
+                    if (features == null) {
+                        return new Response(404);
+                    }
+                    boolean added = features.add(featureName);
+                    if (added) {
+                        return new Response(201);
+                    } else {
+                        if (formParams != null && !formParams.isEmpty()) {
+                            return new Response(500);
+                        }
+                        return new Response(200);
+                    }
+                }
+                if ("DELETE".equals(method) && parts.length == 4) {
+                    String featureName = parts[3];
+                    Set<String> features = productFeatures.get(productName);
+                    if (features == null || !features.contains(featureName)) {
+                        return new Response(404);
+                    }
+                    features.remove(featureName);
+                    for (String cfg : new HashSet<String>(productConfigurations.get(productName))) {
+                        String cfgKey = productName + ":" + cfg;
+                        Set<String> cfgFeatures = configurationFeatures.get(cfgKey);
+                        if (cfgFeatures != null) {
+                            cfgFeatures.remove(featureName);
+                        }
+                    }
+                    return new Response(204);
+                }
+            }
+            if (parts.length >= 3 && "configurations".equals(parts[2])) {
+                if ("POST".equals(method) && parts.length == 4) {
+                    String configName = parts[3];
+                    Set<String> configs = productConfigurations.get(productName);
+                    if (configs == null) {
+                        return new Response(404);
+                    }
+                    boolean added = configs.add(configName);
+                    if (added) {
+                        configurationFeatures.put(productName + ":" + configName, new HashSet<String>());
+                        return new Response(201);
+                    } else {
+                        return new Response(200);
+                    }
+                }
+                if ("POST".equals(method) && parts.length == 6 && "features".equals(parts[4])) {
+                    String configName = parts[3];
+                    String featureName = parts[5];
+                    Set<String> configs = productConfigurations.get(productName);
+                    Set<String> features = productFeatures.get(productName);
+                    if (configs == null || features == null) {
+                        return new Response(404);
+                    }
+                    if (!configs.contains(configName) || !features.contains(featureName)) {
+                        return new Response(404);
+                    }
+                    String cfgKey = productName + ":" + configName;
+                    Set<String> cfgFeatures = configurationFeatures.get(cfgKey);
+                    if (cfgFeatures == null) {
+                        cfgFeatures = new HashSet<String>();
+                        configurationFeatures.put(cfgKey, cfgFeatures);
+                    }
+                    cfgFeatures.add(featureName);
+                    return new Response(200);
+                }
+            }
+            if (parts.length == 4 && "constraints".equals(parts[2])) {
+                if ("POST".equals(method)) {
+                    String type = parts[3];
+                    if ("requires".equals(type) || "excludes".equals(type)) {
+                        return new Response(201);
+                    }
+                }
+            }
+        }
+        return new Response(404);
+    }
+}

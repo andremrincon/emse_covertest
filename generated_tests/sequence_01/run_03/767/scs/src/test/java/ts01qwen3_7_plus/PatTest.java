@@ -1,0 +1,114 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        String txt = "ABAB";
+        String pat = "AB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseNotFound() {
+        String txt = "ABABC";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseFoundAdjacent() {
+        String txt = "ABABBABA";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseFoundNotAdjacent() {
+        String txt = "ABABCBABA";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatternFoundPatternNotFound() {
+        String txt = "CBABA";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatternFoundPatternFoundAdjacent() {
+        String txt = "BABAABAB";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatternFoundPatternFoundNotAdjacent() {
+        String txt = "BABACABAB";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatternNorReverseFound() {
+        String txt = "XYZ";
+        String pat = "ABAB";
+
+        Response response = given()
+                .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat);
+
+        response.then().statusCode(200);
+    }
+}

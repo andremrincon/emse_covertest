@@ -1,0 +1,132 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_03/run_02/767/features-service/src/test/java/ts01gpt_5_mini/CORSFilterTest.java:[84,53] incompatible types: java.nio.charset.Charset cannot be converted to java.lang.String
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintTypeAppearsInProductRepresentation() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String source = "source-" + UUID.randomUUID().toString();
+        String required = "required-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", source).formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        when().get("/products/{productName}", product).then().body(containsString("\"type\":\"requires\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateAddsDerivedFeatureWhenSourceActive() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String source = "src-" + UUID.randomUUID().toString();
+        String required = "req-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", source).formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, source)
+                .then().statusCode(lessThan(300));
+        when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration).then().body("$", hasItem(required));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateDoesNotAddWhenSourceInactive() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String source = "src-" + UUID.randomUUID().toString();
+        String required = "req-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", source).formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration).then().body("$", not(hasItem(required)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateNoDuplicationWhenRequiredAlreadyActive() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String source = "src-" + UUID.randomUUID().toString();
+        String required = "req-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, required).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", source).formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration).then().body("$", hasItem(required));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "desc")
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(201);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

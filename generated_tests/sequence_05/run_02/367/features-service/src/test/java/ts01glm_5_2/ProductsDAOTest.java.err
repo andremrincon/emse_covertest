@@ -1,0 +1,49 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+public class ProductsDAOTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        baseUrl = url;
+    }
+
+    private static String resolvePath(String template, Object... params) {
+        Pattern p = Pattern.compile("\\{[^}]+\\}");
+        Matcher m = p.matcher(template);
+        StringBuffer sb = new StringBuffer();
+        int i = 0;
+        while (m.find()) {
+            String replacement = "";
+            if (i < params.length && params[i] != null) {
+                replacement = params[i].toString();
+            }
+            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            i++;
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }

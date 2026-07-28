@@ -1,0 +1,141 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNormalCase() {
+        given()
+            .when()
+                .get("/api/bessj/{n}/{x}", 3, 2.5)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjSmallX() {
+        given()
+            .when()
+                .get("/api/bessj/{n}/{x}", 3, 1e-10)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNTooSmall() {
+        given()
+            .when()
+                .get("/api/bessj/{n}/{x}", 2, 2.5)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNTooLarge() {
+        given()
+            .when()
+                .get("/api/bessj/{n}/{x}", 1001, 2.5)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNormalCase() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEdgeCase() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 1, 1, 0.0)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMTooLarge() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 1001, 5, 0.75)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNTooLarge() {
+        given()
+            .when()
+                .get("/api/fisher/{m}/{n}/{x}", 10, 1001, 0.75)
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqNormalCase() {
+        given()
+            .when()
+                .get("/api/gammq/{a}/{x}", 5.5, 2.3)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqEdgeCase() {
+        given()
+            .when()
+                .get("/api/gammq/{a}/{x}", 0.001, 1000.0)
+            .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNormalCase() {
+        given()
+            .when()
+                .get("/api/remainder/{a}/{b}", 17, 5)
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", is(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeDividend() {
+        given()
+            .when()
+                .get("/api/remainder/{a}/{b}", -9, 4)
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", notNullValue());
+    }
+}

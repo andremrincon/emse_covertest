@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    private static final String BASE = System.getProperty("API_BASE", System.getenv().containsKey("API_BASE") ? System.getenv("API_BASE") : "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV1All_GET() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all").andReturn();
+        act.then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowMethodsHeaderOnV1Alpha_GET() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US").andReturn();
+        act.then().header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowHeadersHeaderOnV1AlphaCodesQuery_GET() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha").andReturn();
+        act.then().header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV2All_GET() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/all").andReturn();
+        act.then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaEndpointReturns400ForInvalidCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123").andReturn();
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnRootPostMethod() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().contentType("application/json").body("{\"dummy\":\"value\"}").when().post("/").andReturn();
+        act.then().header("Access-Control-Allow-Origin", "*");
+    }
+}

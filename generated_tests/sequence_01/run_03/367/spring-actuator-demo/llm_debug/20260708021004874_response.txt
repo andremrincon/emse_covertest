@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setUpClass() {
+        String base = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithSpecialNameReturnsExpectedBody() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("name", "María-José O'Connor-Smith III").when().get("/");
+        assertEquals("Hello María-José O'Connor-Smith III!!", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithZeroDelayEntersRandomBranchAndReturnsResultBody() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", 0).when().get("/slowApi");
+        assertEquals("Result", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithPositiveDelayReturns200Status() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", 1).when().get("/slowApi");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNegativeDelayReturnsServerError500() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", -1).when().get("/slowApi");
+        assertEquals(500, act.getStatusCode());
+    }
+}

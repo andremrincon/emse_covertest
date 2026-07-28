@@ -1,0 +1,151 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CountryServiceBaseTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_2CharCode_Found() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_3CharCode_Found() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_NotFound_ReturnsNull() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_NullCodeList() {
+        given()
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_DuplicateCodes_ContainsCheck() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_MultipleCodes() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;CA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_NameMatch() {
+        given()
+            .when()
+                .get("/v1/name/France?fullText=true")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_AltSpellingMatch() {
+        given()
+            .when()
+                .get("/v1/name/French%20Republic?fullText=true")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_NameMatch() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_AltSpellingMatch() {
+        given()
+            .when()
+                .get("/v1/name/Republic")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_TriggerLoad() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void v2_getByAlpha_NotFound() {
+        given()
+            .when()
+                .get("/v2/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2_getByCodeList_DuplicateCodes() {
+        given()
+            .when()
+                .get("/v2/alpha?codes=US;US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void v2_fulltextSearch_AltSpelling() {
+        given()
+            .when()
+                .get("/v2/name/French%20Republic?fullText=true")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void v2_substringSearch_AltSpelling() {
+        given()
+            .when()
+                .get("/v2/name/Republic")
+            .then()
+                .statusCode(200);
+    }
+}

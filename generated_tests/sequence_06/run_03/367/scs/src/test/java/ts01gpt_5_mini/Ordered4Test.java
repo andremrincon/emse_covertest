@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import java.util.UUID;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_increasing_order_returns_increasing() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "aaaaa", "bbbbb", "ddddd", "ccccc")
+               .then().statusCode(lessThan(300)).and().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_decreasing_order_returns_decreasing() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "eeeee", "ddddd", "bbbbb", "ccccc")
+               .then().statusCode(lessThan(300)).and().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_length_violation_returns_unordered() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "abcd", "bbbbb", "ddddd", "ccccc")
+               .then().statusCode(lessThan(300)).and().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_within_length_but_no_order_returns_unordered() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "zebra", "yakyy", "xrayy", "wolfy")
+               .then().statusCode(lessThan(300)).and().body(equalTo("unordered"));
+    }
+}

@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIso6391_in_v1_alpha_US_bodyCheck() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIso6392_in_v1_alpha_US_bodyCheck() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testName_in_v1_alpha_US_bodyCheck() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNativeName_in_v1_alpha_US_bodyCheck() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/lang/es");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_US_status200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US");
+        act.then().statusCode(200);
+    }
+}

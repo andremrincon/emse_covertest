@@ -1,0 +1,84 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengths() {
+        given()
+            .pathParam("w", "a")
+            .pathParam("x", "b")
+            .pathParam("z", "c")
+            .pathParam("y", "d")
+            .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidLengthsUnordered() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "aaaaa")
+            .pathParam("y", "bbbbb")
+            .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "berry")
+            .pathParam("z", "dates")
+            .pathParam("y", "cherry")
+            .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .pathParam("w", "zebra")
+            .pathParam("x", "yak__")
+            .pathParam("z", "wagon")
+            .pathParam("y", "x_ray")
+            .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testServerError() {
+        given()
+            .pathParam("w", "apple")
+            .pathParam("x", "banana")
+            .pathParam("z", "cherry")
+            .pathParam("y", " ")
+            .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+                .statusCode(500);
+    }
+}

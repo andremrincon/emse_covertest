@@ -1,0 +1,190 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[21,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[30,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[40,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[49,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[58,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[67,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[76,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[85,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_02/767/ncs/src/test/java/ts01glm_5_2/BessjTest.java:[94,9] cannot find symbol
+symbol:   method given()
+location: class ts01glm_5_2.BessjTest
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjValidN3X2_5() {
+        given()
+                .when()
+                .get("/api/bessj/3/2.5")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBoundaryN1000() {
+        given()
+                .when()
+                .get("/api/bessj/1000/1.0")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidN2() {
+        given()
+                .when()
+                .get("/api/bessj/2/2.5")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidN1001() {
+        given()
+                .when()
+                .get("/api/bessj/1001/2.5")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValidM10N5X0_75() {
+        given()
+                .when()
+                .get("/api/fisher/10/5/0.75")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValidM1N1X0() {
+        given()
+                .when()
+                .get("/api/fisher/1/1/0.0")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidM1001() {
+        given()
+                .when()
+                .get("/api/fisher/1001/5/0.75")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidN1001() {
+        given()
+                .when()
+                .get("/api/fisher/10/1001/0.75")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqValidA5_5X2_3() {
+        given()
+                .when()
+                .get("/api/gammq/5.5/2.3")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqValidA0_001X1000() {
+        given()
+                .when()
+                .get("/api/gammq/0.001/1000.0")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValidA17B5() {
+        given()
+                .when()
+                .get("/api/remainder/17/5")
+                .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValidNegativeA_Negative9B4() {
+        given()
+                .when()
+                .get("/api/remainder/-9/4")
+                .then()
+                .statusCode(200)
+                .body("resultAsInt", notNullValue());
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

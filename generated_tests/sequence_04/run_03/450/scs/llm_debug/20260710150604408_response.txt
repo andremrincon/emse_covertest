@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void test_iEquals5_with_s_abab_returns_6() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_iEqualsMinus4_with_s_abab_returns_0() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_iLessThanMinus444_with_s_baab_returns_10() {
+        given().when().get("/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -1000, "baab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_iEqualsMinus333_with_s_abab_returns_6() {
+        given().when().get("/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -333, "abab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_compareTo_equals_zero_path_with_s_ababba_returns_10() {
+        given().when().get("/api/pat/{txt}", "status").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 0, "ababba");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+}

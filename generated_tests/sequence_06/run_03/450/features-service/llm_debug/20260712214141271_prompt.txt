@@ -1,0 +1,333 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductConfigurationTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetValidTrueAfterFixingExcludesConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[2] METHOD=testActivedFeaturesContainsActivatedFeature TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a collection containing "f-63a02963"
+  Actual: ["f-63a02963"]
+
+[3] METHOD=testSetValidFalseViaExcludesConstraintViolation TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=testCollectFeatureNamesEmptySet TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: an empty collection
+  Actual: []
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetValidTrueAfterFixingExcludesConstraint FAILURE AT LINE 132
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testSetValidTrueAfterFixingExcludesConstraint(ProductConfigurationTest.java:132)
+CODE CONTEXT:
+   129:         given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+   130:         given().contentType(ContentType.URLENC).formParam("sourceFeature", f1).formParam("excludedFeature", f2).when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+   131:         given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f1).then().statusCode(lessThan(300));
+   132:         given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(lessThan(300));  ← FAILURE HERE
+   133: 
+   134:         given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(204);
+   135:     }
+
+[2] METHOD=testActivedFeaturesContainsActivatedFeature FAILURE AT LINE 75
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testActivedFeaturesContainsActivatedFeature(ProductConfigurationTest.java:75)
+CODE CONTEXT:
+    72:         given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+    73:         given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+    74: 
+    75:         given().when().get("/products/" + product + "/configurations/" + config + "/features").then().body(hasItem(feature));  ← FAILURE HERE
+    76:     }
+    77: 
+    78:     @Test(timeout = 60000)
+
+[3] METHOD=testSetValidFalseViaExcludesConstraintViolation FAILURE AT LINE 101
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testSetValidFalseViaExcludesConstraintViolation(ProductConfigurationTest.java:101)
+CODE CONTEXT:
+    98:         given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+    99:         given().contentType(ContentType.URLENC).formParam("sourceFeature", f1).formParam("excludedFeature", f2).when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+   100:         given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f1).then().statusCode(lessThan(300));
+   101:         given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(lessThan(300));  ← FAILURE HERE
+   102: 
+   103:         given().when().get("/products/" + product + "/configurations/" + config).then().body("valid", is(false));
+   104:     }
+
+[4] METHOD=testCollectFeatureNamesEmptySet FAILURE AT LINE 205
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testCollectFeatureNamesEmptySet(ProductConfigurationTest.java:205)
+CODE CONTEXT:
+   202:         given().when().post("/products/" + product).then().statusCode(lessThan(300));
+   203:         given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+   204: 
+   205:         given().when().get("/products/" + product + "/configurations/" + config + "/features").then().body(empty());  ← FAILURE HERE
+   206:     }
+   207: 
+   208:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uid() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesViaGetConfiguration() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductViaPostConfigurationFeature() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesViaGetConfigurationFeatures() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesContainsActivatedFeature() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config + "/features").then().body(hasItem(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidTrueOnConfigurationCreation() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidFalseViaExcludesConstraintViolation() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String f1 = "f-" + uid();
+        String f2 = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", f1).formParam("excludedFeature", f2).when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config).then().body("valid", is(false));
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveFeatureViaPostConfigurationFeature() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidTrueAfterFixingExcludesConstraint() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String f1 = "f-" + uid();
+        String f2 = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", f1).formParam("excludedFeature", f2).when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + f2).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureViaDeleteConfigurationFeature() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveNonActiveFeature() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureViaRequiresConstraint() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String source = "f-" + uid();
+        String required = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + source).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + required).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", source).formParam("requiredFeature", required).when().post("/products/" + product + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + required).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + source).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureViaExcludesConstraint() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String f1 = "f-" + uid();
+        String f2 = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + f2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", f1).formParam("excludedFeature", f2).when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + f1).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesEmptySet() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config + "/features").then().body(empty());
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithNoProductFeatures() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesAfterDeactivation() {
+        String product = "p-" + uid();
+        String config = "c-" + uid();
+        String feature = "f-" + uid();
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + product + "/configurations/" + config + "/features").then().body(not(hasItem(feature)));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

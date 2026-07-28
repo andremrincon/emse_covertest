@@ -1,0 +1,75 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+    
+    @Test(timeout = 60000)
+    public void testPatWithPatternFoundOnly() {
+        given()
+            .pathParam("txt", "XYZABABXYZ")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testPatWithPatternAndReverseAdjacent() {
+        given()
+            .pathParam("txt", "ABABBABA")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testPatWithPatternAndReverseNotAdjacent() {
+        given()
+            .pathParam("txt", "ABABXYZBABA")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testPatWithReverseFoundOnly() {
+        given()
+            .pathParam("txt", "XYZBABAXYZ")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testPatWithReverseAndPatternAdjacent() {
+        given()
+            .pathParam("txt", "BABAABAB")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testPatWithShortPattern() {
+        given()
+            .pathParam("txt", "ABAB")
+            .pathParam("pat", "AB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

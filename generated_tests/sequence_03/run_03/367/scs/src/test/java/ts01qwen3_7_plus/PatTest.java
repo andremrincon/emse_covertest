@@ -1,0 +1,84 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsZeroWhenNeitherPatNorReverseFound() {
+        given()
+            .pathParam("txt", "helloworld")
+            .pathParam("pat", "xyz")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsOneWhenOnlyPatFound() {
+        given()
+            .pathParam("txt", "helloabcworld")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsTwoWhenOnlyReverseFound() {
+        given()
+            .pathParam("txt", "hellocbaworld")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFourWhenPatFollowedByReverseImmediately() {
+        given()
+            .pathParam("txt", "abccba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFiveWhenReverseFollowedByPatImmediately() {
+        given()
+            .pathParam("txt", "cbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsThreeWhenPatThenReverseNotAdjacent() {
+        given()
+            .pathParam("txt", "abcxyzcba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsThreeWhenReverseThenPatNotAdjacent() {
+        given()
+            .pathParam("txt", "cbaxyzabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,68 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleValidTitle() {
+        given()
+            .get("/api/title/male/mr")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleValidTitle() {
+        given()
+            .get("/api/title/female/mrs")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneValidTitle() {
+        given()
+            .get("/api/title/none/dr")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleInvalidTitle() {
+        given()
+            .get("/api/title/male/Smith")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleInvalidTitle() {
+        given()
+            .get("/api/title/female/Smith")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidSexAndTitle() {
+        given()
+            .get("/api/title/f/Smith")
+        .then()
+            .statusCode(200);
+    }
+}
+```

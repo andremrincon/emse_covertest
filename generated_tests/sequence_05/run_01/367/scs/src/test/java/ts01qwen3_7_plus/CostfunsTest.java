@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5_sEqualsBaab() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/5/baab")
+        .then()
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444_sEqualsAbabba() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/-500/ababba")
+        .then()
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666_sEqualsAbab() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/700/abab")
+        .then()
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_sEqualsXyz() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/-4/xyz")
+        .then()
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iZero_sEqualsAaaa() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/0/aaaa")
+        .then()
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_invalidInteger_returns400() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/one/test")
+        .then()
+            .statusCode(400);
+    }
+}

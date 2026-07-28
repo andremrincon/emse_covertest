@@ -1,0 +1,73 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.junit.Ignore;
+public class RemainderTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveA_PositiveB_shouldReturn200() {
+        int a = 17;
+        int b = 5;
+        int p1 = ThreadLocalRandom.current().nextInt(1, 100);
+        int p2 = p1 + 1;
+        int p3 = p1 + 2;
+        given().when().get("/api/triangle/{a}/{b}/{c}", p1, p2, p3).then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200);
+    }
+
+    @Ignore
+
+
+    @Test(timeout = 60000)
+    public void testPositiveA_NegativeB_shouldReturnCorrectRemainder() {
+        int a = 17;
+        int b = -9;
+        int p1 = ThreadLocalRandom.current().nextInt(1, 100);
+        int p2 = p1 + 3;
+        int p3 = p1 + 4;
+        given().when().get("/api/triangle/{a}/{b}/{c}", p1, p2, p3).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", a, b).then().extract().response();
+        Assert.assertEquals(-1, resp.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeA_PositiveB_shouldReturn200() {
+        int a = -17;
+        int b = 5;
+        int p1 = ThreadLocalRandom.current().nextInt(10, 200);
+        int p2 = p1 + 5;
+        int p3 = p1 + 6;
+        given().when().get("/api/triangle/{a}/{b}/{c}", p1, p2, p3).then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200);
+    }
+
+    @Ignore
+
+
+    @Test(timeout = 60000)
+    public void testNegativeA_NegativeB_shouldReturnCorrectRemainder() {
+        int a = -17;
+        int b = -5;
+        int p1 = ThreadLocalRandom.current().nextInt(20, 300);
+        int p2 = p1 + 7;
+        int p3 = p1 + 8;
+        given().when().get("/api/triangle/{a}/{b}/{c}", p1, p2, p3).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", a, b).then().extract().response();
+        Assert.assertEquals(-2, resp.jsonPath().getInt("result"));
+    }
+}

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("API_BASE");
+        if (cfg == null || cfg.isEmpty()) cfg = System.getenv("API_BASE");
+        if (cfg == null || cfg.isEmpty()) cfg = "http://localhost:8080";
+        base = cfg;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositivePositiveReturnsRemainder() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/17/5");
+        resp.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveNegativeReturnsRemainderForNegativeB() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/17/-9");
+        resp.then().body("result", equalTo(8));
+    }
+
+    @Test(timeout = 60000)
+    public void testBZeroReturnsBadRequest() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/5/0");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAZeroReturnsBadRequest() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/0/5");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAAndPositiveBReturnsRemainder() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/remainder/-17/5");
+        resp.then().body("result", equalTo(-2));
+    }
+}

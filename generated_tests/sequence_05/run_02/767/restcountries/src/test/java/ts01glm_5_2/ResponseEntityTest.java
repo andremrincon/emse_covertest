@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getNameNotFoundReturnsStatusField() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void getNameNotFoundReturnsMessageField() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void getCapitalNotFoundReturnsStatusField() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void getCapitalNotFoundReturnsMessageField() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void getRegionNotFoundReturnsStatusField() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void getRegionNotFoundReturnsMessageField() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+}

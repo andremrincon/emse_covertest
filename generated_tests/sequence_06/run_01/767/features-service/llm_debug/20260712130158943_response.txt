@@ -1,0 +1,48 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv().getOrDefault("API_BASE", "http://localhost:8080");
+        String base = System.getProperty("api.base", env);
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void optionsRequestSetsCorsAllowOriginHeader() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().when().options("/products/{productName}/features", "any-product");
+        assertEquals("*", act.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void addingFeatureToProductReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String feature = "feat-" + UUID.randomUUID().toString();
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Automated test feature description")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deletingProductReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}", product);
+        assertEquals(204, act.getStatusCode());
+    }
+}

@@ -1,0 +1,52 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", System.getenv("BASE_URL"));
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_TwoLetter_es_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_ThreeLetter_eng_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/eng").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_UnsupportedLength_span_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/span").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBloc_lowercase_eu_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/regionalbloc/eu").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBloc_unknown_XYZ_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/regionalbloc/XYZ").then().statusCode(404);
+    }
+}

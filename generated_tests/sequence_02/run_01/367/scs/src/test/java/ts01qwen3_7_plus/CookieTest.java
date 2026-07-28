@@ -1,0 +1,83 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CookieTest {
+
+    static {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridValidUser() {
+        given()
+            .pathParam("name", "userid")
+            .pathParam("val", "user123")
+            .pathParam("site", "site")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridShortVal() {
+        given()
+            .pathParam("name", "userid")
+            .pathParam("val", "user1")
+            .pathParam("site", "site")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridInvalidPrefix() {
+        given()
+            .pathParam("name", "userid")
+            .pathParam("val", "admin123")
+            .pathParam("site", "site")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionValid() {
+        given()
+            .pathParam("name", "session")
+            .pathParam("val", "am")
+            .pathParam("site", "abc.com")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionInvalid() {
+        given()
+            .pathParam("name", "session")
+            .pathParam("val", "pm")
+            .pathParam("site", "abc.com")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+}

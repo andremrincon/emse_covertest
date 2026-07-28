@@ -1,0 +1,78 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testWLengthTooShort() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/abc/berry/delta/cherry")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testXLengthTooShort() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/apple/ber/delta/cherry")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testYLengthTooShort() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/apple/berry/delta/che")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testZLengthTooShort() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/apple/berry/del/cherry")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/apple/berry/delta/cherry")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/ordered4/delta/cherry/apple/berry")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+}
+```

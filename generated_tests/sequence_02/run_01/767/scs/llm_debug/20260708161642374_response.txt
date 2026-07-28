@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) base = System.getProperty("BASE_URL", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) base = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDateReturns200() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Wednesday/August");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDateReturns500() {
+        given().when().get("/api/pat/ready").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Superday/Movember");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbrevDayMonthReturnsNumericBody() {
+        given().when().get("/api/pat/ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/mon/jan");
+        resp.then().body(equalTo("2"));
+    }
+}

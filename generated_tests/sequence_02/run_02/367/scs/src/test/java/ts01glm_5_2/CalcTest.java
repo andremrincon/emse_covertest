@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testLogOperator() {
+        given()
+            .when()
+                .get("/api/calc/log/10/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSineOperator() {
+        given()
+            .when()
+                .get("/api/calc/sine/0/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCosineOperator() {
+        given()
+            .when()
+                .get("/api/calc/cosine/0/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTangentOperator() {
+        given()
+            .when()
+                .get("/api/calc/tangent/0/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubtractOperator() {
+        given()
+            .when()
+                .get("/api/calc/subtract/15.5/4.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyOperator() {
+        given()
+            .when()
+                .get("/api/calc/multiply/15.5/4.5")
+            .then()
+                .statusCode(200);
+    }
+}

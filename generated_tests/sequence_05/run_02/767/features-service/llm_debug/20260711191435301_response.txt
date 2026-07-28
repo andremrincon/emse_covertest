@@ -1,0 +1,253 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ProductTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String uniqueProductName() {
+        return "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String createProduct(String productName) {
+        given()
+            .when()
+            .post("/products/{productName}", productName)
+            .then()
+            .statusCode(lessThan(300));
+        return productName;
+    }
+
+    private void addFeature(String productName, String featureName) {
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, "TestFeature")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureToRemove");
+
+        given()
+            .when()
+            .delete("/products/{productName}/features/{featureName}", productName, "FeatureToRemove")
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureNotPresent() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+
+        given()
+            .when()
+            .delete("/products/{productName}/features/{featureName}", productName, "NonExistentFeature")
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaConfigurationEvaluation() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureA");
+        createConfiguration(productName, "TestConfig");
+
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, "TestConfig", "FeatureA")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, "TestConfig")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureToUpdate");
+
+        given()
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, "FeatureToUpdate")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameNotFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+
+        given()
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, "NonExistentFeature")
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameCaseInsensitive() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "MyFeature");
+
+        given()
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, "myfeature")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedTrue() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureForConfig");
+        createConfiguration(productName, "TestConfig");
+
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, "TestConfig", "FeatureForConfig")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedFalse() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        createConfiguration(productName, "TestConfig");
+
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, "TestConfig", "NonExistentFeature")
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedCaseInsensitive() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "MyFeature");
+        createConfiguration(productName, "TestConfig");
+
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, "TestConfig", "MYFEATURE")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequires() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+        addFeature(productName, "RequiredFeature");
+
+        given()
+            .formParam("sourceFeature", "SourceFeature")
+            .formParam("requiredFeature", "RequiredFeature")
+            .when()
+            .post("/products/{productName}/constraints/requires", productName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintExcludes() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+        addFeature(productName, "ExcludedFeature");
+
+        given()
+            .formParam("sourceFeature", "SourceFeature")
+            .formParam("excludedFeature", "ExcludedFeature")
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequiresFeatureNotFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+
+        given()
+            .formParam("sourceFeature", "SourceFeature")
+            .formParam("requiredFeature", "NonExistentFeature")
+            .when()
+            .post("/products/{productName}/constraints/requires", productName)
+            .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturnsActiveFeatures() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureX");
+        createConfiguration(productName, "TestConfig");
+
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, "TestConfig", "FeatureX")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", productName, "TestConfig")
+            .then()
+            .body(hasItem("FeatureX"));
+    }
+}
+```

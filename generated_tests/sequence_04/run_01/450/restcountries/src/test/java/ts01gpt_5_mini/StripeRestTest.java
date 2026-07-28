@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String base = env != null && !env.isEmpty() ? env : System.getProperty("api.base", "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withNullPayload_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given()
+                .contentType("application/json;charset=utf-8")
+                .body("null")
+                .when()
+                .post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withBlankToken_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"   \"}";
+        Response resp = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withRandomToken_triggersStripeError_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":250,\"token\":\"" + token + "\"}";
+        Response resp = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withKnownSuccessToken_returnsAccepted() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String token = "tok_success_example_" + UUID.randomUUID().toString();
+        String payload = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        Response resp = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

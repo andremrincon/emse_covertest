@@ -1,0 +1,99 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaTwoCharCodeNotFound() {
+        when().get("/v1/alpha/ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaThreeCharCodeNotFound() {
+        when().get("/v1/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValidTwoCharCode() {
+        when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValidThreeCharCode() {
+        when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNullCodes() {
+        when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicateCodes() {
+        when().get("/v1/alpha?codes=US;US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMultipleValidCodes() {
+        when().get("/v1/alpha?codes=US;CA;MX").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListAllCodesNotFound() {
+        when().get("/v1/alpha?codes=XX;YY;ZZ").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpellingMatch() {
+        when().get("/v1/name/USA?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactNameMatch() {
+        when().get("/v1/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFound() {
+        when().get("/v1/name/NonExistentCountry?fullText=true").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpellingMatch() {
+        when().get("/v1/name/Bundesrepublik").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchPartialNameMatch() {
+        when().get("/v1/name/Fran").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchNotFound() {
+        when().get("/v1/name/NonExistentCountry").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonNormalPath() {
+        when().get("/v1/all").then().statusCode(200);
+    }
+}

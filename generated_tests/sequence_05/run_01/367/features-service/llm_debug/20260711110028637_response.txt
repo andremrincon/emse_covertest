@@ -1,0 +1,108 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+public class ProductsServiceTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private void createProduct(String productName) {
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        RestAssured.given().formParam("description", "desc").when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(Matchers.lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Duplicate() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, featureName);
+
+        RestAssured.given()
+            .formParam("description", "duplicate feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_ActiveInConfiguration() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        String configName = "config-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, featureName);
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "source-" + UUID.randomUUID().toString();
+        String requiredFeature = "req-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, requiredFeature);
+
+        RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String sourceFeature = "source-" + UUID.randomUUID().toString();
+        String excludedFeature = "excl-" + UUID.randomUUID().toString();
+
+        createProduct(productName);
+        createFeature(productName, sourceFeature);
+        createFeature(productName, excludedFeature);
+
+        RestAssured.given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+}

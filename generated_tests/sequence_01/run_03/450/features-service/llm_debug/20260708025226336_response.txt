@@ -1,0 +1,124 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("API_BASE");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Desc")
+                .when()
+                .post("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromProduct_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "to delete")
+                .when()
+                .post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeatures_returns200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "feature for list")
+                .when()
+                .post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByName_returns200_afterAddingFeatures() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String f1 = "featA-" + UUID.randomUUID().toString();
+        String f2 = "featB-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "first")
+                .when()
+                .post("/products/{productName}/features/{featureName}", product, f1)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "second")
+                .when()
+                .post("/products/{productName}/features/{featureName}", product, f2)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "src-" + UUID.randomUUID().toString())
+                .formParam("requiredFeature", "req-" + UUID.randomUUID().toString())
+                .when()
+                .post("/products/{productName}/constraints/requires", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "src-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "excl-" + UUID.randomUUID().toString())
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraint_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response created = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "s-" + UUID.randomUUID().toString())
+                .formParam("excludedFeature", "e-" + UUID.randomUUID().toString())
+                .when()
+                .post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(lessThan(300)).extract().response();
+        Object idObj = created.path("id");
+        String idStr = idObj == null ? "0" : String.valueOf(idObj);
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", product, idStr);
+        act.then().statusCode(204);
+    }
+}

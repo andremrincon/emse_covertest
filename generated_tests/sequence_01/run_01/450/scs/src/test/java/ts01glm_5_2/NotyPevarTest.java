@@ -1,0 +1,49 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("test.host", "localhost");
+        String port = System.getProperty("test.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_branchI0TrueI2TrueI3True() {
+        given()
+            .when()
+                .get("/api/notypevar/28/zzz")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_branchI1TrueI3True() {
+        given()
+            .when()
+                .get("/api/notypevar/7/a")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_allBranchesFalse() {
+        given()
+            .when()
+                .get("/api/notypevar/3/a")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}

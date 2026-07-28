@@ -1,0 +1,166 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_twoLetterCodeNotFound_returns404() {
+        given()
+            .pathParam("alphacode", "XX")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_threeLetterCodeNotFound_returns404() {
+        given()
+            .pathParam("alphacode", "ZZZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_twoLetterCodeFound_returns200() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_threeLetterCodeFound_returns200() {
+        given()
+            .pathParam("alphacode", "USA")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_missingCodesParam_returns400() {
+        when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_duplicateCodes_returns200() {
+        given()
+            .queryParam("codes", "US;US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_validAndInvalidCodes_returns200() {
+        given()
+            .queryParam("codes", "US;XX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_altSpellingMatch_returns200() {
+        given()
+            .pathParam("name", "United States of America")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_altSpellingGermanMatch_returns200() {
+        given()
+            .pathParam("name", "Federal Republic of Germany")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_exactNameMatch_returns200() {
+        given()
+            .pathParam("name", "France")
+            .queryParam("fullText", "true")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_altSpellingSubstringMatch_returns200() {
+        given()
+            .pathParam("name", "USA")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_altSpellingGermanSubstring_returns200() {
+        given()
+            .pathParam("name", "Bundesrepublik")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_partialNameMatch_returns200() {
+        given()
+            .pathParam("name", "Fran")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_v1AllEndpoint_returns200() {
+        when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_v2AllEndpoint_returns200() {
+        when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+}
+```

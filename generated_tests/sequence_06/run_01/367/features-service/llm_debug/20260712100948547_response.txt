@@ -1,0 +1,157 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        String description = "Desc " + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", description)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_returns200_and_updates_description() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        String newDesc = "Updated description " + UUID.randomUUID();
+        given().contentType(ContentType.URLENC).formParam("description", newDesc)
+                .when().put("/products/{productName}/features/{featureName}", product, feature)
+                .then().body("description", equalTo(newDesc));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_returns204() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_returns200_and_contains_featureName() {
+        String product = "prod-" + UUID.randomUUID();
+        String featureA = "featA-" + UUID.randomUUID();
+        String featureB = "featB-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, featureA)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, featureB)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product)
+                .then().body("featureName", hasItems(featureA, featureB));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_returns201() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "conf-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration_returns204() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "conf-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeatures_returns200_list() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "conf-" + UUID.randomUUID();
+        String feature1 = "feat1-" + UUID.randomUUID();
+        String feature2 = "feat2-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature1)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature2)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature1)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature2)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config)
+                .then().body("", hasItems(feature1, feature2));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByName_returns200_and_nameMatches() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product)
+                .then().body("name", equalTo(product));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddingSameFeatureTwice_results_in_single_feature_in_list() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-duplicate-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product)
+                .then().body("featureName.size()", equalTo(1));
+    }
+}

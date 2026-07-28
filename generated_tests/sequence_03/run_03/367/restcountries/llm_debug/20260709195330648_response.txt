@@ -1,0 +1,68 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaAlphaCode() {
+        // Arrange
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha/US");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaName() {
+        // Arrange
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/France");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaCurrency() {
+        // Arrange
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/currency/USD");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaLang() {
+        // Arrange
+        given().when().get("/v1/lang/es").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/lang/es");
+
+        // Assert
+        response.then().statusCode(200);
+    }
+}
+```

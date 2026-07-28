@@ -1,0 +1,40 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_returns28_when_i28_and_sHello() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/setup-" + uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/28/hello").then().assertThat().body(equalTo("28"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_returns1_when_i7_and_sHello() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/text2txt/setup-" + uuid + "/x/y").then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/7/hello").then().assertThat().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_returns3_when_i6_and_sWorld() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/add/1/1-" + uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/6/world").then().assertThat().body(equalTo("3"));
+    }
+}

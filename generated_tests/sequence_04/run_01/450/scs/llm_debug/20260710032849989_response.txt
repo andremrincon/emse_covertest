@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEquals5_sAlgorithm() {
+        given()
+            .when()
+                .get("/api/costfuns/5/algorithm")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsNegative4_sA() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iLessThanNegative444_sBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-445/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iGreaterThan666_sAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/667/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEquals555_sAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/555/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsNegative333_sAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/-333/ababba")
+            .then()
+                .statusCode(200);
+    }
+}
+```

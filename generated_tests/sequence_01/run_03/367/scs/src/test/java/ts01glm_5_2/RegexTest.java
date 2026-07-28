@@ -1,0 +1,74 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/http://a/a")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/12.34e+56")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchWithFtp() {
+        given()
+            .when()
+                .get("/api/pat/ftp://b/c")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatchWithSpecialChars() {
+        given()
+            .when()
+                .get("/api/pat/---")
+            .then()
+                .statusCode(200);
+    }
+}

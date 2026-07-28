@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Test;
+
+public class GammqTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testGammqGcfNormalPath() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/5.5/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserNormalPath() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfExtremeA() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/10000000000.0/10000000002.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserExtremeA() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/100.0/100.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNegativeA() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/-1.0/2.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidNegativeX() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/gammq/5.5/-1.0")
+            .then()
+                .statusCode(400);
+    }
+}

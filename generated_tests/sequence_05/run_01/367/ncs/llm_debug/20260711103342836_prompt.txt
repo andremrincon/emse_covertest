@@ -1,0 +1,179 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.RemainderTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testRemainder_AZero_returnsBadRequest TYPE=FAILURE
+expected:<400> but was:<200>
+
+[2] METHOD=testRemainder_PositiveNegative_returnsExpectedRemainder TYPE=ERROR
+
+
+[3] METHOD=testRemainder_NegativeNegative_returnsExpectedRemainder TYPE=ERROR
+
+
+[4] METHOD=testRemainder_BZero_returnsBadRequest TYPE=FAILURE
+expected:<400> but was:<200>
+
+[5] METHOD=testRemainder_PositivePositive_returnsExpectedRemainder TYPE=ERROR
+
+
+[6] METHOD=testRemainder_NegativePositive_returnsExpectedRemainder TYPE=ERROR
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testRemainder_AZero_returnsBadRequest FAILURE AT LINE 60
+java.lang.AssertionError: expected:<400> but was:<200>
+at ts01gpt_5_mini.RemainderTest.testRemainder_AZero_returnsBadRequest(RemainderTest.java:60)
+CODE CONTEXT:
+    57:     public void testRemainder_AZero_returnsBadRequest() {
+    58:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    59:         Response act = given().when().get("/api/remainder/{a}/{b}", 0, 5);
+    60:         assertEquals(400, act.getStatusCode());  ← FAILURE HERE
+    61:     }
+    62: }
+
+[2] METHOD=testRemainder_PositiveNegative_returnsExpectedRemainder FAILURE AT LINE 32
+at ts01gpt_5_mini.RemainderTest.testRemainder_PositiveNegative_returnsExpectedRemainder(RemainderTest.java:32)
+CODE CONTEXT:
+    29:     public void testRemainder_PositiveNegative_returnsExpectedRemainder() {
+    30:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    31:         Response act = given().when().get("/api/remainder/{a}/{b}", 17, -9);
+    32:         assertEquals(8, act.jsonPath().getInt("result"));  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+[3] METHOD=testRemainder_NegativeNegative_returnsExpectedRemainder FAILURE AT LINE 46
+at ts01gpt_5_mini.RemainderTest.testRemainder_NegativeNegative_returnsExpectedRemainder(RemainderTest.java:46)
+CODE CONTEXT:
+    43:     public void testRemainder_NegativeNegative_returnsExpectedRemainder() {
+    44:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    45:         Response act = given().when().get("/api/remainder/{a}/{b}", -17, -5);
+    46:         assertEquals(2, act.jsonPath().getInt("result"));  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+[4] METHOD=testRemainder_BZero_returnsBadRequest FAILURE AT LINE 53
+java.lang.AssertionError: expected:<400> but was:<200>
+at ts01gpt_5_mini.RemainderTest.testRemainder_BZero_returnsBadRequest(RemainderTest.java:53)
+CODE CONTEXT:
+    50:     public void testRemainder_BZero_returnsBadRequest() {
+    51:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    52:         Response act = given().when().get("/api/remainder/{a}/{b}", 5, 0);
+    53:         assertEquals(400, act.getStatusCode());  ← FAILURE HERE
+    54:     }
+    55: 
+    56:     @Test(timeout = 60000)
+
+[5] METHOD=testRemainder_PositivePositive_returnsExpectedRemainder FAILURE AT LINE 25
+at ts01gpt_5_mini.RemainderTest.testRemainder_PositivePositive_returnsExpectedRemainder(RemainderTest.java:25)
+CODE CONTEXT:
+    22:     public void testRemainder_PositivePositive_returnsExpectedRemainder() {
+    23:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    24:         Response act = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+    25:         assertEquals(2, act.jsonPath().getInt("result"));  ← FAILURE HERE
+    26:     }
+    27: 
+    28:     @Test(timeout = 60000)
+
+[6] METHOD=testRemainder_NegativePositive_returnsExpectedRemainder FAILURE AT LINE 39
+at ts01gpt_5_mini.RemainderTest.testRemainder_NegativePositive_returnsExpectedRemainder(RemainderTest.java:39)
+CODE CONTEXT:
+    36:     public void testRemainder_NegativePositive_returnsExpectedRemainder() {
+    37:         given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+    38:         Response act = given().when().get("/api/remainder/{a}/{b}", -17, 5);
+    39:         assertEquals(-2, act.jsonPath().getInt("result"));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_PositivePositive_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+        assertEquals(2, act.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_PositiveNegative_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", 17, -9);
+        assertEquals(8, act.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_NegativePositive_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", -17, 5);
+        assertEquals(-2, act.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_NegativeNegative_returnsExpectedRemainder() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", -17, -5);
+        assertEquals(2, act.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_BZero_returnsBadRequest() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", 5, 0);
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_AZero_returnsBadRequest() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/{a}/{b}", 0, 5);
+        assertEquals(400, act.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

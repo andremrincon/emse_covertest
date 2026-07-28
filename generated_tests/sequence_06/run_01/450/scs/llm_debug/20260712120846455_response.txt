@@ -1,0 +1,70 @@
+```java
+package ts01glm_5_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveAndSEqualsBaab() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/5/baab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanMinus444() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/-500/a")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsMinusFour() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/-4/ababba")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/700/z")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIBetween555And666() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/600/a")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIZeroWithShortString() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/costfuns/0/a")
+        .then()
+            .statusCode(200);
+    }
+}
+```

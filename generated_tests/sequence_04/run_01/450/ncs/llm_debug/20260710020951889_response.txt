@@ -1,0 +1,98 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NcsRestTest {
+
+    private static String BASE_URL;
+
+    @BeforeClass
+    public static void init() {
+        BASE_URL = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (BASE_URL == null || BASE_URL.isEmpty()) {
+            BASE_URL = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjValidReturns200() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/bessj/3/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/bessj/2/1.0");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValidReturns200() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/fisher/10/5/0.75");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidMHighReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/fisher/1001/5/0.75");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidXThrowsReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/fisher/10/5/1.2");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqValidReturns200() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/gammq/5.5/2.3");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidAThrowsReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/gammq/-1.0/2.3");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValidBodyResult() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/remainder/17/5");
+        act.then().body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderOutOfRangeReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/remainder/10001/5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintValidReturns200() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/expint/3/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintInvalidNThrowsReturns400() {
+        given().when().get(BASE_URL + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/expint/-1/2.5");
+        act.then().statusCode(400);
+    }
+}

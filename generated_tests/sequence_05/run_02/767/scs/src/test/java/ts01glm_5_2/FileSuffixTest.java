@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class FileSuffixTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDotInFileReturnsZero() {
+        given()
+        .when()
+            .get("/api/filesuffix/text/nodotfile")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffix() {
+        given()
+        .when()
+            .get("/api/filesuffix/text/report.txt")
+        .then()
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffix() {
+        given()
+        .when()
+            .get("/api/filesuffix/acrobat/document.pdf")
+        .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffix() {
+        given()
+        .when()
+            .get("/api/filesuffix/word/letter.doc")
+        .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeSuffix() {
+        given()
+        .when()
+            .get("/api/filesuffix/bin/program.exe")
+        .then()
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllSuffix() {
+        given()
+        .when()
+            .get("/api/filesuffix/lib/library.dll")
+        .then()
+            .body(equalTo("5"));
+    }
+}

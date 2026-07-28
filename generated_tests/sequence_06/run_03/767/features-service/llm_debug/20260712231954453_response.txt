@@ -1,0 +1,96 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Method;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("basePort", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterGetRequestSetsCorsAllowOriginHeader() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterOptionsRequestSetsCorsAllowMethodsHeader() {
+        given()
+            .when()
+                .request(Method.OPTIONS, "/products")
+            .then()
+                .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterOptionsRequestSetsCorsAllowHeadersHeader() {
+        given()
+            .when()
+                .request(Method.OPTIONS, "/products")
+            .then()
+                .header("Access-Control-Allow-Headers", "x-requested-with");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterPostRequestSetsCorsMaxAgeHeader() {
+        String productName = "cors-post-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .header("Access-Control-Max-Age", "3600");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterDeleteRequestSetsCorsAllowOriginHeader() {
+        String productName = "cors-delete-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterPutRequestSetsCorsAllowOriginHeader() {
+        String productName = "cors-put-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "cors-feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+}
+```

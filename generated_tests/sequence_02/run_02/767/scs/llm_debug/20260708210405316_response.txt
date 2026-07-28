@@ -1,0 +1,92 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i2_s_abc() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 2)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i2_s_world() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 2)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i7_s_abc() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 7)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i28_s_abc() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 28)
+            .pathParam("s", "abc")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i10_s_world() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", 10)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_invalid_i() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("i", "abc")
+            .pathParam("s", "test")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

@@ -1,0 +1,82 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithNLessThan2() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithAxZero() {
+        given()
+            .when()
+                .get("/api/bessj/3/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithAxLessThanN() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithAxGreaterThanNAndLessThan8() {
+        given()
+            .when()
+                .get("/api/bessj/3/5.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithAxGreaterThanNAndGreaterThan8() {
+        given()
+            .when()
+                .get("/api/bessj/3/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithNegativeXGreaterThan8() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjWithInvalidN() {
+        given()
+            .when()
+                .get("/api/bessj/abc/2.5")
+            .then()
+                .statusCode(400);
+    }
+}

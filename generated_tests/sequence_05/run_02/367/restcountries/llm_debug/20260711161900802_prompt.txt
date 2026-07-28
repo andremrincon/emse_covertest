@@ -1,0 +1,192 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[38,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[66,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[74,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[82,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[90,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[98,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[106,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[114,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[122,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[130,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/restcountries/src/test/java/ts01glm_5_2/CountryRestV2Test.java:[138,9] cannot find symbol
+
+CURRENT TEST CODE:
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getAllCountriesWithFieldsReturns200() {
+        given()
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaWithFieldsReturns200() {
+        given()
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaNotFoundReturns404() {
+        when()
+            .get("/v2/alpha/ZZZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListShortCodeReturns400() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListNotFoundReturns404() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyWrongLengthReturns400() {
+        when()
+            .get("/v2/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyNotFoundReturns404() {
+        when()
+            .get("/v2/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameNotFoundReturns404() {
+        when()
+            .get("/v2/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeNotFoundReturns404() {
+        when()
+            .get("/v2/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalNotFoundReturns404() {
+        when()
+            .get("/v2/capital/12345")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionNotFoundReturns404() {
+        when()
+            .get("/v2/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegionNotFoundReturns404() {
+        when()
+            .get("/v2/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguageNotFoundReturns404() {
+        when()
+            .get("/v2/lang/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonymNotFoundReturns404() {
+        when()
+            .get("/v2/demonym/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBlocNotFoundReturns404() {
+        when()
+            .get("/v2/regionalbloc/123")
+        .then()
+            .statusCode(404);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

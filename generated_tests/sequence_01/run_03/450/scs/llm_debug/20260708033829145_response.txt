@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPi() {
+        given().when().get("/api/calc/e/1.0/0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/pi/0.0/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcSqrt() {
+        given().when().get("/api/calc/log/1.0/0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sqrt/4.0/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcSine() {
+        given().when().get("/api/calc/cosine/0.0/0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0.0/0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sine/0.0/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPlus() {
+        given().when().get("/api/calc/subtract/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcMultiply() {
+        given().when().get("/api/calc/divide/10.0/2.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/5.0/2.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidOp() {
+        given().when().get("/api/calc/power/10.0/2.0").then().statusCode(200);
+    }
+}

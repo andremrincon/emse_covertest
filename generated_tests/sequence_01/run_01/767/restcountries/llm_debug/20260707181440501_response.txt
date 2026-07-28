@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE");
+        if (env != null && !env.trim().isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_NotFound_statusCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_NotFound_bodyMessageField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_NotFound_bodyStatusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_BadRequest_statusCode400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_bodyAlpha2Code() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("alpha2Code", equalTo("US"));
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_Accepted_statusCode202() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        String payload = "{\"amount\":10,\"currency\":\"USD\",\"token\":\"tok_"+unique+"\",\"description\":\"test\"}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(400);
+    }
+}

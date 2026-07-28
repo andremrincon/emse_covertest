@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSuccess() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration, "featureName", feature).when().put("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationFailureWhenInvalidFeatureName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 800; i++) sb.append('x');
+        String longFeature = sb.toString();
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration, "featureName", longFeature).when().put("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccess() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration, "featureName", feature).when().put("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(201);
+        given().pathParams("productName", product, "configurationName", configuration, "featureName", feature).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFailureWhenInvalidFeatureName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 900; i++) sb.append('y');
+        String longFeature = sb.toString();
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParams("productName", product, "configurationName", configuration, "featureName", longFeature).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(500);
+    }
+}

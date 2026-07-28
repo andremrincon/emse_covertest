@@ -1,0 +1,36 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+public class RegexTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return envUrl != null ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesUrlPattern() {
+        Response response = given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "http://a/b")
+        .when()
+            .get("/api/pat/{txt}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectMatchesFpePattern() {
+        Response response = given()
+            .baseUri(getBaseUrl())
+            .pathParam("txt", "12.34e-56")
+        .when()
+            .get("/api/pat/{txt}");
+
+        response.then().statusCode(200);
+    }
+}

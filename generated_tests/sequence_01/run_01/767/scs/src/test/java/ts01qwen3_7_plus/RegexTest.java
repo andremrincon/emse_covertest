@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternMatch() {
+        String txt = "http://abc/def";
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <404> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDatePatternMatch() {
+        String txt = "mon01jan";
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <404> but was <200>.")
+    @Test(timeout = 60000)
+    public void testFpePatternMatch() {
+        String txt = "12.34e+56";
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <404> but was <200>.")
+    @Test(timeout = 60000)
+    public void testNoPatternMatch() {
+        String txt = "randomtext";
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(404);
+    }
+}

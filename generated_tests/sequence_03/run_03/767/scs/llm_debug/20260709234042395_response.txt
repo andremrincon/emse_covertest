@@ -1,0 +1,48 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarWhenXPlusYEquals56() {
+        given()
+            .when()
+                .get("/api/notypevar/28/world")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarWhenXsPlusYEqualsHello7() {
+        given()
+            .when()
+                .get("/api/notypevar/7/a")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarWhenNoConditionsMet() {
+        given()
+            .when()
+                .get("/api/notypevar/2/a")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}
+```

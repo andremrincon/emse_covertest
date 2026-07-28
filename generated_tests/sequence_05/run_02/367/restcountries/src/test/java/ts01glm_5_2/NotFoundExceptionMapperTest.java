@@ -1,0 +1,44 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotFoundExceptionMapperTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenNonExistentPathIsRequested() {
+        given()
+                .when()
+                .get("/v1/nonexistentpath" + java.util.UUID.randomUUID().toString().substring(0, 8))
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenUnknownRootPathIsRequested() {
+        given()
+                .when()
+                .get("/unknownroot" + java.util.UUID.randomUUID().toString().substring(0, 8))
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_returnsNotFound_whenDeepNonExistentPathIsRequested() {
+        given()
+                .when()
+                .get("/v1/alpha/US/nonexistent/sub/" + java.util.UUID.randomUUID().toString().substring(0, 8))
+                .then()
+                .statusCode(404);
+    }
+}

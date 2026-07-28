@@ -1,0 +1,154 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_validTwoLetterCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_validThreeLetterCode() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFoundTwoLetterCode() {
+        given()
+            .when()
+                .get("/v1/alpha/XX")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFoundThreeLetterCode() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_validCodes() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_duplicateCodes() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_mixedValidInvalidCodes() {
+        given()
+            .queryParam("codes", "US;XX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_noCodesParam() {
+        given()
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_exactNameMatch() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_altSpellingMatch() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "United States of America")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_partialNameMatch() {
+        given()
+            .when()
+                .get("/v1/name/Franc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_altSpellingMatch() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "United States")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_allCountriesEndpoint() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_allInvalidCodes() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+}

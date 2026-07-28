@@ -1,0 +1,45 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValidParametersReturns200() {
+        given()
+                .when()
+                .get("/api/fisher/10/5/0.75")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherExceedsLimitReturns400() {
+        given()
+                .when()
+                .get("/api/fisher/1001/5/0.75")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidXThrowsExceptionReturns400() {
+        given()
+                .when()
+                .get("/api/fisher/1/1/1.2")
+                .then()
+                .statusCode(200);
+    }
+}

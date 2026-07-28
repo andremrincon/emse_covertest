@@ -1,0 +1,66 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetAllReturnsOk() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeader() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(lessThan(300))
+            .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeader() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(lessThan(300))
+            .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeader() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(lessThan(300))
+            .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeader() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(lessThan(300))
+            .header("Cache-Control", nullValue());
+    }
+}

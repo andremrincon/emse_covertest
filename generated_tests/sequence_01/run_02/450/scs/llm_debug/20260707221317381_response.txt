@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("BASE_URL");
+        String prop = System.getProperty("baseUrl");
+        String base = env != null && !env.isEmpty() ? env : (prop != null && !prop.isEmpty() ? prop : "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5_returnsOkStatus() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 5, "algorithm");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanNegative444_returnsOkStatus() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -445, "a");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsNegative333_returnsOkStatus() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -333, "a");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666_and_sCompareToTriggers_returnsOkStatus() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 700, "zzzzzz");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals555_and_sEqualsBaab_returnsOkStatus() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 555, "baab");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4_and_sEqualsAbab_returnsBodyZero() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        act.then().body(equalTo("10"));
+    }
+}

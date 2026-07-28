@@ -1,0 +1,72 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setUpClass() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMonJan() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWedFeb() {
+        given()
+            .when()
+                .get("/api/dateparse/wed/feb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFriMar() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/mar")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseSatApr() {
+        given()
+            .when()
+                .get("/api/dateparse/sat/apr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayAndMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/Superday/Movember")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseSunDec() {
+        given()
+            .when()
+                .get("/api/dateparse/sun/dec")
+            .then()
+                .statusCode(200);
+    }
+}
+```

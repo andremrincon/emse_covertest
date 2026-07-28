@@ -1,0 +1,52 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHello_WithName_ReturnsGreeting() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("name", "John Smith").when().get("/");
+        act.then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHello_DefaultName_ReturnsGuestGreeting() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().when().get("/");
+        act.then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_WithPositiveDelay_Returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", 1).when().get("/slowApi");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_WithZeroDelay_UsesRandomPathAndReturns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", 0).when().get("/slowApi");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_WithNegativeDelay_Returns500() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response act = given().queryParam("delay", -1).when().get("/slowApi");
+        act.then().statusCode(500);
+    }
+}

@@ -1,0 +1,160 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[30,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[30,149] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[39,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[39,151] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[48,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[48,159] package eu.fayder.restcountries.v2.domain does not exist
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE_URL;
+
+    @BeforeClass
+    public static void setup() {
+        String prop = System.getProperty("baseUrl");
+        String env = System.getenv("BASE_URL");
+        if (prop != null && !prop.isEmpty()) {
+            BASE_URL = prop;
+        } else if (env != null && !env.isEmpty()) {
+            BASE_URL = env;
+        } else {
+            BASE_URL = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess_US() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequest_Short() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/A").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound_ZZZ() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBad_NoCodes() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess_US_CA() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get(BASE_URL + "/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInternalServerError_Malformed() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get(BASE_URL + "/v1/alpha").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess_USD() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequest_LengthNotThree() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound_XYZ() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess_France_FullTextFalse() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get(BASE_URL + "/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound_Numeric() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get(BASE_URL + "/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess_1() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess_London() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccess_Europe() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccess_es() {
+        given().when().get(BASE_URL + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE_URL + "/v1/lang/es").then().statusCode(200);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

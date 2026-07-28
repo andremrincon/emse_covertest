@@ -1,0 +1,100 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testTextTxtSuffix() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "text")
+                .pathParam("file", "notes.txt")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatPdfSuffix() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "acrobat")
+                .pathParam("file", "document.pdf")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDocSuffix() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "word")
+                .pathParam("file", "report.doc")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinExeSuffix() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "bin")
+                .pathParam("file", "app.exe")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDllSuffix() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "lib")
+                .pathParam("file", "core.dll")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDotFileReturnsZero() {
+        given()
+                .accept(ContentType.JSON)
+                .pathParam("directory", "text")
+                .pathParam("file", "nofilesuffix")
+                .when()
+                .get("/api/filesuffix/{directory}/{file}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}

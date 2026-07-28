@@ -1,0 +1,140 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private String getBaseUrl() {
+        String v = System.getProperty("api.base");
+        if (v != null && !v.isEmpty()) return v;
+        v = System.getenv("API_BASE");
+        if (v != null && !v.isEmpty()) return v;
+        return "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Success_US() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_Short() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/1");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success_SemicolonSeparated() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha?codes=US;CA;MX");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest_EmptyParam() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha?codes=");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound_UnknownCodes() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha?codes=XX;YY;ZZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success_USD() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest_Short() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/12");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Success_es() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Success_France_FullTextFalse() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/name/France?fullText=false");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound_Numeric() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/name/123?fullText=false");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Success_1() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Success_London() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/capital/London");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Success_Europe() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/region/Europe");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_Success_WesternEurope() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        String enc = URLEncoder.encode("Western Europe", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get(base + "/v1/subregion/" + enc);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_NotFound_XYZ() throws Exception {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/XYZ");
+        resp.then().statusCode(404);
+    }
+}

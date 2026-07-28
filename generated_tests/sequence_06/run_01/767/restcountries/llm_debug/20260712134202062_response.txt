@@ -1,0 +1,147 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("test.base.uri", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given()
+            .pathParam("alphacode", "XYZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequest() {
+        given()
+            .pathParam("alphacode", "A")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBadRequest() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListServerError() {
+        given()
+            .queryParam("codes", "US|CA|MX")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListEmptyCodes() {
+        given()
+            .queryParam("codes", "")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequest() {
+        given()
+            .pathParam("currency", "12")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyServerError() {
+        given()
+            .pathParam("currency", "INVALIDCURRENCYCODE")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameServerError() {
+        given()
+            .pathParam("name", "True")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeServerError() {
+        given()
+            .pathParam("callingcode", "True")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalServerError() {
+        given()
+            .pathParam("capital", "True")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionServerError() {
+        given()
+            .pathParam("region", "True")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregionServerError() {
+        given()
+            .pathParam("subregion", "True")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageServerError() {
+        given()
+            .pathParam("lang", "True")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(500);
+    }
+}
+```

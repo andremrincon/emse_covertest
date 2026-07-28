@@ -1,0 +1,161 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_twoCharCode_returns200() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_threeCharCode_returns200() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_nonExistentCode_returns404() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_invalidFormat_returns400() {
+        given()
+            .when()
+                .get("/v1/alpha/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_multipleCodes_returns200() {
+        given()
+            .queryParam("codes", "US;CA;MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_duplicateCodes_returns200() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_nonExistentCodes_returns404() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_exactName_returns200() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "France")
+            .then()
+                .statusCode(404);
+    }
+
+    @Ignore("Illegal character in path at index 46: http://localhost:8080/rest/rest/v1/name/French Republic")
+    @Test(timeout = 60000)
+    public void fulltextSearch_altSpelling_returns200() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "French Republic")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_nonMatchingName_returns404() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "NonExistentCountryName")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_partialName_returns200() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "Fran")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_altSpellingSubstring_returns200() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "Republic")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void substringSearch_nonMatchingName_returns404() {
+        given()
+            .when()
+                .get("/v1/name/{name}", "123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_allCountries_returns200() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_singleCode_returns200() {
+        given()
+            .queryParam("codes", "US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+}

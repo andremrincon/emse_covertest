@@ -1,0 +1,557 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCreateFeaturesWithDifferentNamesCoversEqualsFalsePath TYPE=ERROR
+Illegal character in path at index 85: http://localhost:8080/products/Product-6e159e7a-f734-4e58-a38f-206b5a89602b/features/{featureName1}
+
+[2] METHOD=testAddSameFeatureTwiceToConfigurationCoversEqualsTruePath TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[3] METHOD=testMultipleFeaturesInConfigurationCoversEquals TYPE=ERROR
+Illegal character in path at index 85: http://localhost:8080/products/Product-5ca332ee-978e-41ef-bcf4-70917f5ba66a/features/{featureName1}
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCreateFeaturesWithDifferentNamesCoversEqualsFalsePath FAILURE AT LINE 260
+java.net.URISyntaxException: Illegal character in path at index 85: http://localhost:8080/products/Product-6e159e7a-f734-4e58-a38f-206b5a89602b/features/{featureName1}
+at ts01qwen3_7_plus.FeatureTest.testCreateFeaturesWithDifferentNamesCoversEqualsFalsePath(FeatureTest.java:260)
+CODE CONTEXT:
+   257:             .pathParam("featureName", featureName1)
+   258:             .formParam("description", "First feature")
+   259:         .when()
+   260:             .post("/products/{productName}/features/{featureName1}")  ← FAILURE HERE
+   261:         .then()
+   262:             .statusCode(lessThan(300));
+   263: 
+
+[2] METHOD=testAddSameFeatureTwiceToConfigurationCoversEqualsTruePath FAILURE AT LINE 239
+java.lang.AssertionError:
+at ts01qwen3_7_plus.FeatureTest.testAddSameFeatureTwiceToConfigurationCoversEqualsTruePath(FeatureTest.java:239)
+CODE CONTEXT:
+   236:         .when()
+   237:             .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+   238:         .then()
+   239:             .statusCode(500);  ← FAILURE HERE
+   240:     }
+   241: 
+   242:     @Test(timeout = 60000)
+
+[3] METHOD=testMultipleFeaturesInConfigurationCoversEquals FAILURE AT LINE 440
+java.net.URISyntaxException: Illegal character in path at index 85: http://localhost:8080/products/Product-5ca332ee-978e-41ef-bcf4-70917f5ba66a/features/{featureName1}
+at ts01qwen3_7_plus.FeatureTest.testMultipleFeaturesInConfigurationCoversEquals(FeatureTest.java:440)
+CODE CONTEXT:
+   437:             .pathParam("featureName", featureName1)
+   438:             .formParam("description", "First feature")
+   439:         .when()
+   440:             .post("/products/{productName}/features/{featureName1}")  ← FAILURE HERE
+   441:         .then()
+   442:             .statusCode(lessThan(300));
+   443: 
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureCoversSetNameAndSetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetName() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureTwiceToConfigurationCoversEqualsTruePath() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeaturesWithDifferentNamesCoversEqualsFalsePath() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeaturesWithSameNameInDifferentProductsCoversEqualsProductComparison() {
+        String productName1 = "Product1-" + UUID.randomUUID().toString();
+        String productName2 = "Product2-" + UUID.randomUUID().toString();
+        String featureName = "SharedFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName1)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName2)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName1)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Feature in product 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName2)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Feature in product 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName = "Feature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultipleFeaturesInConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/{productName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/{productName}/features/{featureName2}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName1}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName2)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName2}")
+        .then()
+            .statusCode(201);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

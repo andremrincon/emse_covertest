@@ -1,0 +1,216 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ResponseEntityTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetNameServerErrorReturnsResponseEntityWithStatusAndMessage TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[2] METHOD=testGetNameNotFoundReturnsResponseEntityWithStatusAndMessage TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+[3] METHOD=testGetRegionServerErrorReturnsResponseEntityWithStatusAndMessage TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[4] METHOD=testGetCallingCodeNotFoundReturnsResponseEntityWithStatusAndMessage TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+[5] METHOD=testGetRegionNotFoundReturnsResponseEntityWithStatusAndMessage TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+[6] METHOD=testGetCapitalNotFoundReturnsResponseEntityWithStatusAndMessage TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetNameServerErrorReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 69
+java.lang.AssertionError:
+at ts01glm_5_2.ResponseEntityTest.testGetNameServerErrorReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:69)
+CODE CONTEXT:
+    66:                 .when()
+    67:                 .get("/v1/name/True")
+    68:                 .then()
+    69:                 .statusCode(404)  ← FAILURE HERE
+    70:                 .body("status", equalTo(500))
+    71:                 .body("message", equalTo("Internal Server Error"));
+    72:     }
+
+[2] METHOD=testGetNameNotFoundReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 26
+at ts01glm_5_2.ResponseEntityTest.testGetNameNotFoundReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:26)
+CODE CONTEXT:
+    23:                 .get("/v1/name/123")
+    24:                 .then()
+    25:                 .statusCode(404)
+    26:                 .body("status", equalTo(404))  ← FAILURE HERE
+    27:                 .body("message", equalTo("Not Found"));
+    28:     }
+    29: 
+
+[3] METHOD=testGetRegionServerErrorReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 80
+java.lang.AssertionError:
+at ts01glm_5_2.ResponseEntityTest.testGetRegionServerErrorReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:80)
+CODE CONTEXT:
+    77:                 .when()
+    78:                 .get("/v1/region/True")
+    79:                 .then()
+    80:                 .statusCode(404)  ← FAILURE HERE
+    81:                 .body("status", equalTo(500))
+    82:                 .body("message", equalTo("Internal Server Error"));
+    83:     }
+
+[4] METHOD=testGetCallingCodeNotFoundReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 59
+at ts01glm_5_2.ResponseEntityTest.testGetCallingCodeNotFoundReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:59)
+CODE CONTEXT:
+    56:                 .get("/v1/callingcode/abc")
+    57:                 .then()
+    58:                 .statusCode(404)
+    59:                 .body("status", equalTo(404))  ← FAILURE HERE
+    60:                 .body("message", equalTo("Not Found"));
+    61:     }
+    62: 
+
+[5] METHOD=testGetRegionNotFoundReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 48
+at ts01glm_5_2.ResponseEntityTest.testGetRegionNotFoundReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:48)
+CODE CONTEXT:
+    45:                 .get("/v1/region/123")
+    46:                 .then()
+    47:                 .statusCode(404)
+    48:                 .body("status", equalTo(404))  ← FAILURE HERE
+    49:                 .body("message", equalTo("Not Found"));
+    50:     }
+    51: 
+
+[6] METHOD=testGetCapitalNotFoundReturnsResponseEntityWithStatusAndMessage FAILURE AT LINE 37
+at ts01glm_5_2.ResponseEntityTest.testGetCapitalNotFoundReturnsResponseEntityWithStatusAndMessage(ResponseEntityTest.java:37)
+CODE CONTEXT:
+    34:                 .get("/v1/capital/123")
+    35:                 .then()
+    36:                 .statusCode(404)
+    37:                 .body("status", equalTo(404))  ← FAILURE HERE
+    38:                 .body("message", equalTo("Not Found"));
+    39:     }
+    40: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/name/123")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/capital/123")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/region/123")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingCodeNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/callingcode/abc")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameServerErrorReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/name/True")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(500))
+                .body("message", equalTo("Internal Server Error"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionServerErrorReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .when()
+                .get("/v1/region/True")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(500))
+                .body("message", equalTo("Internal Server Error"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

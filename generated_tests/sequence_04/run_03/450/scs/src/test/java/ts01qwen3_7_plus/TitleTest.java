@@ -1,0 +1,80 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    @Test(timeout = 60000)
+    public void testMaleMr() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "male")
+            .pathParam("title", "mr")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleRthon() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "male")
+            .pathParam("title", "rthon")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleMrs() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "female")
+            .pathParam("title", "mrs")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleProf() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "female")
+            .pathParam("title", "prof")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneDr() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "none")
+            .pathParam("title", "dr")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneProf() {
+        given()
+            .baseUri("http://localhost:8080")
+            .pathParam("sex", "none")
+            .pathParam("title", "prof")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,87 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "Prod-Req-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "F1-" + UUID.randomUUID().toString().substring(0, 8);
+        String f2 = "F2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", f1)
+            .formParam("requiredFeature", f2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithConstraints() {
+        String productName = "Prod-Get-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "F1-" + UUID.randomUUID().toString().substring(0, 8);
+        String f2 = "F2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", f1).formParam("requiredFeature", f2).when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "Prod-Exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "F1-" + UUID.randomUUID().toString().substring(0, 8);
+        String f2 = "F2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", f1)
+            .formParam("excludedFeature", f2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraint() {
+        String productName = "Prod-Del-" + UUID.randomUUID().toString().substring(0, 8);
+        String f1 = "F1-" + UUID.randomUUID().toString().substring(0, 8);
+        String f2 = "F2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", f1).formParam("requiredFeature", f2).when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+
+        Long constraintId = given().when().get("/products/" + productName).then().statusCode(lessThan(300)).extract().jsonPath().getLong("constraints[0].id");
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/constraints/" + constraintId)
+            .then()
+            .statusCode(204);
+    }
+}
+```

@@ -1,0 +1,71 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("base.port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositivePositive() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveNegative() {
+        given()
+            .when()
+                .get("/api/remainder/17/-5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativePositive() {
+        given()
+            .when()
+                .get("/api/remainder/-9/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeNegative() {
+        given()
+            .when()
+                .get("/api/remainder/-9/-5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderInvalidInput() {
+        given()
+            .when()
+                .get("/api/remainder/abc/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderZeroDivisor() {
+        given()
+            .when()
+                .get("/api/remainder/17/0")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,135 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowOriginHeader() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowMethodsHeader() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowHeadersHeader() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsCacheControlHeader() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2Endpoints() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToCallingCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToSubregionEndpoint() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToLangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToAllV2Endpoint() {
+        given()
+                .when()
+                .get("/v2/all")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+}
+```

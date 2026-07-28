@@ -1,0 +1,77 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefault() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .queryParam("name", "John")
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello John!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithSingleCharName() {
+        given()
+            .queryParam("name", "A")
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello A!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiZeroDelay() {
+        given()
+            .queryParam("delay", 0)
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiPositiveDelay() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+}

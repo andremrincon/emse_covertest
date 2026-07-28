@@ -1,0 +1,38 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+	@Test(timeout = 60000)
+	public void testValidDateparseReturns200() {
+		String base = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+		String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun" };
+		for (String m : months) {
+			given().baseUri(base).when().get("/api/dateparse/Mon/{m}", m).then().statusCode(lessThan(300));
+		}
+		given().baseUri(base).when().get("/api/dateparse/Wednesday/August").then().statusCode(200);
+	}
+
+	@Test(timeout = 60000)
+	public void testCaseInsensitiveMonthAndDayReturns200() {
+		String base = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+		String[] months = { "Jul", "Sep", "Oct", "Nov", "Dec" };
+		for (String m : months) {
+			given().baseUri(base).when().get("/api/dateparse/Fri/{m}", m).then().statusCode(lessThan(300));
+		}
+		given().baseUri(base).when().get("/api/dateparse/tuesday/MAR").then().statusCode(200);
+	}
+
+	@Test(timeout = 60000)
+	public void testInvalidDayOrMonthReturns500() {
+		String base = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+		given().baseUri(base).when().get("/api/dateparse/Mon/Jan").then().statusCode(lessThan(300));
+		String unique = UUID.randomUUID().toString();
+		given().baseUri(base).when().get("/api/dateparse/" + unique + "/Jan").then().statusCode(lessThan(300));
+		given().baseUri(base).when().get("/api/dateparse/Superday/Movember").then().statusCode(500);
+	}
+}

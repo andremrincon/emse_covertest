@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NotyPevarTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI0True() {
+        given().when().get("/api/notypevar/5/hello").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/notypevar/28/hello");
+        assertEquals("3", response.body().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI1True() {
+        given().when().get("/api/notypevar/5/hello").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/notypevar/7/hello");
+        assertEquals("3", response.body().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI2True() {
+        given().when().get("/api/notypevar/5/hello").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/notypevar/0/world");
+        assertEquals("2", response.body().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidIntegerFormat() {
+        given().when().get("/api/notypevar/5/hello").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/notypevar/abc/hello");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIntegerOverflow() {
+        given().when().get("/api/notypevar/5/hello").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/notypevar/2147483648/hello");
+        assertEquals(400, response.getStatusCode());
+    }
+}

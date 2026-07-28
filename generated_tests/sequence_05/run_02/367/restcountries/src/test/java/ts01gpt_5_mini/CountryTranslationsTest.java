@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryTranslationsTest {
+
+    private static final String BASE;
+    static {
+        String v = System.getProperty("baseUrl");
+        if (v == null || v.isEmpty()) {
+            v = System.getenv("BASE_URL");
+        }
+        if (v == null || v.isEmpty()) {
+            v = "http://localhost:8080/rest";
+        }
+        BASE = v;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeViaV1AlphaUS_1() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaV1AlphaUS_2() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaV1AlphaUS_3() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaV1AlphaUS_4() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaV1AlphaUS_5() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+}

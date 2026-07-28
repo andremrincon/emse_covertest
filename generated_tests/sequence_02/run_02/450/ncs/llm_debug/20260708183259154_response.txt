@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ExpintTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String prop = System.getProperty("baseUrl");
+        if (env != null && !env.isEmpty()) BASE = env;
+        else if (prop != null && !prop.isEmpty()) BASE = prop;
+        else BASE = "http://localhost:8080";
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintInvalidInputZeroN() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/0/0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZeroReturnsOk() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/0/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNGreaterThanOne() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/3/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintContinuedFractionPath() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/3/2.5").then().body("status", equalTo("success"));
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathNOne() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/1/0.1").then().statusCode(200);
+    }
+}

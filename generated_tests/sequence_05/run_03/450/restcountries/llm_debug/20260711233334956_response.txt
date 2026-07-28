@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getProperty("REST_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("REST_BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        RestAssured.baseURI = env + "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_message() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFound_statusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/123").then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaValid_statusCode200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaBadFormat_statusCode400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyInvalid_statusCode400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/123").then().statusCode(400);
+    }
+}

@@ -1,0 +1,85 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.http.ContentType;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+
+    @Test(timeout = 60000)
+    public void testContributionValid() {
+        String uniqueToken = "tok_" + UUID.randomUUID().toString();
+        String body = "{\"amount\": 100, \"token\": \"" + uniqueToken + "\"}";
+
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributionMissingAmount() {
+        String uniqueToken = "tok_" + UUID.randomUUID().toString();
+        String body = "{\"token\": \"" + uniqueToken + "\"}";
+
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributionMissingToken() {
+        String body = "{\"amount\": 100}";
+
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributionInvalidAmountType() {
+        String uniqueToken = "tok_" + UUID.randomUUID().toString();
+        String body = "{\"amount\": \"invalid\", \"token\": \"" + uniqueToken + "\"}";
+
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributionEmptyBody() {
+        given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(404);
+    }
+}

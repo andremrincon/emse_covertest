@@ -1,0 +1,145 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeader() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/all");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeader() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/alpha/US");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeader() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/name/France");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeader() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/capital/London");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2All() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/all");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Alpha() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/alpha/US");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Name() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/name/Germany");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Capital() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/capital/Paris");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV1Currency() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/currency/USD");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Currency() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/currency/EUR");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV1Region() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/region/Europe");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2Region() {
+        Response response = RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/region/Europe");
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals(null, response.getHeader("Cache-Control"));
+    }
+}

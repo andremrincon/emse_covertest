@@ -1,0 +1,73 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setupBaseUri() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_Succeeds() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uuid;
+        String config = "standard-gpu-cluster-" + uuid;
+        String feature = "distributed-training";
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", product).pathParam("configurationName", config).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", product).pathParam("configurationName", config).pathParam("featureName", feature).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        resp.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_FailsOnInvalidFeatureName() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uuid;
+        String config = "standard-gpu-cluster-" + uuid;
+        String longFeature = "feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database_column_width_or_url_segment_limit_" + uuid;
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", product).pathParam("configurationName", config).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", product).pathParam("configurationName", config).pathParam("featureName", longFeature).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_Succeeds() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uuid;
+        String config = "Premium-Tier-" + uuid;
+        String feature = "Realtime-Analytics-Dashboard-" + uuid;
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", product).pathParam("configurationName", config).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", product).pathParam("configurationName", config).pathParam("featureName", feature).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", product).pathParam("configurationName", config).pathParam("featureName", feature).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        resp.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_FailsOnInvalidFeatureName() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "DataStreamer-" + uuid;
+        String config = "Standard-" + uuid;
+        String problematicFeature = "feature-name-that-is-intentionally-made-very_long_to_exceed_limits_and_trigger_internal_server_error_" + uuid;
+        given().pathParam("productName", product).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", product).pathParam("configurationName", config).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response resp = given().pathParam("productName", product).pathParam("configurationName", config).pathParam("featureName", problematicFeature).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        resp.then().statusCode(500);
+    }
+}

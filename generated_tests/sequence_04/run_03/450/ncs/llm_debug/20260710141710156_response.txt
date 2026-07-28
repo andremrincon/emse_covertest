@@ -1,0 +1,92 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNormal() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPLessThanZero() {
+        given()
+            .pathParam("m", 100)
+            .pathParam("n", 1)
+            .pathParam("x", 1000000.0)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOne() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 100)
+            .pathParam("x", 1e15)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidM() {
+        given()
+            .pathParam("m", "abc")
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidN() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", -3)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidX() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", "abc")
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(404);
+    }
+}

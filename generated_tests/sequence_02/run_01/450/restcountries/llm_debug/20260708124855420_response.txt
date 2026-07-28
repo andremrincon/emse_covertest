@@ -1,0 +1,45 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("API_BASE");
+            base = (env != null && !env.isEmpty()) ? env : "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIso639_1IsExposedForAlphaCodeUS() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIso639_2IsExposedForAlphaCodeUS() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNameIsExposedForAlphaCodeUS() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNativeNameIsExposedForAlphaCodeUS() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].nativeName", equalTo("English"));
+    }
+}

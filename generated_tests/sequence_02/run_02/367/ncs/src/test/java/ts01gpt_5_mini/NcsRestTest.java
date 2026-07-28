@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NcsRestTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        BASE = Optional.ofNullable(System.getProperty("ncs.base.url"))
+                .orElse(Optional.ofNullable(System.getenv("NCS_BASE_URL"))
+                        .orElse("http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccess() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/10/5/0.75");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLimitExceededReturns400() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/1001/5/0.5");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherRuntimeExceptionReturns400() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/fisher/10/5/1.2");
+        assertEquals(200, act.getStatusCode());
+    }
+}

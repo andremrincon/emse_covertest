@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2Returns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZeroReturnsZero() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/0")
+        .then()
+            .body("value", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessOrEqualN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/1.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLargeNegativeXForBessj1ElseBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200);
+    }
+}

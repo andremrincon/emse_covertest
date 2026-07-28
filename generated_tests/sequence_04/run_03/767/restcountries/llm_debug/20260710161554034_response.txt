@@ -1,0 +1,97 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_DEU_threeLetter_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/DEU");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_invalidFormat_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_codes_multiple_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha?codes=US,CA");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_codes_missing_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha");
+        Assert.assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_codes_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha?codes=XX");
+        Assert.assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_fulltext_primary_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France?fullText=true");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_fulltext_altspelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/Bundesrepublik%20Deutschland?fullText=true");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_substring_primary_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/United?fullText=false");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_substring_altspelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/Bundes?fullText=false");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All_triggersLoadJson_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/all");
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+}

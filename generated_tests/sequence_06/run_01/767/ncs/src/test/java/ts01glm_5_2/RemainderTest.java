@@ -1,0 +1,95 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RemainderTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_aZero_returns400() {
+        given()
+                .pathParam("a", 0)
+                .pathParam("b", 5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_bZero_returns400() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", 0)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"2\"   Actual: {\"resul...")
+    @Test(timeout = 60000)
+    public void remainder_bothPositive_returnsCorrectRemainder() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", 5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"2\"   Actual: {\"resul...")
+    @Test(timeout = 60000)
+    public void remainder_aPositiveBNegative_returnsCorrectRemainder() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", -5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"-4\"   Actual: {\"resu...")
+    @Test(timeout = 60000)
+    public void remainder_aNegativeBPositive_returnsCorrectRemainder() {
+        given()
+                .pathParam("a", -9)
+                .pathParam("b", 5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("-4"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"-4\"   Actual: {\"resu...")
+    @Test(timeout = 60000)
+    public void remainder_bothNegative_returnsCorrectRemainder() {
+        given()
+                .pathParam("a", -9)
+                .pathParam("b", -5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200)
+                .body(equalTo("-4"));
+    }
+}

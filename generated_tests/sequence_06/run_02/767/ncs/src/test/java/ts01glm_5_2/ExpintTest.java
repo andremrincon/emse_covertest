@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class ExpintTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN0XPositive() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/0/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeNThrowsError() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/-1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNGreaterThan1XZero() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/2/0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNGreaterThan1XGreaterThanOne() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/3/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN1XLessThanOneSeriesNm1Zero() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/1/0.1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN3XLessThanOneSeriesNm1NonZero() {
+        RestAssured.given()
+        .when()
+            .get("/api/expint/3/0.1")
+        .then()
+            .statusCode(200);
+    }
+}

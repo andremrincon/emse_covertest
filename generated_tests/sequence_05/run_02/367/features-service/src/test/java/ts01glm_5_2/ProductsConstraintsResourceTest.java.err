@@ -1,0 +1,175 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseUrl;
+    private static final int CONNECT_TIMEOUT = 10000;
+    private static final int READ_TIMEOUT = 10000;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() throws Exception {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int status;
+
+        status = doPost("/products/" + encodePath(productName), null, null);
+        assertTrue(status < 300);
+
+        status = doPost("/products/" + encodePath(productName) + "/features/" + encodePath(sourceFeature), null, null);
+        assertTrue(status < 300);
+
+        status = doPost("/products/" + encodePath(productName) + "/features/" + encodePath(requiredFeature), null, null);
+        assertTrue(status < 300);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&requiredFeature=" + urlEncode(requiredFeature);
+        status = doPost("/products/" + encodePath(productName) + "/constraints/requires", "application/x-www-form-urlencoded", body);
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() throws Exception {
+        String productName = "TestProduct-Excludes-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int status;
+
+        status = doPost("/products/" + encodePath(productName), null, null);
+        assertTrue(status < 300);
+
+        status = doPost("/products/" + encodePath(productName) + "/features/" + encodePath(sourceFeature), null, null);
+        assertTrue(status < 300);
+
+        status = doPost("/products/" + encodePath(productName) + "/features/" + encodePath(excludedFeature), null, null);
+        assertTrue(status < 300);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&excludedFeature=" + urlEncode(excludedFeature);
+        status = doPost("/products/" + encodePath(productName) + "/constraints/excludes", "application/x-www-form-urlencoded", body);
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintWithNonExistentProduct() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&requiredFeature=" + urlEncode(requiredFeature);
+        int status = doPost("/products/" + encodePath(productName) + "/constraints/requires", "application/x-www-form-urlencoded", body);
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintWithNonExistentProduct() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&excludedFeature=" + urlEncode(excludedFeature);
+        int status = doPost("/products/" + encodePath(productName) + "/constraints/excludes", "application/x-www-form-urlencoded", body);
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintWithNonExistentFeatures() throws Exception {
+        String productName = "TestProduct-RequiresNoFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "NonExistentSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "NonExistentRequired-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int status;
+
+        status = doPost("/products/" + encodePath(productName), null, null);
+        assertTrue(status < 300);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&requiredFeature=" + urlEncode(requiredFeature);
+        status = doPost("/products/" + encodePath(productName) + "/constraints/requires", "application/x-www-form-urlencoded", body);
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintWithNonExistentFeatures() throws Exception {
+        String productName = "TestProduct-ExcludesNoFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "NonExistentSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "NonExistentExcluded-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int status;
+
+        status = doPost("/products/" + encodePath(productName), null, null);
+        assertTrue(status < 300);
+
+        String body = "sourceFeature=" + urlEncode(sourceFeature) + "&excludedFeature=" + urlEncode(excludedFeature);
+        status = doPost("/products/" + encodePath(productName) + "/constraints/excludes", "application/x-www-form-urlencoded", body);
+        assertEquals(500, status);
+    }
+
+    private static int doPost(String path, String contentType, String body) throws Exception {
+        URL url = new URL(normalizeBaseUrl(baseUrl) + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(CONNECT_TIMEOUT);
+            conn.setReadTimeout(READ_TIMEOUT);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            if (body != null) {
+                conn.setDoOutput(true);
+                byte[] out = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(out);
+                    os.flush();
+                } finally {
+                    os.close();
+                }
+            } else {
+                conn.setDoOutput(false);
+            }
+            int status = conn.getResponseCode();
+            return status;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static String urlEncode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String encodePath(String s) {
+        String encoded = urlEncode(s);
+        return encoded.replace("+", "%20");
+    }
+
+    private static String normalizeBaseUrl(String u) {
+        if (u.endsWith("/")) {
+            return u.substring(0, u.length() - 1);
+        }
+        return u;
+    }
+}

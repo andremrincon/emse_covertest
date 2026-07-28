@@ -1,0 +1,334 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ConfigurationEvaluatorTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=evaluateConfiguration_noConstraints_returnsValidConfiguration TYPE=FAILURE
+
+
+[2] METHOD=evaluateConfiguration_excludesConstraintViolated_returnsInvalidConfiguration TYPE=FAILURE
+
+
+[3] METHOD=evaluateConfiguration_excludesConstraintNotViolated_returnsValidConfiguration TYPE=FAILURE
+
+
+[4] METHOD=evaluateConfiguration_requiresConstraintTriggersDerivedFeature_returnsValidConfiguration TYPE=FAILURE
+
+
+[5] METHOD=evaluateConfiguration_requiresConstraintSatisfied_returnsValidConfiguration TYPE=FAILURE
+
+
+[6] METHOD=evaluateConfiguration_requiresConstraintNotSatisfied_returnsInvalidConfiguration TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=evaluateConfiguration_noConstraints_returnsValidConfiguration FAILURE AT LINE 94
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_noConstraints_returnsValidConfiguration(ConfigurationEvaluatorTest.java:94)
+CODE CONTEXT:
+    91:         Assert.assertTrue(code1 < 300);
+    92: 
+    93:         int code2 = sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(featureName), null);
+    94:         Assert.assertTrue(code2 < 300);  ← FAILURE HERE
+    95: 
+    96:         int code3 = sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null);
+    97:         Assert.assertTrue(code3 < 300);
+
+[2] METHOD=evaluateConfiguration_excludesConstraintViolated_returnsInvalidConfiguration FAILURE AT LINE 157
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_excludesConstraintViolated_returnsInvalidConfiguration(ConfigurationEvaluatorTest.java:157)
+CODE CONTEXT:
+   154:         String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+   155: 
+   156:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+   157:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);  ← FAILURE HERE
+   158:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null) < 300);
+   159:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+   160:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+[3] METHOD=evaluateConfiguration_excludesConstraintNotViolated_returnsValidConfiguration FAILURE AT LINE 179
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_excludesConstraintNotViolated_returnsValidConfiguration(ConfigurationEvaluatorTest.java:179)
+CODE CONTEXT:
+   176:         String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+   177: 
+   178:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+   179:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);  ← FAILURE HERE
+   180:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null) < 300);
+   181:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+   182:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+[4] METHOD=evaluateConfiguration_requiresConstraintTriggersDerivedFeature_returnsValidConfiguration FAILURE AT LINE 200
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_requiresConstraintTriggersDerivedFeature_returnsValidConfiguration(ConfigurationEvaluatorTest.java:200)
+CODE CONTEXT:
+   197:         String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+   198: 
+   199:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+   200:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);  ← FAILURE HERE
+   201:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+   202:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+   203:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+[5] METHOD=evaluateConfiguration_requiresConstraintSatisfied_returnsValidConfiguration FAILURE AT LINE 114
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_requiresConstraintSatisfied_returnsValidConfiguration(ConfigurationEvaluatorTest.java:114)
+CODE CONTEXT:
+   111:         String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+   112: 
+   113:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+   114:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);  ← FAILURE HERE
+   115:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+   116:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+   117:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+[6] METHOD=evaluateConfiguration_requiresConstraintNotSatisfied_returnsInvalidConfiguration FAILURE AT LINE 136
+java.lang.AssertionError
+at ts01glm_5_2.ConfigurationEvaluatorTest.evaluateConfiguration_requiresConstraintNotSatisfied_returnsInvalidConfiguration(ConfigurationEvaluatorTest.java:136)
+CODE CONTEXT:
+   133:         String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+   134: 
+   135:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+   136:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);  ← FAILURE HERE
+   137:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+   138:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+   139:         Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class ConfigurationEvaluatorTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        baseUri = base;
+    }
+
+    private static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private int sendRequest(String method, String path, Map<String, String> params) throws IOException {
+        String urlStr = baseUri;
+        if (!path.startsWith("/")) {
+            urlStr += "/";
+        }
+        urlStr += path;
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
+            conn.setDoOutput(true);
+            String body = "";
+            if (params != null && !params.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (Map.Entry<String, String> e : params.entrySet()) {
+                    if (!first) {
+                        sb.append("&");
+                    }
+                    sb.append(encode(e.getKey())).append("=").append(encode(e.getValue()));
+                    first = false;
+                }
+                body = sb.toString();
+            }
+            if (!body.isEmpty()) {
+                byte[] out = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(out);
+                os.flush();
+                os.close();
+            } else {
+                conn.setRequestProperty("Content-Length", "0");
+            }
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_noConstraints_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code1 = sendRequest("POST", "/products/" + encode(productName), null);
+        Assert.assertTrue(code1 < 300);
+
+        int code2 = sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(featureName), null);
+        Assert.assertTrue(code2 < 300);
+
+        int code3 = sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null);
+        Assert.assertTrue(code3 < 300);
+
+        int code4 = sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(featureName), null);
+        Assert.assertTrue(code4 < 300);
+
+        int code5 = sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null);
+        Assert.assertEquals(200, code5);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintSatisfied_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(requiredFeature), null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params) < 300);
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintNotSatisfied_returnsInvalidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params) < 300);
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_excludesConstraintViolated_returnsInvalidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(excludedFeature), null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", params) < 300);
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_excludesConstraintNotViolated_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", params) < 300);
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintTriggersDerivedFeature_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        Assert.assertTrue(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params) < 300);
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

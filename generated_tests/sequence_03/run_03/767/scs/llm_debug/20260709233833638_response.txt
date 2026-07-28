@@ -1,0 +1,67 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testLengthsOutOfBounds() {
+        given()
+            .pathParam("w", "a")
+            .pathParam("x", "b")
+            .pathParam("z", "c")
+            .pathParam("y", "d")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthsInBoundsUnordered() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "ccccc")
+            .pathParam("z", "bbbbb")
+            .pathParam("y", "ddddd")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthsInBoundsIncreasing() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("y", "ccccc")
+            .pathParam("z", "ddddd")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthsInBoundsDecreasing() {
+        given()
+            .pathParam("w", "ddddd")
+            .pathParam("x", "ccccc")
+            .pathParam("y", "bbbbb")
+            .pathParam("z", "aaaaa")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+}
+```

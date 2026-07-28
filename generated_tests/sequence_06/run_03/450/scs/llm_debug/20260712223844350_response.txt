@@ -1,0 +1,40 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("API_BASE", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstant_returnsPiBody() {
+        given().when().get("/api/calc/plus/1/2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/pi/0/0");
+        assertEquals(String.valueOf(Math.PI), act.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZero_returns500() {
+        given().when().get("/api/calc/multiply/2/3").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/divide/100/0");
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnary_returnsExpectedBody() {
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/sqrt/9/0");
+        assertEquals("3.0", act.asString());
+    }
+}

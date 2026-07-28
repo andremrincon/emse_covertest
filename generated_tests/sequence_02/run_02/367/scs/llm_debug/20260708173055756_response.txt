@@ -1,0 +1,73 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithInvalidLengths() {
+        String w = "abc";
+        String x = "defgh";
+        String z = "ijklm";
+        String y = "nopqr";
+        
+        given()
+            .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "apple";
+        String x = "banana";
+        String y = "cherry";
+        String z = "datee";
+        
+        given()
+            .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+            .then()
+                .statusCode(200)
+                .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "zebra";
+        String x = "yakss";
+        String y = "xrays";
+        String z = "wolves";
+        
+        given()
+            .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+            .then()
+                .statusCode(200)
+                .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengths() {
+        String w = "apple";
+        String x = "banana";
+        String y = "cherry";
+        String z = "apple";
+        
+        given()
+            .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+}
+```

@@ -1,0 +1,118 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryRestV2Test {
+
+    private static final String BASE = System.getProperty("BASE_URL",
+            System.getenv("BASE_URL") == null ? "http://localhost:8080/rest" : System.getenv("BASE_URL"));
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Success_WithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_ShortCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/1");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/ZZZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha?codes=US,CA");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest_InvalidFormat() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha?codes=[\"US\",\"CA\"]");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest_MissingCodes_IsEmpty() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success_WithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR?fields=name;capital;population");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest_NonThreeLetters() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/12");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Success_FullTextTrue() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/name/Germany?fullText=true");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/name/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Success_WithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/1?fields=name;capital;region");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Success_WithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/capital/Paris?fields=name;capital;population");
+        act.then().body(containsString("Paris"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_NotFound_InvalidRegion() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/region/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testPost_V2_MethodNotAllowed() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().post("/v2");
+        act.then().statusCode(405);
+    }
+}

@@ -1,0 +1,106 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080/rest"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaInvalidLengthReturns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundReturns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListMissingCodesReturns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA,MX&fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListNotFoundReturns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=XX,YY,ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyInvalidReturns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNotFoundReturns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFullTextFalseReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/Germany?fullText=false&fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/callingcode/1?fields=name;capital;region").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/capital/Paris?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionWithFieldsReturns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/region/Europe?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostMethodNotAllowedReturns405() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().post("/v2").then().statusCode(405);
+    }
+}

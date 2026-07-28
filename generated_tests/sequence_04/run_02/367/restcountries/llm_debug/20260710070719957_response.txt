@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("REST_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("REST_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionReturns202() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100,\"token\":\"" + token + "\",\"currency\":\"USD\"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingTokenReturns400() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50,\"currency\":\"USD\"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingAmountReturns400() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"token\":\"" + token + "\",\"currency\":\"USD\"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testEmptyBodyReturns400() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String payload = "{}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+}

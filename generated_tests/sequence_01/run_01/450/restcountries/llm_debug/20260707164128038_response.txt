@@ -1,0 +1,78 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CodeFound() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CodeFound() {
+        given().when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidFormat() {
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValidCodes() {
+        given().when().queryParam("codes", "US,CA,MX").get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNonExistentCodes() {
+        given().when().queryParam("codes", "XX,YY,ZZ").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMissingCodesParam() {
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        given().when().queryParam("fullText", "true").get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given().when().queryParam("fullText", "true").get("/v1/name/United States of America").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFound() {
+        given().when().queryParam("fullText", "true").get("/v1/name/NonExistentCountry").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonViaGetAll() {
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchByName() {
+        given().when().get("/v1/name/France").then().statusCode(200);
+    }
+}
+```

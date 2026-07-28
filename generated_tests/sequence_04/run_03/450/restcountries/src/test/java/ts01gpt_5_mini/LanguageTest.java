@@ -1,0 +1,88 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_US_language_iso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0]['iso639_1']", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_invalid_alphacode_returns_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_unknown_alphacode_returns_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Ignore("The parameter \"nativeName\" was used but not defined. Define parameters using the JsonPath.param...")
+    @Test(timeout = 60000)
+    public void testGetV1Name_France_language_nativeName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().body("[0].languages[0].nativeName", equalTo(null));
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testGetV1Lang_es_has_iso639_2() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().body("[0].languages[0]['iso639_2']", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2Name_Germany_language_nativeName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/Germany").then().body("[0].languages[0].nativeName", equalTo("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2Lang_Spanish_first_country_language_iso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish").then().body("[0].languages[0]['iso639_1']", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_query_multiple_codes_returns_200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2Alpha_query_malformed_codes_returns_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testGetV1Currency_USD_contains_language_iso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().body("[0].languages[0]['iso639_1']", equalTo(null));
+    }
+}

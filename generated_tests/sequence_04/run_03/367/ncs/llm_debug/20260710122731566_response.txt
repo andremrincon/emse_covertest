@@ -1,0 +1,91 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNormalCaseEvenMOddN() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNegativeXClampedToZero() {
+        given()
+            .pathParam("m", 2)
+            .pathParam("n", 2)
+            .pathParam("x", -0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeNegativeXClampedToOne() {
+        given()
+            .pathParam("m", 2)
+            .pathParam("n", 2)
+            .pathParam("x", -2.0)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOddParameters() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 1)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMEvenN() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 2)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidMParameter() {
+        given()
+            .pathParam("m", "abc")
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

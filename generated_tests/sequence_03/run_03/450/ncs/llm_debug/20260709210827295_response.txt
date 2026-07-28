@@ -1,0 +1,101 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns400WhenNLessThan2() {
+        int n = 0;
+        double x = 2.5;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200WhenForwardRecurrenceWithSmallX() {
+        int n = 3;
+        double x = 5.0;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200WhenForwardRecurrenceWithLargeNegativeX() {
+        int n = 3;
+        double x = -10.0;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200WhenForwardRecurrenceWithLargePositiveX() {
+        int n = 3;
+        double x = 10.0;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200WhenBackwardRecurrenceWithPositiveX() {
+        int n = 50;
+        double x = 10.0;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjReturns200WhenBackwardRecurrenceWithNegativeXAndOddN() {
+        int n = 51;
+        double x = -10.0;
+
+        given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,175 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[30,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[30,149] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[39,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[39,151] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[48,42] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_01/run_02/767/restcountries/src/test/java/ts01gpt_5_mini/CurrencyTest.java:[48,159] package eu.fayder.restcountries.v2.domain does not exist
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("REST_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("REST_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/{code}", "US");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badLength_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/{code}", "1");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/{code}", "ZZZ");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_withFields_returnsFilteredBody() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{code}", "US");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US;CA").when().get("/v2/alpha");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_emptyCodes_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "").when().get("/v2/alpha");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badFormat_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/{currency}", "EUR");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badLength_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/{currency}", "12");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", false).when().get("/v2/name/{name}", "Germany");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/callingcode/{callingcode}", "1");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/capital/{capital}", "Paris");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/region/{region}", "Europe");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/subregion/{subregion}", "Western Europe");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountries_withFields_returnsBodyContainsName() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2");
+        assertEquals(200, resp.getStatusCode());
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

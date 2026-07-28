@@ -1,0 +1,46 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void init() {
+        String url = System.getProperty("base.url");
+        if (url == null || url.isEmpty()) url = System.getenv("TEST_BASE_URL");
+        if (url == null || url.isEmpty()) url = "http://localhost:8080";
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstant_returns200() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", "1", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "1", "2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "5", "3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "2", "4").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", id).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZero_returns500() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "10", "5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtProducesCorrectBody() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "3", "4").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "4", "0").then().body(equalTo("2.0"));
+    }
+}

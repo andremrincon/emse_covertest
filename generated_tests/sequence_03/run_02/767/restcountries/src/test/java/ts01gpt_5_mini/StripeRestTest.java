@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithNoBodyReturns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response response = given().contentType("application/json;charset=utf-8").body("").when().post("/contribute");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankTokenReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String json = "{\"amount\":100,\"token\":\"   \"}";
+        Response response = given().contentType("application/json;charset=utf-8").body(json).when().post("/contribute");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithMissingTokenFieldReturns400() {
+        given().when().get("/v1").then().statusCode(lessThan(300));
+        String json = "{\"amount\":250}";
+        Response response = given().contentType("application/json;charset=utf-8").body(json).when().post("/contribute");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithNullTokenReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String json = "{\"amount\":50,\"token\":null}";
+        Response response = given().contentType("application/json;charset=utf-8").body(json).when().post("/contribute");
+        assertEquals(400, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidTokenReturns202() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String uuid = java.util.UUID.randomUUID().toString();
+        String json = "{\"amount\":500,\"token\":\"tok_visa_"+uuid+"\"}";
+        Response response = given().contentType("application/json;charset=utf-8").body(json).when().post("/contribute");
+        assertEquals(400, response.getStatusCode());
+    }
+}

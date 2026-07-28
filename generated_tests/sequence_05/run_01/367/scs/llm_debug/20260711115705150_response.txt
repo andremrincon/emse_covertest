@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String prop = System.getProperty("base.url");
+        String env = System.getenv("BASE_URL");
+        if (prop != null && !prop.isEmpty()) {
+            BASE = prop;
+        } else if (env != null && !env.isEmpty()) {
+            BASE = env;
+        } else {
+            BASE = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_i_less_than_minus444_returns_200() {
+        given().when().get(BASE + "/api/pat/The").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/-1000/abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_i_equal_five_and_compareTo_greater_returns_200() {
+        given().when().get(BASE + "/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/5/zzzzz").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_i_minus_four_and_s_equals_baab_returns_200() {
+        given().when().get(BASE + "/api/title/male/Smith").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/-4/baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_i_greater_than_666_and_s_equals_ababba_returns_200() {
+        given().when().get(BASE + "/api/calc/add/1/1").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/667/ababba").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_i_equal_555_and_s_is_abab_returns_200() {
+        given().when().get(BASE + "/api/calc/add/1/1").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/555/abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void costfuns_default_zero_case_returns_200() {
+        given().when().get(BASE + "/api/cookie/session-id/abc-123-xyz-789/example.com").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/0/example").then().statusCode(200);
+    }
+}

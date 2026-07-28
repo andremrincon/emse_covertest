@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    private final String baseUrl = System.getProperty("test.base.url", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3Code() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/alpha/USA")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNull() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicates() {
+        given()
+            .baseUri(baseUrl)
+            .queryParam("codes", "US;US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .baseUri(baseUrl)
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/Bundesrepublik Deutschland")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .baseUri(baseUrl)
+            .queryParam("fullText", false)
+        .when()
+            .get("/v1/name/Bundesrepublik")
+        .then()
+            .statusCode(200);
+    }
+}

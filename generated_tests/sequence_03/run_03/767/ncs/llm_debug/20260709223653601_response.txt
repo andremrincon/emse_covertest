@@ -1,0 +1,103 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class ExpintTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithXGreaterThan1() {
+        int n = 3;
+        double x = 2.5;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithXBetween0And1() {
+        int n = 3;
+        double x = 0.1;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithNegativeN() {
+        int n = -1;
+        double x = 2.5;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithNegativeX() {
+        int n = 3;
+        double x = -999.9;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithZeroXAndZeroN() {
+        int n = 0;
+        double x = 0.0;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintWithZeroXAndOneN() {
+        int n = 1;
+        double x = 0.0;
+
+        Response response = given()
+            .pathParam("n", n)
+            .pathParam("x", x)
+        .when()
+            .get("/api/expint/{n}/{x}");
+
+        response.then().statusCode(400);
+    }
+}
+```

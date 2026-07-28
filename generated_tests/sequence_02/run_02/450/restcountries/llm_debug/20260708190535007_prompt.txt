@@ -1,0 +1,156 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.ResponseEntityTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testResponseEntityCapitalEndpoint404 TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+[2] METHOD=testResponseEntityNameEndpoint404 TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+[3] METHOD=testResponseEntityRegionEndpoint404 TYPE=ERROR
+Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the response.
+Try registering a default parser using:
+   RestAssured.defaultParser(<parser type>);
+Content was:
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testResponseEntityCapitalEndpoint404 FAILURE AT LINE 43
+at ts01qwen3_7_plus.ResponseEntityTest.testResponseEntityCapitalEndpoint404(ResponseEntityTest.java:43)
+CODE CONTEXT:
+    40: 
+    41:         response.then()
+    42:             .statusCode(404)
+    43:             .body("status", equalTo(404))  ← FAILURE HERE
+    44:             .body("message", equalTo("Not Found"));
+    45:     }
+    46: 
+
+[2] METHOD=testResponseEntityNameEndpoint404 FAILURE AT LINE 30
+at ts01qwen3_7_plus.ResponseEntityTest.testResponseEntityNameEndpoint404(ResponseEntityTest.java:30)
+CODE CONTEXT:
+    27: 
+    28:         response.then()
+    29:             .statusCode(404)
+    30:             .body("status", equalTo(404))  ← FAILURE HERE
+    31:             .body("message", equalTo("Not Found"));
+    32:     }
+    33: 
+
+[3] METHOD=testResponseEntityRegionEndpoint404 FAILURE AT LINE 56
+at ts01qwen3_7_plus.ResponseEntityTest.testResponseEntityRegionEndpoint404(ResponseEntityTest.java:56)
+CODE CONTEXT:
+    53: 
+    54:         response.then()
+    55:             .statusCode(404)
+    56:             .body("status", equalTo(404))  ← FAILURE HERE
+    57:             .body("message", equalTo("Not Found"));
+    58:     }
+    59: 
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityNameEndpoint404() {
+        Response response = given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}");
+
+        response.then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityCapitalEndpoint404() {
+        Response response = given()
+            .pathParam("capital", "123")
+        .when()
+            .get("/v1/capital/{capital}");
+
+        response.then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityRegionEndpoint404() {
+        Response response = given()
+            .pathParam("region", "123")
+        .when()
+            .get("/v1/region/{region}");
+
+        response.then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", equalTo("Not Found"));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testResponseEntityPostRootEndpoint405() {
+        Response response = given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/");
+
+        response.then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", equalTo("Not Found"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

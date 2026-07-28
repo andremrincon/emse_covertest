@@ -1,0 +1,71 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturnsStatusInBody() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testNameServerErrorReturnsMessageInBody() {
+        given()
+            .when()
+                .get("/v1/name/True")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundReturnsMessageInBody() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionNotFoundReturnsStatusInBody() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionServerErrorReturnsMessageInBody() {
+        given()
+            .when()
+                .get("/v1/region/True")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeNotFoundReturnsStatusCode() {
+        given()
+            .when()
+                .get("/v1/callingcode/abc")
+            .then()
+                .statusCode(404);
+    }
+}

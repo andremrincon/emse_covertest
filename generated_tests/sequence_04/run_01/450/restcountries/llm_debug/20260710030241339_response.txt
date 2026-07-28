@@ -1,0 +1,127 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_validReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/{code}", "US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidShortReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/{code}", "1");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/{code}", "ZZZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_withFieldsReturnsJsonWithName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{code}", "US");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_validCodesReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String codes = "US,CA";
+        Response act = given().queryParam("codes", codes).when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badFormatReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String codes = "123";
+        Response act = given().queryParam("codes", codes).when().get("/v2/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_serverErrorScenarioReturns500() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String codes = "US|CA|MX";
+        Response act = given().queryParam("codes", codes).when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_validWithFieldsReturnsJsonWithName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/currency/{currency}", "EUR");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalidLengthReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/{currency}", "12");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_foundReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "false").when().get("/v2/name/{name}", "Germany");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String unique = "Atlantis-" + UUID.randomUUID().toString();
+        Response act = given().when().get("/v2/name/{name}", unique);
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_withFieldsReturnsJsonWithName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;region").when().get("/v2/callingcode/{code}", "1");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostOnV2ReturnsMethodNotAllowed() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().post("/v2");
+        act.then().statusCode(405);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountries_withFieldsReturnsJsonWithName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2");
+        act.then().body(containsString("name"));
+    }
+}

@@ -1,0 +1,290 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CurrencyTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCurrencyCodeSetterViaV2AlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testCurrencyCodeSetterViaV1AlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testCurrencyNameSetterViaV2RegionalblocEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testCurrencyCodeSetterViaV1CurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testCurrencySymbolSetterViaV1AlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testCurrencyNameSetterViaV1AlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testCurrencySymbolSetterViaV1CurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testCurrencyNameSetterViaV1CurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testCurrencySymbolSetterViaV2CurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCurrencyCodeSetterViaV2AlphaEndpoint FAILURE AT LINE 91
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyCodeSetterViaV2AlphaEndpoint(CurrencyTest.java:91)
+CODE CONTEXT:
+    88:                 .when()
+    89:                 .get("/v2/alpha/DE")
+    90:                 .then()
+    91:                 .statusCode(404)  ← FAILURE HERE
+    92:                 .body("currencies[0].code", equalTo("EUR"));
+    93:     }
+    94: 
+
+[2] METHOD=testCurrencyCodeSetterViaV1AlphaEndpoint FAILURE AT LINE 31
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyCodeSetterViaV1AlphaEndpoint(CurrencyTest.java:31)
+CODE CONTEXT:
+    28:                 .when()
+    29:                 .get("/v1/alpha/US")
+    30:                 .then()
+    31:                 .statusCode(404)  ← FAILURE HERE
+    32:                 .body("currencies[0].code", equalTo("USD"));
+    33:     }
+    34: 
+
+[3] METHOD=testCurrencyNameSetterViaV2RegionalblocEndpoint FAILURE AT LINE 101
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyNameSetterViaV2RegionalblocEndpoint(CurrencyTest.java:101)
+CODE CONTEXT:
+    98:                 .when()
+    99:                 .get("/v2/regionalbloc/EU")
+   100:                 .then()
+   101:                 .statusCode(404)  ← FAILURE HERE
+   102:                 .body("currencies[0].name", hasItem("Euro"));
+   103:     }
+   104: 
+
+[4] METHOD=testCurrencyCodeSetterViaV1CurrencyEndpoint FAILURE AT LINE 61
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyCodeSetterViaV1CurrencyEndpoint(CurrencyTest.java:61)
+CODE CONTEXT:
+    58:                 .when()
+    59:                 .get("/v1/currency/USD")
+    60:                 .then()
+    61:                 .statusCode(404)  ← FAILURE HERE
+    62:                 .body("currencies[0].code", hasItem("USD"));
+    63:     }
+    64: 
+
+[5] METHOD=testCurrencySymbolSetterViaV1AlphaEndpoint FAILURE AT LINE 51
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencySymbolSetterViaV1AlphaEndpoint(CurrencyTest.java:51)
+CODE CONTEXT:
+    48:                 .when()
+    49:                 .get("/v1/alpha/US")
+    50:                 .then()
+    51:                 .statusCode(404)  ← FAILURE HERE
+    52:                 .body("currencies[0].symbol", equalTo("$"));
+    53:     }
+    54: 
+
+[6] METHOD=testCurrencyNameSetterViaV1AlphaEndpoint FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyNameSetterViaV1AlphaEndpoint(CurrencyTest.java:41)
+CODE CONTEXT:
+    38:                 .when()
+    39:                 .get("/v1/alpha/US")
+    40:                 .then()
+    41:                 .statusCode(404)  ← FAILURE HERE
+    42:                 .body("currencies[0].name", equalTo("United States dollar"));
+    43:     }
+    44: 
+
+[7] METHOD=testCurrencySymbolSetterViaV1CurrencyEndpoint FAILURE AT LINE 81
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencySymbolSetterViaV1CurrencyEndpoint(CurrencyTest.java:81)
+CODE CONTEXT:
+    78:                 .when()
+    79:                 .get("/v1/currency/EUR")
+    80:                 .then()
+    81:                 .statusCode(404)  ← FAILURE HERE
+    82:                 .body("currencies[0].symbol", hasItem("€"));
+    83:     }
+    84: 
+
+[8] METHOD=testCurrencyNameSetterViaV1CurrencyEndpoint FAILURE AT LINE 71
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencyNameSetterViaV1CurrencyEndpoint(CurrencyTest.java:71)
+CODE CONTEXT:
+    68:                 .when()
+    69:                 .get("/v1/currency/EUR")
+    70:                 .then()
+    71:                 .statusCode(404)  ← FAILURE HERE
+    72:                 .body("currencies[0].name", hasItem("Euro"));
+    73:     }
+    74: 
+
+[9] METHOD=testCurrencySymbolSetterViaV2CurrencyEndpoint FAILURE AT LINE 111
+java.lang.AssertionError:
+at ts01glm_5_2.CurrencyTest.testCurrencySymbolSetterViaV2CurrencyEndpoint(CurrencyTest.java:111)
+CODE CONTEXT:
+   108:                 .when()
+   109:                 .get("/v2/currency/USD")
+   110:                 .then()
+   111:                 .statusCode(404)  ← FAILURE HERE
+   112:                 .body("currencies[0].symbol", hasItem("$"));
+   113:     }
+   114: }
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyCodeSetterViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNameSetterViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySymbolSetterViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyCodeSetterViaV1CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].code", hasItem("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNameSetterViaV1CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].name", hasItem("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySymbolSetterViaV1CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].symbol", hasItem("€"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyCodeSetterViaV2AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNameSetterViaV2RegionalblocEndpoint() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].name", hasItem("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySymbolSetterViaV2CurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v2/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].symbol", hasItem("$"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,63 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingTokenReturnsBadRequest_1() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100}";
+        given()
+                .header("Content-Type", "application/json;charset=utf-8")
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidTokenReturnsBadRequest_2() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String token = "invalid-" + UUID.randomUUID().toString();
+        String body = "{\"amount\":250,\"token\":\"" + token + "\"}";
+        given()
+                .header("Content-Type", "application/json;charset=utf-8")
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValidTokenReturnsAccepted_3() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        String body = "{\"amount\":500,\"token\":\"tok_visa\"}";
+        given()
+                .header("Content-Type", "application/json;charset=utf-8")
+                .body(body)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+}

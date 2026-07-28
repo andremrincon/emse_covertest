@@ -1,0 +1,309 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureCoversSetNameAndSetProduct() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetName() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGetProduct() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateFeatureTriggersEquals() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Duplicate feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationTriggersEquals() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String configName = "Config-" + System.nanoTime();
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversGetProduct() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String configName = "Config-" + System.nanoTime();
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultipleFeaturesSameProductTriggersEquals() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String feature1 = "Feature1-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/" + productName + "/features/" + feature1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String feature2 = "Feature2-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/" + productName + "/features/" + feature2)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesToConfigurationTriggersEquals() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String feature1 = "Feature1-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/" + productName + "/features/" + feature1)
+        .then()
+            .statusCode(lessThan(300));
+
+        String feature2 = "Feature2-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/" + productName + "/features/" + feature2)
+        .then()
+            .statusCode(lessThan(300));
+
+        String configName = "Config-" + System.nanoTime();
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversGetProduct() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationTriggersEquals() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        String configName = "Config-" + System.nanoTime();
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureWithSpecialCharactersCoversSetName() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-Special-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature with special chars: !@#$%^&*()")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureWithEmptyDescriptionCoversSetName() {
+        String productName = "Product-" + System.nanoTime();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        String featureName = "Feature-" + System.nanoTime();
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+}

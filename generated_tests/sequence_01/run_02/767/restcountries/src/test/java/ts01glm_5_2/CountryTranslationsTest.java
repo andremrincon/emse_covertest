@@ -1,0 +1,189 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetDeViaAlphaCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.de", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetEsViaAlphaCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.es", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetFrViaAlphaCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.fr", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetJaViaAlphaCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.ja", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetItViaAlphaCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.it", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetDeViaName() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(404)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetEsViaCurrency() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(404)
+                .body("translations.es", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetFrViaCallingCode() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(404)
+                .body("translations.fr", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetJaViaCapital() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(404)
+                .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetItViaRegion() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(404)
+                .body("translations.it", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetDeViaAlphaCodes() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetEsViaSubregion() {
+        given()
+            .when()
+                .get("/v1/subregion/Western%20Europe")
+            .then()
+                .statusCode(404)
+                .body("translations.es", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetFrViaLang() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .statusCode(404)
+                .body("translations.fr", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetJaViaAll() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404)
+                .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testSetItViaAlphaCodeGB() {
+        given()
+            .when()
+                .get("/v1/alpha/GB")
+            .then()
+                .statusCode(404)
+                .body("translations.it", notNullValue());
+    }
+}

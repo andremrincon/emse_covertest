@@ -1,0 +1,71 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withNameParam_returns200() {
+        given()
+            .queryParam("name", "John%20Smith")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returns200() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayZero_returns200() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNonZeroDelay_returns200() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNegativeDelay_returns500() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+}

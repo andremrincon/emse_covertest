@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void nameEndpointNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void nameEndpointServerErrorReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v1/name/True")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void capitalEndpointNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void regionEndpointNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void v2CurrencyBadRequestReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v2/currency/123")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void v2CurrencyNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+}

@@ -1,0 +1,90 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid2Letter_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidFormat_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid3Letter_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_valid_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_invalidFormat_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_notFound_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=XX,YY,ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_exactName_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_alternativeSpelling_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Deutschland?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_partial_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/United?fullText=false").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_notFound_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123?fullText=false").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_serverError_v1_encodedArray() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=%5B%22US%22%2C%22CA%22%5D").then().statusCode(500);
+    }
+}

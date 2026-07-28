@@ -1,0 +1,68 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationTriggersEvaluationResultConstruction() {
+        String productName = "EvalTest-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/" + productName + "/configurations/" + configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersEvaluationResultConstruction() {
+        String productName = "EvalTest2-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/" + productName + "/configurations/" + configurationName + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithConstraintsTriggersEvaluationResultConstruction() {
+        String productName = "EvalTest3-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "constr-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        RestAssured.given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        RestAssured.given().when().get("/products/" + productName + "/configurations/" + configurationName).then().statusCode(200);
+    }
+}

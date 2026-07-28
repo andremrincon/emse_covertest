@@ -1,0 +1,52 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RegexTest {
+
+    @Test(timeout = 60000)
+    public void testUrlPatternMatch() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        Response response = given()
+            .pathParam("txt", "http://abc/def")
+        .when()
+            .get("/api/pat/{txt}");
+        response.then().body(equalTo("url"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatch() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        Response response = given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}");
+        response.then().body(equalTo("date"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatch() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        Response response = given()
+            .pathParam("txt", "12.34e-56")
+        .when()
+            .get("/api/pat/{txt}");
+        response.then().body(equalTo("fpe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoPatternMatch() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        Response response = given()
+            .pathParam("txt", "hello")
+        .when()
+            .get("/api/pat/{txt}");
+        response.then().body(equalTo("none"));
+    }
+}
+```

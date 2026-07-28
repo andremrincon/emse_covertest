@@ -1,0 +1,157 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validCode_returns200() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_invalidLengthCode_returns400() {
+        given()
+                .when()
+                .get("/v1/alpha/1234")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFoundCode_returns404() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes_returns200() {
+        given()
+                .queryParam("codes", "US;CA")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_shortCode_returns400() {
+        given()
+                .queryParam("codes", "1")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFoundCodes_returns404() {
+        given()
+                .queryParam("codes", "XX;YY;ZZ")
+                .when()
+                .get("/v1/alpha/")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_validCode_returns200() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_invalidLength_returns400() {
+        given()
+                .when()
+                .get("/v1/currency/1234")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFoundCode_returns404() {
+        given()
+                .when()
+                .get("/v1/currency/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_validName_returns200() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFoundName_returns404() {
+        given()
+                .when()
+                .get("/v1/name/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFoundCode_returns404() {
+        given()
+                .when()
+                .get("/v1/callingcode/abc")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFoundCapital_returns404() {
+        given()
+                .when()
+                .get("/v1/capital/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFoundRegion_returns404() {
+        given()
+                .when()
+                .get("/v1/region/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_notFoundSubregion_returns404() {
+        given()
+                .when()
+                .get("/v1/subregion/123")
+                .then()
+                .statusCode(404);
+    }
+}

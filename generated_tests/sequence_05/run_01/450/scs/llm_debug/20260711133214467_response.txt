@@ -1,0 +1,72 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/text/test.txt")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/acrobat/test.pdf")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/word/test.doc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/bin/test.exe")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/lib/test.dll")
+            .then()
+                .statusCode(200)
+                .body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutDot() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/filesuffix/text/nodotfile")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}
+```

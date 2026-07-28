@@ -1,0 +1,40 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+    private static final String BASE;
+    static {
+        String b = System.getProperty("baseUrl");
+        if (b == null) b = System.getenv("BASE_URL");
+        if (b == null) b = "http://localhost:8080";
+        BASE = b;
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_i5_s_baab_returns_10() {
+        given().when().get(BASE + "/api/pat/arrange").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/{i}/{s}", 5, "baab").then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_i_minus500_s_abab_returns_6() {
+        given().when().get(BASE + "/api/pat/arrange2").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/{i}/{s}", -500, "abab").then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_i_1000_s_aaaaaa_returns_10() {
+        given().when().get(BASE + "/api/pat/setup").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/{i}/{s}", 1000, "aaaaaa").then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_i_minus4_s_ababba_triggers_compare_ge_zero_branch() {
+        given().when().get(BASE + "/api/pat/ok").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/costfuns/{i}/{s}", -4, "ababba").then().statusCode(200).body(equalTo("10"));
+    }
+}

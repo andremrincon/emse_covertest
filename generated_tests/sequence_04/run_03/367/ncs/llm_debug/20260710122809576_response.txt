@@ -1,0 +1,99 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("base.port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2ThrowsException() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxAboveNWithSmallX() {
+        given()
+            .when()
+                .get("/api/bessj/3/5.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxAboveNWithLargeX() {
+        given()
+            .when()
+                .get("/api/bessj/3/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeLargeXOddN() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXEqualsZero() {
+        given()
+            .when()
+                .get("/api/bessj/3/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualN() {
+        given()
+            .when()
+                .get("/api/bessj/2/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+            .when()
+                .get("/api/bessj/4/-5.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNParameter() {
+        given()
+            .when()
+                .get("/api/bessj/abc/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualNNegativeX() {
+        given()
+            .when()
+                .get("/api/bessj/2/-1.0")
+            .then()
+                .statusCode(200);
+    }
+}

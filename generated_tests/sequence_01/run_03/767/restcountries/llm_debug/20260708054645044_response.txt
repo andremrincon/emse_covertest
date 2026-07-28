@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3Code() {
+        given()
+            .pathParam("alphacode", "USA")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicates() {
+        given()
+            .queryParam("codes", "US;US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .pathParam("name", "Holy%20See")
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .pathParam("name", "Holy")
+            .queryParam("fullText", false)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonInitialization() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,215 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        baseUri = base;
+    }
+
+    private static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private int sendRequest(String method, String path, Map<String, String> params) throws IOException {
+        String urlStr = baseUri;
+        if (!path.startsWith("/")) {
+            urlStr += "/";
+        }
+        urlStr += path;
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
+            conn.setDoOutput(true);
+            String body = "";
+            if (params != null && !params.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (Map.Entry<String, String> e : params.entrySet()) {
+                    if (!first) {
+                        sb.append("&");
+                    }
+                    sb.append(encode(e.getKey())).append("=").append(encode(e.getValue()));
+                    first = false;
+                }
+                body = sb.toString();
+            }
+            if (!body.isEmpty()) {
+                byte[] out = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(out);
+                os.flush();
+                os.close();
+            } else {
+                conn.setRequestProperty("Content-Length", "0");
+            }
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_noConstraints_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code1 = sendRequest("POST", "/products/" + encode(productName), null);
+        assertThat(code1, lessThan(300));
+
+        int code2 = sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(featureName), null);
+        assertThat(code2, lessThan(300));
+
+        int code3 = sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null);
+        assertThat(code3, lessThan(300));
+
+        int code4 = sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(featureName), null);
+        assertThat(code4, lessThan(300));
+
+        int code5 = sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null);
+        Assert.assertEquals(200, code5);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintSatisfied_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertThat(sendRequest("POST", "/products/" + encode(productName), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(requiredFeature), null), lessThan(300));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params), lessThan(300));
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintNotSatisfied_returnsInvalidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertThat(sendRequest("POST", "/products/" + encode(productName), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params), lessThan(300));
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_excludesConstraintViolated_returnsInvalidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertThat(sendRequest("POST", "/products/" + encode(productName), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(excludedFeature), null), lessThan(300));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("excludedFeature", excludedFeature);
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", params), lessThan(300));
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_excludesConstraintNotViolated_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertThat(sendRequest("POST", "/products/" + encode(productName), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(excludedFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("excludedFeature", excludedFeature);
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", params), lessThan(300));
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfiguration_requiresConstraintTriggersDerivedFeature_returnsValidConfiguration() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "ReqFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertThat(sendRequest("POST", "/products/" + encode(productName), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+        assertThat(sendRequest("PUT", "/products/" + encode(productName) + "/features/" + encode(requiredFeature), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null), lessThan(300));
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/configurations/" + encode(configurationName) + "/features/" + encode(sourceFeature), null), lessThan(300));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", sourceFeature);
+        params.put("requiredFeature", requiredFeature);
+        assertThat(sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", params), lessThan(300));
+
+        Assert.assertEquals(200, sendRequest("GET", "/products/" + encode(productName) + "/configurations/" + encode(configurationName), null));
+    }
+}

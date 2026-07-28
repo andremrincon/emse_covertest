@@ -1,0 +1,42 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class ExpintTest {
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOdd() {
+        RestAssured.given().when().get("/api/fisher/1/1/0.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMOddNEven() {
+        RestAssured.given().when().get("/api/fisher/1/2/0.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMEvenNOdd() {
+        RestAssured.given().when().get("/api/fisher/2/1/0.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEven() {
+        RestAssured.given().when().get("/api/fisher/2/2/0.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOne() {
+        RestAssured.given().when().get("/api/fisher/2/2/-2.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherFromExamples() {
+        RestAssured.given().when().get("/api/fisher/10/5/0.75").then().statusCode(200);
+    }
+}

@@ -1,0 +1,66 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("3.141592653589793"));
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/e/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2.718281828459045"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOperators() {
+        given().when().get("/api/calc/sqrt/16/0").then().statusCode(200).body(equalTo("4.0"));
+        given().when().get("/api/calc/log/1.0/0").then().statusCode(200).body(equalTo("0.0"));
+        given().when().get("/api/calc/sine/0/0").then().statusCode(200).body(equalTo("0.0"));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(200).body(equalTo("1.0"));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(200).body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryOperators() {
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(200).body(equalTo("20.0"));
+        given().when().get("/api/calc/subtract/10/3").then().statusCode(200).body(equalTo("7.0"));
+        given().when().get("/api/calc/multiply/6/7").then().statusCode(200).body(equalTo("42.0"));
+        given().when().get("/api/calc/divide/20/4").then().statusCode(200).body(equalTo("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorReturnsZero() {
+        given()
+            .when()
+                .get("/api/calc/unknown/5/3")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+}

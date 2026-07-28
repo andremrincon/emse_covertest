@@ -1,0 +1,93 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "apple";
+        String x = "banana";
+        String z = "delta";
+        String y = "cherry";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "delta";
+        String x = "cherry";
+        String z = "apple";
+        String y = "banana";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        String w = "apple";
+        String x = "zebra";
+        String z = "mango";
+        String y = "peach";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testXLengthInvalid() {
+        String w = "apple";
+        String x = "abcd";
+        String z = "delta";
+        String y = "cherry";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testYLengthInvalid() {
+        String w = "apple";
+        String x = "banana";
+        String z = "delta";
+        String y = "abcd";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testZLengthInvalid() {
+        String w = "apple";
+        String x = "banana";
+        String z = "abcd";
+        String y = "cherry";
+        given()
+                .when()
+                .get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y)
+                .then()
+                .statusCode(200);
+    }
+}

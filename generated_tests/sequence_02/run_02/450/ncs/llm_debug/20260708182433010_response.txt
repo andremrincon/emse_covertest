@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("API_HOST", "localhost");
+        String port = System.getenv().getOrDefault("API_PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nLessThan2_returns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nZero_returns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/0/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_xZero_returnsValueZero() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/0")
+        .then()
+            .body("value", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_smallX_coversBessj0Bessj1SmallAxBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axGreaterThanN_largeX_coversBessj0Bessj1LargeAxBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeLargeX_coversBessj1NegativeXBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_axLessOrEqualN_coversElseBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/10/5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeSmallX_oddN_coversReturnNegation() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-5.0")
+        .then()
+            .statusCode(200);
+    }
+}
+```

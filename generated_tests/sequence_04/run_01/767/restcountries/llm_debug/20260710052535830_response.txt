@@ -1,0 +1,134 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertTrue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+    }
+
+    @After
+    public void tearDown() {
+        RestAssured.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void corsAllowOriginHeaderOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsAllowMethodsHeaderOnV1Alpha() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void corsAllowHeadersHeaderOnV1Name() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void cacheControlHeaderOnV1Capital() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOn404AlphaResponse() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOn400AlphaResponse() {
+        given()
+            .when()
+                .get("/v1/alpha/123")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOnV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOnRootGet() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOnPostToRoot() {
+        given()
+            .when()
+                .post("/")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void chainDoFilterProducesResponseBody() {
+        Response response = given()
+            .when()
+                .get("/v1/alpha/US");
+
+        assertTrue(response.asString().contains("United States"));
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOnCallingCodeEndpoint() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeaderOnCurrencyEndpoint() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+}
+```

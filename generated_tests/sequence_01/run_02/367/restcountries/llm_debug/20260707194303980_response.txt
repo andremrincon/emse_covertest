@@ -1,0 +1,70 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValidPayload() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .contentType("application/json")
+                .body("{\"amount\": 100, \"token\": \"tok_12345\"}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .contentType("application/json")
+                .body("{\"amount\": 100}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingAmount() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .contentType("application/json")
+                .body("{\"token\": \"tok_12345\"}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeEmptyBody() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .contentType("application/json")
+                .body("{}")
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+}

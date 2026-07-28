@@ -1,0 +1,134 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testUnorderedByLengthTooShort() {
+        String w = "abcd";
+        String x = "abcde";
+        String y = "abcde";
+        String z = "abcde";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedByLengthTooLong() {
+        String w = "abcdefg";
+        String x = "abcde";
+        String y = "abcde";
+        String z = "abcde";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedByValue() {
+        String w = "abcde";
+        String x = "abcde";
+        String y = "abcde";
+        String z = "abcde";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String y = "ccccc";
+        String z = "ddddd";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        String w = "eeeee";
+        String x = "ddddd";
+        String y = "ccccc";
+        String z = "bbbbb";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingLength6() {
+        String w = "aaaaaa";
+        String x = "bbbbbb";
+        String y = "cccccc";
+        String z = "dddddd";
+
+        Response response = given()
+                .baseUri(baseUrl)
+                .pathParam("w", w)
+                .pathParam("x", x)
+                .pathParam("z", z)
+                .pathParam("y", y)
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}");
+
+        response.then().statusCode(200);
+        response.then().body(equalTo("increasing"));
+    }
+}
+```

@@ -1,0 +1,90 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusReturnsExpectedSum() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 16, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 10, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 2, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 10, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 1, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 5, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 3.3, 4.7).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 0, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "minus", 1, 1).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 1.7976931348623157e+308, 1).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 1e-300, 1e+300).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturnsInternalServerError() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 4, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 3, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 9, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 10, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 50, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 25, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNumberFormatReturnsBadRequest() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 2.718281828, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 10, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", 10, 4).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", 10, "twenty").then().statusCode(400);
+    }
+}

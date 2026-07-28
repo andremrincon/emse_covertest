@@ -1,0 +1,75 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidEdgeA() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/0/4/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidEdgeB() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/3/0/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateralTriangle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/5/5/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyDegenerateTriangle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/10/3/3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsoscelesTriangle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/3/3/4")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScaleneTriangle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/triangle/3/4/5")
+        .then()
+            .statusCode(200);
+    }
+}

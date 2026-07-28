@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOrigin_OnV1All_GET() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethods_OnV1Alpha_GET() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/US");
+        assertEquals("GET", response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeaders_OnV1Currency_GET() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/currency/USD");
+        assertEquals("Accept, X-Requested-With", response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeader_OnV2All_GET() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/all");
+        assertEquals("public, max-age=86400", response.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeader_OnContribute_POST() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String json = "{\"amount\":100,\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        Response response = given().contentType("application/json").body(json).when().post("/contribute");
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeader_OnRoot_GET() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/");
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+    }
+}

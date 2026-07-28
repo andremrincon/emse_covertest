@@ -1,0 +1,74 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getenv().getOrDefault("HOST", "localhost");
+        String port = System.getenv().getOrDefault("PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdValidUserPrefixReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user123/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdShortValueReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdLongValueWrongPrefixReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/test123/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionAmOnAbcComReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionPmOnAbcComReturnsTwo() {
+        given()
+            .when()
+                .get("/api/cookie/session/pm/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownNameReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/other/test/abc.com")
+            .then()
+                .statusCode(200);
+    }
+}
+```

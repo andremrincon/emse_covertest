@@ -1,0 +1,137 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_03/run_01/767/scs/src/test/java/ts01glm_5_2/CalcTest.java:[20,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_03/run_01/767/scs/src/test/java/ts01glm_5_2/CalcTest.java:[30,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_03/run_01/767/scs/src/test/java/ts01glm_5_2/CalcTest.java:[40,9] cannot find symbol
+symbol:   method given()
+location: class ts01glm_5_2.CalcTest
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class PatTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInText() {
+        String txt = "ABABCABAB";
+        String pat = "ABAB";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundInText() {
+        String txt = "ABABCDCBA";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBothPatAndReverseFoundNonAdjacent() {
+        String txt = "ABCXYZCBA";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByReversePalindrome() {
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFollowedByPatPalindrome() {
+        String txt = "CBAABC";
+        String pat = "ABC";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTooShort() {
+        String txt = "ABCDEF";
+        String pat = "AB";
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

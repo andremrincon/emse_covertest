@@ -1,0 +1,114 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[8,38] package eu.fayder.restcountries.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[25,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[25,37] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[33,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[33,37] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[41,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[41,37] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[49,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/ResponseEntityTest.java:[49,37] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[25,47] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[25,136] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[33,47] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[33,140] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[41,47] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[41,140] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[49,47] package eu.fayder.restcountries.v2.domain does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_06/run_03/367/restcountries/src/test/java/ts01gpt_5_mini/LanguageTest.java:[49,140] package eu.fayder.restcountries.v2.domain does not exist
+symbol:   class ResponseEntity
+location: class ts01gpt_5_mini.ResponseEntityTest
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void init() {
+        String envUrl = System.getProperty("baseUrl");
+        if (envUrl == null || envUrl.isEmpty()) {
+            envUrl = System.getenv("BASE_URL");
+        }
+        if (envUrl == null || envUrl.isEmpty()) {
+            envUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = envUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeMissingToken_shouldReturnBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{\"amount\":100}")
+                .when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidToken_causesStripeException_returnsBadRequest() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String token = "invalid-" + UUID.randomUUID().toString();
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{\"amount\":250,\"token\":\"" + token + "\"}")
+                .when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidToken_returnsAccepted() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String token = "tok_visa";
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body("{\"amount\":500,\"token\":\"" + token + "\"}")
+                .when().post("/contribute");
+        response.then().statusCode(202);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

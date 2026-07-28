@@ -1,0 +1,176 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodeReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/alpha/US")
+            .then()
+            .statusCode(200)
+            .body("languages[0]['iso639_1']", equalTo("sv"))
+            .body("languages[0]['iso639_2']", equalTo("swe"))
+            .body("languages[0]['name']", equalTo("Swedish"))
+            .body("languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/currency/USD")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/name/France")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/lang/es")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaCodeReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/alpha/US")
+            .then()
+            .statusCode(200)
+            .body("languages[0]['iso639_1']", equalTo("sv"))
+            .body("languages[0]['iso639_2']", equalTo("swe"))
+            .body("languages[0]['name']", equalTo("Swedish"))
+            .body("languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/lang/Spanish")
+            .then()
+            .statusCode(404)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/currency/EUR")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/name/Germany")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/callingcode/1")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CallingCodeReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/callingcode/1")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/region/Europe")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/region/Europe")
+            .then()
+            .statusCode(200)
+            .body("[0].languages[0]['iso639_1']", equalTo("sv"))
+            .body("[0].languages[0]['iso639_2']", equalTo("swe"))
+            .body("[0].languages[0]['name']", equalTo("Swedish"))
+            .body("[0].languages[0]['nativeName']", equalTo("svenska"));
+    }
+}

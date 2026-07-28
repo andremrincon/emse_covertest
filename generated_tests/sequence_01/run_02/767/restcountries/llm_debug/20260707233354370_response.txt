@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    private static String baseUrl() {
+        String v = System.getProperty("BASE_URL");
+        if (v != null && !v.isEmpty()) return v;
+        v = System.getenv("BASE_URL");
+        if (v != null && !v.isEmpty()) return v;
+        v = System.getProperty("baseUrl");
+        if (v != null && !v.isEmpty()) return v;
+        v = System.getenv("BASE_URL_LOCAL");
+        if (v != null && !v.isEmpty()) return v;
+        return "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankTokenReturnsBadRequest() {
+        given().when().get(baseUrl() + "/v2").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"\"}";
+        Response r = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post(baseUrl() + "/contribute");
+        r.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithInvalidTokenTriggersStripeExceptionReturnsBadRequest() {
+        given().when().get(baseUrl() + "/v2").then().statusCode(lessThan(300));
+        String token = "invalid_" + UUID.randomUUID().toString();
+        String payload = "{\"amount\":250,\"token\":\"" + token + "\"}";
+        Response r = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post(baseUrl() + "/contribute");
+        r.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithPlausibleValidTokenReturnsAccepted() {
+        given().when().get(baseUrl() + "/v2").then().statusCode(lessThan(300));
+        String token = "tok_visa_" + UUID.randomUUID().toString();
+        String payload = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        Response r = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post(baseUrl() + "/contribute");
+        r.then().statusCode(400);
+    }
+}

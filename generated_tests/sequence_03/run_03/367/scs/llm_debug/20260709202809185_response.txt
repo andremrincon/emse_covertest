@@ -1,0 +1,89 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndValidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/feb")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/tue/xyz")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/xyz")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainingDays() {
+        String[] days = {"wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            given()
+                .when()
+                    .get("/api/dateparse/" + day + "/jan")
+                .then()
+                    .statusCode(200)
+                    .body(equalTo("2"));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainingMonths() {
+        String[] months = {"mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        int[] expected = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+        for (int i = 0; i < months.length; i++) {
+            given()
+                .when()
+                    .get("/api/dateparse/mon/" + months[i])
+                .then()
+                    .statusCode(200)
+                    .body(equalTo(String.valueOf(expected[i])));
+        }
+    }
+}
+```

@@ -1,0 +1,179 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.RemainderTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAPositiveBNegativeReturnsRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <8>
+  Actual: null
+
+[2] METHOD=testAPositiveBPositiveReturnsRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+[3] METHOD=testAEqualsZeroReturns400 TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <200>.
+
+[4] METHOD=testANegativeBNegativeReturnsRemainder TYPE=FAILURE
+1 expectation failed.
+JSON path result doesn't match.
+Expected: <2>
+  Actual: null
+
+[5] METHOD=testBEqualsZeroReturns400 TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAPositiveBNegativeReturnsRemainder FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testAPositiveBNegativeReturnsRemainder(RemainderTest.java:46)
+CODE CONTEXT:
+    43:     public void testAPositiveBNegativeReturnsRemainder() {
+    44:         String marker = UUID.randomUUID().toString();
+    45:         given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+    46:         given().when().get(base + "/api/remainder/17/-9").then().body("result", equalTo(8));  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+[2] METHOD=testAPositiveBPositiveReturnsRemainder FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testAPositiveBPositiveReturnsRemainder(RemainderTest.java:39)
+CODE CONTEXT:
+    36:     public void testAPositiveBPositiveReturnsRemainder() {
+    37:         String marker = UUID.randomUUID().toString();
+    38:         given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+    39:         given().when().get(base + "/api/remainder/17/5").then().body("result", equalTo(2));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[3] METHOD=testAEqualsZeroReturns400 FAILURE AT LINE 25
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testAEqualsZeroReturns400(RemainderTest.java:25)
+CODE CONTEXT:
+    22:     public void testAEqualsZeroReturns400() {
+    23:         String marker = UUID.randomUUID().toString();
+    24:         given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+    25:         given().when().get(base + "/api/remainder/0/5").then().statusCode(200);  ← FAILURE HERE
+    26:     }
+    27: 
+    28:     @Test(timeout = 60000)
+
+[4] METHOD=testANegativeBNegativeReturnsRemainder FAILURE AT LINE 60
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testANegativeBNegativeReturnsRemainder(RemainderTest.java:60)
+CODE CONTEXT:
+    57:     public void testANegativeBNegativeReturnsRemainder() {
+    58:         String marker = UUID.randomUUID().toString();
+    59:         given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+    60:         given().when().get(base + "/api/remainder/-17/-5").then().body("result", equalTo(2));  ← FAILURE HERE
+    61:     }
+    62: }
+
+[5] METHOD=testBEqualsZeroReturns400 FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01gpt_5_mini.RemainderTest.testBEqualsZeroReturns400(RemainderTest.java:32)
+CODE CONTEXT:
+    29:     public void testBEqualsZeroReturns400() {
+    30:         String marker = UUID.randomUUID().toString();
+    31:         given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+    32:         given().when().get(base + "/api/remainder/5/0").then().statusCode(200);  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("API_BASE", System.getenv("API_BASE") != null ? System.getenv("API_BASE") : "http://localhost:8080");
+        base = env.endsWith("/") ? env.substring(0, env.length() - 1) : env;
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAEqualsZeroReturns400() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/0/5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBEqualsZeroReturns400() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/5/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAPositiveBPositiveReturnsRemainder() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/17/5").then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testAPositiveBNegativeReturnsRemainder() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/17/-9").then().body("result", equalTo(8));
+    }
+
+    @Test(timeout = 60000)
+    public void testANegativeBPositiveReturns200() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/-17/5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testANegativeBNegativeReturnsRemainder() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get(base + "/api/triangle/1/1/1?m=" + marker).then().statusCode(lessThan(300));
+        given().when().get(base + "/api/remainder/-17/-5").then().body("result", equalTo(2));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) {
+            String envVar = System.getenv("API_BASE");
+            RestAssured.baseURI = (envVar != null && !envVar.isEmpty()) ? envVar : "http://localhost:8080/rest";
+        } else {
+            RestAssured.baseURI = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDe_viaV1Alpha_US_translationsDePresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEs_viaV1Alpha_US_translationsEsPresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFr_viaV1Alpha_US_translationsFrPresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJa_viaV1Alpha_US_translationsJaPresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIt_viaV1Alpha_US_translationsItPresent() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+}

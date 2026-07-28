@@ -1,0 +1,33 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaAlphaCode() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencySettersViaCurrency() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,470 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.*;
+
+public class ConstraintExcludesTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+    }
+
+    private static class HttpResponse {
+        int status;
+        String body;
+
+        HttpResponse(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private HttpResponse sendRequest(String method, String path, String contentType, String body) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        conn.setDoInput(true);
+        if (body != null && (method.equals("POST") || method.equals("PUT"))) {
+            conn.setDoOutput(true);
+            byte[] data = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(data.length));
+            OutputStream os = conn.getOutputStream();
+            os.write(data);
+            os.flush();
+            os.close();
+        }
+        int status = conn.getResponseCode();
+        InputStream is;
+        try {
+            is = (status >= 400) ? conn.getErrorStream() : conn.getInputStream();
+        } catch (Exception e) {
+            is = null;
+        }
+        String responseBody = "";
+        if (is != null) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            br.close();
+            responseBody = sb.toString();
+        }
+        conn.disconnect();
+        return new HttpResponse(status, responseBody);
+    }
+
+    private HttpResponse postNoBody(String path) throws Exception {
+        return sendRequest("POST", path, null, null);
+    }
+
+    private HttpResponse postForm(String path, String[][] params) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < params.length; i++) {
+            if (i > 0) sb.append("&");
+            sb.append(URLEncoder.encode(params[i][0], "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(params[i][1], "UTF-8"));
+        }
+        return sendRequest("POST", path, "application/x-www-form-urlencoded", sb.toString());
+    }
+
+    private HttpResponse get(String path) throws Exception {
+        return sendRequest("GET", path, null, null);
+    }
+
+    private HttpResponse delete(String path) throws Exception {
+        return sendRequest("DELETE", path, null, null);
+    }
+
+    private void assertStatusLessThan(HttpResponse resp, int threshold) {
+        assertTrue("Expected status < " + threshold + " but was " + resp.status, resp.status < threshold);
+    }
+
+    private String extractJsonFieldString(String json, String key) {
+        if (json == null) return null;
+        String pattern = "\""+Pattern.quote(key)+"\"\\s*:\\s*\"([^\"]+)\"";
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(json);
+        if (m.find()) {
+            return m.group(1);
+        }
+        pattern = "\""+Pattern.quote(key)+"\"\\s*:\\s*([^,}\\]]+)";
+        p = Pattern.compile(pattern);
+        m = p.matcher(json);
+        if (m.find()) {
+            return m.group(1).trim().replaceAll("^\"|\"$", "");
+        }
+        return null;
+    }
+
+    private Boolean extractJsonFieldBoolean(String json, String key) {
+        String val = extractJsonFieldString(json, key);
+        if (val == null) return null;
+        if ("true".equalsIgnoreCase(val)) return Boolean.TRUE;
+        if ("false".equalsIgnoreCase(val)) return Boolean.FALSE;
+        return null;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintCoversConstructorAndSetters() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+
+        HttpResponse resp = postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        });
+        assertEquals(201, resp.status);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBothFeaturesActiveResultsInvalid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertFalse(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlySourceFeatureActiveResultsValid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlyExcludedFeatureActiveResultsValid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNoFeaturesActiveResultsValid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductRetrievesExcludesConstraintType() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+
+        HttpResponse resp = get("/products/" + productName);
+        assertEquals(200, resp.status);
+        assertNotNull(resp.body);
+        assertTrue(resp.body.contains("\"type\"") && resp.body.contains("excludes"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductRetrievesSourceAndExcludedFeatureNames() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+
+        HttpResponse resp = get("/products/" + productName);
+        assertEquals(200, resp.status);
+        assertNotNull(resp.body);
+        assertTrue(resp.body.contains(sourceFeature));
+        assertTrue(resp.body.contains(excludedFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithoutSourceFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+
+        HttpResponse resp = postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"excludedFeature", excludedFeature}
+        });
+        assertTrue("Expected status < 500 but was " + resp.status, resp.status < 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithoutExcludedFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+
+        HttpResponse resp = postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature}
+        });
+        assertTrue("Expected status < 500 but was " + resp.status, resp.status < 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationAfterRemovingExcludedFeatureBecomesValid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        assertStatusLessThan(delete("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationAfterRemovingSourceFeatureBecomesValid() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        assertStatusLessThan(delete("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesListsActiveFeaturesWithExcludesConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        }), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName + "/features");
+        assertEquals(200, resp.status);
+        assertNotNull(resp.body);
+        assertTrue(resp.body.contains(sourceFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testMultipleExcludesConstraintsOnSameProduct() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature1 = "src1-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature1 = "exc1-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature2 = "src2-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature2 = "exc2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature1), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature1), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature2), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature2), 300);
+
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature1},
+                {"excludedFeature", excludedFeature1}
+        }), 300);
+
+        assertStatusLessThan(postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature2},
+                {"excludedFeature", excludedFeature2}
+        }), 300);
+
+        HttpResponse resp = get("/products/" + productName);
+        assertEquals(200, resp.status);
+        assertNotNull(resp.body);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteExcludesConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        HttpResponse createResp = postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        });
+        assertStatusLessThan(createResp, 300);
+        String constraintId = extractJsonFieldString(createResp.body, "id");
+        assertNotNull(constraintId);
+
+        HttpResponse delResp = delete("/products/" + productName + "/constraints/" + constraintId);
+        assertEquals(204, delResp.status);
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationValidAfterDeletingExcludesConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(postNoBody("/products/" + productName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/features/" + excludedFeature), 300);
+        HttpResponse createResp = postForm("/products/" + productName + "/constraints/excludes", new String[][]{
+                {"sourceFeature", sourceFeature},
+                {"excludedFeature", excludedFeature}
+        });
+        assertStatusLessThan(createResp, 300);
+        String constraintId = extractJsonFieldString(createResp.body, "id");
+        assertNotNull(constraintId);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature), 300);
+        assertStatusLessThan(postNoBody("/products/" + productName + "/configurations/" + configName + "/features/" + excludedFeature), 300);
+
+        assertStatusLessThan(delete("/products/" + productName + "/constraints/" + constraintId), 300);
+
+        HttpResponse resp = get("/products/" + productName + "/configurations/" + configName);
+        assertEquals(200, resp.status);
+        Boolean valid = extractJsonFieldBoolean(resp.body, "valid");
+        assertNotNull(valid);
+        assertTrue(valid);
+    }
+}

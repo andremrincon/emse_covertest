@@ -1,0 +1,87 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_languageIso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_1", equalTo(null));
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1Name_France_languageIso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().body("[0].languages[0].iso639_1", equalTo(null));
+    }
+
+    @Ignore("The parameter \"nativeName\" was used but not defined. Define parameters using the JsonPath.param...")
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_languageNativeName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().body("[0].languages[0].nativeName", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_Spanish_languageIso639_1() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish").then().body("[0].languages[0].iso639_1", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_invalid_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_notFound_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_query_codes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_invalid_400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/123").then().statusCode(404);
+    }
+}

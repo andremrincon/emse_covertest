@@ -1,0 +1,85 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static org.hamcrest.Matchers.*;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        String txt = "http://a/a";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        String txt = "mon01jan";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        String txt = "12.34e+56";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        String txt = "a";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidInputServerError() {
+        String txt = "(abc";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectLongInputServerError() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 5000; i++) {
+            sb.append("a");
+        }
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}", sb.toString())
+            .then()
+                .statusCode(anyOf(equalTo(200), equalTo(500)));
+    }
+}

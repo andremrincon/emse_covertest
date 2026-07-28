@@ -1,0 +1,46 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_validDayAndMonth_returns200() {
+        RestAssured.given()
+            .when()
+                .get("/api/dateparse/Wednesday/August")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_invalidDayAndMonth_returns500() {
+        RestAssured.given()
+            .when()
+                .get("/api/dateparse/Superday/Movember")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_validDayInvalidMonth_returns500() {
+        RestAssured.given()
+            .when()
+                .get("/api/dateparse/tuesday/456")
+            .then()
+                .statusCode(200);
+    }
+}

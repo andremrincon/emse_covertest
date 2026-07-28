@@ -1,0 +1,151 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.PatTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSingleArgPatEndpoint TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSingleArgPatEndpoint FAILURE AT LINE 100
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01glm_5_2.PatTest.testSingleArgPatEndpoint(PatTest.java:100)
+CODE CONTEXT:
+    97:     public void testSingleArgPatEndpoint() {
+    98:         given()
+    99:             .when()
+   100:                 .get("/api/pat/The quick brown fox jumps over the lazy dog.")  ← FAILURE HERE
+   101:             .then()
+   102:                 .statusCode(200);
+   103:     }
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host");
+        if (host == null) {
+            host = "localhost";
+        }
+        String port = System.getProperty("server.port");
+        if (port == null) {
+            port = "8080";
+        }
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        given()
+            .when()
+                .get("/api/pat/hello/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given()
+            .when()
+                .get("/api/pat/hello/ell")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABCCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABCXCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstThenPatAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/CBAABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstThenPatNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/CBAXABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundOnlyNoPat() {
+        given()
+            .when()
+                .get("/api/pat/CBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given()
+            .when()
+                .get("/api/pat/hello/xyz")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSingleArgPatEndpoint() {
+        given()
+            .when()
+                .get("/api/pat/The quick brown fox jumps over the lazy dog.")
+            .then()
+                .statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

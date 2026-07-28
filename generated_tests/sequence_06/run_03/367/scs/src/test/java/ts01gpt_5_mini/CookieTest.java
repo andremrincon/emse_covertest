@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URL;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        try {
+            URL url = new URL(base);
+            RestAssured.baseURI = url.getProtocol() + "://" + url.getHost();
+            int p = url.getPort();
+            if (p == -1) p = url.getDefaultPort();
+            if (p != -1) RestAssured.port = p;
+        } catch (Exception e) {
+            RestAssured.baseURI = base;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridMatchesProducesOne() {
+        given().when().get("/api/pat/ready").then().statusCode(lessThan(300));
+        given().when().get("/api/cookie/{name}/{val}/{site}", "userid", "userXYZ1", "example.com")
+               .then().assertThat().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridNonMatchProducesZero() {
+        given().when().get("/api/pat/setup").then().statusCode(lessThan(300));
+        given().when().get("/api/cookie/{name}/{val}/{site}", "userid", "usr", "localhost")
+               .then().assertThat().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionExactMatchProducesOne() {
+        given().when().get("/api/pat/check").then().statusCode(lessThan(300));
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session", "am", "abc.com")
+               .then().assertThat().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionOtherProducesTwo() {
+        given().when().get("/api/pat/ping").then().statusCode(lessThan(300));
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session", "pm", "abc.com")
+               .then().assertThat().body(equalTo("2"));
+    }
+}

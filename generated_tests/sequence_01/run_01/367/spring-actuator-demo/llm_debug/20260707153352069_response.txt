@@ -1,0 +1,80 @@
+```javapackage ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithDefaultName() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithExplicitName() {
+        given()
+            .queryParam("name", "John Smith")
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithDefaultDelay() {
+        given()
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithExplicitDelay() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithInvalidDelayType() {
+        given()
+            .queryParam("delay", "abc")
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(500);
+    }
+}
+```

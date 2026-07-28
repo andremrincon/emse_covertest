@@ -1,0 +1,125 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_03/run_02/767/features-service/src/test/java/ts01gpt_5_mini/CORSFilterTest.java:[84,53] incompatible types: java.nio.charset.Charset cannot be converted to java.lang.String
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("api.baseUrl");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("API_BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesNonOptionsPassesThrough() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/features", encode(product));
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsPreflightDoesNotInvokeChain() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        Response resp = given().when().options("/products/{productName}/features", encode(product));
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersPresentOnGet() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/features", encode(product));
+        assertEquals("*", resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSAllowMethodsHeaderOnOptions() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        Response resp = given().when().options("/products/{productName}/features", encode(product));
+        assertEquals("POST, PUT, GET, OPTIONS, DELETE", resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddAndDeleteFeatureFlow() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        given().formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", encode(product), encode(feature)).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", encode(product), encode(feature));
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationProducesCreated() {
+        String product = "test-product-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", encode(product)).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", encode(product), encode(config)).then().statusCode(lessThan(300));
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", encode(product), encode(config), encode(feature));
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    private static String encode(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

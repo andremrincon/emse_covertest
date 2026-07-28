@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i5_sBaab() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iMinus500_sAbabba() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "ababba")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i600_sAbab() {
+        given()
+            .pathParam("i", 600)
+            .pathParam("s", "abab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i700_sA() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iMinus4_sC() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "c")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("10"));
+    }
+}

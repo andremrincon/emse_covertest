@@ -1,0 +1,83 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testWedAug_returns9() {
+        given().when().get("/api/pat/TheQuickBrownFox").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/apr").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/jun").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Wed/Aug");
+        assertEquals("9", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testThurDec_returns13() {
+        given().when().get("/api/pat/alpha").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/oct").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/thur/Dec");
+        assertEquals("13", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTUEFeb_returns3() {
+        given().when().get("/api/pat/sample").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sun/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thu/oct").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/TUE/FEB");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSunNov_returns12() {
+        given().when().get("/api/pat/check").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/jul/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/aug/aug").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/sun/Nov");
+        assertEquals("12", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testWednesdayMar_noDayMatch_returns3() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/jun").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/Wednesday/MAR");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTuesdayMovember_returns500() {
+        given().when().get("/api/pat/ready").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tuesday/Movember").then().statusCode(200);
+    }
+}

@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("NCS_BASE_URL");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("NCS_BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getProperty("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccessReturns200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherRejectsWhenParametersTooLarge() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 1001, 5, 0.75);
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherRuntimeExceptionResultsIn400() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 1.2);
+        assertEquals(400, act.getStatusCode());
+    }
+}

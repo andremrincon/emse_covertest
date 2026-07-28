@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMonJanReturns2() {
+        given().when().get("/api/pat/{txt}", "health").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "Mon", "Jan").then().assertThat().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWedAugReturns9() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "WeD", "AUG").then().assertThat().body(equalTo("9"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSuperdayMovemberReturns500() {
+        given().when().get("/api/pat/{txt}", "setup").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "Superday", "Movember").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testTueFebReturns3() {
+        given().when().get("/api/pat/{txt}", "check").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "tue", "Feb").then().assertThat().body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSunDecReturns13() {
+        given().when().get("/api/pat/{txt}", "ready").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "sun", "dec").then().assertThat().body(equalTo("13"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMonInvalidMonthReturns500() {
+        given().when().get("/api/pat/{txt}", "alive").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{day}/{month}", "mon", "Movember").then().statusCode(500);
+    }
+}

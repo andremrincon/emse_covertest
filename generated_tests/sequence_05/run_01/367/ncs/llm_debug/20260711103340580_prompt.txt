@@ -1,0 +1,171 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.BessjTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testBessjZeroXReturnsZeroValue TYPE=FAILURE
+1 expectation failed.
+JSON path value doesn't match.
+Expected: a numeric value within <1.0E-6> of <0.0>
+  Actual: null
+
+[2] METHOD=testBessjAxGreaterThanNUsesBessj1SmallAxBranch TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+[3] METHOD=testBessjAxLessOrEqualUsesBackwardRecurrenceAndHandlesNegativeXSign TYPE=FAILURE
+1 expectation failed.
+JSON path value doesn't match.
+Expected: a value less than <0.0>
+  Actual: null
+
+[4] METHOD=testBessjAxGreaterThanNUsesBessj1LargeAxBranch TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testBessjZeroXReturnsZeroValue FAILURE AT LINE 52
+java.lang.AssertionError:
+at ts01gpt_5_mini.BessjTest.testBessjZeroXReturnsZeroValue(BessjTest.java:52)
+CODE CONTEXT:
+    49:     @Test(timeout = 60000)
+    50:     public void testBessjZeroXReturnsZeroValue() {
+    51:         given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+    52:         when().get("/api/bessj/{n}/{x}", 3, 0).then().body("value", closeTo(0.0, 1e-6));  ← FAILURE HERE
+    53:     }
+    54: 
+    55:     @Test(timeout = 60000)
+
+[2] METHOD=testBessjAxGreaterThanNUsesBessj1SmallAxBranch FAILURE AT LINE 58
+java.lang.AssertionError:
+at ts01gpt_5_mini.BessjTest.testBessjAxGreaterThanNUsesBessj1SmallAxBranch(BessjTest.java:58)
+CODE CONTEXT:
+    55:     @Test(timeout = 60000)
+    56:     public void testBessjAxGreaterThanNUsesBessj1SmallAxBranch() {
+    57:         given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+    58:         when().get("/api/bessj/{n}/{x}", 2, 3.0).then().statusCode(400);  ← FAILURE HERE
+    59:     }
+    60: 
+    61:     @Test(timeout = 60000)
+
+[3] METHOD=testBessjAxLessOrEqualUsesBackwardRecurrenceAndHandlesNegativeXSign FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01gpt_5_mini.BessjTest.testBessjAxLessOrEqualUsesBackwardRecurrenceAndHandlesNegativeXSign(BessjTest.java:64)
+CODE CONTEXT:
+    61:     @Test(timeout = 60000)
+    62:     public void testBessjAxLessOrEqualUsesBackwardRecurrenceAndHandlesNegativeXSign() {
+    63:         given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+    64:         when().get("/api/bessj/{n}/{x}", 3, -2.5).then().body("value", lessThan(0.0));  ← FAILURE HERE
+    65:     }
+    66: 
+    67:     @Test(timeout = 60000)
+
+[4] METHOD=testBessjAxGreaterThanNUsesBessj1LargeAxBranch FAILURE AT LINE 70
+java.lang.AssertionError:
+at ts01gpt_5_mini.BessjTest.testBessjAxGreaterThanNUsesBessj1LargeAxBranch(BessjTest.java:70)
+CODE CONTEXT:
+    67:     @Test(timeout = 60000)
+    68:     public void testBessjAxGreaterThanNUsesBessj1LargeAxBranch() {
+    69:         given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+    70:         when().get("/api/bessj/{n}/{x}", 2, 10.0).then().statusCode(400);  ← FAILURE HERE
+    71:     }
+    72: }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThan;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.*;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNReturns400() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        when().get("/api/bessj/{n}/{x}", -5, 2.5).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjZeroXReturnsZeroValue() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        when().get("/api/bessj/{n}/{x}", 3, 0).then().body("value", closeTo(0.0, 1e-6));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNUsesBessj1SmallAxBranch() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        when().get("/api/bessj/{n}/{x}", 2, 3.0).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessOrEqualUsesBackwardRecurrenceAndHandlesNegativeXSign() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        when().get("/api/bessj/{n}/{x}", 3, -2.5).then().body("value", lessThan(0.0));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNUsesBessj1LargeAxBranch() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        when().get("/api/bessj/{n}/{x}", 2, 10.0).then().statusCode(400);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

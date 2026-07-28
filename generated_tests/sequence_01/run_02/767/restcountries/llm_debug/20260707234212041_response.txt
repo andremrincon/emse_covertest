@@ -1,0 +1,50 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_EU_Returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_InvalidBloc_Returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/regionalbloc/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_NAFTA_Returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/regionalbloc/NAFTA")
+        .then()
+            .statusCode(200);
+    }
+}
+```

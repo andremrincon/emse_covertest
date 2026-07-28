@@ -1,0 +1,207 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.Text2TxtTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testText2TxtFour TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testText2TxtNoMatch TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testText2TxtByTheWay TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testText2TxtSeeYou TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testText2TxtAnd TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testText2TxtFor TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testText2TxtFour FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtFour(Text2TxtTest.java:32)
+CODE CONTEXT:
+    29:         .when()
+    30:             .get("/api/text2txt/four/x/y")
+    31:         .then()
+    32:             .statusCode(404)  ← FAILURE HERE
+    33:             .body(equalTo("4"));
+    34:     }
+    35: 
+
+[2] METHOD=testText2TxtNoMatch FAILURE AT LINE 76
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtNoMatch(Text2TxtTest.java:76)
+CODE CONTEXT:
+    73:         .when()
+    74:             .get("/api/text2txt/x/y/z")
+    75:         .then()
+    76:             .statusCode(404)  ← FAILURE HERE
+    77:             .body(equalTo(""));
+    78:     }
+    79: }
+
+[3] METHOD=testText2TxtByTheWay FAILURE AT LINE 65
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtByTheWay(Text2TxtTest.java:65)
+CODE CONTEXT:
+    62:         .when()
+    63:             .get("/api/text2txt/by/the/way")
+    64:         .then()
+    65:             .statusCode(404)  ← FAILURE HERE
+    66:             .body(equalTo("btw"));
+    67:     }
+    68: 
+
+[4] METHOD=testText2TxtSeeYou FAILURE AT LINE 54
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtSeeYou(Text2TxtTest.java:54)
+CODE CONTEXT:
+    51:         .when()
+    52:             .get("/api/text2txt/see/you/y")
+    53:         .then()
+    54:             .statusCode(404)  ← FAILURE HERE
+    55:             .body(equalTo("cu"));
+    56:     }
+    57: 
+
+[5] METHOD=testText2TxtAnd FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtAnd(Text2TxtTest.java:43)
+CODE CONTEXT:
+    40:         .when()
+    41:             .get("/api/text2txt/and/x/y")
+    42:         .then()
+    43:             .statusCode(404)  ← FAILURE HERE
+    44:             .body(equalTo("n"));
+    45:     }
+    46: 
+
+[6] METHOD=testText2TxtFor FAILURE AT LINE 21
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Text2TxtTest.testText2TxtFor(Text2TxtTest.java:21)
+CODE CONTEXT:
+    18:         .when()
+    19:             .get("/api/text2txt/for/x/y")
+    20:         .then()
+    21:             .statusCode(404)  ← FAILURE HERE
+    22:             .body(equalTo("4"));
+    23:     }
+    24: 
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Text2TxtTest {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtFor() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/for/x/y")
+        .then()
+            .statusCode(404)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtFour() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/four/x/y")
+        .then()
+            .statusCode(404)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtAnd() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/and/x/y")
+        .then()
+            .statusCode(404)
+            .body(equalTo("n"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYou() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/see/you/y")
+        .then()
+            .statusCode(404)
+            .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtByTheWay() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/by/the/way")
+        .then()
+            .statusCode(404)
+            .body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtNoMatch() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/x/y/z")
+        .then()
+            .statusCode(404)
+            .body(equalTo(""));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

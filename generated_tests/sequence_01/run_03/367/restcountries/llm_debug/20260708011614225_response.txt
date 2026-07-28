@@ -1,0 +1,43 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base");
+        String base = prop != null ? prop : (env != null ? env : "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/XYZ_NOT_EXISTENT").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/XYZ_NOT_EXISTENT").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameServerErrorStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/True").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameServerErrorMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/True").then().body("message", equalTo("Not Found"));
+    }
+}

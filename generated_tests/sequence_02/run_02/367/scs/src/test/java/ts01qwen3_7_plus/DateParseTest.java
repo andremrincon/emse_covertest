@@ -1,0 +1,79 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndValidMonthJan() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndValidMonthDec() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/dec")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/sun/xyz")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/xyz")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAllValidDays() {
+        String[] days = {"tue", "wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            given()
+                .when()
+                    .get("/api/dateparse/" + day + "/jan")
+                .then()
+                    .statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAllValidMonths() {
+        String[] months = {"feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov"};
+        for (String month : months) {
+            given()
+                .when()
+                    .get("/api/dateparse/mon/" + month)
+                .then()
+                    .statusCode(200);
+        }
+    }
+}

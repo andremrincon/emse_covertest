@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class TriangleClassificationTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/3")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(3));
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleInequalityViolation() {
+        given()
+            .when()
+                .get("/api/triangle/1/2/5")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroSideReturnsInvalid() {
+        given()
+            .when()
+                .get("/api/triangle/0/4/5")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/4")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testScaleneTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/4/5")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(1));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeSideReturnsInvalid() {
+        given()
+            .when()
+                .get("/api/triangle/-1/2/2")
+            .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(0));
+    }
+}

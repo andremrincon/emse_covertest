@@ -1,0 +1,51 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getProperty("api.baseUrl");
+        if (env == null || env.isEmpty()) {
+            String env2 = System.getenv("API_BASE_URL");
+            RestAssured.baseURI = (env2 == null || env2.isEmpty()) ? "http://localhost:8080/rest" : env2;
+        } else {
+            RestAssured.baseURI = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_WithIso639_1_Returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/lang/es");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_WithIso639_2_Returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/lang/eng");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_ByAcronym_Returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/regionalbloc/EU");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_ByOtherAcronymsOrAcronym_Returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/regionalbloc/NAFTA");
+        act.then().statusCode(200);
+    }
+}

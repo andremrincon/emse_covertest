@@ -1,0 +1,72 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Ordered4Test {
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenNeitherIncreasingNorDecreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/bbbbb/bbbbb/bbbbb/bbbbb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenWTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/a/bbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenXTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/b/ccccc/ddddd")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenZTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/c/ddddd")
+            .then()
+                .statusCode(200);
+    }
+}
+```

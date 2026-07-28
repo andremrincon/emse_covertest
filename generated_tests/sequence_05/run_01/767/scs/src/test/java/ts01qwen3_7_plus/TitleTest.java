@@ -1,0 +1,80 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithValidTitleMr() {
+        Response response = given()
+            .pathParam("sex", "male")
+            .pathParam("title", "mr")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithInvalidTitle() {
+        Response response = given()
+            .pathParam("sex", "male")
+            .pathParam("title", "invalid")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithValidTitleMrs() {
+        Response response = given()
+            .pathParam("sex", "female")
+            .pathParam("title", "mrs")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithInvalidTitle() {
+        Response response = given()
+            .pathParam("sex", "female")
+            .pathParam("title", "invalid")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithValidTitleDr() {
+        Response response = given()
+            .pathParam("sex", "none")
+            .pathParam("title", "dr")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithInvalidTitle() {
+        Response response = given()
+            .pathParam("sex", "none")
+            .pathParam("title", "invalid")
+        .when()
+            .get("/api/title/{sex}/{title}");
+        response.then().statusCode(200);
+    }
+}

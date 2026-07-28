@@ -1,0 +1,76 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFive() {
+        given()
+        .when()
+            .get("/api/costfuns/5/a")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanNegative444AndStringEqualsBaab() {
+        given()
+        .when()
+            .get("/api/costfuns/-500/baab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666AndStringEqualsAbabba() {
+        given()
+        .when()
+            .get("/api/costfuns/700/ababba")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsNegative4AndStringLessThan() {
+        given()
+        .when()
+            .get("/api/costfuns/-4/aaaa")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsZeroAndStringCompareToGreaterThanZero() {
+        given()
+        .when()
+            .get("/api/costfuns/0/zzzz")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterEqual555AndStringAlgorithm() {
+        given()
+        .when()
+            .get("/api/costfuns/600/algorithm")
+        .then()
+            .statusCode(200);
+    }
+}

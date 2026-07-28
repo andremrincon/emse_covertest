@@ -1,0 +1,382 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testLanguageSettersViaV1AlphaMultipleCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testLanguageSettersViaV1All TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testLanguageSettersViaV1Lang TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testLanguageSettersViaV1Name TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testLanguageSettersViaV2Lang TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testLanguageSettersViaV2Name TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testLanguageSettersViaV1Currency TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testLanguageSettersViaV2AlphaCode TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testLanguageSettersViaV1AlphaCode TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testLanguageSettersViaV1Capital TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testLanguageSettersViaV1Region TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testLanguageSettersViaV1CallingCode TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testLanguageSettersViaV1AlphaMultipleCodes FAILURE AT LINE 144
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1AlphaMultipleCodes(LanguageTest.java:144)
+CODE CONTEXT:
+   141:                 .when()
+   142:                 .get("/v1/alpha")
+   143:                 .then()
+   144:                 .statusCode(404)  ← FAILURE HERE
+   145:                 .body("languages", notNullValue());
+   146:     }
+   147: 
+
+[2] METHOD=testLanguageSettersViaV1All FAILURE AT LINE 155
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1All(LanguageTest.java:155)
+CODE CONTEXT:
+   152:                 .when()
+   153:                 .get("/v1/all")
+   154:                 .then()
+   155:                 .statusCode(404)  ← FAILURE HERE
+   156:                 .body("languages", notNullValue());
+   157:     }
+   158: }
+
+[3] METHOD=testLanguageSettersViaV1Lang FAILURE AT LINE 54
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1Lang(LanguageTest.java:54)
+CODE CONTEXT:
+    51:                 .when()
+    52:                 .get("/v1/lang/es")
+    53:                 .then()
+    54:                 .statusCode(404)  ← FAILURE HERE
+    55:                 .body("languages[0].iso639_1", hasItem("es"));
+    56:     }
+    57: 
+
+[4] METHOD=testLanguageSettersViaV1Name FAILURE AT LINE 40
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1Name(LanguageTest.java:40)
+CODE CONTEXT:
+    37:                 .when()
+    38:                 .get("/v1/name/France")
+    39:                 .then()
+    40:                 .statusCode(404)  ← FAILURE HERE
+    41:                 .body("languages[0].iso639_1", equalTo("fr"))
+    42:                 .body("languages[0].iso639_2", equalTo("fra"))
+    43:                 .body("languages[0].name", equalTo("French"))
+
+[5] METHOD=testLanguageSettersViaV2Lang FAILURE AT LINE 132
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV2Lang(LanguageTest.java:132)
+CODE CONTEXT:
+   129:                 .when()
+   130:                 .get("/v2/lang/Spanish")
+   131:                 .then()
+   132:                 .statusCode(404)  ← FAILURE HERE
+   133:                 .body("languages[0].name", hasItem("Spanish"));
+   134:     }
+   135: 
+
+[6] METHOD=testLanguageSettersViaV2Name FAILURE AT LINE 118
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV2Name(LanguageTest.java:118)
+CODE CONTEXT:
+   115:                 .when()
+   116:                 .get("/v2/name/Germany")
+   117:                 .then()
+   118:                 .statusCode(404)  ← FAILURE HERE
+   119:                 .body("languages[0].iso639_1", equalTo("de"))
+   120:                 .body("languages[0].iso639_2", equalTo("deu"))
+   121:                 .body("languages[0].name", equalTo("German"))
+
+[7] METHOD=testLanguageSettersViaV1Currency FAILURE AT LINE 65
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1Currency(LanguageTest.java:65)
+CODE CONTEXT:
+    62:                 .when()
+    63:                 .get("/v1/currency/USD")
+    64:                 .then()
+    65:                 .statusCode(404)  ← FAILURE HERE
+    66:                 .body("languages[0].name", hasItem("English"));
+    67:     }
+    68: 
+
+[8] METHOD=testLanguageSettersViaV2AlphaCode FAILURE AT LINE 107
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV2AlphaCode(LanguageTest.java:107)
+CODE CONTEXT:
+   104:                 .when()
+   105:                 .get("/v2/alpha/DE")
+   106:                 .then()
+   107:                 .statusCode(404)  ← FAILURE HERE
+   108:                 .body("languages.deu", equalTo("German"));
+   109:     }
+   110: 
+
+[9] METHOD=testLanguageSettersViaV1AlphaCode FAILURE AT LINE 26
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1AlphaCode(LanguageTest.java:26)
+CODE CONTEXT:
+    23:                 .when()
+    24:                 .get("/v1/alpha/US")
+    25:                 .then()
+    26:                 .statusCode(404)  ← FAILURE HERE
+    27:                 .body("languages[0].iso639_1", equalTo("en"))
+    28:                 .body("languages[0].iso639_2", equalTo("eng"))
+    29:                 .body("languages[0].name", equalTo("English"))
+
+[10] METHOD=testLanguageSettersViaV1Capital FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1Capital(LanguageTest.java:86)
+CODE CONTEXT:
+    83:                 .when()
+    84:                 .get("/v1/capital/London")
+    85:                 .then()
+    86:                 .statusCode(404);  ← FAILURE HERE
+    87:     }
+    88: 
+    89:     @Test(timeout = 60000)
+
+[11] METHOD=testLanguageSettersViaV1Region FAILURE AT LINE 96
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1Region(LanguageTest.java:96)
+CODE CONTEXT:
+    93:                 .when()
+    94:                 .get("/v1/region/Europe")
+    95:                 .then()
+    96:                 .statusCode(404)  ← FAILURE HERE
+    97:                 .body("languages", notNullValue());
+    98:     }
+    99: 
+
+[12] METHOD=testLanguageSettersViaV1CallingCode FAILURE AT LINE 76
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLanguageSettersViaV1CallingCode(LanguageTest.java:76)
+CODE CONTEXT:
+    73:                 .when()
+    74:                 .get("/v1/callingcode/44")
+    75:                 .then()
+    76:                 .statusCode(404);  ← FAILURE HERE
+    77:     }
+    78: 
+    79:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1AlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", equalTo("en"))
+                .body("languages[0].iso639_2", equalTo("eng"))
+                .body("languages[0].name", equalTo("English"))
+                .body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Name() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", equalTo("fr"))
+                .body("languages[0].iso639_2", equalTo("fra"))
+                .body("languages[0].name", equalTo("French"))
+                .body("languages[0].nativeName", equalTo("français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Lang() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", hasItem("es"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Currency() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("languages[0].name", hasItem("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1CallingCode() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/callingcode/44")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Capital() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Region() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2AlphaCode() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(404)
+                .body("languages.deu", equalTo("German"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Name() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", equalTo("de"))
+                .body("languages[0].iso639_2", equalTo("deu"))
+                .body("languages[0].name", equalTo("German"))
+                .body("languages[0].nativeName", equalTo("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Lang() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(404)
+                .body("languages[0].name", hasItem("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1AlphaMultipleCodes() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1All() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

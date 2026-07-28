@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("server.url");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("SERVER_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencyCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencyName() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsCurrencySymbol() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsCurrencyCode() {
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("currencies[0][0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsCurrencyName() {
+        given().when().get("/v1/currency/EUR").then().statusCode(200).body("currencies[0][0].name", equalTo("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsCurrencySymbol() {
+        given().when().get("/v1/currency/EUR").then().statusCode(200).body("currencies[0][0].symbol", equalTo("€"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencyCode() {
+        given().queryParam("fields", "name;capital;currencies").when().get("/v2/regionalbloc/EU").then().statusCode(200).body("currencies[0][0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencyName() {
+        given().queryParam("fields", "name;capital;currencies").when().get("/v2/regionalbloc/EU").then().statusCode(200).body("currencies[0][0].name", equalTo("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCurrencySymbol() {
+        given().queryParam("fields", "name;capital;currencies").when().get("/v2/regionalbloc/EU").then().statusCode(200).body("currencies[0][0].symbol", equalTo("€"));
+    }
+}
+```

@@ -1,0 +1,101 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "http://localhost");
+        int port = Integer.getInteger("server.port", 8080);
+        RestAssured.baseURI = host;
+        RestAssured.port = port;
+    }
+
+    @Test(timeout = 60000)
+    public void testShortPatternReturnsZero() {
+        given()
+            .when()
+                .get("/api/pat/abc/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundNoReverse() {
+        given()
+            .when()
+                .get("/api/pat/abcPATdef/PAT")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/PATTAP/PAT")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/PATxyzTAP/PAT")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/PATTAP/TAP")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/PATxyzTAP/TAP")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatNotFound() {
+        given()
+            .when()
+                .get("/api/pat/PATxyz/TAP")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatternNorReverseFound() {
+        given()
+            .when()
+                .get("/api/pat/xyz/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given()
+            .when()
+                .get("/api/pat/ab/ABCDEF")
+            .then()
+                .statusCode(200);
+    }
+}
+```

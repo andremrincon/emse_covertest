@@ -1,0 +1,187 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByLanguage_fieldsFiltered_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testGetByAlphaList_fieldsFiltered_parsedCountries TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a string containing "name"
+  Actual: {"status":400,"message":"Bad Request"}
+
+[3] METHOD=testGetBySubRegion_fieldsFiltered_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByLanguage_fieldsFiltered_returns200 FAILURE AT LINE 85
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetByLanguage_fieldsFiltered_returns200(CountryRestV2Test.java:85)
+CODE CONTEXT:
+    82:     @Test(timeout = 60000)
+    83:     public void testGetByLanguage_fieldsFiltered_returns200() {
+    84:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    85:         given().when().get("/v2/lang/Spanish?fields=name;capital;population").then().statusCode(404);  ← FAILURE HERE
+    86:     }
+    87: 
+    88:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByAlphaList_fieldsFiltered_parsedCountries FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetByAlphaList_fieldsFiltered_parsedCountries(CountryRestV2Test.java:43)
+CODE CONTEXT:
+    40:     @Test(timeout = 60000)
+    41:     public void testGetByAlphaList_fieldsFiltered_parsedCountries() {
+    42:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    43:         given().when().get("/v2/alpha?codes=US,CA&fields=name;capital;population").then().body(containsString("name"));  ← FAILURE HERE
+    44:     }
+    45: 
+    46:     @Test(timeout = 60000)
+
+[3] METHOD=testGetBySubRegion_fieldsFiltered_returns200 FAILURE AT LINE 79
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetBySubRegion_fieldsFiltered_returns200(CountryRestV2Test.java:79)
+CODE CONTEXT:
+    76:     @Test(timeout = 60000)
+    77:     public void testGetBySubRegion_fieldsFiltered_returns200() {
+    78:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    79:         given().when().get("/v2/subregion/Western%20Europe?fields=name;capital;population").then().statusCode(404);  ← FAILURE HERE
+    80:     }
+    81: 
+    82:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_fieldsFiltered_parsedCountry() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalid_short_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_missingCodes_returns400_isEmpty() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_fieldsFiltered_parsedCountries() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA&fields=name;capital;population").then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullText_true_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/Germany?fullText=true&fields=name;capital").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/callingcode/1?fields=name;capital;region").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/capital/Paris?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/region/Europe?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/subregion/Western%20Europe?fields=name;capital;population").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish?fields=name;capital;population").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonym_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/demonym/American?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_fieldsFiltered_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/regionalbloc/EU?fields=name;capital;currencies").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/Atlantis?fullText=false").then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

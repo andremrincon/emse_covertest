@@ -1,0 +1,449 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetCallingCode1ReturnsTranslationsDe TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testGetAlphaCodeUSRreturnsTranslationsEs TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testGetAlphaCodeDEReturnsTranslationsDeField TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testGetCapitalLondonReturnsTranslationsEs TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testGetCurrencyUSDReturnsTranslationsJa TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testGetNameFranceReturnsTranslationsIt TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testGetSubregionWesternEuropeReturnsTranslationsJa TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+
+[8] METHOD=testGetRegionAmericasReturnsTranslationsDeField TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testGetLangEsReturnsTranslationsIt TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testGetCurrencyEURReturnsTranslationsItField TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testGetAlphaCodeGBReturnsAllTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testGetRegionEuropeReturnsTranslationsFr TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[13] METHOD=testGetNameUnitedStatesReturnsTranslationsJaField TYPE=ERROR
+Illegal character in path at index 46: http://localhost:8080/rest/rest/v1/name/United States of America
+
+[14] METHOD=testGetAllV1ReturnsTranslationsDe TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[15] METHOD=testGetAlphaCodesReturnsTranslationsFr TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetCallingCode1ReturnsTranslationsDe FAILURE AT LINE 82
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetCallingCode1ReturnsTranslationsDe(CountryTranslationsTest.java:82)
+CODE CONTEXT:
+    79:             .when()
+    80:                 .get("/v1/callingcode/1")
+    81:             .then()
+    82:                 .statusCode(404)  ← FAILURE HERE
+    83:                 .body("[0].translations.de", notNullValue());
+    84:     }
+    85: 
+
+[2] METHOD=testGetAlphaCodeUSRreturnsTranslationsEs FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetAlphaCodeUSRreturnsTranslationsEs(CountryTranslationsTest.java:41)
+CODE CONTEXT:
+    38:             .when()
+    39:                 .get("/v1/alpha/US")
+    40:             .then()
+    41:                 .statusCode(404)  ← FAILURE HERE
+    42:                 .body("translations.es", notNullValue());
+    43:     }
+    44: 
+
+[3] METHOD=testGetAlphaCodeDEReturnsTranslationsDeField FAILURE AT LINE 146
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetAlphaCodeDEReturnsTranslationsDeField(CountryTranslationsTest.java:146)
+CODE CONTEXT:
+   143:             .when()
+   144:                 .get("/v1/alpha/DE")
+   145:             .then()
+   146:                 .statusCode(404)  ← FAILURE HERE
+   147:                 .body("translations.de", equalTo("Deutschland"));
+   148:     }
+   149: 
+
+[4] METHOD=testGetCapitalLondonReturnsTranslationsEs FAILURE AT LINE 92
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetCapitalLondonReturnsTranslationsEs(CountryTranslationsTest.java:92)
+CODE CONTEXT:
+    89:             .when()
+    90:                 .get("/v1/capital/London")
+    91:             .then()
+    92:                 .statusCode(404)  ← FAILURE HERE
+    93:                 .body("[0].translations.es", notNullValue());
+    94:     }
+    95: 
+
+[5] METHOD=testGetCurrencyUSDReturnsTranslationsJa FAILURE AT LINE 62
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetCurrencyUSDReturnsTranslationsJa(CountryTranslationsTest.java:62)
+CODE CONTEXT:
+    59:             .when()
+    60:                 .get("/v1/currency/USD")
+    61:             .then()
+    62:                 .statusCode(404)  ← FAILURE HERE
+    63:                 .body("[0].translations.ja", notNullValue());
+    64:     }
+    65: 
+
+[6] METHOD=testGetNameFranceReturnsTranslationsIt FAILURE AT LINE 72
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetNameFranceReturnsTranslationsIt(CountryTranslationsTest.java:72)
+CODE CONTEXT:
+    69:             .when()
+    70:                 .get("/v1/name/France")
+    71:             .then()
+    72:                 .statusCode(404)  ← FAILURE HERE
+    73:                 .body("[0].translations.it", notNullValue());
+    74:     }
+    75: 
+
+[7] METHOD=testGetSubregionWesternEuropeReturnsTranslationsJa FAILURE AT LINE 110
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+at ts01glm_5_2.CountryTranslationsTest.testGetSubregionWesternEuropeReturnsTranslationsJa(CountryTranslationsTest.java:110)
+CODE CONTEXT:
+   107:     public void testGetSubregionWesternEuropeReturnsTranslationsJa() {
+   108:         given()
+   109:             .when()
+   110:                 .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+   111:             .then()
+   112:                 .statusCode(200)
+   113:                 .body("[0].translations.ja", notNullValue());
+
+[8] METHOD=testGetRegionAmericasReturnsTranslationsDeField FAILURE AT LINE 176
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetRegionAmericasReturnsTranslationsDeField(CountryTranslationsTest.java:176)
+CODE CONTEXT:
+   173:             .when()
+   174:                 .get("/v1/region/Americas")
+   175:             .then()
+   176:                 .statusCode(404)  ← FAILURE HERE
+   177:                 .body("[0].translations.de", notNullValue());
+   178:     }
+   179: }
+
+[9] METHOD=testGetLangEsReturnsTranslationsIt FAILURE AT LINE 122
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetLangEsReturnsTranslationsIt(CountryTranslationsTest.java:122)
+CODE CONTEXT:
+   119:             .when()
+   120:                 .get("/v1/lang/es")
+   121:             .then()
+   122:                 .statusCode(404)  ← FAILURE HERE
+   123:                 .body("[0].translations.it", notNullValue());
+   124:     }
+   125: 
+
+[10] METHOD=testGetCurrencyEURReturnsTranslationsItField FAILURE AT LINE 156
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetCurrencyEURReturnsTranslationsItField(CountryTranslationsTest.java:156)
+CODE CONTEXT:
+   153:             .when()
+   154:                 .get("/v1/currency/EUR")
+   155:             .then()
+   156:                 .statusCode(404)  ← FAILURE HERE
+   157:                 .body("[0].translations.it", notNullValue());
+   158:     }
+   159: 
+
+[11] METHOD=testGetAlphaCodeGBReturnsAllTranslations FAILURE AT LINE 132
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetAlphaCodeGBReturnsAllTranslations(CountryTranslationsTest.java:132)
+CODE CONTEXT:
+   129:             .when()
+   130:                 .get("/v1/alpha/GB")
+   131:             .then()
+   132:                 .statusCode(404)  ← FAILURE HERE
+   133:                 .body("translations.de", notNullValue(),
+   134:                       "translations.es", notNullValue(),
+   135:                       "translations.fr", notNullValue(),
+
+[12] METHOD=testGetRegionEuropeReturnsTranslationsFr FAILURE AT LINE 102
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetRegionEuropeReturnsTranslationsFr(CountryTranslationsTest.java:102)
+CODE CONTEXT:
+    99:             .when()
+   100:                 .get("/v1/region/Europe")
+   101:             .then()
+   102:                 .statusCode(404)  ← FAILURE HERE
+   103:                 .body("[0].translations.fr", notNullValue());
+   104:     }
+   105: 
+
+[13] METHOD=testGetNameUnitedStatesReturnsTranslationsJaField FAILURE AT LINE 164
+java.net.URISyntaxException: Illegal character in path at index 46: http://localhost:8080/rest/rest/v1/name/United States of America
+at ts01glm_5_2.CountryTranslationsTest.testGetNameUnitedStatesReturnsTranslationsJaField(CountryTranslationsTest.java:164)
+CODE CONTEXT:
+   161:     public void testGetNameUnitedStatesReturnsTranslationsJaField() {
+   162:         given()
+   163:             .when()
+   164:                 .get("/v1/name/United States of America")  ← FAILURE HERE
+   165:             .then()
+   166:                 .statusCode(200)
+   167:                 .body("[0].translations.ja", notNullValue());
+
+[14] METHOD=testGetAllV1ReturnsTranslationsDe FAILURE AT LINE 31
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetAllV1ReturnsTranslationsDe(CountryTranslationsTest.java:31)
+CODE CONTEXT:
+    28:             .when()
+    29:                 .get("/v1/all")
+    30:             .then()
+    31:                 .statusCode(404)  ← FAILURE HERE
+    32:                 .body("[0].translations.de", notNullValue());
+    33:     }
+    34: 
+
+[15] METHOD=testGetAlphaCodesReturnsTranslationsFr FAILURE AT LINE 52
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetAlphaCodesReturnsTranslationsFr(CountryTranslationsTest.java:52)
+CODE CONTEXT:
+    49:             .when()
+    50:                 .get("/v1/alpha")
+    51:             .then()
+    52:                 .statusCode(404)  ← FAILURE HERE
+    53:                 .body("[0].translations.fr", notNullValue());
+    54:     }
+    55: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllV1ReturnsTranslationsDe() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeUSRreturnsTranslationsEs() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(404)
+                .body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCodesReturnsTranslationsFr() {
+        given()
+            .queryParam("codes", "US,CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCurrencyUSDReturnsTranslationsJa() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameFranceReturnsTranslationsIt() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingCode1ReturnsTranslationsDe() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalLondonReturnsTranslationsEs() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionEuropeReturnsTranslationsFr() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetSubregionWesternEuropeReturnsTranslationsJa() {
+        given()
+            .when()
+                .get("/v1/subregion/Western Europe")
+            .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetLangEsReturnsTranslationsIt() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeGBReturnsAllTranslations() {
+        given()
+            .when()
+                .get("/v1/alpha/GB")
+            .then()
+                .statusCode(404)
+                .body("translations.de", notNullValue(),
+                      "translations.es", notNullValue(),
+                      "translations.fr", notNullValue(),
+                      "translations.ja", notNullValue(),
+                      "translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCodeDEReturnsTranslationsDeField() {
+        given()
+            .when()
+                .get("/v1/alpha/DE")
+            .then()
+                .statusCode(404)
+                .body("translations.de", equalTo("Deutschland"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCurrencyEURReturnsTranslationsItField() {
+        given()
+            .when()
+                .get("/v1/currency/EUR")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameUnitedStatesReturnsTranslationsJaField() {
+        given()
+            .when()
+                .get("/v1/name/United States of America")
+            .then()
+                .statusCode(200)
+                .body("[0].translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionAmericasReturnsTranslationsDeField() {
+        given()
+            .when()
+                .get("/v1/region/Americas")
+            .then()
+                .statusCode(404)
+                .body("[0].translations.de", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

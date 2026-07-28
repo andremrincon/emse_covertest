@@ -1,0 +1,147 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1AlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", equalTo("fra"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", equalTo("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1NameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", equalTo("français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_1ViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("es"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetIso639_2ViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", hasItem("spa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNameViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", hasItem("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSetNativeNameViaV1LangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", hasItem("Español"));
+    }
+}
+```

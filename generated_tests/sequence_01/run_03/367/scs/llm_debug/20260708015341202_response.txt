@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSuccessfulParseReturns200ForFullNames() {
+        given().when().get("/api/pat/{txt}", "arrange").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Wednesday", "August");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testShortDayAndUppercaseMonthReturnsExpectedValue() {
+        given().when().get("/api/pat/{txt}", "setup2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "tue", "MAR");
+        assertEquals("4", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testNonMatchingDayWithDecemberReturnsTwelve() {
+        given().when().get("/api/pat/{txt}", "setup3").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "dne", "dec");
+        assertEquals("12", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayNameTriggersServerError() {
+        given().when().get("/api/pat/{txt}", "setup4").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "123", "Movember");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testMondayAndJanuaryProducesTwo() {
+        given().when().get("/api/pat/{txt}", "setup5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "jan");
+        assertEquals("2", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testUppercaseSundayAndFebruaryProducesThree() {
+        given().when().get("/api/pat/{txt}", "setup6").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{dayname}/{monthname}", "SUN", "feb");
+        assertEquals("3", resp.getBody().asString());
+    }
+}

@@ -1,0 +1,102 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanThree() {
+        given()
+            .when()
+                .get("/api/pat/ABCDEF/AB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundNoReverse() {
+        given()
+            .when()
+                .get("/api/pat/ABCDEF/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPattern() {
+        given()
+            .when()
+                .get("/api/pat/CBAXYZ/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatFollowedByReverse() {
+        given()
+            .when()
+                .get("/api/pat/ABCCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromeReverseFollowedByPat() {
+        given()
+            .when()
+                .get("/api/pat/CBAABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBothFoundNotAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABCXCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+            .when()
+                .get("/api/pat/XYZXYZ/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundAtNonZeroIndex() {
+        given()
+            .when()
+                .get("/api/pat/XABCDEF/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundAtNonZeroIndex() {
+        given()
+            .when()
+                .get("/api/pat/XCBAXYZ/ABC")
+            .then()
+                .statusCode(200);
+    }
+}
+```

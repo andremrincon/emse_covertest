@@ -1,0 +1,55 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantOperations() {
+        given().when().get("/api/calc/pi/1.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/e/1.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryMathOperations() {
+        given().when().get("/api/calc/sqrt/4.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/log/10.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTrigonometricOperations() {
+        given().when().get("/api/calc/sine/0.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/cosine/0.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/tangent/0.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAdditionAndSubtraction() {
+        given().when().get("/api/calc/plus/5.0/3.0").then().statusCode(200);
+        given().when().get("/api/calc/subtract/5.0/3.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplicationAndDivision() {
+        given().when().get("/api/calc/multiply/4.0/2.0").then().statusCode(200);
+        given().when().get("/api/calc/divide/4.0/2.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnsupportedOperation() {
+        given().when().get("/api/calc/unknown/5.0/3.0").then().statusCode(200);
+    }
+}

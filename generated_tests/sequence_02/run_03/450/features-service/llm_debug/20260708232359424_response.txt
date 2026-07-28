@@ -1,0 +1,67 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithDerivedFeatures() {
+        String p1 = "P1_" + UUID.randomUUID().toString();
+        String f1 = "F1_" + UUID.randomUUID().toString();
+        String f2 = "F2_" + UUID.randomUUID().toString();
+        String c1 = "C1_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + p1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p1 + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p1 + "/features/" + f2).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", f1).formParam("requiredFeature", f2).when().post("/products/" + p1 + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p1 + "/configurations/" + c1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p1 + "/configurations/" + c1 + "/features/" + f1).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + p1 + "/configurations/" + c1 + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithoutDerivedFeatures() {
+        String p2 = "P2_" + UUID.randomUUID().toString();
+        String f3 = "F3_" + UUID.randomUUID().toString();
+        String c2 = "C2_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + p2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p2 + "/features/" + f3).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p2 + "/configurations/" + c2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p2 + "/configurations/" + c2 + "/features/" + f3).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + p2 + "/configurations/" + c2 + "/features").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithInvalidConstraint() {
+        String p3 = "P3_" + UUID.randomUUID().toString();
+        String f4 = "F4_" + UUID.randomUUID().toString();
+        String f5 = "F5_" + UUID.randomUUID().toString();
+        String c3 = "C3_" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + p3).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p3 + "/features/" + f4).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p3 + "/features/" + f5).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", f4).formParam("excludedFeature", f5).when().post("/products/" + p3 + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p3 + "/configurations/" + c3).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p3 + "/configurations/" + c3 + "/features/" + f4).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p3 + "/configurations/" + c3 + "/features/" + f5).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + p3 + "/configurations/" + c3 + "/features").then().statusCode(200);
+    }
+}

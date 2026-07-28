@@ -1,0 +1,72 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CookieTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testUseridBranchWithLongValueAndUserPrefix() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/userid/user12345/example.com")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridBranchWithLongValueAndNonUserPrefix() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/userid/admin12345/example.com")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridBranchWithShortValue() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/userid/user123/example.com")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchWithValidAmAndAbcCom() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/session/am/abc.com")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchWithInvalidAmOrAbcCom() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/session/pm/abc.com")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDefaultBranchWithOtherName() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/cookie/other/value/example.com")
+        .then()
+            .statusCode(200);
+    }
+}
+```

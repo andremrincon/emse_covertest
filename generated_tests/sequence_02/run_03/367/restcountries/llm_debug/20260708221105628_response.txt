@@ -1,0 +1,156 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFound_returns404() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes_returns200() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFoundCodes_returns404() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_validCurrency_returns200() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFoundCurrency_returns404() {
+        given()
+            .when()
+                .get("/v1/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_validName_returns200() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFoundName_returns404() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_validCode_returns200() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFoundCode_returns404() {
+        given()
+            .when()
+                .get("/v1/callingcode/99999")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_validCapital_returns200() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFoundCapital_returns404() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_validRegion_returns200() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFoundRegion_returns404() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_validSubregion_returns200() {
+        given()
+            .when()
+                .get("/v1/subregion/Western Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_validLanguage_returns200() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .statusCode(200);
+    }
+}
+```

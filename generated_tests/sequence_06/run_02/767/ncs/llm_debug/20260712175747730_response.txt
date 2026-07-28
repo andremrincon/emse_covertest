@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void init() {
+        String fromSys = System.getProperty("baseUrl");
+        String fromEnv = System.getenv("BASE_URL");
+        RestAssured.baseURI = fromSys != null && !fromSys.isEmpty() ? fromSys : (fromEnv != null && !fromEnv.isEmpty() ? fromEnv : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPath_returns200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/gammq/{a}/{x}", 5.5, 0.001);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPath_returns200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/gammq/{a}/{x}", 5.5, 1000.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqNegativeA_returns400() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/gammq/{a}/{x}", -1.0, 2.3);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqNegativeX_returns400() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/gammq/{a}/{x}", 5.5, -0.1);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqXZero_returnsResultOne() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/gammq/{a}/{x}", 1.5, 0.0);
+        act.then().body("result", closeTo(1.0, 1e-9));
+    }
+}

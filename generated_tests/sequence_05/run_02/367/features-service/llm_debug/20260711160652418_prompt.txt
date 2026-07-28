@@ -1,0 +1,254 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsConfigurationFeaturesResourceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=deleteFeature_invalidResult_returns400 TYPE=FAILURE
+
+
+[2] METHOD=addFeatureToConfiguration_validResult_returns201 TYPE=FAILURE
+
+
+[3] METHOD=addFeatureToConfiguration_invalidResult_returns400 TYPE=FAILURE
+
+
+[4] METHOD=deleteFeature_validResult_returns204 TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=deleteFeature_invalidResult_returns400 FAILURE AT LINE 94
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.deleteFeature_invalidResult_returns400(ProductsConfigurationFeaturesResourceTest.java:94)
+CODE CONTEXT:
+    91:         String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+    92: 
+    93:         Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+    94:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);  ← FAILURE HERE
+    95:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+    96:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+    97:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+
+[2] METHOD=addFeatureToConfiguration_validResult_returns201 FAILURE AT LINE 40
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.addFeatureToConfiguration_validResult_returns201(ProductsConfigurationFeaturesResourceTest.java:40)
+CODE CONTEXT:
+    37:         Assert.assertTrue(r1 < 300);
+    38: 
+    39:         int r2 = sendRequest("POST", "/products/" + productName + "/features/" + featureName, null);
+    40:         Assert.assertTrue(r2 < 300);  ← FAILURE HERE
+    41: 
+    42:         int r3 = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null);
+    43:         Assert.assertTrue(r3 < 300);
+
+[3] METHOD=addFeatureToConfiguration_invalidResult_returns400 FAILURE AT LINE 57
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.addFeatureToConfiguration_invalidResult_returns400(ProductsConfigurationFeaturesResourceTest.java:57)
+CODE CONTEXT:
+    54:         String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+    55: 
+    56:         Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+    57:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);  ← FAILURE HERE
+    58:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+    59:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+    60:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+
+[4] METHOD=deleteFeature_validResult_returns204 FAILURE AT LINE 78
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConfigurationFeaturesResourceTest.deleteFeature_validResult_returns204(ProductsConfigurationFeaturesResourceTest.java:78)
+CODE CONTEXT:
+    75:         String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+    76: 
+    77:         Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+    78:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureName, null) < 300);  ← FAILURE HERE
+    79:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+    80:         Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null) < 300);
+    81: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        String base = System.getProperty("baseUrl");
+        if (base != null && !base.isEmpty()) {
+            baseUrl = base;
+        } else {
+            baseUrl = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validResult_returns201() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int r1 = sendRequest("POST", "/products/" + productName, null);
+        Assert.assertTrue(r1 < 300);
+
+        int r2 = sendRequest("POST", "/products/" + productName + "/features/" + featureName, null);
+        Assert.assertTrue(r2 < 300);
+
+        int r3 = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null);
+        Assert.assertTrue(r3 < 300);
+
+        int r4 = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null);
+        Assert.assertEquals(201, r4);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_invalidResult_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", featureA);
+        params.put("excludedFeature", featureB);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/constraints/excludes", params) < 300);
+
+        int r = sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null);
+        Assert.assertEquals(400, r);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_validResult_returns204() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null) < 300);
+
+        int r = sendRequest("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName, null);
+        Assert.assertEquals(204, r);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_invalidResult_returns400() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/features/" + featureB, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA, null) < 300);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null) < 300);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("sourceFeature", featureA);
+        params.put("requiredFeature", featureB);
+        Assert.assertTrue(sendRequest("POST", "/products/" + productName + "/constraints/requires", params) < 300);
+
+        int r = sendRequest("DELETE", "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB, null);
+        Assert.assertEquals(400, r);
+    }
+
+    private int sendRequest(String method, String path, Map<String, String> formParams) throws Exception {
+        String full = baseUrl + path;
+        URL url = new URL(full);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(15000);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            if (formParams != null && !formParams.isEmpty()) {
+                String body = buildForm(formParams);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    try {
+                        os.close();
+                    } catch (Exception e) {
+                    }
+                }
+            } else {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Length", "0");
+            }
+        }
+        conn.connect();
+        int code;
+        try {
+            code = conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+        return code;
+    }
+
+    private String buildForm(Map<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,220 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetCountriesBySubregionV1ReturnsTranslations TYPE=ERROR
+Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+
+[2] METHOD=testGetCountriesByAlphaCodesV1ReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetCountriesBySubregionV1ReturnsTranslations FAILURE AT LINE 130
+java.net.URISyntaxException: Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+at ts01glm_5_2.CountryTranslationsTest.testGetCountriesBySubregionV1ReturnsTranslations(CountryTranslationsTest.java:130)
+CODE CONTEXT:
+   127:     @Test(timeout = 60000)
+   128:     public void testGetCountriesBySubregionV1ReturnsTranslations() {
+   129:         given()
+   130:                 .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+   131:                 .then()
+   132:                 .statusCode(200)
+   133:                 .body("translations.de", hasItem(notNullValue()));
+
+[2] METHOD=testGetCountriesByAlphaCodesV1ReturnsTranslations FAILURE AT LINE 78
+java.lang.AssertionError:
+at ts01glm_5_2.CountryTranslationsTest.testGetCountriesByAlphaCodesV1ReturnsTranslations(CountryTranslationsTest.java:78)
+CODE CONTEXT:
+    75:                 .queryParam("codes", "US,CA,MX")
+    76:                 .get("/v1/alpha")
+    77:                 .then()
+    78:                 .statusCode(400)  ← FAILURE HERE
+    79:                 .body("translations.de", hasItem(notNullValue()));
+    80:     }
+    81: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesV1ReturnsTranslations() {
+        given()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeV1ReturnsDeTranslation() {
+        given()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeV1ReturnsEsTranslation() {
+        given()
+                .get("/v1/alpha/FR")
+                .then()
+                .statusCode(200)
+                .body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeV1ReturnsFrTranslation() {
+        given()
+                .get("/v1/alpha/DE")
+                .then()
+                .statusCode(200)
+                .body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeV1ReturnsJaTranslation() {
+        given()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeV1ReturnsItTranslation() {
+        given()
+                .get("/v1/alpha/IT")
+                .then()
+                .statusCode(200)
+                .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByAlphaCodesV1ReturnsTranslations() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCurrencyV1ReturnsTranslations() {
+        given()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByNameV1ReturnsTranslations() {
+        given()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCallingCodeV1ReturnsTranslations() {
+        given()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByCapitalV1ReturnsTranslations() {
+        given()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByRegionV1ReturnsTranslations() {
+        given()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesBySubregionV1ReturnsTranslations() {
+        given()
+                .get("/v1/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountriesByLanguageV1ReturnsTranslations() {
+        given()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesV1ReturnsAllTranslationFields() {
+        given()
+                .get("/v1")
+                .then()
+                .statusCode(200)
+                .body("translations.de", hasItem(notNullValue()))
+                .body("translations.es", hasItem(notNullValue()))
+                .body("translations.fr", hasItem(notNullValue()))
+                .body("translations.ja", hasItem(notNullValue()))
+                .body("translations.it", hasItem(notNullValue()));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

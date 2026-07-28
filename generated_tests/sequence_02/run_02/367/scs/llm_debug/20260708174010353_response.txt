@@ -1,0 +1,97 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstant() {
+        given()
+            .pathParam("op", "pi")
+            .pathParam("arg1", 0.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo(String.valueOf(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstant() {
+        given()
+            .pathParam("op", "e")
+            .pathParam("arg1", 0.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo(String.valueOf(Math.E)));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryOperator() {
+        given()
+            .pathParam("op", "sqrt")
+            .pathParam("arg1", 16.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusBinaryOperator() {
+        given()
+            .pathParam("op", "plus")
+            .pathParam("arg1", 10.5)
+            .pathParam("arg2", 5.5)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("16.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideBinaryOperator() {
+        given()
+            .pathParam("op", "divide")
+            .pathParam("arg1", 20.0)
+            .pathParam("arg2", 4.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroError() {
+        given()
+            .pathParam("op", "divide")
+            .pathParam("arg1", 100.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(500);
+    }
+}

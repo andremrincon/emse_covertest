@@ -1,0 +1,135 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl != null) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_twoCharCode_returnsCountry() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_threeCharCode_returnsCountry() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_nonExistentCode_returnsNullAnd404() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_multipleCodes_returnsCountries() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;CA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_duplicateCodes_triggersContainsCheck() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_nonExistentCodes_returns404() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=XX;YY;ZZ")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeList_missingCodesParam_triggersNullCheck() {
+        given()
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_exactNameMatch_returnsCountry() {
+        given()
+            .when()
+                .get("/v1/name/Germany?fullText=true")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("Illegal character in path at index 42: http://localhost:8080/rest/v1/name/Federal Republic of Ger...")
+    @Test(timeout = 60000)
+    public void fulltextSearch_altSpellingMatch_returnsCountry() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}", "Federal Republic of Germany")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearch_noMatch_returns404() {
+        given()
+            .when()
+                .get("/v1/name/Atlantis?fullText=true")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_allEndpoint_exercisesJsonLoading() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJson_v2AllEndpoint_exercisesJsonLoading() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(200);
+    }
+}

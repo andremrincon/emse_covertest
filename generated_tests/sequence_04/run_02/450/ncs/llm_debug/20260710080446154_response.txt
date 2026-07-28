@@ -1,0 +1,95 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String port = System.getProperty("server.port");
+        if (port == null) {
+            port = System.getenv("SERVER_PORT");
+        }
+        if (port == null) {
+            port = "8080";
+        }
+        RestAssured.port = Integer.parseInt(port);
+
+        String host = System.getProperty("server.host");
+        if (host == null) {
+            host = System.getenv("SERVER_HOST");
+        }
+        if (host == null) {
+            host = "localhost";
+        }
+        RestAssured.baseURI = "http://" + host;
+
+        String basePath = System.getProperty("server.basePath");
+        if (basePath == null) {
+            basePath = System.getenv("SERVER_BASE_PATH");
+        }
+        if (basePath == null) {
+            basePath = "/";
+        }
+        RestAssured.basePath = basePath;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddNValidInput() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddNValidInput() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.75")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeXProbabilityClampedToOne() {
+        given()
+            .when()
+                .get("/api/fisher/1/3/10000.0")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherVerySmallXProbabilityNearZero() {
+        given()
+            .when()
+                .get("/api/fisher/10/1/0.0000001")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidMNonNumeric() {
+        given()
+            .when()
+                .get("/api/fisher/abc/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidNNegative() {
+        given()
+            .when()
+                .get("/api/fisher/10/-3/0.75")
+            .then()
+                .statusCode(200);
+    }
+}

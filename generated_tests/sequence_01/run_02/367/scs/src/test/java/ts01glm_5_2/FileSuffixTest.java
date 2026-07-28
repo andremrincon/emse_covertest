@@ -1,0 +1,93 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FileSuffixTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutDotReturnsZero() {
+        String directory = "text";
+        String file = "nofileextension";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtSuffixReturnsOne() {
+        String directory = "text";
+        String file = "document.txt";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfSuffixReturnsTwo() {
+        String directory = "acrobat";
+        String file = "report.pdf";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocSuffixReturnsThree() {
+        String directory = "word";
+        String file = "letter.doc";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeSuffixReturnsFour() {
+        String directory = "bin";
+        String file = "program.exe";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllSuffixReturnsFive() {
+        String directory = "lib";
+        String file = "library.dll";
+        given()
+            .when()
+                .get("/api/filesuffix/{directory}/{file}", directory, file)
+            .then()
+                .statusCode(200)
+                .body(equalTo("5"));
+    }
+}

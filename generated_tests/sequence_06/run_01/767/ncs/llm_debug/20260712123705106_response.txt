@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        String url = System.getProperty("base.url");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/3/3/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_bNot1_returns200() {
+        given().when().get("/api/triangle/5/4/2").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/3/4/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_b1_returns200() {
+        given().when().get("/api/triangle/2/3/3").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/4/3/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_neitherAorB_is1_returns200() {
+        given().when().get("/api/triangle/4/4/4").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/4/4/0.1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_invalidM_returns400() {
+        given().when().get("/api/triangle/3/3/3").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/abc/5/0.75").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_invalidX_returns400() {
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/10/5/1.2").then().statusCode(400);
+    }
+}

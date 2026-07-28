@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    private static final String BASE = System.getProperty("rest.base.url", System.getenv("REST_BASE_URL") != null ? System.getenv("REST_BASE_URL") : "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1All() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/all").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersOnV1AlphaInvalid() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/123").then().header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV2All() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v2/all").then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderPresentOnOptionsRoot() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().options(BASE + "/").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUSReturns200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesQueryHasCorsHeader() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha?codes=US,CA").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributePostAcceptedStatus() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().contentType("application/json").body("{\"amount\":1,\"currency\":\"USD\",\"token\":\"tok\"}").when().post(BASE + "/contribute").then().statusCode(202);
+    }
+}

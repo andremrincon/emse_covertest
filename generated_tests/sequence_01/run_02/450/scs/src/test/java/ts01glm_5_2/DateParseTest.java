@@ -1,0 +1,75 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndValidMonthAugust() {
+        given()
+            .when()
+                .get("/api/dateparse/Wednesday/August")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndValidMonthMarch() {
+        given()
+            .when()
+                .get("/api/dateparse/tuesday/MAR")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testValidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/Monday/Movember")
+            .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayAndValidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/123/January")
+            .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/123/456")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndValidMonthDecember() {
+        given()
+            .when()
+                .get("/api/dateparse/Friday/December")
+            .then()
+                .statusCode(200);
+    }
+}

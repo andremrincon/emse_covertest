@@ -1,0 +1,120 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CostfunsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCostfuns_negativeI_triggersMultipleIntegerBranches TYPE=FAILURE
+expected:<[6]> but was:<[10]>
+
+[2] METHOD=testCostfuns_iEquals5_returnsExpectedBody TYPE=FAILURE
+expected:<[6]> but was:<[10]>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCostfuns_negativeI_triggersMultipleIntegerBranches FAILURE AT LINE 37
+at ts01gpt_5_mini.CostfunsTest.testCostfuns_negativeI_triggersMultipleIntegerBranches(CostfunsTest.java:37)
+CODE CONTEXT:
+    34:     public void testCostfuns_negativeI_triggersMultipleIntegerBranches() {
+    35:         given().when().get("/api/pat/{txt}", "arrange2").then().statusCode(lessThan(300));
+    36:         Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "abab");
+    37:         Assert.assertEquals("6", resp.asString());  ← FAILURE HERE
+    38:     }
+    39: 
+    40:     @Test(timeout = 60000)
+
+[2] METHOD=testCostfuns_iEquals5_returnsExpectedBody FAILURE AT LINE 30
+at ts01gpt_5_mini.CostfunsTest.testCostfuns_iEquals5_returnsExpectedBody(CostfunsTest.java:30)
+CODE CONTEXT:
+    27:     public void testCostfuns_iEquals5_returnsExpectedBody() {
+    28:         given().when().get("/api/pat/{txt}", "arrange1").then().statusCode(lessThan(300));
+    29:         Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+    30:         Assert.assertEquals("6", resp.asString());  ← FAILURE HERE
+    31:     }
+    32: 
+    33:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private static String getBase() {
+        String b = System.getProperty("api.baseUrl");
+        if (b != null && !b.isEmpty()) return b;
+        b = System.getenv("API_BASE_URL");
+        if (b != null && !b.isEmpty()) return b;
+        return "http://localhost:8080";
+    }
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = getBase();
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5_returnsExpectedBody() {
+        given().when().get("/api/pat/{txt}", "arrange1").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+        Assert.assertEquals("6", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_negativeI_triggersMultipleIntegerBranches() {
+        given().when().get("/api/pat/{txt}", "arrange2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "abab");
+        Assert.assertEquals("6", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_largeI_and_greaterString_triggersCompareBranches() {
+        given().when().get("/api/pat/{txt}", "arrange3").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 700, "zzzz");
+        Assert.assertEquals("10", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsBaab_executesEqualsBranch() {
+        given().when().get("/api/pat/{txt}", "arrange4").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -4, "baab");
+        Assert.assertEquals("10", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_stringEqualToConcatenation_triggersCompareToEquals() {
+        given().when().get("/api/pat/{txt}", "arrange5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 0, "ababba");
+        Assert.assertEquals("10", resp.asString());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

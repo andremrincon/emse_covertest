@@ -1,0 +1,179 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.Ordered4Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testUnorderedInvalidLength TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "unordered"
+  Actual: {"timestamp":"2026-07-08T09:14:01.382+0000","status":404,"error":"Not Found","message":"No message available","path":"/http:/localhost:8080/api/ordered4/a/b/d/c"}
+
+[2] METHOD=testDecreasingOrder TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "decreasing"
+  Actual: {"timestamp":"2026-07-08T09:14:01.424+0000","status":404,"error":"Not Found","message":"No message available","path":"/http:/localhost:8080/api/ordered4/eeeee/ddddd/bbbbb/ccccc"}
+
+[3] METHOD=testUnorderedValidLength TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "unordered"
+  Actual: {"timestamp":"2026-07-08T09:14:01.442+0000","status":404,"error":"Not Found","message":"No message available","path":"/http:/localhost:8080/api/ordered4/aaaaa/bbbbb/ccccc/ddddd"}
+
+[4] METHOD=testIncreasingOrder TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "increasing"
+  Actual: {"timestamp":"2026-07-08T09:14:01.464+0000","status":404,"error":"Not Found","message":"No message available","path":"/http:/localhost:8080/api/ordered4/aaaaa/bbbbb/ddddd/ccccc"}
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testUnorderedInvalidLength FAILURE AT LINE 58
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Ordered4Test.testUnorderedInvalidLength(Ordered4Test.java:58)
+CODE CONTEXT:
+    55:                 .when()
+    56:                     .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+    57: 
+    58:         response.then().body(equalTo("unordered"));  ← FAILURE HERE
+    59:     }
+    60: 
+    61:     @Test(timeout = 60000)
+
+[2] METHOD=testDecreasingOrder FAILURE AT LINE 42
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Ordered4Test.testDecreasingOrder(Ordered4Test.java:42)
+CODE CONTEXT:
+    39:                 .when()
+    40:                     .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+    41: 
+    42:         response.then().body(equalTo("decreasing"));  ← FAILURE HERE
+    43:     }
+    44: 
+    45:     @Test(timeout = 60000)
+
+[3] METHOD=testUnorderedValidLength FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Ordered4Test.testUnorderedValidLength(Ordered4Test.java:74)
+CODE CONTEXT:
+    71:                 .when()
+    72:                     .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+    73: 
+    74:         response.then().body(equalTo("unordered"));  ← FAILURE HERE
+    75:     }
+    76: }
+
+[4] METHOD=testIncreasingOrder FAILURE AT LINE 26
+java.lang.AssertionError:
+at ts01qwen3_7_plus.Ordered4Test.testIncreasingOrder(Ordered4Test.java:26)
+CODE CONTEXT:
+    23:                 .when()
+    24:                     .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+    25: 
+    26:         response.then().body(equalTo("increasing"));  ← FAILURE HERE
+    27:     }
+    28: 
+    29:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "ddddd";
+        String y = "ccccc";
+
+        Response response = RestAssured
+                .given()
+                    .basePath(baseUrl)
+                .when()
+                    .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "eeeee";
+        String x = "ddddd";
+        String z = "bbbbb";
+        String y = "ccccc";
+
+        Response response = RestAssured
+                .given()
+                    .basePath(baseUrl)
+                .when()
+                    .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLength() {
+        String w = "a";
+        String x = "b";
+        String z = "d";
+        String y = "c";
+
+        Response response = RestAssured
+                .given()
+                    .basePath(baseUrl)
+                .when()
+                    .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLength() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "ccccc";
+        String y = "ddddd";
+
+        Response response = RestAssured
+                .given()
+                    .basePath(baseUrl)
+                .when()
+                    .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().body(equalTo("unordered"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

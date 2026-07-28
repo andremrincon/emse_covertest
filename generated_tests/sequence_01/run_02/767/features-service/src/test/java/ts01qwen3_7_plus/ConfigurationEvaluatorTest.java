@@ -1,0 +1,86 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConfigurationEvaluatorTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithRequiresConstraint() {
+        String productName = "Prod-Req-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-Req-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when().post("/products/" + productName + "/constraints/requires")
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA);
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+            .then().body("$", hasItem(featureB));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithExcludesConstraint() {
+        String productName = "Prod-Exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-Exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureC = "FeatureC-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureD = "FeatureD-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureC).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureD).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", featureC)
+            .formParam("excludedFeature", featureD)
+            .when().post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureC);
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+            .then().body("$", not(hasItem(featureD)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithNoConstraints() {
+        String productName = "Prod-None-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-None-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureE = "FeatureE-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureE).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureE);
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+            .then().body("$", hasItem(featureE));
+    }
+}

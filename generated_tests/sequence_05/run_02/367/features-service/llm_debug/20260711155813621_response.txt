@@ -1,0 +1,780 @@
+package ts01glm_5_2;
+
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+public class CORSFilterTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+    }
+
+    public static RequestBuilder given() {
+        return new RequestBuilder(baseUrl);
+    }
+
+    public static class RequestBuilder {
+        private final String base;
+        private String contentType;
+        private Map<String, String> formParams = new LinkedHashMap<>();
+        private Response lastResponse;
+
+        public RequestBuilder(String base) {
+            this.base = base;
+        }
+
+        public RequestBuilder contentType(String ct) {
+            this.contentType = ct;
+            return this;
+        }
+
+        public RequestBuilder formParam(String name, String value) {
+            this.formParams.put(name, value);
+            return this;
+        }
+
+        public RequestBuilder when() {
+            return this;
+        }
+
+        public RequestBuilder post(String path, Object... pathParams) {
+            doRequest("POST", path, pathParams);
+            return this;
+        }
+
+        public RequestBuilder get(String path, Object... pathParams) {
+            doRequest("GET", path, pathParams);
+            return this;
+        }
+
+        public RequestBuilder delete(String path, Object... pathParams) {
+            doRequest("DELETE", path, pathParams);
+            return this;
+        }
+
+        private void doRequest(String method, String pathTemplate, Object... pathParams) {
+            try {
+                String path = buildPath(pathTemplate, pathParams);
+                URL url = new URL(base + path);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod(method);
+                if (contentType != null) {
+                    conn.setRequestProperty("Content-Type", contentType);
+                }
+                if ("POST".equals(method) || "PUT".equals(method)) {
+                    String body = "";
+                    if (formParams != null && !formParams.isEmpty()) {
+                        if (contentType != null && contentType.contains("application/x-www-form-urlencoded")) {
+                            StringBuilder sb = new StringBuilder();
+                            for (Map.Entry<String, String> e : formParams.entrySet()) {
+                                if (sb.length() > 0) sb.append("&");
+                                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                                sb.append("=");
+                                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+                            }
+                            body = sb.toString();
+                        }
+                    }
+                    conn.setDoOutput(true);
+                    if (!body.isEmpty()) {
+                        byte[] out = body.getBytes("UTF-8");
+                        conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+                        OutputStream os = conn.getOutputStream();
+                        os.write(out);
+                        os.flush();
+                        os.close();
+                    }
+                }
+                int status = conn.getResponseCode();
+                InputStream is;
+                if (status >= 200 && status < 400) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+                String body = "";
+                if (is != null) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    body = response.toString();
+                }
+                conn.disconnect();
+                this.lastResponse = new Response(status, body);
+            } catch (Exception e) {
+                this.lastResponse = new Response(500, "");
+            }
+        }
+
+        private String buildPath(String template, Object... params) {
+            String result = template;
+            if (params != null) {
+                for (Object p : params) {
+                    int start = result.indexOf("{");
+                    int end = result.indexOf("}", start);
+                    if (start >= 0 && end > start) {
+                        String before = result.substring(0, start);
+                        String after = result.substring(end + 1);
+                        String replacement = "";
+                        if (p != null) {
+                            try {
+                                replacement = URLEncoder.encode(String.valueOf(p), "UTF-8");
+                            } catch (Exception ex) {
+                                replacement = String.valueOf(p);
+                            }
+                        }
+                        result = before + replacement + after;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        public ResponseAssertion then() {
+            return new ResponseAssertion(lastResponse);
+        }
+    }
+
+    public static class Response {
+        private final int statusCode;
+        private final String body;
+
+        public Response(int statusCode, String body) {
+            this.statusCode = statusCode;
+            this.body = body == null ? "" : body;
+        }
+
+        public int statusCode() {
+            return statusCode;
+        }
+
+        public String body() {
+            return body;
+        }
+    }
+
+    public static class ResponseAssertion {
+        private final Response response;
+
+        public ResponseAssertion(Response response) {
+            this.response = response;
+        }
+
+        public ResponseAssertion statusCode(int expected) {
+            MatcherAssert.assertThat(response.statusCode(), is(expected));
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public ResponseAssertion statusCode(Matcher<Integer> matcher) {
+            MatcherAssert.assertThat(response.statusCode(), matcher);
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public ResponseAssertion body(String jsonPath, Matcher<?> matcher) {
+            if ("$".equals(jsonPath)) {
+                List<String> elements = parseTopLevelArray(response.body());
+                MatcherAssert.assertThat(elements, (Matcher) matcher);
+            } else {
+                MatcherAssert.assertThat(response.body(), (Matcher) matcher);
+            }
+            return this;
+        }
+
+        private List<String> parseTopLevelArray(String body) {
+            List<String> list = new ArrayList<>();
+            if (body == null) return list;
+            String s = body.trim();
+            if (!s.startsWith("[")) return list;
+            int len = s.length();
+            int depth = 0;
+            boolean inQuotes = false;
+            StringBuilder current = new StringBuilder();
+            for (int i = 1; i < len; i++) {
+                char c = s.charAt(i);
+                current.append(c);
+                if (c == '"' && (i == 0 || s.charAt(i - 1) != '\\')) {
+                    inQuotes = !inQuotes;
+                }
+                if (!inQuotes) {
+                    if (c == '[' || c == '{') depth++;
+                    else if (c == ']' || c == '}') {
+                        if (depth > 0) depth--;
+                    } else if (c == ',' && depth == 0) {
+                        String item = current.toString();
+                        item = item.substring(0, item.length() - 1).trim();
+                        if (!item.isEmpty()) list.add(item);
+                        current.setLength(0);
+                    } else if (c == ']' && depth == 0) {
+                        String item = current.toString();
+                        item = item.substring(0, item.length() - 1).trim();
+                        if (!item.isEmpty()) list.add(item);
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < list.size(); i++) {
+                String it = list.get(i);
+                if (it.startsWith(",")) it = it.substring(1).trim();
+                list.set(i, it);
+            }
+            if (list.size() == 1) {
+                String only = list.get(0).trim();
+                if (only.isEmpty()) {
+                    list.clear();
+                }
+            }
+            return list;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsNamesForProductReturns200() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsNamesForProductEmptyList() {
+        String productName = "EmptyProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations", productName)
+            .then()
+                .statusCode(200)
+                .body("$", hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesNamesReturns200() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesNamesEmptyList() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then()
+                .statusCode(200)
+                .body("$", hasSize(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationReturns204() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureFromConfigurationReturns201() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureFromConfigurationDuplicatedReturns500() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateAndUpdateConfigurationAfterAddWithConstraint() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateAndUpdateConfigurationAfterRemoveWithConstraint() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsNamesForProductMultipleConfigurations() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String config1 = "config1-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String config2 = "config2-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, config1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, config2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations", productName)
+            .then()
+                .statusCode(200)
+                .body("$", hasSize(greaterThanOrEqualTo(2)));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesNamesMultipleFeatures() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "feat1-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "feat2-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feature1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feature2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then()
+                .statusCode(200)
+                .body("$", hasSize(greaterThanOrEqualTo(2)));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationNotActiveReturns500() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureFromConfigurationWithExcludesConstraint() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateAndUpdateConfigurationAfterRemoveAllFeatures() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+            .then()
+                .statusCode(200)
+                .body("$", hasSize(0));
+    }
+}

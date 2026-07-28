@@ -1,0 +1,407 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String uniqueName(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature description")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Original description")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Updated description")
+            .when()
+                .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/features", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+        String configName = uniqueName("config");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+        String configName = uniqueName("config");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+        String configName = uniqueName("config");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        String productName = uniqueName("product");
+        String featureName1 = uniqueName("feature1");
+        String featureName2 = uniqueName("feature2");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 1")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 2")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", featureName1)
+            .formParam("requiredFeature", featureName2)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint() {
+        String productName = uniqueName("product");
+        String featureName1 = uniqueName("feature1");
+        String featureName2 = uniqueName("feature2");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 1")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 2")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", featureName1)
+            .formParam("excludedFeature", featureName2)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesToConfig() {
+        String productName = uniqueName("product");
+        String featureName1 = uniqueName("feature1");
+        String featureName2 = uniqueName("feature2");
+        String configName = uniqueName("config");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 1")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Feature 2")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName2)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithFeatures() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}", productName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationDetails() {
+        String productName = uniqueName("product");
+        String featureName = uniqueName("feature");
+        String configName = uniqueName("config");
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test feature")
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+                .statusCode(200);
+    }
+}
+```

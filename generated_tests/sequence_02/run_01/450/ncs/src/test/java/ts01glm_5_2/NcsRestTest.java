@@ -1,0 +1,94 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherValidParametersReturns200() {
+        given()
+                .pathParam("m", 10)
+                .pathParam("n", 5)
+                .pathParam("x", 0.75)
+                .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+                .then()
+                .statusCode(200)
+                .body("resultAsDouble", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMExceedsLimitReturns400() {
+        given()
+                .pathParam("m", 1001)
+                .pathParam("n", 5)
+                .pathParam("x", 0.75)
+                .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNExceedsLimitReturns400() {
+        given()
+                .pathParam("m", 10)
+                .pathParam("n", 1001)
+                .pathParam("x", 0.75)
+                .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderValidParametersReturns200() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", 5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(200)
+                .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderAExceedsUpperLimitReturns400() {
+        given()
+                .pathParam("a", 10001)
+                .pathParam("b", 5)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBBelowLowerLimitReturns400() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", -10001)
+                .when()
+                .get("/api/remainder/{a}/{b}")
+                .then()
+                .statusCode(400);
+    }
+}

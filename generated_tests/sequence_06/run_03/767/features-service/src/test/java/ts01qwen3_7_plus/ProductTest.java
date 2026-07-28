@@ -1,0 +1,204 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = "Smartwatch-Series-8-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "Blood-Oxygen-Sensor-" + UUID.randomUUID().toString();
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + excludedFeature)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+            .post("/products/" + productName + "/constraints/excludes")
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithDescription() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "backlit-keyboard-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeatures() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "USB-C-Dongle-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given()
+            .contentType(ContentType.JSON)
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        String featureName = "stylus-support-" + UUID.randomUUID().toString();
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Updated description for stylus support.")
+            .when()
+            .put("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(200);
+    }
+}

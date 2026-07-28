@@ -1,0 +1,88 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/2.3")
+        .then()
+            .statusCode(200)
+            .body("result", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalPath() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/0.001/1000.0")
+        .then()
+            .statusCode(200)
+            .body("result", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZeroBranch() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/0.001/0")
+        .then()
+            .statusCode(200)
+            .body("result", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNegativeA() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/-1.0/2.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNonNumericA() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/abc/2.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfExtremeValuesForFpminBranches() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/1e-10/1e10")
+        .then()
+            .statusCode(anyOf(is(200), is(400)));
+    }
+}
+```

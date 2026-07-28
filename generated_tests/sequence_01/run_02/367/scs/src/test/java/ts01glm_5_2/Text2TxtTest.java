@@ -1,0 +1,94 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Text2TxtTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectTwo() {
+        given()
+            .pathParam("word1", "two")
+            .pathParam("word2", "test")
+            .pathParam("word3", "test")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFor() {
+        given()
+            .pathParam("word1", "for")
+            .pathParam("word2", "test")
+            .pathParam("word3", "test")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectSeeYou() {
+        given()
+            .pathParam("word1", "see")
+            .pathParam("word2", "you")
+            .pathParam("word3", "test")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectByTheWay() {
+        given()
+            .pathParam("word1", "by")
+            .pathParam("word2", "the")
+            .pathParam("word3", "way")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAre() {
+        given()
+            .pathParam("word1", "are")
+            .pathParam("word2", "test")
+            .pathParam("word3", "test")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDefaultEmpty() {
+        given()
+            .pathParam("word1", "hello")
+            .pathParam("word2", "world")
+            .pathParam("word3", "foo")
+        .when()
+            .get("/api/text2txt/{word1}/{word2}/{word3}")
+        .then()
+            .statusCode(200)
+            .body(equalTo(""));
+    }
+}

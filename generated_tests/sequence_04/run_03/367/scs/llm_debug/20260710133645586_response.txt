@@ -1,0 +1,93 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoPatrev() {
+        given()
+            .when()
+            .get("/api/pat/ABCXYZ/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevFoundNoPat() {
+        given()
+            .when()
+            .get("/api/pat/CBAXYZ/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByPatrevAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABCCBA/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevFollowedByPatAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/CBAABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevNotAdjacentPatFirst() {
+        given()
+            .when()
+            .get("/api/pat/ABCXYZCBA/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevNotAdjacentPatrevFirst() {
+        given()
+            .when()
+            .get("/api/pat/CBAXYZABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthLessThanThree() {
+        given()
+            .when()
+            .get("/api/pat/ABC/AB")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorPatrevFound() {
+        given()
+            .when()
+            .get("/api/pat/XYZ/ABC")
+            .then()
+            .statusCode(200);
+    }
+}
+```

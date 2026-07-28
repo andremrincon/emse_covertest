@@ -1,0 +1,138 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintCreatesConstraintAndReturns201() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", productName);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintReturnsConstraintTypeEXCLUDES() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintReturns204() {
+        String productName = "UltraPhoneX-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response create = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9")
+                .formParam("excludedFeature", "Legacy-GPU")
+                .when().post("/products/{productName}/constraints/excludes", productName);
+        create.then().statusCode(lessThan(300));
+        Response list = given().when().get("/products/{productName}/constraints", productName);
+        list.then().statusCode(lessThan(300));
+        List<Map<String, Object>> items = list.jsonPath().getList("", Map.class);
+        String id = null;
+        if (items != null) {
+            for (Map<String, Object> m : items) {
+                Object sf = m.get("sourceFeature");
+                Object ef = m.get("excludedFeature");
+                if ("CPU-i9".equals(sf) && "Legacy-GPU".equals(ef)) {
+                    Object vid = m.get("id");
+                    if (vid != null) {
+                        id = String.valueOf(vid);
+                        break;
+                    }
+                }
+            }
+        }
+        if (id == null) {
+            String loc = create.getHeader("Location");
+            if (loc != null && !loc.isEmpty()) {
+                int idx = loc.lastIndexOf('/');
+                id = idx >= 0 ? loc.substring(idx + 1) : loc;
+            }
+        }
+        assertNotNull(id);
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", productName, id);
+        assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String productName = "Smartwatch-Series-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", productName, "Blood-Oxygen-Sensor-" + UUID.randomUUID().toString());
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProductReturns200() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Backlit keyboard")
+                .when().post("/products/{productName}/features/{featureName}", productName, "backlit-keyboard-" + UUID.randomUUID().toString())
+                .then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", productName);
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String productName = "QuantumLeap-AI-Platform-" + UUID.randomUUID().toString();
+        String configurationName = "standard-gpu-cluster-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Distributed training support")
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "distributed-training-" + UUID.randomUUID().toString());
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturns200() {
+        String productName = "ultra-laptop-x1-" + UUID.randomUUID().toString();
+        String configurationName = "us-standard-16gb-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Fingerprint scanner feature")
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "fingerprint-scanner-" + UUID.randomUUID().toString())
+                .then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertEquals(200, act.getStatusCode());
+    }
+}

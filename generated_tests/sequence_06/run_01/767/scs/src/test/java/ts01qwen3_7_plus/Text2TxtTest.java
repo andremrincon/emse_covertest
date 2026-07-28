@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Text2TxtTest {
+
+    @Test(timeout = 60000)
+    public void testText2TxtFor() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/for/quick/brown");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYou() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/see/you/brown");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtByTheWay() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/by/the/way");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtNotFor() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/hello/quick/brown");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeNotYou() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/see/me/brown");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtByTheNotWay() {
+        Response response = given()
+            .when()
+            .get("/api/text2txt/by/the/car");
+
+        response.then().statusCode(200);
+    }
+}

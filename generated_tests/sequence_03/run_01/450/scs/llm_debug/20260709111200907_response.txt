@@ -1,0 +1,86 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.*;
+import static io.restassured.RestAssured.*;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleValidTitle() {
+        given()
+            .pathParam("sex", "male")
+            .pathParam("title", "mr")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleInvalidTitle() {
+        given()
+            .pathParam("sex", "male")
+            .pathParam("title", "mrs")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleValidTitle() {
+        given()
+            .pathParam("sex", "female")
+            .pathParam("title", "mrs")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleInvalidTitle() {
+        given()
+            .pathParam("sex", "female")
+            .pathParam("title", "sir")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneValidTitle() {
+        given()
+            .pathParam("sex", "none")
+            .pathParam("title", "dr")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexReturnsError() {
+        given()
+            .pathParam("sex", "neuter")
+            .pathParam("title", "Jones")
+        .when()
+            .get("/api/title/{sex}/{title}")
+        .then()
+            .statusCode(500);
+    }
+}
+```

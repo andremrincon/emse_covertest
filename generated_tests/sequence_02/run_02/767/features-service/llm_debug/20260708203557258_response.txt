@@ -1,0 +1,119 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasItem;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureCreatesFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureDeletesFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturnsAddedFeatureInBody() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "Blood Oxygen Sensor " + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", product);
+        act.then().body("featureName", hasItem(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "RAID-Controller-" + UUID.randomUUID().toString();
+        String req = "128GB-ECC-RAM-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "CPU-i9-" + UUID.randomUUID().toString();
+        String excl = "Integrated-Graphics-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "CPU-" + UUID.randomUUID().toString();
+        String excl = "NoGPU-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response created = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(lessThan(300)).extract().response();
+        String location = created.getHeader("Location");
+        String id = (location == null || location.isEmpty()) ? "0" : location.substring(location.lastIndexOf('/') + 1);
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", product, id);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "dist-train-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "featcfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        act.then().statusCode(204);
+    }
+}

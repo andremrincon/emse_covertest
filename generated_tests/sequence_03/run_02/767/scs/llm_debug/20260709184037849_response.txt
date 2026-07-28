@@ -1,0 +1,74 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("base.url");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        base = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_Wednesday_August_status200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/Wednesday/August");
+        r.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_tuesday_MAR_body4() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/tuesday/MAR");
+        r.then().body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_Superday_Movember_500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/Superday/Movember");
+        r.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_mon_jan_body2() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/mon/jan");
+        r.then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_123_August_500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/123/August");
+        r.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_Sun_DEC_body13() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get(base + "/api/pat/" + uid).then().statusCode(lessThan(300));
+        Response r = given().when().get(base + "/api/dateparse/Sun/DEC");
+        r.then().body(equalTo("13"));
+    }
+}

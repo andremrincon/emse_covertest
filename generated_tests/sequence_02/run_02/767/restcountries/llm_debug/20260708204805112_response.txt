@@ -1,0 +1,62 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/name/123").then().statusCode(equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByCapital() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/capital/123").then().statusCode(equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByRegion() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/region/123").then().statusCode(equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByCallingCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/callingcode/abc").then().statusCode(equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByAlphaCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/alpha/XYZ").then().statusCode(equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusOnNotFoundByCurrency() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v1/currency/XYZ").then().statusCode(equalTo(404));
+    }
+}
+```

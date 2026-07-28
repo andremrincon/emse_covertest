@@ -1,0 +1,91 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleMaleProf() {
+        String sex = "male";
+        String title = "prof";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleMaleInvalid() {
+        String sex = "male";
+        String title = "invalid";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleFemaleProf() {
+        String sex = "female";
+        String title = "prof";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleFemaleInvalid() {
+        String sex = "female";
+        String title = "invalid";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleNoneProf() {
+        String sex = "none";
+        String title = "prof";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTitleNoneInvalid() {
+        String sex = "none";
+        String title = "invalid";
+        
+        given()
+            .when()
+                .get("/api/title/" + sex + "/" + title)
+            .then()
+                .statusCode(200);
+    }
+}

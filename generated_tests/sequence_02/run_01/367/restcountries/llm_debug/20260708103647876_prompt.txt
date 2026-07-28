@@ -1,0 +1,137 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAccessControlAllowHeadersHeader TYPE=FAILURE
+expected:<Accept, X-Requested-With> but was:<null>
+
+[2] METHOD=testAccessControlAllowOriginHeader TYPE=FAILURE
+expected:<*> but was:<null>
+
+[3] METHOD=testAccessControlAllowMethodsHeader TYPE=FAILURE
+expected:<GET> but was:<null>
+
+[4] METHOD=testCacheControlHeader TYPE=FAILURE
+expected:<public, max-age=86400> but was:<null>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAccessControlAllowHeadersHeader FAILURE AT LINE 37
+java.lang.AssertionError: expected:<Accept, X-Requested-With> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testAccessControlAllowHeadersHeader(CORSFilterTest.java:37)
+CODE CONTEXT:
+    34:     public void testAccessControlAllowHeadersHeader() {
+    35:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    36:         Response response = given().when().get("/v1/all");
+    37:         assertEquals("Accept, X-Requested-With", response.getHeader("Access-Control-Allow-Headers"));  ← FAILURE HERE
+    38:     }
+    39: 
+    40:     @Test(timeout = 60000)
+
+[2] METHOD=testAccessControlAllowOriginHeader FAILURE AT LINE 23
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testAccessControlAllowOriginHeader(CORSFilterTest.java:23)
+CODE CONTEXT:
+    20:     public void testAccessControlAllowOriginHeader() {
+    21:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    22:         Response response = given().when().get("/v1/all");
+    23:         assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[3] METHOD=testAccessControlAllowMethodsHeader FAILURE AT LINE 30
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testAccessControlAllowMethodsHeader(CORSFilterTest.java:30)
+CODE CONTEXT:
+    27:     public void testAccessControlAllowMethodsHeader() {
+    28:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    29:         Response response = given().when().get("/v1/all");
+    30:         assertEquals("GET", response.getHeader("Access-Control-Allow-Methods"));  ← FAILURE HERE
+    31:     }
+    32: 
+    33:     @Test(timeout = 60000)
+
+[4] METHOD=testCacheControlHeader FAILURE AT LINE 44
+java.lang.AssertionError: expected:<public, max-age=86400> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testCacheControlHeader(CORSFilterTest.java:44)
+CODE CONTEXT:
+    41:     public void testCacheControlHeader() {
+    42:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    43:         Response response = given().when().get("/v1/all");
+    44:         assertEquals("public, max-age=86400", response.getHeader("Cache-Control"));  ← FAILURE HERE
+    45:     }
+    46: }
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        io.restassured.RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        assertEquals("*", response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        assertEquals("GET", response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        assertEquals("Accept, X-Requested-With", response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        assertEquals("public, max-age=86400", response.getHeader("Cache-Control"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

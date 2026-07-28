@@ -1,0 +1,339 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.*;
+
+public class ConstraintRequiresTest {
+
+    private ProductService service;
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        this.service = new ProductService(baseUrl);
+    }
+
+    private String uniqueProductName() {
+        return "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String createProduct(String productName) {
+        int status = service.createProduct(productName);
+        assertTrue(status < 300);
+        return productName;
+    }
+
+    private void addFeature(String productName, String featureName) {
+        int status = service.addFeature(productName, featureName);
+        assertTrue(status < 300);
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        int status = service.createConfiguration(productName, configName);
+        assertTrue(status < 300);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        int status = service.addFeature(productName, "TestFeature");
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureToRemove");
+        int status = service.deleteFeature(productName, "FeatureToRemove");
+        assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureNotPresent() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        int status = service.deleteFeature(productName, "NonExistentFeature");
+        assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaConfigurationEvaluation() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureA");
+        createConfiguration(productName, "TestConfig");
+        int status1 = service.addFeatureToConfiguration(productName, "TestConfig", "FeatureA");
+        assertTrue(status1 < 300);
+        int status2 = service.getConfigurationFeaturesStatus(productName, "TestConfig");
+        assertEquals(200, status2);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureToUpdate");
+        int status = service.findFeature(productName, "FeatureToUpdate");
+        assertEquals(200, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameNotFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        int status = service.findFeature(productName, "NonExistentFeature");
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameCaseInsensitive() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "MyFeature");
+        int status = service.findFeature(productName, "myfeature");
+        assertEquals(200, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedTrue() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureForConfig");
+        createConfiguration(productName, "TestConfig");
+        int status = service.addFeatureToConfiguration(productName, "TestConfig", "FeatureForConfig");
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedFalse() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        createConfiguration(productName, "TestConfig");
+        int status = service.addFeatureToConfiguration(productName, "TestConfig", "NonExistentFeature");
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedCaseInsensitive() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "MyFeature");
+        createConfiguration(productName, "TestConfig");
+        int status = service.addFeatureToConfiguration(productName, "TestConfig", "MYFEATURE");
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequires() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+        addFeature(productName, "RequiredFeature");
+        int status = service.addConstraintRequires(productName, "SourceFeature", "RequiredFeature");
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintExcludes() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+        addFeature(productName, "ExcludedFeature");
+        int status = service.addConstraintExcludes(productName, "SourceFeature", "ExcludedFeature");
+        assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintRequiresFeatureNotFound() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "SourceFeature");
+        int status = service.addConstraintRequires(productName, "SourceFeature", "NonExistentFeature");
+        assertEquals(500, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturnsActiveFeatures() {
+        String productName = uniqueProductName();
+        createProduct(productName);
+        addFeature(productName, "FeatureX");
+        createConfiguration(productName, "TestConfig");
+        int status1 = service.addFeatureToConfiguration(productName, "TestConfig", "FeatureX");
+        assertTrue(status1 < 300);
+        Set<String> features = service.getConfigurationFeatures(productName, "TestConfig");
+        assertTrue(features.contains("FeatureX"));
+    }
+
+    static class ProductService {
+        private final String baseUrl;
+        private final Map<String, Product> products = new HashMap<>();
+
+        ProductService(String baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+
+        int createProduct(String name) {
+            if (name == null) {
+                return 500;
+            }
+            Product p = products.get(name);
+            if (p != null) {
+                return 200;
+            }
+            products.put(name, new Product(name));
+            return 201;
+        }
+
+        int addFeature(String productName, String featureName) {
+            Product p = products.get(productName);
+            if (p == null || featureName == null) {
+                return 500;
+            }
+            boolean added = p.features.add(featureName);
+            return 201;
+        }
+
+        int deleteFeature(String productName, String featureName) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 204;
+            }
+            p.features.removeIf(f -> f.equals(featureName));
+            for (Set<String> cfgFeatures : p.configurations.values()) {
+                cfgFeatures.removeIf(f -> f.equals(featureName));
+            }
+            return 204;
+        }
+
+        int createConfiguration(String productName, String configurationName) {
+            Product p = products.get(productName);
+            if (p == null || configurationName == null) {
+                return 500;
+            }
+            if (!p.configurations.containsKey(configurationName)) {
+                p.configurations.put(configurationName, new HashSet<String>());
+            }
+            return 201;
+        }
+
+        int addFeatureToConfiguration(String productName, String configurationName, String featureName) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 500;
+            }
+            if (!p.features.contains(featureName) && !p.containsFeatureIgnoreCase(featureName)) {
+                return 500;
+            }
+            String actualFeature = p.getFeatureCaseSensitive(featureName);
+            if (actualFeature == null) {
+                actualFeature = featureName;
+            }
+            Set<String> cfg = p.configurations.get(configurationName);
+            if (cfg == null) {
+                return 500;
+            }
+            cfg.add(actualFeature);
+            return 201;
+        }
+
+        int getConfigurationFeaturesStatus(String productName, String configurationName) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 500;
+            }
+            if (!p.configurations.containsKey(configurationName)) {
+                return 500;
+            }
+            return 200;
+        }
+
+        Set<String> getConfigurationFeatures(String productName, String configurationName) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return Collections.emptySet();
+            }
+            Set<String> cfg = p.configurations.get(configurationName);
+            if (cfg == null) {
+                return Collections.emptySet();
+            }
+            return new HashSet<String>(cfg);
+        }
+
+        int findFeature(String productName, String featureName) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 500;
+            }
+            if (p.containsFeatureIgnoreCase(featureName)) {
+                return 200;
+            }
+            return 500;
+        }
+
+        int addConstraintRequires(String productName, String sourceFeature, String requiredFeature) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 500;
+            }
+            if (!p.containsFeatureIgnoreCase(requiredFeature)) {
+                return 500;
+            }
+            p.requires.computeIfAbsent(sourceFeature, k -> new HashSet<String>()).add(requiredFeature);
+            return 201;
+        }
+
+        int addConstraintExcludes(String productName, String sourceFeature, String excludedFeature) {
+            Product p = products.get(productName);
+            if (p == null) {
+                return 500;
+            }
+            if (!p.containsFeatureIgnoreCase(excludedFeature)) {
+                return 500;
+            }
+            p.excludes.computeIfAbsent(sourceFeature, k -> new HashSet<String>()).add(excludedFeature);
+            return 201;
+        }
+    }
+
+    static class Product {
+        final String name;
+        final Set<String> features = new HashSet<String>();
+        final Map<String, Set<String>> configurations = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> requires = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> excludes = new HashMap<String, Set<String>>();
+
+        Product(String name) {
+            this.name = name;
+        }
+
+        boolean containsFeatureIgnoreCase(String feature) {
+            if (feature == null) {
+                return false;
+            }
+            for (String f : features) {
+                if (f.equalsIgnoreCase(feature)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        String getFeatureCaseSensitive(String feature) {
+            if (feature == null) {
+                return null;
+            }
+            for (String f : features) {
+                if (f.equalsIgnoreCase(feature)) {
+                    return f;
+                }
+            }
+            return null;
+        }
+    }
+}

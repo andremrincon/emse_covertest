@@ -1,0 +1,244 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+public class CORSFilterTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        baseUrl = url;
+    }
+
+    private static String resolvePath(String template, Object... params) {
+        Pattern p = Pattern.compile("\\{[^}]+\\}");
+        Matcher m = p.matcher(template);
+        StringBuffer sb = new StringBuffer();
+        int i = 0;
+        while (m.find()) {
+            String replacement = "";
+            if (i < params.length && params[i] != null) {
+                replacement = params[i].toString();
+            }
+            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            i++;
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static int sendRequest(String method, String pathTemplate, Map<String, String> formParams, Object... pathParams) throws IOException {
+        String path = resolvePath(pathTemplate, pathParams);
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if (formParams != null && !formParams.isEmpty()) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            StringBuilder body = new StringBuilder();
+            boolean first = true;
+            for (Map.Entry<String, String> e : formParams.entrySet()) {
+                if (!first) {
+                    body.append('&');
+                }
+                first = false;
+                body.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                body.append('=');
+                body.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            }
+            byte[] bytes = body.toString().getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+            } finally {
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (IOException ignored) {}
+                }
+            }
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaRequiresEndpoint() throws Exception {
+        String productName = "prod-req-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        code = sendRequest("POST", "/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaExcludesEndpoint() throws Exception {
+        String productName = "prod-exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "srcex-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        code = sendRequest("POST", "/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithExistingConstraints() throws Exception {
+        String productName = "prod-delc-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "f1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "f2-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat3 = "f3-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat1);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat2);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat3);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form1 = new HashMap<String, String>();
+        form1.put("sourceFeature", feat1);
+        form1.put("requiredFeature", feat2);
+        code = sendRequest("POST", "/products/{productName}/constraints/requires", form1, productName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form2 = new HashMap<String, String>();
+        form2.put("sourceFeature", feat1);
+        form2.put("excludedFeature", feat3);
+        code = sendRequest("POST", "/products/{productName}/constraints/excludes", form2, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}", null, productName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithNoConstraints() throws Exception {
+        String productName = "prod-delnc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}", null, productName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintAndDeleteConstraintById() throws Exception {
+        String productName = "prod-cid-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "c1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "c2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat1);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat2);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", feat1);
+        form.put("requiredFeature", feat2);
+        code = sendRequest("POST", "/products/{productName}/constraints/requires", form, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("GET", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}/constraints/{constraintId}", null, productName, 1);
+        Assert.assertTrue(code < 500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductViaFeatureDeletion() throws Exception {
+        String productName = "prod-featdel-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "fd1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "fd2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat1);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", null, productName, feat2);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", feat1);
+        form.put("excludedFeature", feat2);
+        code = sendRequest("POST", "/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}/features/{featureName}", null, productName, feat1);
+        Assert.assertTrue(code < 500);
+    }
+}

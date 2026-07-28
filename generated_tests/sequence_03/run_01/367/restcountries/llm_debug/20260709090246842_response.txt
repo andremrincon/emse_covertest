@@ -1,0 +1,179 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_invalidCode_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/alpha/1")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_withFields_returns200() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_invalidCodes_returns400() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "1")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "ZZ")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/currency/USD")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_invalidLength_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/currency/US")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/name/France")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/region/Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/subregion/Western%20Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/lang/es")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonym_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/demonym/American")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+}

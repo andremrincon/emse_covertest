@@ -1,0 +1,186 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("rest.base.url", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.basePath = "/v1";
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validCode_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_invalidLength_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/alpha/123")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_emptyCode_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/alpha/")
+        .then()
+            .statusCode(anyOf(is(400), is(404)));
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes_returns200() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "US;CA;MX")
+        .when()
+            .get("/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_invalidCodes_returns400() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "1")
+        .when()
+            .get("/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFoundCodes_returns404() {
+        given()
+            .accept(ContentType.JSON)
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_validCurrency_returns200() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/currency/USD")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_invalidLength_returns400() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/currency/US")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/name/NonexistentCountryName123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/capital/NonexistentCapital123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/region/NonexistentRegion123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/subregion/NonexistentSubregion123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_notFound_returns404() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/lang/NonexistentLanguage123")
+        .then()
+            .statusCode(404);
+    }
+}
+```

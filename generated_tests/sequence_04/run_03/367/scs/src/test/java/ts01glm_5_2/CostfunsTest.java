@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost";
+        }
+        String port = System.getenv("PORT");
+        if (port != null && !port.isEmpty()) {
+            RestAssured.port = Integer.parseInt(port);
+        } else {
+            RestAssured.port = 8080;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEquals5AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/5/baab")
+            .then()
+                .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsMinus4AndSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanMinus444() {
+        given()
+            .when()
+                .get("/api/costfuns/-445/abba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/667/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterEqual555NotGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/555/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessEqualMinus333NotLessThanMinus444() {
+        given()
+            .when()
+                .get("/api/costfuns/-333/a")
+            .then()
+                .statusCode(200);
+    }
+}

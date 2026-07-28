@@ -1,0 +1,63 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("TEST_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("test.server", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testNonAbabReturns10() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 1, "a");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbabReturns6WhenINotMinus4() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 0, "abab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbabMinus4Returns0() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIEquals5ExecutesBranch() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 5, "x");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeLargeExecutesLessThanBranches() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", -500, "a");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBigExecutesGreaterThanBranches() {
+        given().when().get("/api/pat/health").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/{i}/{s}", 700, "z");
+        act.then().statusCode(200).body(equalTo("10"));
+    }
+}

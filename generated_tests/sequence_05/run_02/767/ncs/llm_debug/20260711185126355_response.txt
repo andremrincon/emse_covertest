@@ -1,0 +1,117 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2ThrowsException() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZeroReturnsZero() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/0")
+        .then()
+            .statusCode(200)
+            .body("value", equalTo(0.0f));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNWithSmallAx() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/2.5")
+        .then()
+            .statusCode(200)
+            .body("value", equalTo(-0.261375f));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNWithLargeAx() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/10.0")
+        .then()
+            .statusCode(200)
+            .body("value", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/10/5.0")
+        .then()
+            .statusCode(200)
+            .body("value", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-2.5")
+        .then()
+            .statusCode(200)
+            .body("value", equalTo(0.261375f));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/4/-2.5")
+        .then()
+            .statusCode(200)
+            .body("value", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddNLargeAx() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200)
+            .body("value", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNType() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/bessj/abc/2.5")
+        .then()
+            .statusCode(400);
+    }
+}
+```

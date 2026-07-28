@@ -1,0 +1,60 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5() {
+        given()
+            .when()
+            .get("/api/costfuns/5/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666() {
+        given()
+            .when()
+            .get("/api/costfuns/667/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsBaab() {
+        given()
+            .when()
+            .get("/api/costfuns/0/baab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sCompareToGreaterThan0() {
+        given()
+            .when()
+            .get("/api/costfuns/0/bb")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sNotEqualsAbab() {
+        given()
+            .when()
+            .get("/api/costfuns/0/test")
+            .then()
+            .statusCode(200);
+    }
+}

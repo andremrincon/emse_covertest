@@ -1,0 +1,74 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/text/document.txt");
+
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/acrobat/document.pdf");
+
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/word/document.doc");
+
+        response.then().statusCode(200).body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/bin/program.exe");
+
+        response.then().statusCode(200).body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/lib/library.dll");
+
+        response.then().statusCode(200).body(equalTo("5"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileWithoutExtension() {
+        Response response = given()
+                .when()
+                .get("/api/filesuffix/text/noextension");
+
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+}

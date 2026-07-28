@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void init() {
+        RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_InvalidN_ShouldReturn400() {
+        String marker = UUID.randomUUID().toString();
+        given().when().get("/api/remainder/17/5?m={m}", marker).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 1, 2.5);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxZero_ShouldReturn200() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 2, 0.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_ForwardRecurrence_WithNegativeX_ShouldReturn200() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, -5.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_BackwardRecurrence_ShouldReturn200() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 5, 2.5);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_LargeAbsoluteX_UsesAsymptoticForms_ShouldReturn200() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, 9.0);
+        act.then().statusCode(200);
+    }
+}

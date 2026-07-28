@@ -1,0 +1,111 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+
+public class FeatureConstraintTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        String envUrl = System.getenv("BASE_URL");
+        baseUrl = (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "Prod-Req-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "Feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "Prod-Exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "Feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+            .formParam("sourceFeature", feature1)
+            .formParam("excludedFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithConstraints() {
+        String productName = "Prod-Get-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "Feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        RestAssured.given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+
+        RestAssured.given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .body("constraints[0].id", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraint() {
+        String productName = "Prod-Del-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "Feat1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "Feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+        RestAssured.given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response productResponse = RestAssured.given().when().get("/products/" + productName);
+        Object constraintId = productResponse.jsonPath().get("constraints[0].id");
+
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName + "/constraints/" + constraintId)
+        .then()
+            .statusCode(204);
+    }
+}

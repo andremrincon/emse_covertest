@@ -1,0 +1,65 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CookieTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantOperator() {
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/pi/0/0")
+            .then().body(containsString("3.14159"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryOperator() {
+        given().when().get("/api/calc/log/2.718281828459045/0").then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/sqrt/16/0")
+            .then().body(containsString("4.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSineTrigOperator() {
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/sine/0/0")
+            .then().body(containsString("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusBinaryOperator() {
+        given().when().get("/api/calc/subtract/10/3").then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/plus/15.5/4.5")
+            .then().body(containsString("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyBinaryOperator() {
+        given().when().get("/api/calc/divide/100/4").then().statusCode(lessThan(300));
+
+        given().when().get("/api/calc/multiply/5/4")
+            .then().body(containsString("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorDefaultBranch() {
+        given().when().get("/api/calc/unknown/10/5")
+            .then().body(containsString("0.0"));
+    }
+}

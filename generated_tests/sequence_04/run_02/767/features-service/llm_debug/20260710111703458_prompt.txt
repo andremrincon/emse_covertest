@@ -1,0 +1,538 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetConfigurationFeaturesTriggersEquals TYPE=ERROR
+Illegal character in path at index 89: http://localhost:8080/products/TestProduct-9b35310d-2eee-4dea-9a98-5bad093d5816/features/{featureName1}
+
+[2] METHOD=testCreateMultipleFeaturesTriggersSetProduct TYPE=ERROR
+Illegal character in path at index 89: http://localhost:8080/products/TestProduct-5d5919d4-6c31-41ed-9f06-ba66b0f3edf4/features/{featureName1}
+
+[3] METHOD=testAddDuplicateFeatureToConfigurationTriggersEquals TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetConfigurationFeaturesTriggersEquals FAILURE AT LINE 209
+java.net.URISyntaxException: Illegal character in path at index 89: http://localhost:8080/products/TestProduct-9b35310d-2eee-4dea-9a98-5bad093d5816/features/{featureName1}
+at ts01qwen3_7_plus.FeatureTest.testGetConfigurationFeaturesTriggersEquals(FeatureTest.java:209)
+CODE CONTEXT:
+   206:             .pathParam("productName", productName)
+   207:             .pathParam("featureName", featureName1)
+   208:             .when()
+   209:             .post("/products/{productName}/features/{featureName1}")  ← FAILURE HERE
+   210:             .then()
+   211:             .statusCode(lessThan(300));
+   212: 
+
+[2] METHOD=testCreateMultipleFeaturesTriggersSetProduct FAILURE AT LINE 380
+java.net.URISyntaxException: Illegal character in path at index 89: http://localhost:8080/products/TestProduct-5d5919d4-6c31-41ed-9f06-ba66b0f3edf4/features/{featureName1}
+at ts01qwen3_7_plus.FeatureTest.testCreateMultipleFeaturesTriggersSetProduct(FeatureTest.java:380)
+CODE CONTEXT:
+   377:             .pathParam("productName", productName)
+   378:             .pathParam("featureName", featureName1)
+   379:             .when()
+   380:             .post("/products/{productName}/features/{featureName1}")  ← FAILURE HERE
+   381:             .then()
+   382:             .statusCode(lessThan(300));
+   383: 
+
+[3] METHOD=testAddDuplicateFeatureToConfigurationTriggersEquals FAILURE AT LINE 188
+java.lang.AssertionError:
+at ts01qwen3_7_plus.FeatureTest.testAddDuplicateFeatureToConfigurationTriggersEquals(FeatureTest.java:188)
+CODE CONTEXT:
+   185:             .when()
+   186:             .post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+   187: 
+   188:         response.then().statusCode(lessThan(300));  ← FAILURE HERE
+   189:     }
+   190: 
+   191:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureSetsProductAndName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureSetsName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String newDescription = "Updated description";
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", newDescription)
+            .when()
+            .put("/products/{productName}/features/{featureName}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturnsProductAssociation() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureToConfigurationTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureToConfigurationTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName1 = "TestFeature1-" + UUID.randomUUID().toString();
+        String featureName2 = "TestFeature2-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .when()
+            .post("/products/{productName}/features/{featureName1}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .when()
+            .post("/products/{productName}/features/{featureName2}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName1)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName1}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName2)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName2}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureNameTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String updatedDescription = "New description " + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", updatedDescription)
+            .when()
+            .put("/products/{productName}/features/{featureName}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesTriggersGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .when()
+            .get("/products/{productName}/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateMultipleFeaturesTriggersSetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName1 = "TestFeature1-" + UUID.randomUUID().toString();
+        String featureName2 = "TestFeature2-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1)
+            .when()
+            .post("/products/{productName}/features/{featureName1}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2)
+            .when()
+            .post("/products/{productName}/features/{featureName2}");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .delete("/products/{productName}/features/{featureName}");
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationTriggersEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .pathParam("productName", productName)
+            .when()
+            .post("/products/{productName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+
+        response.then().statusCode(201);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

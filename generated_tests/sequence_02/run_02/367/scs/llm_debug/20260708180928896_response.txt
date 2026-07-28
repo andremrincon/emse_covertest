@@ -1,0 +1,57 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import static io.restassured.RestAssured.given;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+    private static String BASE;
+
+    @BeforeClass
+    public static void setupBase() {
+        String p = System.getProperty("base.url");
+        if (p != null && !p.isEmpty()) {
+            BASE = p;
+        } else {
+            String e = System.getenv("BASE_URL");
+            BASE = (e != null && !e.isEmpty()) ? e : "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsMathPiString() {
+        given().baseUri(BASE).when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/sqrt/9/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/log/2.718281828/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/plus/1/2").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/subtract/5/2").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/multiply/3/4").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/divide/10/2").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/calc/pi/0/0");
+        act.then().body(equalTo(Double.toString(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturns500() {
+        given().baseUri(BASE).when().get("/api/calc/plus/2/3").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/multiply/2/3").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/sqrt/16/0").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/calc/divide/100/0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusReturnsCorrectSum() {
+        given().baseUri(BASE).when().get("/api/calc/pi/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/calc/sine/1/0").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/calc/plus/15.5/4.5");
+        act.then().body(equalTo("20.0"));
+    }
+}

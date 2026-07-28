@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void init() {
+        String envUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = System.getProperty("baseUrl", envUrl != null ? envUrl : "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEur_status200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsd_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_containsCurrenciesField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        Assert.assertTrue(resp.asString().contains("\"currencies\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEur_includesCodeFieldInBody() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        Assert.assertTrue(resp.asString().contains("\"code\":\"EUR\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEur_includesNameFieldInBody() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        Assert.assertTrue(resp.asString().contains("\"name\":\"Euro\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_includesCurrencyNameUnitedStatesDollar() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        Assert.assertTrue(resp.asString().contains("United States dollar"));
+    }
+}

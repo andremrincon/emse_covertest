@@ -1,0 +1,45 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_CoverLines38_39_WhenIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/667/test")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_CoverLine63_WhenSNotEqualsS2PlusS2() {
+        given()
+            .when()
+                .get("/api/costfuns/0/test")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_CoverLine20_ConstructorInvocation() {
+        given()
+            .when()
+                .get("/api/costfuns/1/algorithm")
+            .then()
+                .statusCode(200);
+    }
+}
+```

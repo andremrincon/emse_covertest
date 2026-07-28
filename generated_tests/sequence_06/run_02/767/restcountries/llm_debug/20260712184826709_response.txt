@@ -1,0 +1,48 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForUnknownPath() {
+        String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+        Response response = RestAssured.given()
+                .when()
+                .get("/" + uuid);
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForUnknownSubPath() {
+        String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+        Response response = RestAssured.given()
+                .when()
+                .get("/v1/nonexistent/" + uuid);
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForDeeplyNestedUnknownPath() {
+        String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+        Response response = RestAssured.given()
+                .when()
+                .get("/v2/alpha/" + uuid + "/extra/segments");
+        response.then().statusCode(404);
+    }
+}

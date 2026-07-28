@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String prop = System.getProperty("baseUrl");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else if (prop != null && !prop.isEmpty()) {
+            RestAssured.baseURI = prop;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_containsCurrencyCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().body("[0].currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_containsCurrencyCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        act.then().body("[0].currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_containsCurrencyName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().body("currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_invalidParameter_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/123");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/XYZ");
+        act.then().statusCode(404);
+    }
+}

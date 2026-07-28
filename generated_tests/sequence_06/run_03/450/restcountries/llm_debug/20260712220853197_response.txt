@@ -1,0 +1,152 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+
+public class CountryRestV1Test {
+
+    private static String getBaseUrl() {
+        String prop = System.getProperty("TEST_BASE_URL");
+        if (prop != null && !prop.isEmpty()) {
+            return prop;
+        }
+        String env = System.getenv("TEST_BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            return env;
+        }
+        return "http://localhost:8080/rest";
+    }
+
+    private static String enc(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badRequest400() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/A");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/ZZZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US;CA;MX").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest400_whenEmpty() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "XX;YY;ZZ").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_internalServerError500_withMalformed() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        String malformed = "[\"US\",\"CA\"]";
+        Response resp = given().queryParam("codes", malformed).when().get(base + "/v1/alpha/");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badRequest400() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/12");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullTextTrue200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "true").when().get(base + "/v1/name/France");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "false").when().get(base + "/v1/name/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/capital/" + enc("London"));
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/region/" + enc("Europe"));
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+}

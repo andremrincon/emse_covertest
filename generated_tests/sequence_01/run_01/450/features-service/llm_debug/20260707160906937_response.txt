@@ -1,0 +1,147 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    private void createProduct(String productName) {
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+    }
+
+    private void addRequiresConstraint(String productName, String source, String required) {
+        given()
+            .formParam("sourceFeature", source)
+            .formParam("requiredFeature", required)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String product = "Prod1-" + UUID.randomUUID();
+        String featA = "FeatA-" + UUID.randomUUID();
+        String featB = "FeatB-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, featA);
+        createFeature(product, featB);
+
+        given()
+            .formParam("sourceFeature", featA)
+            .formParam("requiredFeature", featB)
+        .when()
+            .post("/products/" + product + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfiguration_SourceActive_RequiredInactive_DerivesRequired() {
+        String product = "Prod2-" + UUID.randomUUID();
+        String featA = "FeatA-" + UUID.randomUUID();
+        String featB = "FeatB-" + UUID.randomUUID();
+        String config = "Config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, featA);
+        createFeature(product, featB);
+        createConfiguration(product, config);
+        addRequiresConstraint(product, featA, featB);
+        addFeatureToConfiguration(product, config, featA);
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config + "/features")
+        .then()
+            .body("$", hasItem(featB));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfiguration_SourceInactive_RequiredInactive_DoesNotDerive() {
+        String product = "Prod3-" + UUID.randomUUID();
+        String featA = "FeatA-" + UUID.randomUUID();
+        String featB = "FeatB-" + UUID.randomUUID();
+        String config = "Config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, featA);
+        createFeature(product, featB);
+        createConfiguration(product, config);
+        addRequiresConstraint(product, featA, featB);
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config + "/features")
+        .then()
+            .body("$", not(hasItem(featB)));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfiguration_BothActive_ReturnsBoth() {
+        String product = "Prod4-" + UUID.randomUUID();
+        String featA = "FeatA-" + UUID.randomUUID();
+        String featB = "FeatB-" + UUID.randomUUID();
+        String config = "Config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, featA);
+        createFeature(product, featB);
+        createConfiguration(product, config);
+        addRequiresConstraint(product, featA, featB);
+        addFeatureToConfiguration(product, config, featA);
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config + "/features")
+        .then()
+            .body("$", hasItems(featA, featB));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProduct_ReturnsRequiresConstraintType() {
+        String product = "Prod5-" + UUID.randomUUID();
+        String featA = "FeatA-" + UUID.randomUUID();
+        String featB = "FeatB-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, featA);
+        createFeature(product, featB);
+        addRequiresConstraint(product, featA, featB);
+
+        given()
+        .when()
+            .get("/products/" + product)
+        .then()
+            .body("constraints[0].type", equalTo("requires"));
+    }
+}

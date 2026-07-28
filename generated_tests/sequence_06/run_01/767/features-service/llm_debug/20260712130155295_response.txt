@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String url = System.getProperty("API_BASE_URL");
+        if (url == null || url.isEmpty()) url = System.getenv("API_BASE_URL");
+        if (url == null || url.isEmpty()) url = "http://localhost:8080";
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", productName);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", productName);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintReturns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String createdId = given().formParam("sourceFeature", "CPU-i7-12700")
+                .formParam("excludedFeature", "Legacy-GPU")
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(lessThan(300)).extract().path("id");
+        Response act = given().when().delete("/products/{productName}/constraints/{constraintId}", productName, createdId);
+        assertEquals(204, act.getStatusCode());
+    }
+}

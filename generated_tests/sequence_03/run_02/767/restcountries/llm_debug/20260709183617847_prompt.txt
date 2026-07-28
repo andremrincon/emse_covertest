@@ -1,0 +1,377 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAlphaCodeReturnsLanguageWithName TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testCallingCodeEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testCapitalEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testAlphaCodeReturnsLanguageWithIso639_1 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testAlphaCodeReturnsLanguageWithIso639_2 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testCurrencyEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testAllEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testAlphaCodeReturnsLanguageWithNativeName TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testAlphaCodesEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testLangEndpointReturnsCountriesWithLanguageData TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testNameEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testRegionEndpointReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAlphaCodeReturnsLanguageWithName FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAlphaCodeReturnsLanguageWithName(LanguageTest.java:50)
+CODE CONTEXT:
+    47:         .when()
+    48:             .get("/v1/alpha/FR")
+    49:         .then()
+    50:             .statusCode(404)  ← FAILURE HERE
+    51:             .body("languages[0].name", notNullValue());
+    52:     }
+    53: 
+
+[2] METHOD=testCallingCodeEndpointReturnsLanguageFields FAILURE AT LINE 127
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testCallingCodeEndpointReturnsLanguageFields(LanguageTest.java:127)
+CODE CONTEXT:
+   124:         .when()
+   125:             .get("/v1/callingcode/1")
+   126:         .then()
+   127:             .statusCode(404)  ← FAILURE HERE
+   128:             .body("[0].languages[0].nativeName", notNullValue());
+   129:     }
+   130: 
+
+[3] METHOD=testCapitalEndpointReturnsLanguageFields FAILURE AT LINE 138
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testCapitalEndpointReturnsLanguageFields(LanguageTest.java:138)
+CODE CONTEXT:
+   135:         .when()
+   136:             .get("/v1/capital/London")
+   137:         .then()
+   138:             .statusCode(404)  ← FAILURE HERE
+   139:             .body("[0].languages[0].iso639_1", notNullValue());
+   140:     }
+   141: 
+
+[4] METHOD=testAlphaCodeReturnsLanguageWithIso639_1 FAILURE AT LINE 28
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAlphaCodeReturnsLanguageWithIso639_1(LanguageTest.java:28)
+CODE CONTEXT:
+    25:         .when()
+    26:             .get("/v1/alpha/US")
+    27:         .then()
+    28:             .statusCode(404)  ← FAILURE HERE
+    29:             .body("languages[0].iso639_1", notNullValue());
+    30:     }
+    31: 
+
+[5] METHOD=testAlphaCodeReturnsLanguageWithIso639_2 FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAlphaCodeReturnsLanguageWithIso639_2(LanguageTest.java:39)
+CODE CONTEXT:
+    36:         .when()
+    37:             .get("/v1/alpha/GB")
+    38:         .then()
+    39:             .statusCode(404)  ← FAILURE HERE
+    40:             .body("languages[0].iso639_2", notNullValue());
+    41:     }
+    42: 
+
+[6] METHOD=testCurrencyEndpointReturnsLanguageFields FAILURE AT LINE 116
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testCurrencyEndpointReturnsLanguageFields(LanguageTest.java:116)
+CODE CONTEXT:
+   113:         .when()
+   114:             .get("/v1/currency/USD")
+   115:         .then()
+   116:             .statusCode(404)  ← FAILURE HERE
+   117:             .body("[0].languages[0].iso639_2", notNullValue());
+   118:     }
+   119: 
+
+[7] METHOD=testAllEndpointReturnsLanguageFields FAILURE AT LINE 94
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAllEndpointReturnsLanguageFields(LanguageTest.java:94)
+CODE CONTEXT:
+    91:         .when()
+    92:             .get("/v1/all")
+    93:         .then()
+    94:             .statusCode(404)  ← FAILURE HERE
+    95:             .body("[0].languages[0].iso639_1", notNullValue());
+    96:     }
+    97: 
+
+[8] METHOD=testAlphaCodeReturnsLanguageWithNativeName FAILURE AT LINE 61
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAlphaCodeReturnsLanguageWithNativeName(LanguageTest.java:61)
+CODE CONTEXT:
+    58:         .when()
+    59:             .get("/v1/alpha/DE")
+    60:         .then()
+    61:             .statusCode(404)  ← FAILURE HERE
+    62:             .body("languages[0].nativeName", notNullValue());
+    63:     }
+    64: 
+
+[9] METHOD=testAlphaCodesEndpointReturnsLanguageFields FAILURE AT LINE 150
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testAlphaCodesEndpointReturnsLanguageFields(LanguageTest.java:150)
+CODE CONTEXT:
+   147:         .when()
+   148:             .get("/v1/alpha")
+   149:         .then()
+   150:             .statusCode(404)  ← FAILURE HERE
+   151:             .body("[0].languages[0].name", notNullValue());
+   152:     }
+   153: }
+
+[10] METHOD=testLangEndpointReturnsCountriesWithLanguageData FAILURE AT LINE 83
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testLangEndpointReturnsCountriesWithLanguageData(LanguageTest.java:83)
+CODE CONTEXT:
+    80:         .when()
+    81:             .get("/v1/lang/es")
+    82:         .then()
+    83:             .statusCode(404)  ← FAILURE HERE
+    84:             .body("[0].languages", not(empty()));
+    85:     }
+    86: 
+
+[11] METHOD=testNameEndpointReturnsLanguageFields FAILURE AT LINE 72
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testNameEndpointReturnsLanguageFields(LanguageTest.java:72)
+CODE CONTEXT:
+    69:         .when()
+    70:             .get("/v1/name/France")
+    71:         .then()
+    72:             .statusCode(404)  ← FAILURE HERE
+    73:             .body("[0].languages[0].iso639_1", equalTo("fr"));
+    74:     }
+    75: 
+
+[12] METHOD=testRegionEndpointReturnsLanguageFields FAILURE AT LINE 105
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testRegionEndpointReturnsLanguageFields(LanguageTest.java:105)
+CODE CONTEXT:
+   102:         .when()
+   103:             .get("/v1/region/Europe")
+   104:         .then()
+   105:             .statusCode(404)  ← FAILURE HERE
+   106:             .body("[0].languages[0].name", notNullValue());
+   107:     }
+   108: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_1() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(404)
+            .body("languages[0].iso639_1", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_2() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/GB")
+        .then()
+            .statusCode(404)
+            .body("languages[0].iso639_2", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithName() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/FR")
+        .then()
+            .statusCode(404)
+            .body("languages[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithNativeName() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/DE")
+        .then()
+            .statusCode(404)
+            .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].iso639_1", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLangEndpointReturnsCountriesWithLanguageData() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(404)
+            .body("[0].languages", not(empty()));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].iso639_1", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].iso639_2", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].iso639_1", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesEndpointReturnsLanguageFields() {
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404)
+            .body("[0].languages[0].name", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

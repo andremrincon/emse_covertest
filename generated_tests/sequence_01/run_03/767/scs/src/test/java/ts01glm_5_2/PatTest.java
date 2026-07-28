@@ -1,0 +1,99 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("API_HOST", "localhost");
+        String port = System.getenv().getOrDefault("API_PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "hello", "ab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundNoReverse() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "ABCDEF", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPattern() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "CBAXYZ", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternAndReverseAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "ABCCBA", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternAndReverseNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "ABCXCBA", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatternAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "CBAABC", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatternNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "CBAXABC", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFoundPatLenGreaterThanTwo() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "XYZXYZ", "ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundAtNonZeroPosition() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "XABCDEF", "ABC")
+            .then()
+            .statusCode(200);
+    }
+}

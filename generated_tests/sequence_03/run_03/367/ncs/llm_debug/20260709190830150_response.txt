@@ -1,0 +1,69 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NLessThan2_ShouldReturn400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 1, 2.5);
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_XZero_ShouldReturn200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 3, 0.0);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_LargeX_ShouldReturn200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 3, 10.0);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxLessOrEqualN_SmallX_ShouldReturn200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 5, 1.0e-10);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NegativeX_OddN_ValueIsNegative() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 3, -2.5);
+        res.then().body("value", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_Bessj0_SmallAxBranch_ShouldReturn200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 3, 5.0);
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_Bessj1_LargeAxNegativeX_ShouldReturn200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/bessj/{n}/{x}", 3, -10.0);
+        res.then().statusCode(200);
+    }
+}

@@ -1,0 +1,35 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CountryServiceTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_acronymMatch_returns200() {
+        given().when().get("/v2/regionalbloc/EU").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_noMatch_returns404() {
+        given().when().get("/v2/regionalbloc/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_naftaAcronymMatch_returns200() {
+        given().when().get("/v2/regionalbloc/NAFTA").then().statusCode(200);
+    }
+}
+```

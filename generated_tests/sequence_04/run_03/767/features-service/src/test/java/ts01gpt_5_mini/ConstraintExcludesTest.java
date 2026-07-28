@@ -1,0 +1,113 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+            if (base == null || base.isEmpty()) {
+                base = "http://localhost:8080";
+            }
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_returns201() {
+        String product = "prod-" + UUID.randomUUID();
+        String src = "feature-src-" + UUID.randomUUID();
+        String excl = "feature-excl-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product);
+        resp.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_responseContainsSourceFeature() {
+        String product = "prod-" + UUID.randomUUID();
+        String src = "src-" + UUID.randomUUID();
+        String excl = "excl-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product);
+        resp.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintResponseContainsConstraintType_EXCLUDES() {
+        String product = "prod-" + UUID.randomUUID();
+        String src = "cpu-" + UUID.randomUUID();
+        String excl = "igfx-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product);
+        resp.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationWithoutConflict_isValid() {
+        String product = "prod-" + UUID.randomUUID();
+        String src = "A-" + UUID.randomUUID();
+        String excl = "B-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, src).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        resp.then().body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationWithConflict_isInvalid() {
+        String product = "prod-" + UUID.randomUUID();
+        String src = "X-" + UUID.randomUUID();
+        String excl = "Y-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, src).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excl).then().statusCode(500);
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        resp.then().body("valid", equalTo(false));
+    }
+}

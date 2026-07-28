@@ -1,0 +1,40 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @Test(timeout = 60000)
+    public void testGetRequestCorsHeaders() {
+        given().when().get("/products").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products");
+
+        response.then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestCorsHeaders() {
+        given().when().options("/products").then().statusCode(lessThan(300));
+
+        Response response = given().when().options("/products");
+
+        response.then().header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesRequestCorsHeaders() {
+        String productName = "AeroBook-Pro-15";
+
+        Response response = given().when().get("/products/" + productName + "/features");
+
+        response.then().statusCode(500);
+
+        response.then().header("Access-Control-Max-Age", equalTo("3600"));
+    }
+}

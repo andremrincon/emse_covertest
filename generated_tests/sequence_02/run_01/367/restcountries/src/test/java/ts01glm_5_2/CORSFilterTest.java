@@ -1,0 +1,132 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowOriginHeader() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowMethodsHeader() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowHeadersHeader() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsCacheControlHeader() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(lessThan(300))
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForAllEndpoint() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForCallingCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForAlphaCodesEndpoint() {
+        given()
+                .when()
+                .queryParam("codes", "US,CA,MX")
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForSubregionEndpoint() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForLangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterChainContinuesForV2AllEndpoint() {
+        given()
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(200);
+    }
+}

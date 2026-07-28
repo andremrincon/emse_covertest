@@ -1,0 +1,120 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_validReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidShortReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/1");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/ZZZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_withFieldsReturnsFilteredBody() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital").when().get("/v2/alpha/US");
+        act.then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_validCodesReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v2/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_invalidFormatReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_validReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalidLengthReturns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/12");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_foundReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "false").when().get("/v2/name/Germany");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_serverErrorReturns500() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v2/name/True");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_validReturns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/1");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_notFoundReturns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/99999");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_withFieldsReturnsBodyContainsName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/capital/Paris");
+        act.then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostOnV2_returnsMethodNotAllowed405() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().post("/v2");
+        act.then().statusCode(405);
+    }
+}

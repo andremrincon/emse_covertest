@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaV1Alpha() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaV1Lang() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaV2Alpha() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageDeserializationViaV2Lang() {
+        given()
+            .pathParam("lang", "Spanish")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+}

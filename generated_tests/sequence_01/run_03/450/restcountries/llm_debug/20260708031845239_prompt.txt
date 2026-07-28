@@ -1,0 +1,194 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetName_v1AlphaUS TYPE=ERROR
+The parameter "name" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testSetIso639_1_v1AlphaUS TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testV2LangEndpointInvokesLanguageSetters_status200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testSetIso639_2_v1AlphaUS TYPE=ERROR
+The parameter "iso639_2" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[5] METHOD=testV1LangEs_body_iso639_1 TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[6] METHOD=testSetNativeName_v1AlphaUS TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetName_v1AlphaUS FAILURE AT LINE 40
+at ts01gpt_5_mini.LanguageTest.testSetName_v1AlphaUS(LanguageTest.java:40)
+CODE CONTEXT:
+    37:     public void testSetName_v1AlphaUS() {
+    38:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    39:         Response resp = given().when().get("/v1/alpha/US");
+    40:         resp.then().body("languages[0].name", equalTo("English"));  ← FAILURE HERE
+    41:     }
+    42: 
+    43:     @Test(timeout = 60000)
+
+[2] METHOD=testSetIso639_1_v1AlphaUS FAILURE AT LINE 26
+at ts01gpt_5_mini.LanguageTest.testSetIso639_1_v1AlphaUS(LanguageTest.java:26)
+CODE CONTEXT:
+    23:     public void testSetIso639_1_v1AlphaUS() {
+    24:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    25:         Response resp = given().when().get("/v1/alpha/US");
+    26:         resp.then().body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    27:     }
+    28: 
+    29:     @Test(timeout = 60000)
+
+[3] METHOD=testV2LangEndpointInvokesLanguageSetters_status200 FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV2LangEndpointInvokesLanguageSetters_status200(LanguageTest.java:68)
+CODE CONTEXT:
+    65:     public void testV2LangEndpointInvokesLanguageSetters_status200() {
+    66:         given().when().get("/v2").then().statusCode(lessThan(300));
+    67:         Response resp = given().when().get("/v2/lang/Spanish");
+    68:         resp.then().statusCode(404);  ← FAILURE HERE
+    69:     }
+    70: 
+    71:     @Test(timeout = 60000)
+
+[4] METHOD=testSetIso639_2_v1AlphaUS FAILURE AT LINE 33
+at ts01gpt_5_mini.LanguageTest.testSetIso639_2_v1AlphaUS(LanguageTest.java:33)
+CODE CONTEXT:
+    30:     public void testSetIso639_2_v1AlphaUS() {
+    31:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    32:         Response resp = given().when().get("/v1/alpha/US");
+    33:         resp.then().body("languages[0].iso639_2", equalTo("eng"));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+[5] METHOD=testV1LangEs_body_iso639_1 FAILURE AT LINE 75
+at ts01gpt_5_mini.LanguageTest.testV1LangEs_body_iso639_1(LanguageTest.java:75)
+CODE CONTEXT:
+    72:     public void testV1LangEs_body_iso639_1() {
+    73:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    74:         Response resp = given().when().get("/v1/lang/es");
+    75:         resp.then().body("[0].languages[0].iso639_1", equalTo("es"));  ← FAILURE HERE
+    76:     }
+    77: }
+
+[6] METHOD=testSetNativeName_v1AlphaUS FAILURE AT LINE 47
+at ts01gpt_5_mini.LanguageTest.testSetNativeName_v1AlphaUS(LanguageTest.java:47)
+CODE CONTEXT:
+    44:     public void testSetNativeName_v1AlphaUS() {
+    45:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    46:         Response resp = given().when().get("/v1/alpha/US");
+    47:         resp.then().body("languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    48:     }
+    49: 
+    50:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) {
+            String g = System.getenv("API_BASE");
+            env = (g == null || g.isEmpty()) ? "http://localhost:8080/rest" : g;
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName_v1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyEndpointInvokesLanguageSetters_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameEndpointInvokesLanguageSetters_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointInvokesLanguageSetters_status200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/lang/Spanish");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEs_body_iso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/lang/es");
+        resp.then().body("[0].languages[0].iso639_1", equalTo("es"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

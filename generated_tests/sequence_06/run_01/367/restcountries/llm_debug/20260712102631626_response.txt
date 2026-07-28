@@ -1,0 +1,150 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAddsAccessControlAllowOriginHeader() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAddsAccessControlAllowMethodsHeader() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Methods", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAddsAccessControlAllowHeadersHeader() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Headers", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAddsCacheControlHeader() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(200)
+                .header("Cache-Control", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOn404Response() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOn400Response() {
+        given()
+            .when()
+                .get("/v1/alpha/123")
+            .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnV2Endpoint() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Access-Control-Allow-Methods", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnCurrencyEndpoint() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Cache-Control", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnCallingCodeEndpoint() {
+        given()
+            .when()
+                .get("/v1/callingcode/1")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Access-Control-Allow-Headers", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnCapitalEndpoint() {
+        given()
+            .when()
+                .get("/v1/capital/London")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Access-Control-Allow-Methods", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnV2AlphaEndpoint() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Cache-Control", nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSFilterAppliedOnV2NameEndpoint() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", nullValue(String.class))
+                .header("Access-Control-Allow-Methods", nullValue(String.class))
+                .header("Access-Control-Allow-Headers", nullValue(String.class))
+                .header("Cache-Control", nullValue(String.class));
+    }
+}

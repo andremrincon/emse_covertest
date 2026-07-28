@@ -1,0 +1,216 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryRestV1Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByAlphaList_internalServerError500_withMalformed TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <400>.
+
+[2] METHOD=testGetByAlphaList_notFound404 TYPE=FAILURE
+1 expectation failed.
+Expected status code <404> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByAlphaList_internalServerError500_withMalformed FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlphaList_internalServerError500_withMalformed(CountryRestV1Test.java:86)
+CODE CONTEXT:
+    83:         given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+    84:         String malformed = "[\"US\",\"CA\"]";
+    85:         Response resp = given().queryParam("codes", malformed).when().get(base + "/v1/alpha/");
+    86:         resp.then().statusCode(400);  ← FAILURE HERE
+    87:     }
+    88: 
+    89:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByAlphaList_notFound404 FAILURE AT LINE 77
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV1Test.testGetByAlphaList_notFound404(CountryRestV1Test.java:77)
+CODE CONTEXT:
+    74:         String base = getBaseUrl();
+    75:         given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+    76:         Response resp = given().queryParam("codes", "XX;YY;ZZ").when().get(base + "/v1/alpha/");
+    77:         resp.then().statusCode(200);  ← FAILURE HERE
+    78:     }
+    79: 
+    80:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+
+public class CountryRestV1Test {
+
+    private static String getBaseUrl() {
+        String prop = System.getProperty("TEST_BASE_URL");
+        if (prop != null && !prop.isEmpty()) {
+            return prop;
+        }
+        String env = System.getenv("TEST_BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            return env;
+        }
+        return "http://localhost:8080/rest";
+    }
+
+    private static String enc(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/US");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badRequest400() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/A");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/alpha/ZZZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US;CA;MX").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest400_whenEmpty() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "XX;YY;ZZ").when().get(base + "/v1/alpha/");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_internalServerError500_withMalformed() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        String malformed = "[\"US\",\"CA\"]";
+        Response resp = given().queryParam("codes", malformed).when().get(base + "/v1/alpha/");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badRequest400() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/currency/12");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullTextTrue200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "true").when().get(base + "/v1/name/France");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFound404() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "false").when().get(base + "/v1/name/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/capital/" + enc("London"));
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/region/" + enc("Europe"));
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_valid200() {
+        String base = getBaseUrl();
+        given().when().get(base + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/v1/lang/es");
+        resp.then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

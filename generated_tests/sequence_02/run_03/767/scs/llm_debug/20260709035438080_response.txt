@@ -1,0 +1,43 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparseValidShortNamesReturns200() {
+        given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparseInvalidDayReturns500() {
+        given().when().get("/api/pat/ABABCABAB").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/dateparse/Superday/Movember").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparseProducesExpectedNumericResultBody() {
+        given().when().get("/api/calc/add/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/dec").then().body(equalTo("13"));
+    }
+}

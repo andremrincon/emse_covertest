@@ -1,0 +1,37 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    private static final String DEFAULT_BASE_URI = "http://localhost:8080";
+    private static final String PRODUCTS_PATH = "/products";
+    private static final String BASE_URI_PROPERTY = "baseURI";
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty(BASE_URI_PROPERTY, DEFAULT_BASE_URI);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithGetMethod() {
+        given()
+            .when()
+            .get(PRODUCTS_PATH)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithOptionsMethod() {
+        given()
+            .when()
+            .options(PRODUCTS_PATH)
+            .then()
+            .header("Access-Control-Allow-Origin", "*");
+    }
+}

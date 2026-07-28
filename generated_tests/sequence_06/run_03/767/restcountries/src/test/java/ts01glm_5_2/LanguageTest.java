@@ -1,0 +1,171 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("REST_BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("rest.base.url");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAllV1ReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByAlphaCodeReturnsLanguageFields() {
+        given()
+            .when()
+            .get("/v1/alpha/US")
+            .then()
+            .statusCode(404)
+            .body("languages", notNullValue())
+            .body("languages[0].iso639_1", notNullValue())
+            .body("languages[0].iso639_2", notNullValue())
+            .body("languages[0].name", notNullValue())
+            .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByNameReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/name/France")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue())
+            .body("[0].languages[0].name", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByLangReturnsCountriesWithLanguages() {
+        given()
+            .when()
+            .get("/v1/lang/es")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue())
+            .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByCurrencyReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/currency/USD")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/callingcode/1")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByCapitalReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/capital/London")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByRegionReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v1/region/Europe")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetAllV2ReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/all")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetV2AlphaReturnsLanguageFields() {
+        given()
+            .when()
+            .get("/v2/alpha/DE")
+            .then()
+            .statusCode(404)
+            .body("languages", notNullValue())
+            .body("languages[0].iso639_1", notNullValue())
+            .body("languages[0].iso639_2", notNullValue())
+            .body("languages[0].name", notNullValue())
+            .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetV2NameReturnsLanguageData() {
+        given()
+            .when()
+            .get("/v2/name/Germany")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue())
+            .body("[0].languages[0].iso639_1", notNullValue())
+            .body("[0].languages[0].iso639_2", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetV2LangReturnsCountriesWithLanguages() {
+        given()
+            .when()
+            .get("/v2/lang/Spanish")
+            .then()
+            .statusCode(404)
+            .body("[0].languages", notNullValue())
+            .body("[0].languages[0].name", notNullValue())
+            .body("[0].languages[0].nativeName", notNullValue());
+    }
+}

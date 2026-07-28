@@ -1,0 +1,38 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForUnknownPath() {
+        given().when().get("/v1/nonexistent-" + java.util.UUID.randomUUID().toString()).then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForDeepUnknownPath() {
+        given().when().get("/v2/unknown/deep/" + java.util.UUID.randomUUID().toString()).then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForRootUnknownPath() {
+        given().when().get("/nonexistent-" + java.util.UUID.randomUUID().toString()).then().statusCode(404);
+    }
+}
+```

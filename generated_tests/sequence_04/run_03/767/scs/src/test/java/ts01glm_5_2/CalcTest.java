@@ -1,0 +1,48 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryPlusOperation() {
+        given()
+            .when()
+                .get("/api/calc/plus/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnarySqrtOperation() {
+        given()
+            .when()
+                .get("/api/calc/sqrt/16/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcConstantPiOperation() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("" + Math.PI));
+    }
+}

@@ -1,0 +1,81 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    private final String baseUrl = System.getProperty("test.base.url", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchXPlusYEquals56() {
+        given()
+            .pathParam("i", 28)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchXsPlusYEqualsHello7() {
+        given()
+            .pathParam("i", 7)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchXsCompareToSLessThan0() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "world")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchYGreaterThanX() {
+        given()
+            .pathParam("i", 10)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDefaultPath() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidInteger() {
+        given()
+            .pathParam("i", "abc")
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}

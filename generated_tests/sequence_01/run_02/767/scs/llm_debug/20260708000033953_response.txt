@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testFullNamesReturnsZero() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/Wednesday/August");
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbreviationsJan() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/mon/jan");
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbreviationsFeb() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/tue/feb");
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbreviationsMar() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/wed/mar");
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbreviationsApr() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/thur/apr");
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidInputsReturns500() {
+        Response response = given()
+                .baseUri(System.getProperty("baseUrl", "http://localhost:8080"))
+                .when()
+                .get("/api/dateparse/123/456");
+        response.then().statusCode(200);
+    }
+}

@@ -1,0 +1,226 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.WrongProductConfigurationExceptionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=excludesConstraintViolationTriggersWrongProductConfigurationException TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[2] METHOD=multipleConstraintViolationsTriggerWrongProductConfigurationException TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=requiresConstraintViolationTriggersWrongProductConfigurationException TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=excludesConstraintViolationTriggersWrongProductConfigurationException FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.excludesConstraintViolationTriggersWrongProductConfigurationException(WrongProductConfigurationExceptionTest.java:56)
+CODE CONTEXT:
+    53:                 .then().statusCode(lessThan(300));
+    54: 
+    55:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB)
+    56:                 .then().statusCode(lessThan(300));  ← FAILURE HERE
+    57: 
+    58:         given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+    59:                 .then().statusCode(500);
+
+[2] METHOD=multipleConstraintViolationsTriggerWrongProductConfigurationException FAILURE AT LINE 141
+java.lang.AssertionError:
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.multipleConstraintViolationsTriggerWrongProductConfigurationException(WrongProductConfigurationExceptionTest.java:141)
+CODE CONTEXT:
+   138:                 .then().statusCode(lessThan(300));
+   139: 
+   140:         given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB)
+   141:                 .then().statusCode(lessThan(300));  ← FAILURE HERE
+   142: 
+   143:         given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+   144:                 .then().statusCode(500);
+
+[3] METHOD=requiresConstraintViolationTriggersWrongProductConfigurationException FAILURE AT LINE 94
+java.lang.AssertionError:
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.requiresConstraintViolationTriggersWrongProductConfigurationException(WrongProductConfigurationExceptionTest.java:94)
+CODE CONTEXT:
+    91:                 .then().statusCode(lessThan(300));
+    92: 
+    93:         given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+    94:                 .then().statusCode(200);  ← FAILURE HERE
+    95:     }
+    96: 
+    97:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationTriggersWrongProductConfigurationException() {
+        String productName = "test-excludes-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-excl-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-excl-b-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-excl-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Feature A for excludes test")
+                .when().post("/products/" + productName + "/features/" + featureA)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Feature B for excludes test")
+                .when().post("/products/" + productName + "/features/" + featureB)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when().post("/products/" + productName + "/constraints/excludes")
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB)
+                .then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraintViolationTriggersWrongProductConfigurationException() {
+        String productName = "test-requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "feat-req-src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "feat-req-tgt-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-req-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Source feature for requires test")
+                .when().post("/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Required feature for requires test")
+                .when().post("/products/" + productName + "/features/" + requiredFeature)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when().post("/products/" + productName + "/constraints/requires")
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void multipleConstraintViolationsTriggerWrongProductConfigurationException() {
+        String productName = "test-multi-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "feat-multi-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "feat-multi-b-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureC = "feat-multi-c-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-multi-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Feature A")
+                .when().post("/products/" + productName + "/features/" + featureA)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Feature B")
+                .when().post("/products/" + productName + "/features/" + featureB)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Feature C")
+                .when().post("/products/" + productName + "/features/" + featureC)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when().post("/products/" + productName + "/constraints/excludes")
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", featureB)
+                .formParam("requiredFeature", featureC)
+                .when().post("/products/" + productName + "/constraints/requires")
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB)
+                .then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configName + "/features")
+                .then().statusCode(500);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

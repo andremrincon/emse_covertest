@@ -1,0 +1,50 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        String basePath = System.getProperty("basePath", "/rest");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.basePath = basePath;
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_acronymMatch_returnsCountries() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/v2/regionalbloc/EU");
+
+        response.then().statusCode(200);
+        response.then().body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_caseInsensitiveMatch_returnsCountries() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/v2/regionalbloc/eu");
+
+        response.then().statusCode(200);
+        response.then().body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/v2/regionalbloc/XYZ");
+
+        response.then().statusCode(404);
+    }
+}

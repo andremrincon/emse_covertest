@@ -1,0 +1,76 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Test;
+
+public class RemainderTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveAPositiveB() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/17/5")
+        .then()
+            .statusCode(lessThan(300))
+            .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveANegativeB() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/17/-5")
+        .then()
+            .statusCode(lessThan(300))
+            .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeAPositiveB() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/-9/5")
+        .then()
+            .statusCode(lessThan(300))
+            .body("resultAsInt", equalTo(-4));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeANegativeB() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/-9/-5")
+        .then()
+            .statusCode(lessThan(300))
+            .body("resultAsInt", equalTo(4));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderZeroA() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/0/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderZeroB() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/api/remainder/17/0")
+        .then()
+            .statusCode(200);
+    }
+}

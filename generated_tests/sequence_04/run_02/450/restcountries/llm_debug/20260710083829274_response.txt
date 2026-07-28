@@ -1,0 +1,112 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("REST_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Success_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/{alphacode}", "US");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest_Numeric() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/{alphacode}", "123");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound_XYZ() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/{alphacode}", "XYZ");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        Assert.assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_BadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "123").when().get("/v1/alpha");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_NotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha");
+        Assert.assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameSearch_FullTextMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("fullText", "true").when().get("/v1/name/{name}", "France");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameSearch_SubstringMatch() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("fullText", "false").when().get("/v1/name/{name}", "United");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameSearch_NotFound_Numeric() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/name/{name}", "123");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCode_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/callingcode/{callingcode}", "1");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCapital_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/capital/{capital}", "London");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegion_Success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/region/{region}", "Europe");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+}

@@ -1,0 +1,192 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.BessjTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testBessjNLessThan2 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+[2] METHOD=testBessjAxZero TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+[3] METHOD=testBessjXNegativeAndNEven TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+[4] METHOD=testBessjAxLessThanOrEqualToN TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+[5] METHOD=testBessjAxGreaterThanNAndXNegative TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testBessjNLessThan2 FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01qwen3_7_plus.BessjTest.testBessjNLessThan2(BessjTest.java:23)
+CODE CONTEXT:
+    20: 
+    21:     @Test(timeout = 60000)
+    22:     public void testBessjNLessThan2() {
+    23:         given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));  ← FAILURE HERE
+    24:         given()
+    25:             .pathParam("n", 1)
+    26:             .pathParam("x", 2.5)
+
+[2] METHOD=testBessjAxZero FAILURE AT LINE 47
+java.lang.AssertionError:
+at ts01qwen3_7_plus.BessjTest.testBessjAxZero(BessjTest.java:47)
+CODE CONTEXT:
+    44: 
+    45:     @Test(timeout = 60000)
+    46:     public void testBessjAxZero() {
+    47:         given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));  ← FAILURE HERE
+    48:         given()
+    49:             .pathParam("n", 2)
+    50:             .pathParam("x", 0.0)
+
+[3] METHOD=testBessjXNegativeAndNEven FAILURE AT LINE 71
+java.lang.AssertionError:
+at ts01qwen3_7_plus.BessjTest.testBessjXNegativeAndNEven(BessjTest.java:71)
+CODE CONTEXT:
+    68: 
+    69:     @Test(timeout = 60000)
+    70:     public void testBessjXNegativeAndNEven() {
+    71:         given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));  ← FAILURE HERE
+    72:         given()
+    73:             .pathParam("n", 2)
+    74:             .pathParam("x", -10.0)
+
+[4] METHOD=testBessjAxLessThanOrEqualToN FAILURE AT LINE 59
+java.lang.AssertionError:
+at ts01qwen3_7_plus.BessjTest.testBessjAxLessThanOrEqualToN(BessjTest.java:59)
+CODE CONTEXT:
+    56: 
+    57:     @Test(timeout = 60000)
+    58:     public void testBessjAxLessThanOrEqualToN() {
+    59:         given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));  ← FAILURE HERE
+    60:         given()
+    61:             .pathParam("n", 10)
+    62:             .pathParam("x", 2.5)
+
+[5] METHOD=testBessjAxGreaterThanNAndXNegative FAILURE AT LINE 35
+java.lang.AssertionError:
+at ts01qwen3_7_plus.BessjTest.testBessjAxGreaterThanNAndXNegative(BessjTest.java:35)
+CODE CONTEXT:
+    32: 
+    33:     @Test(timeout = 60000)
+    34:     public void testBessjAxGreaterThanNAndXNegative() {
+    35:         given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));  ← FAILURE HERE
+    36:         given()
+    37:             .pathParam("n", 3)
+    38:             .pathParam("x", -10.0)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));
+        given()
+            .pathParam("n", 1)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNAndXNegative() {
+        given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));
+        given()
+            .pathParam("n", 3)
+            .pathParam("x", -10.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZero() {
+        given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));
+        given()
+            .pathParam("n", 2)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualToN() {
+        given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));
+        given()
+            .pathParam("n", 10)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXNegativeAndNEven() {
+        given().when().get("/api/bessj/2/2.5").then().statusCode(lessThan(300));
+        given()
+            .pathParam("n", 2)
+            .pathParam("x", -10.0)
+        .when()
+            .get("/api/bessj/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

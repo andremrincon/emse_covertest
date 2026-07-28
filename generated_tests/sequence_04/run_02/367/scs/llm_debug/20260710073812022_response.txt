@@ -1,0 +1,107 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMonJan() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayWithFeb() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/feb")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTueWedThurMarAprMay() {
+        given()
+            .when()
+                .get("/api/dateparse/tue/mar")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/wed/apr")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/thur/may")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFriSatSunJunJulAug() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/jun")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/sat/jul")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/sun/aug")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMonTueWedThurSepOctNovDec() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/sep")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/tue/oct")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/wed/nov")
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/dateparse/thur/dec")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/xyz")
+            .then()
+                .statusCode(500);
+    }
+}

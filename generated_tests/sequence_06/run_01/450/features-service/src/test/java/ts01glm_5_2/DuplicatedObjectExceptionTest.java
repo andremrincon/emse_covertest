@@ -1,0 +1,92 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
+public class DuplicatedObjectExceptionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateProductThrowsDuplicatedObjectException() {
+        String productName = "dup-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(is(201));
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateConfigurationThrowsDuplicatedObjectException() {
+        String productName = "dup-config-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "dup-config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/configurations/" + configurationName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/" + productName + "/configurations/" + configurationName)
+                .then()
+                .statusCode(is(201));
+    }
+
+    @Test(timeout = 60000)
+    public void addingDuplicateFeatureThrowsDuplicatedObjectException() {
+        String productName = "dup-feature-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "dup-feature-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Test feature description")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Test feature description duplicate")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName)
+                .then()
+                .statusCode(is(500));
+    }
+}

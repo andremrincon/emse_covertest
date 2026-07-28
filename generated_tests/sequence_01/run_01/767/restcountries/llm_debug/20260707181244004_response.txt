@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import java.util.Optional;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = Optional.ofNullable(System.getProperty("api.base"))
+                .orElse(Optional.ofNullable(System.getenv("API_BASE_URL"))
+                        .orElse("http://localhost:8080/rest"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdReturns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdHasSymbolDollar() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().body("[0].currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdHasNameUnitedStatesDollar() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().body("[0].currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyNumericReturns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUnknownReturns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "XYZ").then().statusCode(404);
+    }
+}

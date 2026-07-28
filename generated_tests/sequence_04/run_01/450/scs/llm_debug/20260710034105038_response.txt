@@ -1,0 +1,95 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAllValidDayNamesWithJanuary() {
+        String[] days = {"mon", "tue", "wed", "thur", "fri", "sat"};
+        for (String day : days) {
+            given()
+                .when()
+                    .get("/api/dateparse/{dayname}/{monthname}", day, "jan")
+                .then()
+                    .statusCode(lessThan(300));
+        }
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "sun", "jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidMonthsFebruaryThroughJune() {
+        String[] months = {"feb", "mar", "apr", "may"};
+        for (String month : months) {
+            given()
+                .when()
+                    .get("/api/dateparse/{dayname}/{monthname}", "mon", month)
+                .then()
+                    .statusCode(lessThan(300));
+        }
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "mon", "jun")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidMonthsJulyThroughDecember() {
+        String[] months = {"jul", "aug", "sep", "oct", "nov"};
+        for (String month : months) {
+            given()
+                .when()
+                    .get("/api/dateparse/{dayname}/{monthname}", "mon", month)
+                .then()
+                    .statusCode(lessThan(300));
+        }
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "mon", "dec")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonthReturns500() {
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "Superday", "Movember")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithInvalidMonthReturns200() {
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "mon", "Movember")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayWithValidMonthReturns200() {
+        given()
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}", "Superday", "jan")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,44 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0True_i3True() {
+        Response response = given()
+            .when()
+            .get("/api/notypevar/28/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i1True_i3True() {
+        Response response = given()
+            .when()
+            .get("/api/notypevar/7/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i2True_i3False() {
+        Response response = given()
+            .when()
+            .get("/api/notypevar/5/world");
+        response.then().statusCode(200);
+    }
+}

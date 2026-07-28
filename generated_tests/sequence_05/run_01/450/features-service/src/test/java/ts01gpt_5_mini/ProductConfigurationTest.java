@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Ignore;
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Ignore
+
+
+    @Test(timeout = 60000)
+    public void testConfigurationIncludesProductFeatureNames() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configName = "cfg-" + UUID.randomUUID().toString();
+        String featureA = "feature-A-" + UUID.randomUUID().toString();
+        String featureB = "feature-B-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "desc A").when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().formParam("description", "desc B").when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(200).extract().response();
+
+        assertTrue(act.asString().contains(productName) && act.asString().contains(configName));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWhenProductHasNoFeaturesReturns200() {
+        String productName = "prod-empty-" + UUID.randomUUID().toString();
+        String configName = "cfg-empty-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(200).extract().response();
+
+        assertTrue(act.getStatusCode() == 200);
+    }
+}

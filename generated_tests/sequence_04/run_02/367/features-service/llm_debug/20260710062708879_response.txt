@@ -1,0 +1,50 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DuplicatedObjectExceptionTest {
+
+    private String baseUrl() {
+        String env = System.getenv("API_BASE");
+        if (env != null && !env.isEmpty()) return env;
+        String prop = System.getProperty("api.base");
+        if (prop != null && !prop.isEmpty()) return prop;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void createProductTwiceShouldTriggerDuplicateHandling() {
+        String base = baseUrl();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().post("/products/{productName}", productName);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureTwiceShouldTriggerDuplicateHandling() {
+        String base = baseUrl();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().post("/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addConfigurationTwiceShouldTriggerDuplicateHandling() {
+        String base = baseUrl();
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "conf-" + UUID.randomUUID().toString();
+        given().baseUri(base).when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().baseUri(base).when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        Response act = given().baseUri(base).when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        assertEquals(201, act.getStatusCode());
+    }
+}

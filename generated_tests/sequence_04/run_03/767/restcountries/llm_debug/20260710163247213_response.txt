@@ -1,0 +1,152 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_InvalidLength() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("alphacode", "1")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InvalidLength() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "1")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "[\"US\", \"CA\"]")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_InvalidLength() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("currency", "12")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("currency", "INVALIDCURRENCYCODE")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("name", "True")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("callingcode", "True")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("capital", "True")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("region", "True")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("subregion", "True")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Exception() {
+        given()
+            .baseUri(BASE_URL)
+            .pathParam("lang", "True")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsEmpty_NullCodes() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsEmpty_EmptyCodes() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+}

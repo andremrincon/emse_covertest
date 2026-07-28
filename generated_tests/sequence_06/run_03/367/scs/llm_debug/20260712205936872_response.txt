@@ -1,0 +1,69 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSuccessMonJanStatus200() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "nomatch", "apr").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "Jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMonthValueDecBody12() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "x", "may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "x", "jun").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "x", "jul").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "NoDay", "dec");
+        act.then().body(equalTo("12"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTueMarBody4() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "a", "aug").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "a", "sep").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Tue", "Mar");
+        act.then().body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayStatus500() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "w", "oct").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "w", "nov").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "123", "Aug");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidMonthStatus500() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "alpha", "jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "alpha", "feb").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "Movember");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testThurDecBody13() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "probe", "sep").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "ThUr", "Dec");
+        act.then().body(equalTo("13"));
+    }
+}

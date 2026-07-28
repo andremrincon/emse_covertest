@@ -1,0 +1,74 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/male/mr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithNonMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/male/mrs")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/female/mrs")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithNonMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/female/mr")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/none/dr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithNonMatchingTitle() {
+        given()
+            .when()
+                .get("/api/title/none/mr")
+            .then()
+                .statusCode(500);
+    }
+}
+```

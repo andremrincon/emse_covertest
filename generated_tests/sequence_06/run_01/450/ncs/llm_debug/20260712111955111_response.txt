@@ -1,0 +1,53 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertEquals;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjSuccess() {
+        Response response = given()
+            .pathParam("n", 3)
+            .pathParam("x", 2.5)
+        .when()
+            .get("/api/bessj/{n}/{x}");
+        
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccess() {
+        Response response = given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}");
+        
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderSuccess() {
+        Response response = given()
+            .pathParam("a", 17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+        
+        assertEquals(200, response.getStatusCode());
+    }
+}
+```

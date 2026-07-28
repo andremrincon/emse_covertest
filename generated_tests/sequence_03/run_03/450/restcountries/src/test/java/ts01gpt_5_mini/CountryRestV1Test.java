@@ -1,0 +1,129 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String v = System.getProperty("tests.baseUrl");
+        if (v == null || v.isEmpty()) {
+            v = System.getenv("BASE_URL");
+        }
+        if (v == null || v.isEmpty()) {
+            v = "http://localhost:8080/rest";
+        }
+        BASE = v;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid_shouldReturn200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidFormat_shouldReturn400() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/alpha/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_validMultipleSemicolon_shouldReturn200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US;CA").when().get(BASE + "/v1/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_invalidShort_shouldReturn400() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "1").when().get(BASE + "/v1/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "XX").when().get(BASE + "/v1/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_serverError_shouldReturn500() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "[\"US\",\"CA\"]").when().get(BASE + "/v1/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_shouldReturn200() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/currency/USD");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalidFormat_shouldReturn400() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/currency/12");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/currency/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "false").when().get(BASE + "/v1/name/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/callingcode/99999");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/capital/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/region/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_notFound_shouldReturn404() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/v1/lang/123");
+        act.then().statusCode(404);
+    }
+}

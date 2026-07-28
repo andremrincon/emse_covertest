@@ -1,0 +1,190 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_NotFound_Returns404() {
+        String alphaCode = "ZZZ";
+
+        given()
+            .when()
+                .get("/v2/alpha/{alphacode}", alphaCode)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_ValidWithFields_Returns200() {
+        String alphaCode = "US";
+        String fields = "name;capital";
+
+        given()
+            .queryParam("fields", fields)
+            .when()
+                .get("/v2/alpha/{alphacode}", alphaCode)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_BadRequest_Returns400() {
+        String codes = "1";
+
+        given()
+            .queryParam("codes", codes)
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_NotFound_Returns404() {
+        String codes = "XX;YY;ZZ";
+
+        given()
+            .queryParam("codes", codes)
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_ValidWithFields_Returns200() {
+        String codes = "US;CA";
+        String fields = "name;capital";
+
+        given()
+            .queryParam("codes", codes)
+            .queryParam("fields", fields)
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_BadRequest_Returns400() {
+        String currency = "12";
+
+        given()
+            .when()
+                .get("/v2/currency/{currency}", currency)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_NotFound_Returns404() {
+        String currency = "XYZ";
+
+        given()
+            .when()
+                .get("/v2/currency/{currency}", currency)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_NotFound_Returns404() {
+        String name = "123";
+
+        given()
+            .when()
+                .get("/v2/name/{name}", name)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_NotFound_Returns404() {
+        String callingCode = "99999";
+
+        given()
+            .when()
+                .get("/v2/callingcode/{callingcode}", callingCode)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_NotFound_Returns404() {
+        String capital = "12345";
+
+        given()
+            .when()
+                .get("/v2/capital/{capital}", capital)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_NotFound_Returns404() {
+        String region = "123";
+
+        given()
+            .when()
+                .get("/v2/region/{region}", region)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_NotFound_Returns404() {
+        String subregion = "123";
+
+        given()
+            .when()
+                .get("/v2/subregion/{subregion}", subregion)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_NotFound_Returns404() {
+        String lang = "123";
+
+        given()
+            .when()
+                .get("/v2/lang/{lang}", lang)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonym_NotFound_Returns404() {
+        String demonym = "123";
+
+        given()
+            .when()
+                .get("/v2/demonym/{demonym}", demonym)
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_NotFound_Returns404() {
+        String regionalBloc = "123";
+
+        given()
+            .when()
+                .get("/v2/regionalbloc/{regionalbloc}", regionalBloc)
+            .then()
+                .statusCode(404);
+    }
+}

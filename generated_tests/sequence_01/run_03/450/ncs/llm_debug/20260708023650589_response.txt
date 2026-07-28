@@ -1,0 +1,46 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+    private String baseUrl() {
+        String v = System.getProperty("baseUrl");
+        if (v != null && !v.isEmpty()) return v;
+        v = System.getenv("BASE_URL");
+        if (v != null && !v.isEmpty()) return v;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPositivePositiveRemainder() {
+        given().when().get(baseUrl() + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(baseUrl() + "/api/remainder/17/5").then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveNegativeRemainder() {
+        given().when().get(baseUrl() + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(baseUrl() + "/api/remainder/17/-9").then().body("result", equalTo(8));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativePositiveRemainder() {
+        given().when().get(baseUrl() + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(baseUrl() + "/api/remainder/-17/5").then().body("result", equalTo(-2));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeNegativeRemainder() {
+        given().when().get(baseUrl() + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(baseUrl() + "/api/remainder/-17/-5").then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testAZeroRemainderReturnsMinusOne() {
+        given().when().get(baseUrl() + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get(baseUrl() + "/api/remainder/0/5").then().body("result", equalTo(-1));
+    }
+}

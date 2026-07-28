@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIncreasing() {
+        given()
+            .when()
+            .get("/api/ordered4/aaaaa/bbbbbb/ddddd/ccccc")
+            .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDecreasing() {
+        given()
+            .when()
+            .get("/api/ordered4/dddddd/cccccc/aaaaaa/bbbbbb")
+            .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUnorderedShortString() {
+        given()
+            .when()
+            .get("/api/ordered4/aa/bbbbbb/ccccc/ddddd")
+            .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUnorderedLongString() {
+        given()
+            .when()
+            .get("/api/ordered4/aaaaaaa/bbbbbb/ccccc/ddddd")
+            .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUnorderedNoOrder() {
+        given()
+            .when()
+            .get("/api/ordered4/aaaaa/bbbbb/bbbbb/ccccc")
+            .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testServerError() {
+        given()
+            .urlEncodingEnabled(false)
+            .when()
+            .get("/api/ordered4/first/second//fourth")
+            .then()
+            .statusCode(404);
+    }
+}

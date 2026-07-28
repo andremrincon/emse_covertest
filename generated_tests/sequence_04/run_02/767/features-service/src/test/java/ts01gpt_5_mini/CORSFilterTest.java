@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.baseUrl", System.getenv().getOrDefault("API_BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPreflightOptionsReturnsAllowOriginHeader() {
+        Response res = given().when().options("/products/{productName}/features", "AeroBook-Pro-15");
+        assertEquals("*", res.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductAfterCreateReturns200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response res = given().when().get("/products/{productName}", product);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response res = given().contentType("application/x-www-form-urlencoded").formParam("description", "Auto-generated feature").when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(201, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRootHasAllowMethodsHeader() {
+        Response res = given().when().options("/");
+        assertEquals("POST, PUT, GET, OPTIONS, DELETE", res.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "to be deleted").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response res = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(204, res.getStatusCode());
+    }
+}

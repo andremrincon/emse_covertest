@@ -1,0 +1,138 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaAlphaCode() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaName() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaRegion() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaLangEndpoint() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCapital() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCallingCode() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaCurrency() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaSubregion() {
+        given()
+                .when()
+                .get("/v1/subregion/Western%20Europe")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Lang() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Name() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2AlphaWithFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404);
+    }
+}

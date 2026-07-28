@@ -1,0 +1,96 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    private static final String BASE;
+    static {
+        String env = System.getenv("TEST_BASE_URL");
+        BASE = System.getProperty("TEST_BASE_URL", env != null ? env : "http://localhost:8080");
+    }
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrderLength5() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String y = "ccccc";
+        String z = "ddddd";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrderLength5() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "zzzzz";
+        String x = "yyyyy";
+        String y = "xxxxx";
+        String z = "wwwww";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthOutOfRangeProducesUnordered() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "shor";
+        String x = "bbbbb";
+        String y = "ccccc";
+        String z = "ddddd";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWithinRangeButNotOrderedReturnsUnordered() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "aaaaa";
+        String x = "ccccc";
+        String y = "bbbbb";
+        String z = "ddddd";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrderLength6Boundary() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "aaaaaa";
+        String x = "bbbbbb";
+        String y = "cccccc";
+        String z = "dddddd";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidInputReturnsStatus200() {
+        String seed = UUID.randomUUID().toString().replace("-", "");
+        String w = "alpha";
+        String x = "bravo";
+        String y = "charl";
+        String z = "delta";
+        given().when().get("/api/pat/" + seed).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+        resp.then().statusCode(200);
+    }
+}

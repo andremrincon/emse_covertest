@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i28_sA_i0True_i1False_i2False_i3True() {
+        given()
+            .when()
+                .get("/api/notypevar/28/a")
+            .then()
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i28_sWorld_i0True_i2True_i3True() {
+        given()
+            .when()
+                .get("/api/notypevar/28/world")
+            .then()
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i7_sA_i1True_i3True() {
+        given()
+            .when()
+                .get("/api/notypevar/7/a")
+            .then()
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i7_sWorld_i1True_i2True_i3True() {
+        given()
+            .when()
+                .get("/api/notypevar/7/world")
+            .then()
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i3_sWorld_i2True_i3False() {
+        given()
+            .when()
+                .get("/api/notypevar/3/world")
+            .then()
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i5_sA_allConditionsFalse() {
+        given()
+            .when()
+                .get("/api/notypevar/5/a")
+            .then()
+                .body(equalTo("0"));
+    }
+}

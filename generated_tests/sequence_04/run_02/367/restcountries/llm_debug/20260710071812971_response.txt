@@ -1,0 +1,155 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequestTooLong() {
+        given()
+            .when()
+                .get("/v1/alpha/1234")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBadRequest() {
+        given()
+            .queryParam("codes", "abcd")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequest() {
+        given()
+            .when()
+                .get("/v1/currency/12")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound() {
+        given()
+            .when()
+                .get("/v1/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound() {
+        given()
+            .when()
+                .get("/v1/callingcode/99999")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalNotFound() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionNotFound() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregionNotFound() {
+        given()
+            .when()
+                .get("/v1/subregion/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageNotFound() {
+        given()
+            .when()
+                .get("/v1/lang/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostMethodNotAllowed() {
+        given()
+            .when()
+                .post("/v1")
+            .then()
+                .statusCode(405);
+    }
+}

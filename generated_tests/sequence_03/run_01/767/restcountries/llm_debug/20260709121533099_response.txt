@@ -1,0 +1,59 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1_v1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "US").then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2_v1Alpha_US() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "US").then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName_v1Lang_es() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/{lang}", "es").then().body("[0].languages[0].name", equalTo("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName_v1Lang_es() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/{lang}", "es").then().body("[0].languages[0].nativeName", equalTo("Español"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageFields_v1Currency_USD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().body("[0].languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaBadFormat_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFound_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "XYZ").then().statusCode(404);
+    }
+}

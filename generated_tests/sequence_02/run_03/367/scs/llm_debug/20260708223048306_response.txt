@@ -1,0 +1,47 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testValidDayAllMonths() {
+        String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        for (String month : months) {
+            given().when().get("/api/dateparse/mon/" + month).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAllMonths() {
+        String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        for (String month : months) {
+            given().when().get("/api/dateparse/xyz/" + month).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayInvalidMonth() {
+        given().when().get("/api/dateparse/mon/xyz").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayInvalidMonth() {
+        given().when().get("/api/dateparse/xyz/abc").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity() {
+        given().when().get("/api/dateparse/MoN/JaN").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAllValidDays() {
+        String[] days = {"mon", "tue", "wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            given().when().get("/api/dateparse/" + day + "/jan").then().statusCode(200);
+        }
+    }
+}

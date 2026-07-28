@@ -1,0 +1,70 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("REST_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("rest.base");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+        RestAssured.useRelaxedHTTPSValidation();
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowOriginOnV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaInvalidNumeric400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundXYZ404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultipleCodesV1Alpha200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostContributeAllowsMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().contentType("application/json").body("{}").when().post("/contribute").then().header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;region").when().get("/v2/all").then().header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyAllowHeadersHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFullTextHeaderOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "true").when().get("/v1/name/France").then().header("Access-Control-Allow-Origin", "*");
+    }
+}

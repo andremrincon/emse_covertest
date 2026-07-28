@@ -1,0 +1,142 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsLanguageIso639_1() {
+        given()
+                .pathParam("alphacode", "US")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodesReturnsLanguageIso639_2() {
+        given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages[0].iso639_2", hasItem("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsLanguageName() {
+        given()
+                .pathParam("currency", "USD")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(200)
+                .body("languages[0].name", hasItem("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsLanguageNativeName() {
+        given()
+                .pathParam("name", "France")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(200)
+                .body("languages[0].nativeName", hasItem("français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturns200() {
+        given()
+                .pathParam("callingcode", "1")
+                .when()
+                .get("/v1/callingcode/{callingcode}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalReturns200() {
+        given()
+                .pathParam("capital", "London")
+                .when()
+                .get("/v1/capital/{capital}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturns200() {
+        given()
+                .pathParam("region", "Europe")
+                .when()
+                .get("/v1/region/{region}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1SubregionReturns200() {
+        given()
+                .pathParam("subregion", "Western Europe")
+                .when()
+                .get("/v1/subregion/{subregion}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturns200() {
+        given()
+                .pathParam("lang", "es")
+                .when()
+                .get("/v1/lang/{lang}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaByCodeReturns200() {
+        given()
+                .pathParam("alphacode", "US")
+                .when()
+                .get("/v2/alpha/{alphacode}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangReturns200() {
+        given()
+                .pathParam("lang", "Spanish")
+                .when()
+                .get("/v2/lang/{lang}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturns200() {
+        given()
+                .pathParam("name", "Germany")
+                .when()
+                .get("/v2/name/{name}")
+                .then()
+                .statusCode(200);
+    }
+}
+```

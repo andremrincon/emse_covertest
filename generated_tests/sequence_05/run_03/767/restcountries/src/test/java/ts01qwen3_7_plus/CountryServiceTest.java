@@ -1,0 +1,35 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocValidAcronymEU() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocInvalidCode() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocValidAcronymNAFTA() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/NAFTA")
+            .then()
+                .statusCode(200);
+    }
+}

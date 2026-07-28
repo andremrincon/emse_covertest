@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+public class Ordered4Test {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("baseUrl");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        BASE = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void test_increasing_order() {
+        given().when().get(BASE + "/api/pat/The").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/ordered4/alpha/bravo/delta/charl");
+        assertEquals("increasing", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_decreasing_order() {
+        given().when().get(BASE + "/api/pat/Check").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/ordered4/delta/charl/bravo/alpha");
+        assertEquals("decreasing", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_unordered_due_to_length() {
+        given().when().get(BASE + "/api/pat/Ready").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/ordered4/abcd/bravo/charl/delta");
+        assertEquals("unordered", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_unordered_due_to_nonmonotonic_comparison() {
+        given().when().get(BASE + "/api/pat/Ping").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/ordered4/alpha/bravo/charl/delta");
+        assertEquals("unordered", resp.getBody().asString());
+    }
+}

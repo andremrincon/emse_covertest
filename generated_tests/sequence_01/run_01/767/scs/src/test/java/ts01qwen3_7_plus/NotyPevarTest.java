@@ -1,0 +1,46 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testDefaultPathAndFalseBranches() {
+        Response response = given().when().get("/api/notypevar/0/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConditionI0True() {
+        Response response = given().when().get("/api/notypevar/28/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConditionI1True() {
+        Response response = given().when().get("/api/notypevar/7/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConditionI2True() {
+        Response response = given().when().get("/api/notypevar/0/world");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConditionI3True() {
+        Response response = given().when().get("/api/notypevar/10/a");
+        response.then().statusCode(200);
+    }
+}

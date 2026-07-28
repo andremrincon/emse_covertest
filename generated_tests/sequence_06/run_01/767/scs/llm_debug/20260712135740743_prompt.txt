@@ -1,0 +1,115 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CostfunsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCostfuns_ReturnsSix_When_valid_i_not_minus4_and_sIsAbab TYPE=FAILURE
+expected:<[6]> but was:<[10]>
+
+[2] METHOD=testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab TYPE=FAILURE
+expected:<[]0> but was:<[1]0>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCostfuns_ReturnsSix_When_valid_i_not_minus4_and_sIsAbab FAILURE AT LINE 38
+at ts01gpt_5_mini.CostfunsTest.testCostfuns_ReturnsSix_When_valid_i_not_minus4_and_sIsAbab(CostfunsTest.java:38)
+CODE CONTEXT:
+    35:         given().when().get("/api/calc/add/0/1").then().statusCode(lessThan(300));
+    36:         String unique = "abab";
+    37:         Response resp = given().when().get("/api/costfuns/1/" + unique);
+    38:         assertEquals("6", resp.getBody().asString());  ← FAILURE HERE
+    39:     }
+    40: 
+    41:     @Test(timeout = 60000)
+
+[2] METHOD=testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab FAILURE AT LINE 30
+at ts01gpt_5_mini.CostfunsTest.testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab(CostfunsTest.java:30)
+CODE CONTEXT:
+    27:     public void testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab() {
+    28:         given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+    29:         Response resp = given().when().get("/api/costfuns/-4/abab");
+    30:         assertEquals("0", resp.getBody().asString());  ← FAILURE HERE
+    31:     }
+    32: 
+    33:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/-4/abab");
+        assertEquals("0", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsSix_When_valid_i_not_minus4_and_sIsAbab() {
+        given().when().get("/api/calc/add/0/1").then().statusCode(lessThan(300));
+        String unique = "abab";
+        Response resp = given().when().get("/api/costfuns/1/" + unique);
+        assertEquals("6", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsTen_When_sIsNotAbab_and_iMayTriggerOtherBranches() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        String s = "baab";
+        Response resp = given().when().get("/api/costfuns/5/" + s);
+        assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsBadRequest_When_iIsNotAnInteger() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/one/test");
+        assertEquals(400, resp.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

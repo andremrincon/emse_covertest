@@ -1,0 +1,47 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSuccess() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post(baseUrl + "/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given().when().post(baseUrl + "/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccess() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post(baseUrl + "/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given().when().post(baseUrl + "/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post(baseUrl + "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().delete(baseUrl + "/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName);
+
+        response.then().statusCode(204);
+    }
+}
+```

@@ -1,0 +1,54 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleRecognizedTitle() {
+        RestAssured.given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/api/title/male/mr");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleUnrecognizedTitleReturnsMinusOne() {
+        RestAssured.given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/api/title/male/mrs");
+        act.then().body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleRecognizedTitleCaseInsensitive() {
+        RestAssured.given().when().get("/api/pat/abc").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/api/title/FeMaLe/Ms");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneRecognizedTitleReturnsTwo() {
+        RestAssured.given().when().get("/api/pat/xyz").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/api/title/none/prof");
+        act.then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexReturnsServerError() {
+        RestAssured.given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/api/title/neuter/Jones");
+        act.then().statusCode(500);
+    }
+}

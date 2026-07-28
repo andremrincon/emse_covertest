@@ -1,0 +1,72 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String envUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testLine63_PalindromePatRevPat() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "abccba").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLine84_PalindromeRevPatPat() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "cbaabc").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLine65_SeparatedPatRevPat() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "abcXXXcba").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLine86_SeparatedRevPatPat() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "cbaXXXabc").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThan3() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "abc").pathParam("pat", "ab").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatch() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "hello").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResult1_OnlyPatFound() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "XabcY").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResult2_OnlyRevPatFound() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "XcbaY").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPossmatchNotEqualsPat() {
+        given().when().get("/api/pat/abc/ab").then().statusCode(lessThan(300));
+        given().pathParam("txt", "aXcYcba").pathParam("pat", "abc").when().get("/api/pat/{txt}/{pat}").then().statusCode(200).body(equalTo("2"));
+    }
+}

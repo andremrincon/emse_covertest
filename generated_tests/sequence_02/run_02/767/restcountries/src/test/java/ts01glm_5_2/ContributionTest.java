@@ -1,0 +1,88 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithValidAmountAndTokenReturnsAccepted() {
+        String payload = "{\"amount\":100,\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingAmountReturns400() {
+        String payload = "{\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingTokenReturns400() {
+        String payload = "{\"amount\":100,\"currency\":\"USD\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMissingCurrencyReturns400() {
+        String payload = "{\"amount\":100,\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyBodyReturns400() {
+        given().contentType(ContentType.JSON).body("{}").when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithZeroAmountReturns400() {
+        String payload = "{\"amount\":0,\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithNegativeAmountReturns400() {
+        String payload = "{\"amount\":-50,\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyTokenReturns400() {
+        String payload = "{\"amount\":100,\"currency\":\"USD\",\"token\":\"\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithNullTokenReturns400() {
+        String payload = "{\"amount\":100,\"currency\":\"USD\",\"token\":null}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithLargeAmountReturnsAccepted() {
+        String payload = "{\"amount\":999999,\"currency\":\"USD\",\"token\":\"tok_visa\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithDifferentCurrencyReturnsAccepted() {
+        String payload = "{\"amount\":50,\"currency\":\"EUR\",\"token\":\"tok_visa_debit\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMalformedJsonReturns400() {
+        given().contentType(ContentType.JSON).body("{invalid json}").when().post("/contribute").then().statusCode(400);
+    }
+}

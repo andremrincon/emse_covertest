@@ -1,0 +1,64 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = Optional.ofNullable(System.getProperty("baseUrl"))
+                .orElse(Optional.ofNullable(System.getenv("BASE_URL")).orElse("http://localhost:8080/rest"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFoundFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().body("[0].name", equalTo("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesQuerySuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha?codes=US,CA");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyUsdSuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/json")
+                .body("{\"amount\":1,\"currency\":\"USD\",\"token\":\"tok_visa\"}")
+                .when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

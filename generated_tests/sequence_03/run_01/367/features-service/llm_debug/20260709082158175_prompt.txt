@@ -1,0 +1,168 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.WrongProductConfigurationExceptionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=addFeatureTo_configuration_with_problematic_feature_returns_body_containing_wrong_product_configuration TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: a string containing "Wrong product configuration:"
+  Actual: <!DOCTYPE html><html><head><title>Apache Tomcat/8.5.11 - Error report</title><style type="text/css">h1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} h2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} h3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} body {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} b {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} p {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;} a {color:black;} a.name {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style> </head><body><h1>HTTP Status 500 - org.javiermf.features.exceptions.ObjectNotFoundException: Object with id feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit has not been found</h1><div class="line"></div><p><b>type</b> Exception report</p><p><b>message</b> <u>org.javiermf.features.exceptions.ObjectNotFoundException: Object with id feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit has not been found</u></p><p><b>description</b> <u>The server encountered an internal error that prevented it from fulfilling this request.</u></p><p><b>exception</b></p><pre>javax.servlet.ServletException: org.javiermf.features.exceptions.ObjectNotFoundException: Object with id feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit has not been found
+ org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:489)
+ org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:427)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:388)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:341)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:228)
+ org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+ org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:99)
+ org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107)
+ org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:197)
+ org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107)
+ org.javiermf.features.CORSFilter.doFilter(CORSFilter.java:29)
+</pre><p><b>root cause</b></p><pre>org.javiermf.features.exceptions.ObjectNotFoundException: Object with id feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit has not been found
+ org.javiermf.features.models.Product.findProductFeatureByName(Product.java:75)
+ org.javiermf.features.models.ProductConfiguration.active(ProductConfiguration.java:84)
+ org.javiermf.features.services.ProductsConfigurationsService.addFeatureFromConfiguration(ProductsConfigurationsService.java:82)
+ org.javiermf.features.services.ProductsConfigurationsService$$FastClassBySpringCGLIB$$d6e55de1.invoke(<generated>)
+ org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:204)
+ org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:721)
+ org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:157)
+ org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:99)
+ org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:282)
+ org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:96)
+ org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+ org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:656)
+ org.javiermf.features.services.ProductsConfigurationsService$$EnhancerBySpringCGLIB$$b579e1f7.addFeatureFromConfiguration(<generated>)
+ org.javiermf.features.services.rest.ProductsConfigurationFeaturesResource.addFeatureToConfiguration(ProductsConfigurationFeaturesResource.java:35)
+ sun.reflect.GeneratedMethodAccessor57.invoke(Unknown Source)
+ sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+ java.lang.reflect.Method.invoke(Method.java:498)
+ org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory$1.invoke(ResourceMethodInvocationHandlerFactory.java:81)
+ org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:144)
+ org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:161)
+ org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:160)
+ org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:99)
+ org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:389)
+ org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:347)
+ org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:102)
+ org.glassfish.jersey.server.ServerRuntime$2.run(ServerRuntime.java:326)
+ org.glassfish.jersey.internal.Errors$1.call(Errors.java:271)
+ org.glassfish.jersey.internal.Errors$1.call(Errors.java:267)
+ org.glassfish.jersey.internal.Errors.process(Errors.java:315)
+ org.glassfish.jersey.internal.Errors.process(Errors.java:297)
+ org.glassfish.jersey.internal.Errors.process(Errors.java:267)
+ org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:317)
+ org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:305)
+ org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:1154)
+ org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:473)
+ org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:427)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:388)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:341)
+ org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:228)
+ org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)
+ org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:99)
+ org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107)
+ org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:197)
+ org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:107)
+ org.javiermf.features.CORSFilter.doFilter(CORSFilter.java:29)
+</pre><p><b>note</b> <u>The full stack trace of the root cause is available in the Apache Tomcat/8.5.11 logs.</u></p><hr class="line"><h3>Apache Tomcat/8.5.11</h3></body></html>
+
+[2] METHOD=postConfiguration_with_extremely_long_name_returns_500 TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <201>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=addFeatureTo_configuration_with_problematic_feature_returns_body_containing_wrong_product_configuration FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01gpt_5_mini.WrongProductConfigurationExceptionTest.addFeatureTo_configuration_with_problematic_feature_returns_body_containing_wrong_product_configuration(WrongProductConfigurationExceptionTest.java:43)
+CODE CONTEXT:
+    40:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    41:         String problematicFeatureName = "feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit";
+    42:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, problematicFeatureName);
+    43:         act.then().body(containsString("Wrong product configuration:"));  ← FAILURE HERE
+    44:     }
+    45: }
+
+[2] METHOD=postConfiguration_with_extremely_long_name_returns_500 FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01gpt_5_mini.WrongProductConfigurationExceptionTest.postConfiguration_with_extremely_long_name_returns_500(WrongProductConfigurationExceptionTest.java:32)
+CODE CONTEXT:
+    29:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    30:         String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+    31:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}", productName, longConfigName);
+    32:         act.then().statusCode(201);  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void postConfiguration_with_extremely_long_name_returns_500() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}", productName, longConfigName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureTo_configuration_with_problematic_feature_returns_body_containing_wrong_product_configuration() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        String problematicFeatureName = "feature-name-that-is-intentionally-made-extremely-long-to-exceed-any-reasonable-database-column-width-or-url-path-segment-limit";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, problematicFeatureName);
+        act.then().body(containsString("Wrong product configuration:"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

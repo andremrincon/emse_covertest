@@ -1,0 +1,90 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddNNoLoops() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 1)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddMOddNJLoop() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddNILoop1() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 1)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenMOddNILoop2() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherNegativeX() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", -0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeX() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 10000.0)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

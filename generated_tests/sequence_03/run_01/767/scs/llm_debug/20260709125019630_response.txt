@@ -1,0 +1,90 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsString;
+
+public class CalcTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInText() {
+        String txt = "ABABCABAB";
+        String pat = "ABAB";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundInText() {
+        String txt = "ABABCDCBA";
+        String pat = "ABC";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBothPatAndReverseFoundNonAdjacent() {
+        String txt = "ABCXYZCBA";
+        String pat = "ABC";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByReversePalindrome() {
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFollowedByPatPalindrome() {
+        String txt = "CBAABC";
+        String pat = "ABC";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTooShort() {
+        String txt = "ABCDEF";
+        String pat = "AB";
+        RestAssured.given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+}

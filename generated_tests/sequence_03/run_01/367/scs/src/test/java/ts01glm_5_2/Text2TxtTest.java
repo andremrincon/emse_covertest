@@ -1,0 +1,81 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class Text2TxtTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectSeeYouReturnsCu() {
+        given()
+            .when()
+                .get("/api/text2txt/see/you/later")
+            .then()
+                .statusCode(200)
+                .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectByTheWayReturnsBtw() {
+        given()
+            .when()
+                .get("/api/text2txt/by/the/way")
+            .then()
+                .statusCode(200)
+                .body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectTwoReturns2() {
+        given()
+            .when()
+                .get("/api/text2txt/two/words/here")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAreReturnsR() {
+        given()
+            .when()
+                .get("/api/text2txt/are/you/ready")
+            .then()
+                .statusCode(200)
+                .body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAndReturnsN() {
+        given()
+            .when()
+                .get("/api/text2txt/and/then/now")
+            .then()
+                .statusCode(200)
+                .body(equalTo("n"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoMatchReturnsEmpty() {
+        given()
+            .when()
+                .get("/api/text2txt/hello/world/test")
+            .then()
+                .statusCode(200)
+                .body(equalTo(""));
+    }
+}

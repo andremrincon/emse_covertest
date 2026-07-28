@@ -1,0 +1,147 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureConstraintTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("base.port", "8080"));
+        RestAssured.basePath = System.getProperty("base.path", "/");
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintTriggersFeatureConstraintSetId() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Req-" + uniqueSuffix;
+        String sourceFeature = "SourceFeature-" + uniqueSuffix;
+        String requiredFeature = "RequiredFeature-" + uniqueSuffix;
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintTriggersFeatureConstraintSetId() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Exc-" + uniqueSuffix;
+        String sourceFeature = "ExclSource-" + uniqueSuffix;
+        String excludedFeature = "ExclTarget-" + uniqueSuffix;
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithConstraintsTriggersFeatureConstraintSetIdOnLoad() {
+        String uniqueSuffix = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Cfg-" + uniqueSuffix;
+        String configurationName = "Config-" + uniqueSuffix;
+        String sourceFeature = "CfgSource-" + uniqueSuffix;
+        String requiredFeature = "CfgRequired-" + uniqueSuffix;
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+            .then()
+                .statusCode(200);
+    }
+}
+```

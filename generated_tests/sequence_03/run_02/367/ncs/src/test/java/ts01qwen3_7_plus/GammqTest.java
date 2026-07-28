@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithZeroX() {
+        given()
+            .pathParam("a", 1.0)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserException() {
+        given()
+            .pathParam("a", 100.0)
+            .pathParam("x", 100.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormal() {
+        given()
+            .pathParam("a", 1.0)
+            .pathParam("x", 10.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfException() {
+        given()
+            .pathParam("a", 100.0)
+            .pathParam("x", 101.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}

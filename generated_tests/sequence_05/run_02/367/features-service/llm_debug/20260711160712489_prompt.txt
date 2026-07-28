@@ -1,0 +1,376 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=addFeatureToProductSuccess TYPE=FAILURE
+expected:<201> but was:<500>
+
+[2] METHOD=deleteFeatureOfProductSuccess TYPE=FAILURE
+
+
+[3] METHOD=addExcludesConstraintToProductSuccess TYPE=FAILURE
+
+
+[4] METHOD=addFeatureToProductDuplicateThrowsException TYPE=FAILURE
+
+
+[5] METHOD=addRequiresConstraintToProductSuccess TYPE=FAILURE
+
+
+[6] METHOD=deleteFeatureOfProductWithActiveConfiguration TYPE=FAILURE
+
+
+[7] METHOD=addRequiresConstraintWithSameSourceAndRequired TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=addFeatureToProductSuccess FAILURE AT LINE 97
+java.lang.AssertionError: expected:<201> but was:<500>
+at ts01glm_5_2.ProductsServiceTest.addFeatureToProductSuccess(ProductsServiceTest.java:97)
+CODE CONTEXT:
+    94:         int c1 = doRequest("POST", "/products/{productName}", productName);
+    95:         assertTrue(c1 < 300);
+    96:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+    97:         assertEquals(201, c2);  ← FAILURE HERE
+    98:     }
+    99: 
+   100:     @Test(timeout = 60000)
+
+[2] METHOD=deleteFeatureOfProductSuccess FAILURE AT LINE 129
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.deleteFeatureOfProductSuccess(ProductsServiceTest.java:129)
+CODE CONTEXT:
+   126:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   127:         assertTrue(c1 < 300);
+   128:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   129:         assertTrue(c2 < 300);  ← FAILURE HERE
+   130:         int c3 = doRequest("DELETE", "/products/{productName}/features/{featureName}", productName, featureName);
+   131:         assertEquals(204, c3);
+   132:     }
+
+[3] METHOD=addExcludesConstraintToProductSuccess FAILURE AT LINE 187
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addExcludesConstraintToProductSuccess(ProductsServiceTest.java:187)
+CODE CONTEXT:
+   184:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   185:         assertTrue(c1 < 300);
+   186:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, sourceFeature);
+   187:         assertTrue(c2 < 300);  ← FAILURE HERE
+   188:         int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, excludedFeature);
+   189:         assertTrue(c3 < 300);
+   190:         int c4 = doRequestWithForm("POST", "/products/{productName}/constraints/excludes", new java.util.HashMap<String, String>() {{
+
+[4] METHOD=addFeatureToProductDuplicateThrowsException FAILURE AT LINE 107
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addFeatureToProductDuplicateThrowsException(ProductsServiceTest.java:107)
+CODE CONTEXT:
+   104:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   105:         assertTrue(c1 < 300);
+   106:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   107:         assertTrue(c2 < 300);  ← FAILURE HERE
+   108:         int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   109:         assertEquals(500, c3);
+   110:     }
+
+[5] METHOD=addRequiresConstraintToProductSuccess FAILURE AT LINE 159
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addRequiresConstraintToProductSuccess(ProductsServiceTest.java:159)
+CODE CONTEXT:
+   156:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   157:         assertTrue(c1 < 300);
+   158:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, sourceFeature);
+   159:         assertTrue(c2 < 300);  ← FAILURE HERE
+   160:         int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, requiredFeature);
+   161:         assertTrue(c3 < 300);
+   162:         int c4 = doRequestWithForm("POST", "/products/{productName}/constraints/requires", new java.util.HashMap<String, String>() {{
+
+[6] METHOD=deleteFeatureOfProductWithActiveConfiguration FAILURE AT LINE 142
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.deleteFeatureOfProductWithActiveConfiguration(ProductsServiceTest.java:142)
+CODE CONTEXT:
+   139:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   140:         assertTrue(c1 < 300);
+   141:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   142:         assertTrue(c2 < 300);  ← FAILURE HERE
+   143:         int c3 = doRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   144:         assertTrue(c3 < 300);
+   145:         int c4 = doRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[7] METHOD=addRequiresConstraintWithSameSourceAndRequired FAILURE AT LINE 232
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addRequiresConstraintWithSameSourceAndRequired(ProductsServiceTest.java:232)
+CODE CONTEXT:
+   229:         int c1 = doRequest("POST", "/products/{productName}", productName);
+   230:         assertTrue(c1 < 300);
+   231:         int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   232:         assertTrue(c2 < 300);  ← FAILURE HERE
+   233:         int c3 = doRequestWithForm("POST", "/products/{productName}/constraints/requires", new java.util.HashMap<String, String>() {{
+   234:             put("sourceFeature", featureName);
+   235:             put("requiredFeature", featureName);
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.StringJoiner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsServiceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static String formatPath(String pathTemplate, String[] pathParams) throws UnsupportedEncodingException {
+        String result = pathTemplate;
+        if (pathParams != null) {
+            for (String param : pathParams) {
+                int start = result.indexOf('{');
+                int end = result.indexOf('}', start);
+                if (start >= 0 && end > start) {
+                    String encoded = URLEncoder.encode(param, "UTF-8");
+                    result = result.substring(0, start) + encoded + result.substring(end + 1);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static String buildForm(Map<String, String> formParams) throws UnsupportedEncodingException {
+        if (formParams == null || formParams.isEmpty()) {
+            return "";
+        }
+        StringJoiner joiner = new StringJoiner("&");
+        for (Map.Entry<String, String> e : formParams.entrySet()) {
+            String k = URLEncoder.encode(e.getKey(), "UTF-8");
+            String v = URLEncoder.encode(e.getValue(), "UTF-8");
+            joiner.add(k + "=" + v);
+        }
+        return joiner.toString();
+    }
+
+    private static int doRequest(String method, String pathTemplate, String... pathParams) throws Exception {
+        String path = formatPath(pathTemplate, pathParams);
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+            OutputStream os = conn.getOutputStream();
+            os.write(new byte[0]);
+            os.flush();
+            os.close();
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private static int doRequestWithForm(String method, String pathTemplate, Map<String, String> formParams, String... pathParams) throws Exception {
+        String path = formatPath(pathTemplate, pathParams);
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        String body = buildForm(formParams);
+        OutputStream os = conn.getOutputStream();
+        os.write(body.getBytes("UTF-8"));
+        os.flush();
+        os.close();
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductSuccess() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(201, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductDuplicateThrowsException() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "dup-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertTrue(c2 < 300);
+        int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(500, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductWithDescription() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "desc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequestWithForm("POST", "/products/{productName}/features/{featureName}", java.util.Collections.singletonMap("description", "A test feature description"), productName, featureName);
+        assertEquals(201, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProductSuccess() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "del-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertTrue(c2 < 300);
+        int c3 = doRequest("DELETE", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(204, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProductWithActiveConfiguration() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "cfg-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertTrue(c2 < 300);
+        int c3 = doRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertTrue(c3 < 300);
+        int c4 = doRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        assertTrue(c4 < 300);
+        int c5 = doRequest("DELETE", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(204, c5);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProductSuccess() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, sourceFeature);
+        assertTrue(c2 < 300);
+        int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, requiredFeature);
+        assertTrue(c3 < 300);
+        int c4 = doRequestWithForm("POST", "/products/{productName}/constraints/requires", new java.util.HashMap<String, String>() {{
+            put("sourceFeature", sourceFeature);
+            put("requiredFeature", requiredFeature);
+        }}, productName);
+        assertEquals(201, c4);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProductNonExistentProduct() throws Exception {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        int c = doRequestWithForm("POST", "/products/{productName}/constraints/requires", new java.util.HashMap<String, String>() {{
+            put("sourceFeature", "featureA");
+            put("requiredFeature", "featureB");
+        }}, productName);
+        assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProductSuccess() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "excl-src-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "excl-tgt-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, sourceFeature);
+        assertTrue(c2 < 300);
+        int c3 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, excludedFeature);
+        assertTrue(c3 < 300);
+        int c4 = doRequestWithForm("POST", "/products/{productName}/constraints/excludes", new java.util.HashMap<String, String>() {{
+            put("sourceFeature", sourceFeature);
+            put("excludedFeature", excludedFeature);
+        }}, productName);
+        assertEquals(201, c4);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProductNonExistentProduct() throws Exception {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        int c = doRequestWithForm("POST", "/products/{productName}/constraints/excludes", new java.util.HashMap<String, String>() {{
+            put("sourceFeature", "featureA");
+            put("excludedFeature", "featureB");
+        }}, productName);
+        assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductNonExistentProduct() throws Exception {
+        String productName = "nonexistent-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "orphan-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProductNonExistentFeature() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "ghost-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("DELETE", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertEquals(500, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintWithSameSourceAndRequired() throws Exception {
+        String productName = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "self-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doRequest("POST", "/products/{productName}", productName);
+        assertTrue(c1 < 300);
+        int c2 = doRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        assertTrue(c2 < 300);
+        int c3 = doRequestWithForm("POST", "/products/{productName}/constraints/requires", new java.util.HashMap<String, String>() {{
+            put("sourceFeature", featureName);
+            put("requiredFeature", featureName);
+        }}, productName);
+        assertEquals(201, c3);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

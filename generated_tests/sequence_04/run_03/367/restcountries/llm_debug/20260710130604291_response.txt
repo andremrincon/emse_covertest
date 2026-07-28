@@ -1,0 +1,185 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesTranslationsDe() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200)
+            .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeTranslationsEs() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(200)
+            .body("translations.es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeTranslationsFr() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/GB")
+        .then()
+            .statusCode(200)
+            .body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeTranslationsJa() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/DE")
+        .then()
+            .statusCode(200)
+            .body("translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCodeTranslationsIt() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/FR")
+        .then()
+            .statusCode(200)
+            .body("translations.it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameTranslationsDe() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(200)
+            .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByNameTranslationsEs() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/name/Germany")
+        .then()
+            .statusCode(200)
+            .body("translations.es", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyTranslationsFr() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(200)
+            .body("translations.fr", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyTranslationsJa() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/EUR")
+        .then()
+            .statusCode(200)
+            .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyTranslationsIt() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(200)
+            .body("translations.it", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByRegionTranslationsDe() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(200)
+            .body("translations.de", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByRegionTranslationsEs() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(200)
+            .body("translations.es", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCapitalTranslationsFr() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(200)
+            .body("translations.fr", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCodeTranslationsJa() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(200)
+            .body("translations.ja", hasItem(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCodeTranslationsIt() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/v1/callingcode/44")
+        .then()
+            .statusCode(200)
+            .body("translations.it", hasItem(notNullValue()));
+    }
+}
+```

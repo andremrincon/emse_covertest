@@ -1,0 +1,153 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CalcTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDivideByZeroReturnsInternalServerError TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <200>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDivideByZeroReturnsInternalServerError FAILURE AT LINE 91
+java.lang.AssertionError:
+at ts01gpt_5_mini.CalcTest.testDivideByZeroReturnsInternalServerError(CalcTest.java:91)
+CODE CONTEXT:
+    88:         given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then();
+    89:         given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 50, 0).then().statusCode(lessThan(300));
+    90:         given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 25, 5).then().statusCode(lessThan(300));
+    91:         given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then().statusCode(200);  ← FAILURE HERE
+    92:     }
+    93: 
+    94:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusReturnsExpectedSum() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 16, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 10, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 2, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 10, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 1, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 5, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 3.3, 4.7).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 0, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "minus", 1, 1).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 1.7976931348623157e+308, 1).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 1e-300, 1e+300).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5);
+
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 15.5, 4.5).then().body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturnsInternalServerError() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", 4, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", 3, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", 9, 3).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 2).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 10, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 50, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 25, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", 100, 0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNumberFormatReturnsBadRequest() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", 0, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", 1, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", 2.718281828, 0).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", 10, 5).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", 10, 4).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", 10, "twenty").then();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", 10, "twenty").then().statusCode(400);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

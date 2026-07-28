@@ -1,0 +1,73 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import org.junit.BeforeClass;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Assert;
+import java.util.UUID;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleDoctorReturns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "male", "dr");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleMsReturns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "female", "ms");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneProfReturns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "none", "prof");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleUnknownTitleReturns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "male", "smith");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexNeuterReturns500() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "neuter", "Jones");
+        Assert.assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitiveInputsReturn200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uuid).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "MALE", "Dr");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+}

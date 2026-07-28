@@ -1,0 +1,125 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLine43_withSmallX() {
+        given()
+                .pathParam("n", 3)
+                .pathParam("x", 1e-10)
+        .when()
+                .get("/api/bessj/{n}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLine43_withLargeN() {
+        given()
+                .pathParam("n", 1000)
+                .pathParam("x", 2.5)
+        .when()
+                .get("/api/bessj/{n}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjLine43_withXZero() {
+        given()
+                .pathParam("n", 5)
+                .pathParam("x", 0.0)
+        .when()
+                .get("/api/bessj/{n}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLines92_93_withXZero() {
+        given()
+                .pathParam("m", 10)
+                .pathParam("n", 5)
+                .pathParam("x", 0.0)
+        .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLines92_93_withXGreaterThanOne() {
+        given()
+                .pathParam("m", 1)
+                .pathParam("n", 1)
+                .pathParam("x", 1.2)
+        .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+                .statusCode(anyOf(equalTo(200), equalTo(400)));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLines92_93_withSmallMAndN() {
+        given()
+                .pathParam("m", 1)
+                .pathParam("n", 1)
+                .pathParam("x", 0.5)
+        .when()
+                .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderLine127_withNegativeA() {
+        given()
+                .pathParam("a", -9)
+                .pathParam("b", 5)
+        .when()
+                .get("/api/remainder/{a}/{b}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderLine127_withNegativeB() {
+        given()
+                .pathParam("a", 17)
+                .pathParam("b", -4)
+        .when()
+                .get("/api/remainder/{a}/{b}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderLine127_withBothNegative() {
+        given()
+                .pathParam("a", -17)
+                .pathParam("b", -5)
+        .when()
+                .get("/api/remainder/{a}/{b}")
+        .then()
+                .statusCode(200);
+    }
+}

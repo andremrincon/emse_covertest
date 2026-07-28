@@ -1,0 +1,107 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RemainderTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveAPositiveB() {
+        int a = 17;
+        int b = 5;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveANegativeB() {
+        int a = 17;
+        int b = -9;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeAPositiveB() {
+        int a = -9;
+        int b = 5;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeANegativeB() {
+        int a = -9;
+        int b = -5;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <200>.")
+    @Test(timeout = 60000)
+    public void testRemainderZeroA() {
+        int a = 0;
+        int b = 5;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <200>.")
+    @Test(timeout = 60000)
+    public void testRemainderZeroB() {
+        int a = 5;
+        int b = 0;
+
+        Response response = given()
+            .pathParam("a", a)
+            .pathParam("b", b)
+        .when()
+            .get("/api/remainder/{a}/{b}");
+
+        response.then().statusCode(400);
+    }
+}

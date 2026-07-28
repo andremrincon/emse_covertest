@@ -1,0 +1,136 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        if (envUrl != null && !envUrl.isEmpty()) {
+            return envUrl;
+        }
+        return System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1All() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Alpha() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Name() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Currency() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Capital() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Region() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2All() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2Alpha() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2Name() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/name/Germany")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2Currency() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2Capital() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV2Region() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/v2/region/Europe")
+        .then()
+            .statusCode(404);
+    }
+}

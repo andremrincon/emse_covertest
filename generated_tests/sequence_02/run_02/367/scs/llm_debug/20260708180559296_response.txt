@@ -1,0 +1,26 @@
+package ts01glm_5_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayValidMonth() {
+        String baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        given().baseUri(baseUrl).when().get("/api/dateparse/Wednesday/August").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayValidMonth() {
+        String baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        given().baseUri(baseUrl).when().get("/api/dateparse/123/August").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDayInvalidMonth() {
+        String baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        given().baseUri(baseUrl).when().get("/api/dateparse/Wednesday/Movember").then().statusCode(200);
+    }
+}

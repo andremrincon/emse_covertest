@@ -1,0 +1,82 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsPi() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "2", "3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "5", "1").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0");
+        assertEquals(Double.toString(Math.PI), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstantReturnsE() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", "2.718281828459045", "0").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", "0", "0");
+        assertEquals(Double.toString(Math.E), resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtComputesSquareRoot() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "3", "5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "10", "2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "16", "0");
+        assertEquals("4.0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProducesServerError() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "1", "1").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "5", "2").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyComputesProduct() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", "10", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "1", "0").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "7.5", "2");
+        assertEquals("15.0", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCosineOfZeroReturnsOne() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", "1", "0").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", "0", "0");
+        assertEquals("1.0", resp.asString());
+    }
+}

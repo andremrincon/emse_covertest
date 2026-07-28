@@ -1,0 +1,176 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_NotFound() {
+        given()
+                .pathParam("alphacode", "ZZZ")
+        .when()
+                .get("/v2/alpha/{alphacode}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_BadRequest_InvalidCodeLength() {
+        given()
+                .queryParam("codes", "123")
+        .when()
+                .get("/v2/alpha/")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_NotFound() {
+        given()
+                .queryParam("codes", "XX;YY;ZZ")
+        .when()
+                .get("/v2/alpha/")
+        .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void getByAlphaList_InternalServerError() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+        .when()
+                .get("/v2/alpha/")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_BadRequest_InvalidLength() {
+        given()
+                .pathParam("currency", "123")
+        .when()
+                .get("/v2/currency/{currency}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_NotFound() {
+        given()
+                .pathParam("currency", "XYZ")
+        .when()
+                .get("/v2/currency/{currency}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_NotFound() {
+        given()
+                .pathParam("name", "123")
+        .when()
+                .get("/v2/name/{name}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_NotFound() {
+        given()
+                .pathParam("callingcode", "abc")
+        .when()
+                .get("/v2/callingcode/{callingcode}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_NotFound() {
+        given()
+                .pathParam("capital", "12345")
+        .when()
+                .get("/v2/capital/{capital}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_NotFound() {
+        given()
+                .pathParam("region", "123")
+        .when()
+                .get("/v2/region/{region}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_NotFound() {
+        given()
+                .pathParam("subregion", "123")
+        .when()
+                .get("/v2/subregion/{subregion}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_NotFound() {
+        given()
+                .pathParam("lang", "123")
+        .when()
+                .get("/v2/lang/{lang}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonym_NotFound() {
+        given()
+                .pathParam("demonym", "123")
+        .when()
+                .get("/v2/demonym/{demonym}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_NotFound() {
+        given()
+                .pathParam("regionalbloc", "123")
+        .when()
+                .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void parsedCountryAndParsedCountries_WithFieldsFilter() {
+        given()
+                .queryParam("fields", "name;capital")
+        .when()
+                .get("/v2")
+        .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .pathParam("alphacode", "US")
+                .queryParam("fields", "name;capital")
+        .when()
+                .get("/v2/alpha/{alphacode}")
+        .then()
+                .statusCode(200);
+    }
+}

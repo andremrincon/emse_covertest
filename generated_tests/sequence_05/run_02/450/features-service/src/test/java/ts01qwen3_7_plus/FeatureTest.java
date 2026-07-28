@@ -1,0 +1,178 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureCoversSetNameAndSetProduct() {
+        String productName = "Product-SetName-SetProduct-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        Response response = given()
+                .when()
+                .post("/products/" + productName + "/features/Feature1");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetName() {
+        String productName = "Product-UpdateFeature-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureToUpdate").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("description", "Updated description")
+                .when()
+                .put("/products/" + productName + "/features/FeatureToUpdate");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGetProductAndEquals() {
+        String productName = "Product-GetFeatures-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureB").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .when()
+                .get("/products/" + productName + "/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEquals() {
+        String productName = "Product-AddToConfig-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureConfig").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/Config1").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .when()
+                .post("/products/" + productName + "/configurations/Config1/features/FeatureConfig");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversGetProduct() {
+        String productName = "Product-GetConfigFeatures-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureGetConfig").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/ConfigGet").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/ConfigGet/features/FeatureGetConfig").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .when()
+                .get("/products/" + productName + "/configurations/ConfigGet/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureInSecondProductCoversEqualsProductBranch() {
+        String productName1 = "Product-Equals1-" + UUID.randomUUID().toString();
+        String productName2 = "Product-Equals2-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName1 + "/features/SameFeatureName").then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName2 + "/features/SameFeatureName");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesCoversEqualsSelf() {
+        String productName = "Product-EqualsSelf-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/SelfFeature").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + productName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddConstraintCoversEqualsNonFeature() {
+        String productName = "Product-Constraint-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureB").then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("requiredFeature", "FeatureB")
+                .when()
+                .post("/products/" + productName + "/constraints/requires");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateDifferentFeaturesCoversEqualsNameBranch() {
+        String productName = "Product-DiffNames-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureX").then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName + "/features/FeatureY");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversEqualsAndRemove() {
+        String productName = "Product-Delete-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureToDelete").then().statusCode(lessThan(300));
+
+        Response response = given().when().delete("/products/" + productName + "/features/FeatureToDelete");
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationCoversEquals() {
+        String productName = "Product-DelFromConfig-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureDelConfig").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/ConfigDel").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/ConfigDel/features/FeatureDelConfig").then().statusCode(lessThan(300));
+
+        Response response = given().when().delete("/products/" + productName + "/configurations/ConfigDel/features/FeatureDelConfig");
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsCoversGetProduct() {
+        String productName = "Product-GetConfigs-" + UUID.randomUUID().toString();
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/ConfigA").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + productName + "/configurations");
+
+        response.then().statusCode(200);
+    }
+}

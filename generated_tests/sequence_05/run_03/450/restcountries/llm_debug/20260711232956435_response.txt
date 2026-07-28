@@ -1,0 +1,167 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+            .pathParam("alphacode", "ZZZ")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        given()
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        given()
+            .queryParam("codes", "XX")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        given()
+            .pathParam("currency", "12")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Catch() {
+        given()
+            .pathParam("currency", "invalid")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Catch() {
+        given()
+            .pathParam("name", "True")
+        .when()
+            .get("/v2/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Catch() {
+        given()
+            .pathParam("callingcode", "True")
+        .when()
+            .get("/v2/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Catch() {
+        given()
+            .pathParam("capital", "True")
+        .when()
+            .get("/v2/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Catch() {
+        given()
+            .pathParam("region", "True")
+        .when()
+            .get("/v2/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_Catch() {
+        given()
+            .pathParam("subregion", "True")
+        .when()
+            .get("/v2/subregion/{subregion}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Catch() {
+        given()
+            .pathParam("lang", "True")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonym_Catch() {
+        given()
+            .pathParam("demonym", "True")
+        .when()
+            .get("/v2/demonym/{demonym}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_Catch() {
+        given()
+            .pathParam("regionalbloc", "True")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_WithFields() {
+        given()
+            .pathParam("alphacode", "US")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_WithFields() {
+        given()
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(404);
+    }
+}

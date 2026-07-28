@@ -1,0 +1,156 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValidNoFields() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidShortCode() {
+        given()
+            .when()
+                .get("/v2/alpha/A")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithFields() {
+        given()
+            .queryParam("fields", "name;capital")
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListValidNoFields() {
+        given()
+            .queryParam("codes", "US;CA")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListEmptyCodes() {
+        given()
+            .queryParam("codes", "")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalid() {
+        given()
+            .when()
+                .get("/v2/currency/12")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        given()
+            .when()
+                .get("/v2/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound() {
+        given()
+            .when()
+                .get("/v2/callingcode/99999")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalNotFound() {
+        given()
+            .when()
+                .get("/v2/capital/12345")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionNotFound() {
+        given()
+            .when()
+                .get("/v2/region/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionNotFound() {
+        given()
+            .when()
+                .get("/v2/subregion/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageNotFound() {
+        given()
+            .when()
+                .get("/v2/lang/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymNotFound() {
+        given()
+            .when()
+                .get("/v2/demonym/123")
+            .then()
+                .statusCode(404);
+    }
+}

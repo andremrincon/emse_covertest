@@ -1,0 +1,50 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String host = System.getProperty("test.host", "localhost");
+        String port = System.getProperty("test.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintErrorNNegative() {
+        given().when().get("/api/expint/-1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNEqualsZero() {
+        given().when().get("/api/expint/0/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXEqualsZeroNNotZeroOrOne() {
+        given().when().get("/api/expint/3/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOne() {
+        given().when().get("/api/expint/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathXLessThanOne() {
+        given().when().get("/api/expint/1/0.1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintErrorXZeroNEqualsOne() {
+        given().when().get("/api/expint/1/0").then().statusCode(400);
+    }
+}
+```

@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasKey;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        String envBase = System.getProperty("baseUrl");
+        if (envBase == null || envBase.isEmpty()) {
+            String env = System.getenv("BASE_URL");
+            RestAssured.baseURI = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        } else {
+            RestAssured.baseURI = envBase;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBothOddReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 5, 3, 0.75);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMOddNEvenReturns200() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 5, 4, 0.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMEvenNOddReturns200() {
+        given().when().get("/api/expint/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBothEvenReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 4, 2, 0.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidMReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", "abc", "5", "0.75");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnContainsValueField() {
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 1, 1, 1.0E-10);
+        act.then().body("$", hasKey("resultAsDouble"));
+    }
+}

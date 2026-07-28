@@ -1,0 +1,196 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.CountryServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByRegionalBlocWithNafta TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testGetByRegionalBlocWithValidAcronym TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testGetByLanguageWithInvalidCodeReturnsNotFound TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testGetByLanguageWithThreeCharCode TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testGetByLanguageWithTwoCharCode TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testGetByRegionalBlocWithInvalidReturnsNotFound TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByRegionalBlocWithNafta FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByRegionalBlocWithNafta(CountryServiceTest.java:57)
+CODE CONTEXT:
+    54: 
+    55:     @Test(timeout = 60000)
+    56:     public void testGetByRegionalBlocWithNafta() {
+    57:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    58: 
+    59:         given().when().get("/v2/regionalbloc/NAFTA").then().statusCode(200).body("size()", greaterThan(0));
+    60:     }
+
+[2] METHOD=testGetByRegionalBlocWithValidAcronym FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByRegionalBlocWithValidAcronym(CountryServiceTest.java:50)
+CODE CONTEXT:
+    47: 
+    48:     @Test(timeout = 60000)
+    49:     public void testGetByRegionalBlocWithValidAcronym() {
+    50:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    51: 
+    52:         given().when().get("/v2/regionalbloc/EU").then().statusCode(200).body("size()", greaterThan(0));
+    53:     }
+
+[3] METHOD=testGetByLanguageWithInvalidCodeReturnsNotFound FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByLanguageWithInvalidCodeReturnsNotFound(CountryServiceTest.java:43)
+CODE CONTEXT:
+    40: 
+    41:     @Test(timeout = 60000)
+    42:     public void testGetByLanguageWithInvalidCodeReturnsNotFound() {
+    43:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    44: 
+    45:         given().when().get("/v2/lang/123").then().statusCode(404);
+    46:     }
+
+[4] METHOD=testGetByLanguageWithThreeCharCode FAILURE AT LINE 36
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByLanguageWithThreeCharCode(CountryServiceTest.java:36)
+CODE CONTEXT:
+    33: 
+    34:     @Test(timeout = 60000)
+    35:     public void testGetByLanguageWithThreeCharCode() {
+    36:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    37: 
+    38:         given().when().get("/v2/lang/spa").then().statusCode(200).body("size()", greaterThan(0));
+    39:     }
+
+[5] METHOD=testGetByLanguageWithTwoCharCode FAILURE AT LINE 29
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByLanguageWithTwoCharCode(CountryServiceTest.java:29)
+CODE CONTEXT:
+    26: 
+    27:     @Test(timeout = 60000)
+    28:     public void testGetByLanguageWithTwoCharCode() {
+    29:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    30: 
+    31:         given().when().get("/v2/lang/es").then().statusCode(200).body("size()", greaterThan(0));
+    32:     }
+
+[6] METHOD=testGetByRegionalBlocWithInvalidReturnsNotFound FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01glm_5_2.CountryServiceTest.testGetByRegionalBlocWithInvalidReturnsNotFound(CountryServiceTest.java:64)
+CODE CONTEXT:
+    61: 
+    62:     @Test(timeout = 60000)
+    63:     public void testGetByRegionalBlocWithInvalidReturnsNotFound() {
+    64:         given().when().get("/v2/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    65: 
+    66:         given().when().get("/v2/regionalbloc/123").then().statusCode(404);
+    67:     }
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.notNullValue;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageWithTwoCharCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/lang/es").then().statusCode(200).body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageWithThreeCharCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/lang/spa").then().statusCode(200).body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageWithInvalidCodeReturnsNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/lang/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocWithValidAcronym() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/regionalbloc/EU").then().statusCode(200).body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocWithNafta() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/regionalbloc/NAFTA").then().statusCode(200).body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocWithInvalidReturnsNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+
+        given().when().get("/v2/regionalbloc/123").then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

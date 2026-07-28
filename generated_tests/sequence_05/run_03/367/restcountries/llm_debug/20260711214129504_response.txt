@@ -1,0 +1,57 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotFoundExceptionMapperTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenNonExistentPath_returnsNotFound() {
+        String uniquePath = "/v1/nonexistentpath_" + java.util.UUID.randomUUID().toString();
+
+        given()
+        .when()
+            .get(uniquePath)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenInvalidRootPath_returnsNotFound() {
+        String uniquePath = "/invalidroot_" + java.util.UUID.randomUUID().toString();
+
+        given()
+        .when()
+            .get(uniquePath)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void toResponse_whenNonExistentSubPath_returnsNotFound() {
+        given()
+        .when()
+            .get("/v1/alpha/" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 6))
+        .then()
+            .statusCode(404);
+    }
+}
+```

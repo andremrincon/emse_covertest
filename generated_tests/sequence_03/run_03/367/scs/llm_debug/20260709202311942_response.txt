@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) {
+            String e2 = System.getenv("API_BASE");
+            RestAssured.baseURI = (e2 == null || e2.isEmpty()) ? "http://localhost:8080" : e2;
+        } else {
+            RestAssured.baseURI = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_Mon_Jan_returns200() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Mon", "Jan");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_Wednesday_MAR_returns200() {
+        given().when().get("/api/pat/{txt}", "ABABCABAB").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Wednesday", "MAR");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_tuesday_August_returns200() {
+        given().when().get("/api/pat/{txt}", "banana").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "tuesday", "August");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_InvalidDay_123_returns500() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "123", "Mar");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_InvalidMonth_Movember_returns500() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "Tuesday", "Movember");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_sun_Dec_returns200() {
+        given().when().get("/api/pat/{txt}", "Input text processed successfully.").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{day}/{month}", "sun", "Dec");
+        assertEquals(200, act.getStatusCode());
+    }
+}

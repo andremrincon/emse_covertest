@@ -1,0 +1,218 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddSameFeatureToConfigurationTwice TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddSameFeatureToConfigurationTwice FAILURE AT LINE 118
+java.lang.AssertionError:
+at ts01qwen3_7_plus.FeatureTest.testAddSameFeatureToConfigurationTwice(FeatureTest.java:118)
+CODE CONTEXT:
+   115:             .when()
+   116:             .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+   117:             .then()
+   118:             .statusCode(lessThan(300));  ← FAILURE HERE
+   119:     }
+   120: 
+   121:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProductAndFeature() {
+        String productName = "Product-Set-Name-Test-" + System.currentTimeMillis();
+        String featureName = "Feature-Set-Name-Test-" + System.currentTimeMillis();
+
+        given()
+            .when()
+            .post("/products/" + productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesTriggersHibernateSetters() {
+        String productName = "Product-Get-Test-" + System.currentTimeMillis();
+        String featureName = "Feature-Get-Test-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEqualsDifferentNames() {
+        String productName = "Product-Equals-Diff-Name-" + System.currentTimeMillis();
+        String feature1 = "Feature-A-" + System.currentTimeMillis();
+        String feature2 = "Feature-B-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + feature2)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEqualsDifferentProducts() {
+        String product1 = "Product-1-" + System.currentTimeMillis();
+        String product2 = "Product-2-" + System.currentTimeMillis();
+        String featureName = "Same-Feature-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + product1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product1 + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + product2 + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "Product-Config-" + System.currentTimeMillis();
+        String configName = "Config-" + System.currentTimeMillis();
+        String featureName = "Feature-Config-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureToConfigurationTwice() {
+        String productName = "Product-Config-Twice-" + System.currentTimeMillis();
+        String configName = "Config-Twice-" + System.currentTimeMillis();
+        String featureName = "Feature-Twice-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature() {
+        String productName = "Product-Update-" + System.currentTimeMillis();
+        String featureName = "Feature-Update-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature() {
+        String productName = "Product-Delete-" + System.currentTimeMillis();
+        String featureName = "Feature-Delete-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        String productName = "Product-Constraint-" + System.currentTimeMillis();
+        String feature1 = "Feature-Source-" + System.currentTimeMillis();
+        String feature2 = "Feature-Required-" + System.currentTimeMillis();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+            .when()
+            .post("/products/" + productName + "/constraints/requires")
+            .then()
+            .statusCode(201);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

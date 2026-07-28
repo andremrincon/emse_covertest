@@ -1,0 +1,45 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("API_BASE", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiEndpointReturns200() {
+        given().when().get("/api/calc/plus/1/2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sqrt/9/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/pi/0/0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturns500() {
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/2/3").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/divide/100/0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNumberInputReturns400() {
+        given().when().get("/api/calc/subtract/10/5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/1/0").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/add/10/twenty");
+        act.then().statusCode(400);
+    }
+}

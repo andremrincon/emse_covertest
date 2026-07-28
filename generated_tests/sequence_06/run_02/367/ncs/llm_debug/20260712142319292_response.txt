@@ -1,0 +1,117 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_gserNormalPath_returns200() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_gcfPath_returns200() {
+        given()
+            .pathParam("a", 0.001)
+            .pathParam("x", 1000.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_gserXZero_returns200() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", 0.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_invalidANegative_returns400() {
+        given()
+            .pathParam("a", -1.0)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_invalidXNegative_returns400() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", -1.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_invalidAType_returns400() {
+        given()
+            .pathParam("a", "abc")
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_aZero_returns400() {
+        given()
+            .pathParam("a", 0.0)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_gserLargeAThrows_returns400() {
+        given()
+            .pathParam("a", 100.0)
+            .pathParam("x", 99.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_validResult_hasResultInBody() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .body("result", nullValue());
+    }
+}

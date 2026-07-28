@@ -1,0 +1,73 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void test_s_abab_returns_zero() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("abab", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/-4/" + s);
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_s_a_returns_ten() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("a", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/-4/" + s);
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_i_zero_and_s_abab_returns_six() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("abab", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/0/" + s);
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_i_555_status_ok() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("abab", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/555/" + s);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_i_negative_large_returns_six() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("abab", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/-1000/" + s);
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_s_baab_returns_ten() throws Exception {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        String s = URLEncoder.encode("baab", StandardCharsets.UTF_8.name());
+        Response resp = given().when().get("/api/costfuns/-4/" + s);
+        resp.then().body(equalTo("10"));
+    }
+}

@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_ContinuedFraction_Path_Returns200() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_Series_XZero_NGreaterThanOne_Returns200() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/0.0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_NZero_Returns200() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/0/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_NegativeN_Returns400() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/-1/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_NegativeX_Returns400() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/-1.0");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_XZero_NEqualsOne_Returns400() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/1/0.0");
+        act.then().statusCode(400);
+    }
+}

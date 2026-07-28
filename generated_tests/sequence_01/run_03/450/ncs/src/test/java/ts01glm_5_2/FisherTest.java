@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothOdd() {
+        given()
+            .when()
+                .get("/api/fisher/1/1/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMOddNEven() {
+        given()
+            .when()
+                .get("/api/fisher/1/2/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherMEvenNOdd() {
+        given()
+            .when()
+                .get("/api/fisher/2/1/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBothEven() {
+        given()
+            .when()
+                .get("/api/fisher/2/2/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeValues() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidParameter() {
+        given()
+            .when()
+                .get("/api/fisher/abc/5/0.5")
+            .then()
+                .statusCode(400);
+    }
+}

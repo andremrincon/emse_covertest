@@ -1,0 +1,69 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/http://example.com/test");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/mon01jan");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/12.34e+56");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/hello");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectEmptyString() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/a");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectLongUrl() {
+        Response res = RestAssured.given()
+                .when()
+                .get("/api/pat/http://my-site/my_page");
+        res.then().statusCode(404);
+    }
+}

@@ -1,0 +1,160 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaWithFieldsReturnsFilteredCountry() {
+        given()
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/{alphacode}", "US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaWithoutFieldsReturnsFullCountry() {
+        given()
+        .when()
+            .get("/v2/alpha/{alphacode}", "US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListWithFieldsReturnsCountries() {
+        given()
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListWithUnknownCodesReturnsNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyWithInvalidLengthReturnsBadRequest() {
+        given()
+        .when()
+            .get("/v2/currency/{currency}", "12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/currency/{currency}", "EUR")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyWithUnknownCurrencyReturnsNotFound() {
+        given()
+        .when()
+            .get("/v2/currency/{currency}", "XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/name/{name}", "Germany")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/callingcode/{callingcode}", "1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/capital/{capital}", "Paris")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/region/{region}", "Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegionReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/subregion/{subregion}", "Western%20Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguageReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/lang/{lang}", "Spanish")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonymReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/demonym/{demonym}", "American")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBlocReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}", "EU")
+        .then()
+            .statusCode(200);
+    }
+}

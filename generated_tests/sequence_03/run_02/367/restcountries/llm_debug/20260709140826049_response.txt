@@ -1,0 +1,124 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithFields_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidFormat_returns400() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/123");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound_returns404() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/ZZZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListValid_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha?codes=US,CA,MX");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInvalidFormat_returns400() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha?codes=[\"US\",\"CA\"]");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound_returns404() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha?codes=XX,YY,ZZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyValid_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalid_returns400() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/12");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound_returns404() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameFullTextTrue_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/name/Germany?fullText=true");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound_returns404() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/name/123");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeValid_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/callingcode/1");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound_returns404() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/callingcode/999999");
+        resp.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalWithFields_returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/capital/Paris?fields=name;capital;population");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostOnV2_returns405() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().post("/v2");
+        resp.then().statusCode(405);
+    }
+}

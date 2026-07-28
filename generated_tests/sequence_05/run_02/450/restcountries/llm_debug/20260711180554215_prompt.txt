@@ -1,0 +1,222 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV2Alpha_invalid_400 TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[2] METHOD=testV1Alpha_invalid_400 TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[3] METHOD=testV1Alpha_US_languageIso639_1 TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testV2Lang_Spanish_languageIso639_1 TYPE=FAILURE
+1 expectation failed.
+JSON path [0].languages[0].iso639_1 doesn't match.
+Expected: es
+  Actual: null
+
+[5] METHOD=testV1Name_France_languageIso639_1 TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[6] METHOD=testV1Currency_USD_languageNativeName TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[7] METHOD=testV1Alpha_query_codes_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV2Alpha_invalid_400 FAILURE AT LINE 81
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV2Alpha_invalid_400(LanguageTest.java:81)
+CODE CONTEXT:
+    78:     @Test(timeout = 60000)
+    79:     public void testV2Alpha_invalid_400() {
+    80:         given().when().get("/v2").then().statusCode(lessThan(300));
+    81:         given().when().get("/v2/alpha/123").then().statusCode(404);  ← FAILURE HERE
+    82:     }
+    83: }
+
+[2] METHOD=testV1Alpha_invalid_400 FAILURE AT LINE 63
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_invalid_400(LanguageTest.java:63)
+CODE CONTEXT:
+    60:     @Test(timeout = 60000)
+    61:     public void testV1Alpha_invalid_400() {
+    62:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    63:         given().when().get("/v1/alpha/123").then().statusCode(404);  ← FAILURE HERE
+    64:     }
+    65: 
+    66:     @Test(timeout = 60000)
+
+[3] METHOD=testV1Alpha_US_languageIso639_1 FAILURE AT LINE 33
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_US_languageIso639_1(LanguageTest.java:33)
+CODE CONTEXT:
+    30:     @Test(timeout = 60000)
+    31:     public void testV1Alpha_US_languageIso639_1() {
+    32:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    33:         given().when().get("/v1/alpha/US").then().body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+[4] METHOD=testV2Lang_Spanish_languageIso639_1 FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV2Lang_Spanish_languageIso639_1(LanguageTest.java:57)
+CODE CONTEXT:
+    54:     @Test(timeout = 60000)
+    55:     public void testV2Lang_Spanish_languageIso639_1() {
+    56:         given().when().get("/v2").then().statusCode(lessThan(300));
+    57:         given().when().get("/v2/lang/Spanish").then().body("[0].languages[0].iso639_1", equalTo("es"));  ← FAILURE HERE
+    58:     }
+    59: 
+    60:     @Test(timeout = 60000)
+
+[5] METHOD=testV1Name_France_languageIso639_1 FAILURE AT LINE 39
+at ts01gpt_5_mini.LanguageTest.testV1Name_France_languageIso639_1(LanguageTest.java:39)
+CODE CONTEXT:
+    36:     @Test(timeout = 60000)
+    37:     public void testV1Name_France_languageIso639_1() {
+    38:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    39:         given().when().get("/v1/name/France").then().body("[0].languages[0].iso639_1", equalTo("fr"));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[6] METHOD=testV1Currency_USD_languageNativeName FAILURE AT LINE 45
+at ts01gpt_5_mini.LanguageTest.testV1Currency_USD_languageNativeName(LanguageTest.java:45)
+CODE CONTEXT:
+    42:     @Test(timeout = 60000)
+    43:     public void testV1Currency_USD_languageNativeName() {
+    44:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    45:         given().when().get("/v1/currency/USD").then().body("[0].languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    46:     }
+    47: 
+    48:     @Test(timeout = 60000)
+
+[7] METHOD=testV1Alpha_query_codes_returns200 FAILURE AT LINE 75
+java.lang.AssertionError:
+at ts01gpt_5_mini.LanguageTest.testV1Alpha_query_codes_returns200(LanguageTest.java:75)
+CODE CONTEXT:
+    72:     @Test(timeout = 60000)
+    73:     public void testV1Alpha_query_codes_returns200() {
+    74:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    75:         given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);  ← FAILURE HERE
+    76:     }
+    77: 
+    78:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_languageIso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_France_languageIso639_1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().body("[0].languages[0].iso639_1", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_languageNativeName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().body("[0].languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_Spanish_languageIso639_1() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish").then().body("[0].languages[0].iso639_1", equalTo("es"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_invalid_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_notFound_404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_query_codes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_invalid_400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/123").then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

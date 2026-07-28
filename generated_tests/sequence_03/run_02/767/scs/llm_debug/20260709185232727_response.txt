@@ -1,0 +1,120 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        int port = Integer.parseInt(System.getProperty("server.port", "8080"));
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = port;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoReturnsZero() {
+        given()
+            .pathParam("txt", "hello")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatchFoundReturnsZero() {
+        given()
+            .pathParam("txt", "xyzxyz")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverseReturnsOne() {
+        given()
+            .pathParam("txt", "abcdef")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPatReturnsTwo() {
+        given()
+            .pathParam("txt", "cbadef")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfterPalindrome() {
+        given()
+            .pathParam("txt", "abccba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLaterInText() {
+        given()
+            .pathParam("txt", "abcXcba")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfter() {
+        given()
+            .pathParam("txt", "cbaabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLaterInText() {
+        given()
+            .pathParam("txt", "cbaXabc")
+            .pathParam("pat", "abc")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatTxtOnlyEndpoint() {
+        given()
+            .pathParam("txt", "The quick brown fox")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+}
+```

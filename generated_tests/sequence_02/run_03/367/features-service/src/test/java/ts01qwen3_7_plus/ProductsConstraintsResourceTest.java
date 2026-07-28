@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import java.util.UUID;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConstraintsResourceTest {
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString();
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID().toString();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID().toString();
+
+        RestAssured.given().when().post(baseUrl + "/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post(baseUrl + "/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post(baseUrl + "/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post(baseUrl + "/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString();
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID().toString();
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID().toString();
+
+        RestAssured.given().when().post(baseUrl + "/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post(baseUrl + "/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post(baseUrl + "/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post(baseUrl + "/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+}

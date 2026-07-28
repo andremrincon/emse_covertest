@@ -1,0 +1,88 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+
+public class ConstraintRequiresTest {
+
+    private String productName;
+    private String sourceFeatureName;
+    private String requiredFeatureName;
+    private String configurationName;
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+        String uuid = UUID.randomUUID().toString();
+        productName = "Product-" + uuid;
+        sourceFeatureName = "SourceFeature-" + uuid;
+        requiredFeatureName = "RequiredFeature-" + uuid;
+        configurationName = "Config-" + uuid;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeatureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeatureName).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeatureName)
+            .formParam("requiredFeature", requiredFeatureName)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithRequiresConstraint() {
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeatureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeatureName).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeatureName)
+            .formParam("requiredFeature", requiredFeatureName)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName)
+        .then()
+            .body("constraints[0].type", equalTo("requires"));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateRequiresConstraintAddsDerivedFeature() {
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeatureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeatureName).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeatureName)
+            .formParam("requiredFeature", requiredFeatureName)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then().statusCode(lessThan(300));
+        
+        given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeatureName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/" + configurationName + "/features")
+        .then()
+            .body("$", hasItem(requiredFeatureName));
+    }
+}
+```

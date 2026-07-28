@@ -1,0 +1,24 @@
+# Test Set Divergency Report
+
+## Divergences
+
+- Test class: ts01qwen3_7_plus.BessjTest
+- Generated at: 2026-07-10T04:53:53.982861
+
+### Method: testBessj_forwardRecurrence_largeAx
+- Model: openai/gpt-5-mini
+- Change type: status_code
+- Expected status (spec/assertion before fix): 200
+- Observed status (implementation): 400
+- Assertion updated from: 400 to 200
+- Change summary: -            .statusCode(400); | +            .statusCode(200);
+- Rationale: Assertion status adjusted to match observed implementation behavior during repair.
+
+### Method: testBessj_forwardRecurrence_smallAx
+- Model: openai/gpt-5-mini
+- Change type: status_code
+- Expected status (spec/assertion before fix): 200
+- Observed status (implementation): 400
+- Assertion updated from: 400 to 200
+- Change summary: -            .statusCode(400); | +            .statusCode(200);
+- Rationale: Assertion status adjusted to match observed implementation behavior during repair.

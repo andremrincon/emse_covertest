@@ -1,0 +1,127 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_N_LessThanOrEqualTo2_Returns400() {
+        given()
+            .when()
+                .get("/api/bessj/2/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_N_GreaterThan1000_Returns400() {
+        given()
+            .when()
+                .get("/api/bessj/1001/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_ValidN_Returns200() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_M_GreaterThan1000_Returns400() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_N_GreaterThan1000_Returns400() {
+        given()
+            .when()
+                .get("/api/fisher/10/1001/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_ValidParameters_Returns200() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_ValidParameters_Returns200() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_InvalidParameters_Returns400() {
+        given()
+            .when()
+                .get("/api/gammq/-1.0/2.3")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_A_GreaterThanLimit_Returns400() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_A_LessThanNegativeLimit_Returns400() {
+        given()
+            .when()
+                .get("/api/remainder/-10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_B_GreaterThanLimit_Returns400() {
+        given()
+            .when()
+                .get("/api/remainder/17/10001")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_B_LessThanNegativeLimit_Returns400() {
+        given()
+            .when()
+                .get("/api/remainder/17/-10001")
+            .then()
+                .statusCode(400);
+    }
+}

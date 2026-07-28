@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NegativeN_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", -5, 2.5);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_xZero_returnsZeroInBody() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, 0.0);
+        act.then().body(containsString("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, 5.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axLessOrEqualN_negativeX_signApplied() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, -1.0E-10);
+        act.then().body(containsString("-"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_smallAx_usesSeriesApproximations() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 2, 3.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_largeAx_usesAsymptoticApproximations() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 3, 100.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeLargeX_evenN_noSignFlipAtEnd() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/{n}/{x}", 4, -100.0);
+        act.then().statusCode(200);
+    }
+}

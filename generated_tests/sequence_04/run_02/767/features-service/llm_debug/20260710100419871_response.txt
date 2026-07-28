@@ -1,0 +1,134 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = System.getProperty("api.base", "http://localhost:8080");
+        RestAssured.baseURI = base;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductCreatesFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        String desc = "Description " + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").formParam("description", desc)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescriptionReflectsChange() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        String initialDesc = "Initial " + UUID.randomUUID().toString();
+        String updatedDesc = "Updated " + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", initialDesc)
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded").formParam("description", updatedDesc)
+                .when().put("/products/{productName}/features/{featureName}", product, feature)
+                .then().body("description", equalTo(updatedDesc));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesContainsCreatedFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        String desc = "Desc " + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", desc)
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/features", product)
+                .then().body("", hasItem(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "d")
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesContainsFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "d")
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config)
+                .then().body("", hasItem(feature));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "d")
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromProduct() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "d")
+                .when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByNameReturnsCreatedProduct() {
+        String product = "prod-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}", product)
+                .then().statusCode(200);
+    }
+}

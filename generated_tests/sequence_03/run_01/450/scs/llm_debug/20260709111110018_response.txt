@@ -1,0 +1,81 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("test.host", "localhost");
+        String port = System.getProperty("test.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        String txt = "http://a/a";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        String txt = "mon01jan";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        String txt = "12.34e+56";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        String txt = "abc123";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectWithPatternEndpoint() {
+        String txt = "http://a/a";
+        String pat = "a";
+        given()
+            .when()
+                .get("/api/pat/" + txt + "/" + pat)
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatchWithSpecialChars() {
+        String txt = "xyz";
+        given()
+            .when()
+                .get("/api/pat/" + txt)
+            .then()
+                .statusCode(200);
+    }
+}
+```

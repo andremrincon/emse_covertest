@@ -1,0 +1,80 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CookieTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdCookieWithUserPrefixAndLongValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/userabc/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdCookieWithLongValueNotStartingWithUser() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abcd1234/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdCookieWithShortValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionCookieMatchingAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionCookieWithAmButDifferentSite() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/other.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieWithUnknownName() {
+        given()
+            .when()
+                .get("/api/cookie/unknown/val/site.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+}

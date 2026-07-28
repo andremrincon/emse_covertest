@@ -1,0 +1,177 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ContributionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testContributeBadRequestWhenMissingToken TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testGetAlphaWithMultipleCodesReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testContributeAcceptedWithValidContribution TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testContributeBadRequestWhenMissingAmount TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testContributeBadRequestWhenEmptyToken TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testContributeBadRequestWhenMissingToken FAILURE AT LINE 37
+java.lang.AssertionError:
+at ts01gpt_5_mini.ContributionTest.testContributeBadRequestWhenMissingToken(ContributionTest.java:37)
+CODE CONTEXT:
+    34: 
+    35:     @Test(timeout = 60000)
+    36:     public void testContributeBadRequestWhenMissingToken() {
+    37:         given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));  ← FAILURE HERE
+    38:         String body = "{\"amount\":100,\"currency\":\"EUR\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+    39:         Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+    40:         assertEquals(400, res.getStatusCode());
+
+[2] METHOD=testGetAlphaWithMultipleCodesReturns200 FAILURE AT LINE 61
+java.lang.AssertionError:
+at ts01gpt_5_mini.ContributionTest.testGetAlphaWithMultipleCodesReturns200(ContributionTest.java:61)
+CODE CONTEXT:
+    58: 
+    59:     @Test(timeout = 60000)
+    60:     public void testGetAlphaWithMultipleCodesReturns200() {
+    61:         given().when().get("/v1/alpha?codes=US,CA").then().statusCode(lessThan(300));  ← FAILURE HERE
+    62:         Response res = given().when().get("/v1/alpha?codes=US,CA");
+    63:         assertEquals(200, res.getStatusCode());
+    64:     }
+
+[3] METHOD=testContributeAcceptedWithValidContribution FAILURE AT LINE 29
+java.lang.AssertionError:
+at ts01gpt_5_mini.ContributionTest.testContributeAcceptedWithValidContribution(ContributionTest.java:29)
+CODE CONTEXT:
+    26: 
+    27:     @Test(timeout = 60000)
+    28:     public void testContributeAcceptedWithValidContribution() {
+    29:         given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));  ← FAILURE HERE
+    30:         String body = "{\"amount\":500,\"currency\":\"EUR\",\"token\":\"tok_visa\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+    31:         Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+    32:         assertEquals(202, res.getStatusCode());
+
+[4] METHOD=testContributeBadRequestWhenMissingAmount FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01gpt_5_mini.ContributionTest.testContributeBadRequestWhenMissingAmount(ContributionTest.java:45)
+CODE CONTEXT:
+    42: 
+    43:     @Test(timeout = 60000)
+    44:     public void testContributeBadRequestWhenMissingAmount() {
+    45:         given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));  ← FAILURE HERE
+    46:         String body = "{\"token\":\"tok_visa\",\"currency\":\"EUR\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+    47:         Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+    48:         assertEquals(400, res.getStatusCode());
+
+[5] METHOD=testContributeBadRequestWhenEmptyToken FAILURE AT LINE 53
+java.lang.AssertionError:
+at ts01gpt_5_mini.ContributionTest.testContributeBadRequestWhenEmptyToken(ContributionTest.java:53)
+CODE CONTEXT:
+    50: 
+    51:     @Test(timeout = 60000)
+    52:     public void testContributeBadRequestWhenEmptyToken() {
+    53:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    54:         String body = "{\"amount\":50,\"currency\":\"USD\",\"token\":\"\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+    55:         Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+    56:         assertEquals(400, res.getStatusCode());
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeAcceptedWithValidContribution() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String body = "{\"amount\":500,\"currency\":\"EUR\",\"token\":\"tok_visa\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+        assertEquals(202, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeBadRequestWhenMissingToken() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"currency\":\"EUR\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+        assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeBadRequestWhenMissingAmount() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        String body = "{\"token\":\"tok_visa\",\"currency\":\"EUR\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+        assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeBadRequestWhenEmptyToken() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":50,\"currency\":\"USD\",\"token\":\"\",\"reference\":\"" + UUID.randomUUID().toString() + "\"}";
+        Response res = given().contentType(ContentType.JSON).body(body).when().post("/contribute");
+        assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaWithMultipleCodesReturns200() {
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha?codes=US,CA");
+        assertEquals(200, res.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

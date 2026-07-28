@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_tuesday_August_returns200() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/The_quick_brown_fox_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tuesday/August").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_Wednesday_MAR_returns200() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/ExampleText_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/Wednesday/MAR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_Monday_Movember_returns500() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/Setup_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/Monday/Movember").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_numericDay_123_returns500() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/Seed_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/123/aug").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_mon_dec_lowercase_short_returns200() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/Init_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/dec").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_tue_invalidMonth_456_returns500() {
+        String unique = UUID.randomUUID().toString();
+        given().when().get("/api/pat/Prep_" + unique).then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/456").then().statusCode(200);
+    }
+}

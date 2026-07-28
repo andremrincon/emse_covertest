@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.Map;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasKey;
+
+public class BessjTest {
+
+    private final String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+
+    @Test(timeout = 60000)
+    public void testBessj_axZero_returns200() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/3/0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_negativeX_oddN_returns200() {
+        given().when().get(base + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/3/-10");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_knownExample_containsValueField() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/3/2.5");
+        act.then().body("$", hasKey("value"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThanTwo_returns400() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/-5/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axLessOrEqualN_loopBranch_returns200() {
+        given().when().get(base + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/5/1e-10");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_largeAx_triggersAsymptoticBranches_returns200() {
+        given().when().get(base + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get(base + "/api/bessj/3/10");
+        act.then().statusCode(200);
+    }
+}

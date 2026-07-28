@@ -1,0 +1,91 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testWInvalidLength() {
+        String w = "app";
+        String x = "banana";
+        String z = "delta";
+        String y = "cherry";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testXInvalidLength() {
+        String w = "apple";
+        String x = "ban";
+        String z = "delta";
+        String y = "cherry";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testYInvalidLength() {
+        String w = "apple";
+        String x = "banana";
+        String z = "delta";
+        String y = "cherryx";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testZInvalidLength() {
+        String w = "apple";
+        String x = "banana";
+        String z = "del";
+        String y = "cherry";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "apple";
+        String x = "banana";
+        String z = "delta";
+        String y = "cherry";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "zebra";
+        String x = "yakxx";
+        String z = "vultu";
+        String y = "wolfx";
+
+        Response response = given().when().get("/api/ordered4/" + w + "/" + x + "/" + z + "/" + y);
+
+        response.then().statusCode(200).body(equalTo("decreasing"));
+    }
+}
+```

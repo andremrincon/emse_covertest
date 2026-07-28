@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ExpintTest {
+
+    @Before
+    public void setUp() {
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.port = Integer.parseInt(port);
+        String host = System.getProperty("server.host", "localhost");
+        RestAssured.baseURI = "http://" + host;
+        String basePath = System.getProperty("server.basePath", "/");
+        RestAssured.basePath = basePath;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeNThrowsError() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", -1, 2.5)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroAndNZeroThrowsError() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", 0, 0.0)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOneContinuedFractionConverges() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", 3, 2.5)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathNm1ZeroConverges() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", 1, 0.1)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesPathWithPsiBranchConverges() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", 3, 0.1)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroValidNReturnsSuccess() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/expint/{n}/{x}", 2, 0.0)
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "http://a/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "mon12jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "12.3e+45").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "zzz").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMalformedPatternReturns500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", uid).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "(").then().statusCode(500);
+    }
+}

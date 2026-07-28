@@ -1,0 +1,75 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUri = System.getProperty("baseUri", "http://localhost");
+        String port = System.getProperty("port", "8080");
+        RestAssured.baseURI = baseUri;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFiveAndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/5/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanMinus444AndSEqualsAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsMinusFourAndSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666AndSGreaterThanAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/700/zzzz")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEquals555AndSLessThanAbabba() {
+        given()
+            .when()
+                .get("/api/costfuns/555/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsMinus333AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-333/baab")
+            .then()
+                .statusCode(200);
+    }
+}
+```

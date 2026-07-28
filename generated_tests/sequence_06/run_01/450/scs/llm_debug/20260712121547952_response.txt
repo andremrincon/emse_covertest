@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base",
+                System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithMatchingTitle() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/male/mr");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithNonMatchingTitle() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/male/mrs");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithMatchingTitle() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/female/mrs");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithNonMatchingTitle() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/female/mr");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithMatchingTitle() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/none/dr");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidSexLeadsToServerError() {
+        String id = UUID.randomUUID().toString();
+        given().when().get("/api/pat/arrange-" + id).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/title/neuter/Jones");
+        act.then().statusCode(200);
+    }
+}

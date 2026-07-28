@@ -1,0 +1,118 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200)
+                .body(containsString("3.141592653589793"));
+    }
+
+    @Test(timeout = 60000)
+    public void testEConstantOperator() {
+        given()
+            .when()
+                .get("/api/calc/e/0/0")
+            .then()
+                .statusCode(200)
+                .body(containsString("2.718281828459045"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtAndLogUnaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/sqrt/16/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4.0"));
+
+        given()
+            .when()
+                .get("/api/calc/log/1/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTrigonometricOperators() {
+        given()
+            .when()
+                .get("/api/calc/sine/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+
+        given()
+            .when()
+                .get("/api/calc/cosine/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1.0"));
+
+        given()
+            .when()
+                .get("/api/calc/tangent/0/0")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryArithmeticOperators() {
+        given()
+            .when()
+                .get("/api/calc/plus/5/3")
+            .then()
+                .statusCode(200)
+                .body(equalTo("8.0"));
+
+        given()
+            .when()
+                .get("/api/calc/subtract/10/4")
+            .then()
+                .statusCode(200)
+                .body(equalTo("6.0"));
+
+        given()
+            .when()
+                .get("/api/calc/multiply/6/7")
+            .then()
+                .statusCode(200)
+                .body(equalTo("42.0"));
+
+        given()
+            .when()
+                .get("/api/calc/divide/20/4")
+            .then()
+                .statusCode(200)
+                .body(equalTo("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorReturnsDefaultZero() {
+        given()
+            .when()
+                .get("/api/calc/unknownop/5/3")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+}

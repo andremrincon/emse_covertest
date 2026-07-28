@@ -1,0 +1,75 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Currency_numericBad_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Currency_unknown_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2Currency_EUR_bodyContainsEuroName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/{currency}", "EUR");
+        String currencyName = resp.jsonPath().getString("[0].currencies[0].name");
+        assertEquals("Euro", currencyName);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_badFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Name_FullTextTrue_bodyContainsName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "true").when().get("/v1/name/{name}", "France");
+        assertTrue(resp.asString().contains("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2Alpha_withFields_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{alphacode}", "US").then().statusCode(200);
+    }
+}

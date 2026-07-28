@@ -1,0 +1,57 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantOperatorsPiAndE() {
+        given().when().get("/api/calc/pi/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/e/0/0").then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOperatorsSqrtAndLog() {
+        given().when().get("/api/calc/sqrt/16/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/2.718281828459045/0").then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testTrigOperatorsSineCosineTangent() {
+        given().when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryOperatorsPlusSubtractMultiply() {
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/15.5/4.5").then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideOperator() {
+        given().when().get("/api/calc/divide/100/4").then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorDefaultBranch() {
+        given().when().get("/api/calc/unknown/10/5").then().statusCode(equalTo(200));
+    }
+}
+```

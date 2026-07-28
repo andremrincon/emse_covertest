@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DuplicatedObjectExceptionTest {
+
+    @BeforeClass
+    public static void init() {
+        RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080");
+        RestAssured.basePath = "/";
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateProductCreation() {
+        String productName = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}", productName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateFeatureAddition() {
+        String productName = "test-product-" + UUID.randomUUID().toString();
+        String featureName = "test-feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDuplicateConfigurationCreation() {
+        String productName = "test-product-" + UUID.randomUUID().toString();
+        String configurationName = "test-config-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+}

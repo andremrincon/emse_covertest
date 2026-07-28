@@ -1,0 +1,69 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testShortAbbrevMonths_MonJan_Returns200() {
+        String[] months = {"jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"};
+        for (String m : months) {
+            given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", m).then().statusCode(lessThan(300));
+        }
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullDayAndMonth_WednesdayAugust_Returns200() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "tuesday", "MAR").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "Thursday", "august").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Wednesday", "August");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDay_Superday_Returns500() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "aug").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Superday", "Jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidMonth_Movember_Returns500() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "Wednesday", "August").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Mon", "Movember");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitiveAbbrev_ThuApr_Returns200() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "wEd", "Dec").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Thu", "Apr");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDifferentValidMonth_December_Returns200() {
+        given().when().get("/api/dateparse/{dayname}/{monthname}", "Fri", "nov").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Fri", "Dec");
+        act.then().statusCode(200);
+    }
+}

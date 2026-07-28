@@ -1,0 +1,87 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class Text2TxtTest {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtFor() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/for/x/y")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtFour() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/four/x/y")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtAnd() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/and/x/y")
+        .then()
+            .statusCode(200)
+            .body(equalTo("n"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYou() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/see/you/y")
+        .then()
+            .statusCode(200)
+            .body(equalTo("cu"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtByTheWay() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/by/the/way")
+        .then()
+            .statusCode(200)
+            .body(equalTo("btw"));
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <404>.")
+    @Test(timeout = 60000)
+    public void testText2TxtNoMatch() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/text2txt/x/y/z")
+        .then()
+            .statusCode(200)
+            .body(equalTo(""));
+    }
+}

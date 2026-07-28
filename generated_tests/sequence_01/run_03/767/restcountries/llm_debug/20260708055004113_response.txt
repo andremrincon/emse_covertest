@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("API_BASE");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_TwoLetter_Returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ThreeLetter_Returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Invalid_Returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_MultipleCodes_Returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_MissingCodes_Returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testName_FullText_AltSpelling_Returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/DE?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testName_Substring_AltSpelling_Returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/DE?fullText=false").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testName_FullText_ServerErrorPath_Returns500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/True?fullText=true").then().statusCode(500);
+    }
+}

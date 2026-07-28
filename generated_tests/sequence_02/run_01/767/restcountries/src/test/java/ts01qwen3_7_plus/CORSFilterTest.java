@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeader() {
+        given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeader() {
+        given()
+            .when()
+            .get("/v1/alpha/US")
+            .then()
+            .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeader() {
+        given()
+            .when()
+            .get("/v1/name/France")
+            .then()
+            .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeader() {
+        given()
+            .when()
+            .get("/v2/all")
+            .then()
+            .header("Cache-Control", nullValue());
+    }
+}

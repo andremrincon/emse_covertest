@@ -1,0 +1,60 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE_URL", System.getenv("API_BASE_URL"));
+        RestAssured.baseURI = (base != null && !base.isEmpty()) ? base : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveDividendPositiveDivisor_returnsRemainderBody() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+        res.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveDividendNegativeDivisor_returnsRemainderBody() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 17, -9);
+        res.then().body("result", equalTo(8));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeDividendPositiveDivisor_returnsRemainderBody() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", -17, 5);
+        res.then().body("result", equalTo(-2));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeDividendNegativeDivisor_returnsRemainderBody() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", -17, -5);
+        res.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroDividend_returnsBadRequestStatus() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 0, 5);
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroDivisor_returnsBadRequestStatus() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/remainder/{a}/{b}", 5, 0);
+        res.then().statusCode(400);
+    }
+}

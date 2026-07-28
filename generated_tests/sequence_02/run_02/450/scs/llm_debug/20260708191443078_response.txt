@@ -1,0 +1,113 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+            .get("/api/ordered4/apple/banana/delta/cherry")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/apple/banana/delta/cherry");
+
+        response.then().statusCode(200).body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+            .get("/api/ordered4/zebra/yak/wolf/viper")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/zebra/yak/wolf/viper");
+
+        response.then().statusCode(200).body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .when()
+            .get("/api/ordered4/apple/banana/cherry/apple")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/apple/banana/cherry/apple");
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWTooShort() {
+        given()
+            .when()
+            .get("/api/ordered4/app/banana/cherry/delta")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/app/banana/cherry/delta");
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWTooLong() {
+        given()
+            .when()
+            .get("/api/ordered4/applepie/banana/cherry/delta")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/applepie/banana/cherry/delta");
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testXTooShort() {
+        given()
+            .when()
+            .get("/api/ordered4/apple/ban/cherry/delta")
+            .then()
+            .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+            .get("/api/ordered4/apple/ban/cherry/delta");
+
+        response.then().statusCode(200).body(equalTo("unordered"));
+    }
+}
+```

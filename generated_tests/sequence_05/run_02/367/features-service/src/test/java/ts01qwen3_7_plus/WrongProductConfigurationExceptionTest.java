@@ -1,0 +1,47 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFeatureConstraint() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/FeatureB").then().statusCode(lessThan(300));
+
+        given()
+                .contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("excludedFeature", "FeatureB")
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/FeatureB").then().statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/" + productName + "/configurations/" + configName + "/features")
+                .then()
+                .statusCode(500);
+    }
+}

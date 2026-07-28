@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_iEquals5_returns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "setup-"+uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 5, "sample-"+uuid).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_iLessThanNeg444_returns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "A"+uuid, "B"+uuid, "C"+uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -445, "abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_iLessOrEqualNeg333_with_sEquals_baab_returns200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "prep-"+uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -333, "baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_sCompareToGreaterThan_triggers200() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "1", "2").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 667, "zzzzzz-"+uuid).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_sCompareToEqual_returnsBody10() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/ordered4/{w}/{x}/{z}/{y}", "a"+uuid, "b"+uuid, "c"+uuid, "d"+uuid).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -4, "ababba").then().statusCode(200).body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_sIs_abab_returnsBody6() {
+        String uuid = UUID.randomUUID().toString();
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session-"+uuid, "v"+uuid, "example.com").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 0, "abab").then().statusCode(200).body(equalTo("10"));
+    }
+}

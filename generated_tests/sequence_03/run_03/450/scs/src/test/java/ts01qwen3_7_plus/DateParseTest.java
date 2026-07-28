@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDays() {
+        String[] days = {"mon", "tue", "wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            given()
+                .pathParam("dayname", day)
+                .pathParam("monthname", "aug")
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}")
+            .then()
+                .statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testValidMonths() {
+        String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        for (String month : months) {
+            given()
+                .pathParam("dayname", "mon")
+                .pathParam("monthname", month)
+            .when()
+                .get("/api/dateparse/{dayname}/{monthname}")
+            .then()
+                .statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDay() {
+        given()
+            .pathParam("dayname", "invalid")
+            .pathParam("monthname", "aug")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidMonth() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "invalid")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonth() {
+        given()
+            .pathParam("dayname", "invalid")
+            .pathParam("monthname", "invalid")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity() {
+        given()
+            .pathParam("dayname", "MON")
+            .pathParam("monthname", "JAN")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+}

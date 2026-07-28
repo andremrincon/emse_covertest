@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("API_BASE", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("API_PORT", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsConstant() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", Double.toString(Math.E), "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", "0", "0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", "0", "0").then().statusCode(lessThan(300));
+        ValidatableResponse vr = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0").then();
+        vr.body(equalTo(Double.toString(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusAddsNumbers() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "10", "3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "2", "3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "10", "2").then().statusCode(lessThan(300));
+        ValidatableResponse vr = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "15.5", "4.5").then();
+        vr.body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProducesServerError() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "1", "1").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtOfPositiveNumber() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0").then().statusCode(lessThan(300));
+        ValidatableResponse vr = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "16", "0").then();
+        vr.body(equalTo("4.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLogOfEReturnsOne() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "4", "0").then().statusCode(lessThan(300));
+        ValidatableResponse vr = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", Double.toString(Math.E), "0").then();
+        vr.body(equalTo("1.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyNumbers() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "50", "8").then().statusCode(lessThan(300));
+        ValidatableResponse vr = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "6", "7").then();
+        vr.body(equalTo("42.0"));
+    }
+}

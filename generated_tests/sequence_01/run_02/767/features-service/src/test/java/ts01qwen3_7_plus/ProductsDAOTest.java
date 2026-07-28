@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsDAOTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraint() {
+        String productName = "Prod-IC-" + UUID.randomUUID().toString();
+        String f1 = "F1-" + UUID.randomUUID().toString();
+        String f2 = "F2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", f1)
+            .formParam("requiredFeature", f2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProduct() {
+        String productName = "Prod-DC-" + UUID.randomUUID().toString();
+        String f1 = "F1-" + UUID.randomUUID().toString();
+        String f2 = "F2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + f2).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", f1)
+            .formParam("requiredFeature", f2)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/" + productName)
+        .then()
+            .statusCode(204);
+    }
+}

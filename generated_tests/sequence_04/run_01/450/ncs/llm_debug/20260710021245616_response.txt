@@ -1,0 +1,54 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddOdd() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/1/1/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherOddEven() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/1/2/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenOdd() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/2/1/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherEvenEven() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/2/2/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherZeroX() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/10/5/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidParameter() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/fisher/abc/5/0.75").then().statusCode(400);
+    }
+}
+```

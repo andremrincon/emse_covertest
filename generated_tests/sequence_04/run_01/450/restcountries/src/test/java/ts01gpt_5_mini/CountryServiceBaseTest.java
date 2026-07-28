@@ -1,0 +1,97 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("rest.base");
+        if (base == null || base.isEmpty()) base = System.getenv("REST_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("TEST_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_twoLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_threeLetter_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_badFormat_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_notFound_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_query_multiple_codes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_query_nonexistent_codes_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_query_malformed_codes_returns500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_no_codes_param_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_fullText_exact_primary_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "true").when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_fullText_altspelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "true").when().get("/v1/name/DE").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_substring_primary_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get("/v1/name/United").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_substring_altspelling_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().queryParam("fullText", "false").when().get("/v1/name/Federal").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All_loadJson_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+}

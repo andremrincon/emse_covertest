@@ -1,0 +1,40 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseReturns200ForValidNames() {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/Wednesday/August");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseReturns500ForInvalidNames() {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/123/456");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseHandlesAbbreviatedDayAndMonth() {
+        given().when().get("/api/pat/ok").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/tue/MAR");
+        act.then().statusCode(200);
+    }
+}

@@ -1,0 +1,152 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_1() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/US")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithIso639_2() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/GB")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithName() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/FR")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeReturnsLanguageWithNativeName() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/alpha/DE")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodesMultipleReturnsLanguages() {
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("codes", "US,CA,MX")
+        .when()
+                .get("/v1/alpha")
+        .then()
+                .statusCode(400)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/currency/USD")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/name/France")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/callingcode/1")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/capital/London")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/region/Europe")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubregionReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/subregion/{subregion}", "Western Europe")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testLangEndpointReturnsCountriesWithLanguages() {
+        given()
+                .accept(ContentType.JSON)
+        .when()
+                .get("/v1/lang/es")
+        .then()
+                .statusCode(200)
+                .body("languages[0]", notNullValue());
+    }
+}

@@ -1,0 +1,61 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV1NameNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/123");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV1NameServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/True");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV1CapitalNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/capital/123");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV2NameNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/name/123");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV2CurrencyNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/currency/XYZ");
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageAndStatusViaV2RegionalblocNotFound() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/regionalbloc/123");
+        assertEquals(404, response.getStatusCode());
+    }
+}

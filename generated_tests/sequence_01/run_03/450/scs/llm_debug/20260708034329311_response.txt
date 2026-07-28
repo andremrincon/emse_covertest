@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInText() {
+        String txt = "ABABCABAB";
+        String pat = "ABAB";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundInText() {
+        String txt = "BABAABAB";
+        String pat = "ABAB";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseBothFoundSeparately() {
+        String txt = "ABABXYZBABA";
+        String pat = "ABAB";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatFollowedByReverse() {
+        String txt = "ABABBABA";
+        String pat = "ABAB";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromeReverseFollowedByPat() {
+        String txt = "BABAABAB";
+        String pat = "ABAB";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        String txt = "abcde";
+        String pat = "ab";
+
+        given()
+            .when()
+                .get("/api/pat/{txt}/{pat}", txt, pat)
+            .then()
+                .statusCode(200);
+    }
+}
+```

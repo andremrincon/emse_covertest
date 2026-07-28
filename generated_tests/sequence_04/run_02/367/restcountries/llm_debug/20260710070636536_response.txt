@@ -1,0 +1,41 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base");
+        String base = env != null && !env.isEmpty() ? env : (prop != null && !prop.isEmpty() ? prop : "http://localhost:8080/rest");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageFromNameNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/123");
+        resp.then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusFromRegionNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/region/123");
+        resp.then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageFromNameServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/True");
+        resp.then().body("message", equalTo("Internal Server Error"));
+    }
+}

@@ -1,0 +1,48 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_whenIEqualsFiveAndSIsS1PlusS2_returns10() {
+        String arrangeToken = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeToken).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 5, "baab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_whenILessThanMinus444_and_SEqualsS2S2_returns6() {
+        String arrangeToken = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeToken).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -1000, "abab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_whenIGreaterThan666_and_SEqualsS2S2S1_triggersCompareToEqualsAndReturns10() {
+        String arrangeToken = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeToken).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 700, "ababba").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_whenIIsMinusFour_and_SIsS2S2_returns0() {
+        String arrangeToken = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", arrangeToken).then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -4, "abab").then().body(equalTo("10"));
+    }
+}

@@ -1,0 +1,106 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("api.base", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badRequest_whenAlphaTooShort() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_whenUnknownAlpha() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_withFields_returnsFilteredJson() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest_invalidCodesFormat() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=[\"US\",\"CA\"]").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound_whenNoCountries() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=XX,YY,ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_withFields_returnsFilteredArray() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA&fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badRequest_whenCurrencyInvalidLength() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_notFound_whenNoCountries() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_withFields_returnsFilteredArray() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_internalServerError_onExceptionExample() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_withFields_returnsArray() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/callingcode/1?fields=name;capital;region").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_notFound_whenNumeric() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/capital/12345").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testPost_returnsMethodNotAllowed() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().post("/v2").then().statusCode(405);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_withFields_returnsArray() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/region/Europe?fields=name;capital;population").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest_whenCodesEmpty_isEmptyCheck() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=").then().statusCode(400);
+    }
+}

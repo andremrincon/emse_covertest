@@ -1,0 +1,436 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ConstraintExcludesTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=addFeatureToConfigurationTriggersEvaluationWithExcludesConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[2] METHOD=getConfigurationFeaturesTriggersEvaluationWithExcludesConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=evaluateConfigurationWithBothExcludedFeaturesActiveMakesInvalid TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=getConfigurationAfterRemovingExcludedFeatureBecomesValid TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[5] METHOD=deleteFeatureFromConfigurationAfterExcludesEvaluation TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=addFeatureToConfigurationTriggersEvaluationWithExcludesConstraint FAILURE AT LINE 238
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintExcludesTest.addFeatureToConfigurationTriggersEvaluationWithExcludesConstraint(ConstraintExcludesTest.java:238)
+CODE CONTEXT:
+   235:         .when()
+   236:                 .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature)
+   237:         .then()
+   238:                 .statusCode(500);  ← FAILURE HERE
+   239:     }
+   240: 
+   241:     @Test(timeout = 60000)
+
+[2] METHOD=getConfigurationFeaturesTriggersEvaluationWithExcludesConstraint FAILURE AT LINE 205
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintExcludesTest.getConfigurationFeaturesTriggersEvaluationWithExcludesConstraint(ConstraintExcludesTest.java:205)
+CODE CONTEXT:
+   202:         .then().statusCode(lessThan(300));
+   203:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   204:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+   205:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   206: 
+   207:         given()
+   208:         .when()
+
+[3] METHOD=evaluateConfigurationWithBothExcludedFeaturesActiveMakesInvalid FAILURE AT LINE 93
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintExcludesTest.evaluateConfigurationWithBothExcludedFeaturesActiveMakesInvalid(ConstraintExcludesTest.java:93)
+CODE CONTEXT:
+    90:         .then().statusCode(lessThan(300));
+    91:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+    92:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+    93:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+    94: 
+    95:         given()
+    96:         .when()
+
+[4] METHOD=getConfigurationAfterRemovingExcludedFeatureBecomesValid FAILURE AT LINE 314
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintExcludesTest.getConfigurationAfterRemovingExcludedFeatureBecomesValid(ConstraintExcludesTest.java:314)
+CODE CONTEXT:
+   311:         .then().statusCode(lessThan(300));
+   312:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   313:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+   314:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   315:         given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+   316: 
+   317:         given()
+
+[5] METHOD=deleteFeatureFromConfigurationAfterExcludesEvaluation FAILURE AT LINE 286
+java.lang.AssertionError:
+at ts01glm_5_2.ConstraintExcludesTest.deleteFeatureFromConfigurationAfterExcludesEvaluation(ConstraintExcludesTest.java:286)
+CODE CONTEXT:
+   283:         .then().statusCode(lessThan(300));
+   284:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   285:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+   286:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   287: 
+   288:         given()
+   289:         .when()
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintExercisesSetters() {
+        String productName = "TestProduct-Excludes-Create-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithExcludesConstraintExercisesGetTypeAndGetters() {
+        String productName = "TestProduct-Excludes-Get-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcludedF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}", productName)
+        .then()
+                .statusCode(200)
+                .body("constraints", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithBothExcludedFeaturesActiveMakesInvalid() {
+        String productName = "TestProduct-Eval-Both-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+                .statusCode(200)
+                .body("valid", is(false));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithOnlySourceFeatureActiveRemainsValid() {
+        String productName = "TestProduct-Eval-Src-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+                .statusCode(200)
+                .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithOnlyExcludedFeatureActiveRemainsValid() {
+        String productName = "TestProduct-Eval-Exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+                .statusCode(200)
+                .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithNeitherFeatureActiveRemainsValid() {
+        String productName = "TestProduct-Eval-None-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+                .statusCode(200)
+                .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersEvaluationWithExcludesConstraint() {
+        String productName = "TestProduct-ConfigFeats-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationTriggersEvaluationWithExcludesConstraint() {
+        String productName = "TestProduct-AddFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature)
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsForProductWithExcludesConstraint() {
+        String productName = "TestProduct-GetConfigs-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations", productName)
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationAfterExcludesEvaluation() {
+        String productName = "TestProduct-DelFeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature)
+        .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationAfterRemovingExcludedFeatureBecomesValid() {
+        String productName = "TestProduct-Revalidate-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "Config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+        .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+        .then()
+                .statusCode(200)
+                .body("valid", is(true));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

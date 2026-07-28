@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithEvenMAndEvenN() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 8)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithOddMAndOddN() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 1)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithOddMAndEvenN() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 2)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithEvenMAndOddN() {
+        given()
+            .pathParam("m", 2)
+            .pathParam("n", 1)
+            .pathParam("x", 0.5)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithExtremeXValue() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 1)
+            .pathParam("x", 1e10)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherWithInvalidMParameter() {
+        given()
+            .pathParam("m", "abc")
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}

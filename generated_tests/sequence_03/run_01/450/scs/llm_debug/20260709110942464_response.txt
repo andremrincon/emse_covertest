@@ -1,0 +1,54 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseURI", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlMatch() {
+        given()
+            .pathParam("txt", "http://a/a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("url"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFpeMatch() {
+        given()
+            .pathParam("txt", "1.1e+11")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("fpe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneMatch() {
+        given()
+            .pathParam("txt", "hello")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("none"));
+    }
+}

@@ -1,0 +1,115 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItem;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies.code", hasItem("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies.name", hasItem("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("currencies.symbol", hasItem("£"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrencyCode() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies.code", hasItem(hasItem("USD")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrencyName() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies.name", hasItem(hasItem("Euro")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrencySymbol() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies.symbol", hasItem(hasItem("€")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocWithCurrenciesFieldReturnsCurrencyCode() {
+        given()
+                .queryParam("fields", "name;capital;currencies")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("currencies.code", hasItem(hasItem("EUR")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocWithCurrenciesFieldReturnsCurrencyName() {
+        given()
+                .queryParam("fields", "name;capital;currencies")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("currencies.name", hasItem(hasItem("Euro")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocWithCurrenciesFieldReturnsCurrencySymbol() {
+        given()
+                .queryParam("fields", "name;capital;currencies")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("currencies.symbol", hasItem(hasItem("€")));
+    }
+}
+```

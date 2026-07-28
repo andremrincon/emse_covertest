@@ -1,0 +1,87 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_mon_jan() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_invalidDay_feb() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/feb")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_sat_jul_withArrangeMonths() {
+        given().when().get("/api/dateparse/tue/mar").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/apr").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/jun").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/dateparse/sat/jul")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_wed_dec_withArrangeMonths() {
+        given().when().get("/api/dateparse/sun/aug").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/xyz/sep").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/oct").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/nov").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/dateparse/wed/dec")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_validDay_invalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/xyzmonth")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParse_invalidDay_invalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/notaday/notamonth")
+            .then()
+                .statusCode(200);
+    }
+}

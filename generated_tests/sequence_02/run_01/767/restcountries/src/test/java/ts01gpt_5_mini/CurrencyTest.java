@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_currencyCodeIsUSD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body(containsString("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_containsEURCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/currency/EUR");
+        resp.then().body("[0].currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Name_France_currencyNameIsEuro() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().body(containsString("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_multipleCodes_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha?codes=US,CA,MX");
+        resp.then().statusCode(400);
+    }
+}

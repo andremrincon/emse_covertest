@@ -1,0 +1,161 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CodeMatch() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200)
+                .body("alpha2Code", equalTo("US"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CodeMatch() {
+        given()
+            .when()
+                .get("/v1/alpha/USA")
+            .then()
+                .statusCode(200)
+                .body("alpha3Code", equalTo("USA"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidLength() {
+        given()
+            .when()
+                .get("/v1/alpha/123")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMultipleCodes() {
+        given()
+            .queryParam("codes", "US;CA;MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicateCodes() {
+        given()
+            .queryParam("codes", "US;US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListAllNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/French Republic")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchNotFound() {
+        given()
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/NonExistentCountry123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchName() {
+        given()
+            .when()
+                .get("/v1/name/Fran")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchAltSpelling() {
+        given()
+            .when()
+                .get("/v1/name/Republic")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchNotFound() {
+        given()
+            .when()
+                .get("/v1/name/zzznonexistent")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonViaGetAll() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMissingCodes() {
+        given()
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(400);
+    }
+}
+```

@@ -1,0 +1,143 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaReturnsNotFoundForUnknownCode() {
+        RestAssured.when()
+            .get("/v2/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaWithFieldsReturnsFilteredCountry() {
+        RestAssured.given()
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListReturnsBadRequestForEmptyCodes() {
+        RestAssured.given()
+            .queryParam("codes", "")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListReturnsNotFoundForUnknownSingleCode() {
+        RestAssured.given()
+            .queryParam("codes", "XX")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListWithFieldsReturnsFilteredCountries() {
+        RestAssured.given()
+            .queryParam("codes", "US;CA")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyReturnsBadRequestForInvalidLength() {
+        RestAssured.when()
+            .get("/v2/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyReturnsNotFoundForUnknownCurrency() {
+        RestAssured.when()
+            .get("/v2/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameReturnsNotFoundForUnknownName() {
+        RestAssured.when()
+            .get("/v2/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeReturnsNotFoundForUnknownCode() {
+        RestAssured.when()
+            .get("/v2/callingcode/99999")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalReturnsNotFoundForUnknownCapital() {
+        RestAssured.when()
+            .get("/v2/capital/12345")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionReturnsNotFoundForUnknownRegion() {
+        RestAssured.when()
+            .get("/v2/region/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegionReturnsNotFoundForUnknownSubRegion() {
+        RestAssured.when()
+            .get("/v2/subregion/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguageReturnsNotFoundForUnknownLanguage() {
+        RestAssured.when()
+            .get("/v2/lang/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonymReturnsNotFoundForUnknownDemonym() {
+        RestAssured.when()
+            .get("/v2/demonym/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBlocReturnsNotFoundForUnknownBloc() {
+        RestAssured.when()
+            .get("/v2/regionalbloc/123")
+        .then()
+            .statusCode(404);
+    }
+}

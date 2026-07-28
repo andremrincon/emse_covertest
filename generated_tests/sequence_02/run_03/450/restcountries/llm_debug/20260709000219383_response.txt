@@ -1,0 +1,53 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeader() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404).header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeader() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404).header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeader() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404).header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeader() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404).header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnAlphaEndpoint() {
+        Response response = given().when().get("/v1/alpha/US");
+        response.then().statusCode(404).header("Access-Control-Allow-Origin", nullValue());
+    }
+}

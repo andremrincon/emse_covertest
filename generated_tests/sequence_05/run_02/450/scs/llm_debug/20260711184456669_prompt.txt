@@ -1,0 +1,229 @@
+
+Do create a white box test suite in JUnit 4 and Java 1.8 using REST Assured to achieve full 
+test coverage, including methods, lines, and all branches with all possible execution paths, 
+according to the instructions delimited by %%%%%, which is part of the REST Java Application 
+code delimited by *****. Use the Swagger documentation delimited by ##### to provide 
+complementary information about the application.
+
+Your responses must contain ONLY valid, compilable Java code in JUnit 4 format.
+NO comments, NO explanations, NO syntax errors.
+
+IMPORTANT CONSTRAINTS:
+- Generate AT MOST 6 @Test methods total
+- Test class name MUST be: PatTest
+- Test class package MUST be: ts01gpt_5_mini
+- Tests CANNOT instantiate business classes directly
+- Tests can ONLY call REST API endpoints via REST Assured
+- Use base URL from environment or configuration
+- Include proper imports for REST Assured and JUnit 4
+- ALL @Test methods MUST explicitly declare a timeout of 60000 milliseconds using @Test(timeout = 60000)
+- Prioritize endpoint-aware request data and parameter examples when available
+- Keep assertions aligned with endpoint response codes when known
+
+TEST DESIGN RULES — SINGLE OBJECTIVE PER TEST:
+- Each @Test method MUST test exactly ONE behavior or scenario (single test objective).
+- Each @Test method should be small and focused; do not combine multiple behaviors in one test.
+- Follow the AAA pattern strictly inside every @Test method:
+    * ARRANGE: REST calls that set up the necessary state (e.g., create a product before adding a feature).
+      - Arrange calls MUST NOT use exact statusCode assertions.
+      - Use: given().when().<call>().then().statusCode(lessThan(300)); (import static org.hamcrest.Matchers.lessThan;)
+      - This prevents setup failures from masking the real test objective.
+    * ACT: The single REST call that exercises the behavior being tested.
+    * ASSERT: ONE exact assertion on the ACT response — either a specific statusCode or a body check, never both in the same chain unless they are intrinsically linked.
+- NEVER chain multiple exact statusCode(N) assertions in the same test method with the same importance.
+- If an endpoint is idempotent for setup (e.g., creating a resource), use a unique identifier (UUID) per test to avoid state leakage between tests.
+
+CLASS ROLE NOTE:
+NOTE: This class has no direct REST endpoint. It is exercised TRANSITIVELY by the REST API (e.g., via Spring DI: Resource → Service → DAO → Model). You MUST still write integration tests that call REST API endpoints via REST Assured. Analyse the source code and the available endpoints to identify which endpoints internally exercise the methods listed in UNCOVERED INFO, then write tests that call those endpoints and indirectly cover this class.
+
+UNCOVERED INFO:
+%%%%%
+Uncovered method: <init> - Uncovered Lines: [17]
+Uncovered method: Reverse - Uncovered Lines: [23, 24]
+%%%%%
+
+APPLICATION SOURCE CODE:
+*****
+//! futname = Subject      //NAME OF FUNCTION UNDER TEST
+//! mutation = false        //SPECIFY MUTATION COVERAGE
+//! textout = true        //WRITE INSTRUMENTED SUBJECT TO FILE
+//! maxchildren = 500000  //MAX LENGTH OF SEARCH
+//! totalpopsize = 100    //TOTAL SIZE OF POPULATIONS 
+//! mutationpercent = 50  //REL FREQUENCY OF GENETIC MUTATION TO CROSSOVER
+//! samefitcountmax = 100 //NUMBER OF CONSECUTIVE TESTS IN A POP 
+//THAT MUST HAVE THE SAME COST FOR POP TO BE STAGNANT
+//! verbose = false        //PRINT MESSAGES SHOWING PROGRESS OF SEARCH
+//! showevery = 3000      //NUMBER OF CANDIDATE INPUTS GENERATED BETWEEN EACH SHOW
+//! numbins = 0           //GRANULARITY OF CANDIDATE INPUT HISTOGRAM, SET TO 0 TO NOT COLLECT STATS
+//! trialfirst = 1        //EACH TRIAL USES A DIFFERENT RANDOM SEED
+//! triallast = 1         //NUMBER OF TRIALS = triallast - trialfirst + 1
+
+package org.restscs.imp;
+
+public class Pat
+{
+	private static String  Reverse(String s)
+	{
+		//RTN REVERSE OF s
+		int slen  = s.length();
+		if (slen < 2) {
+			return s;
+		}
+		String result = "";
+		//var result : System.Text.StringBuilder = new System.Text.StringBuilder(slen);
+		//var i : int = slen - 1;
+		for (int i = slen - 1; i >= 0; i--) { 
+			//result.Append(s[i]);
+			result += s.charAt(i);
+		}
+		//Console.WriteLine("s {0} revs {1}", s, result.ToString());
+		return result;
+	}
+
+	public static String subject(String txt , String pat )  {
+		//SEARCH txt FOR FIRST OCCURRENCE OF pat OR REVERSE OF pat
+		//IF pat (STRING OF LENGTH AT LEAST 3) OCCURS IN txt, RTN 1
+		//IF REVERSE OF pat OCCURS IN txt, RTN 2
+		//IF pat AND REVERSE OF pat OCCURS IN txt, RTN 3
+		//IF PALINDROME CONSISTING OF pat FOLLOWED BY REVERSE pat OCCURS IN txt, RTN 4
+		//IF PALINDROME CONSISTING OF REVERSE pat FOLLOWED pat OCCURS IN txt, RTN 5
+		int result = 0;
+		int  i  = 0;
+		int  j  = 0;
+		int txtlen  = txt.length();
+		int patlen  = pat.length();
+		String  possmatch = null;
+
+		if (patlen > 2) {
+			String patrev  = Reverse(pat);
+			for (i = 0; i <= txtlen - patlen; i++) { 
+				if (txt.charAt(i) == pat.charAt(0)) {
+					possmatch = txt.substring(i, i + patlen);
+					if (possmatch.equals(pat)) {
+						//FOUND pat
+						result = 1;
+						//CHECK IF txt CONTAINS REVERSE pat
+						for (j = i + patlen; j <= txtlen - patlen; j++) { 
+							if (txt.charAt(j) == patrev.charAt(0)) {
+								possmatch = txt.substring(j, j + patlen);
+								if (possmatch.equals(patrev)) {
+									if (j == i + patlen) {
+										return "" + i;//4;
+									}
+									else {
+										return "" + i;//3;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (txt.charAt(i) == patrev.charAt(0)) {
+					possmatch = txt.substring(i, i + patlen);
+					if (possmatch.equals(patrev)) {
+						//FOUND pat REVERSE
+						result = 2;
+						//CHECK IF txt CONTAINS pat
+						for (j = i + patlen; j <= txtlen - patlen; j++) { 
+							if (txt.charAt(j) == pat.charAt(0)) {
+								possmatch = txt.substring(j, j + patlen);
+								if (possmatch.equals(pat)) {
+									if (j == i + patlen) {
+										return "" + i;//5;
+									}
+									else {
+										return "" + i;//3;
+									}
+								}
+							}
+						}
+					}
+				}
+			}  //pat NOR REVERSE FOUND
+		}
+		return "" + result;
+	}
+
+}
+
+*****
+
+ENDPOINT CONTEXT (normalized):
+@@@@@
+- GET /api/calc/{op}/{arg1}/{arg2} | expected status codes: 200, 400, 500
+- GET /api/cookie/{name}/{val}/{site} | expected status codes: 200, 500
+- GET /api/costfuns/{i}/{s} | expected status codes: 200, 400, 500
+- GET /api/dateparse/{dayname}/{monthname} | expected status codes: 200, 500
+- GET /api/filesuffix/{directory}/{file} | expected status codes: 200, 500
+- GET /api/notypevar/{i}/{s} | expected status codes: 200, 400, 500
+- GET /api/ordered4/{w}/{x}/{z}/{y} | expected status codes: 200, 500
+- GET /api/pat/{txt} | expected status codes: 200, 500
+- GET /api/pat/{txt}/{pat} | expected status codes: 200, 500
+- GET /api/text2txt/{word1}/{word2}/{word3} | expected status codes: 200, 500
+@@@@@
+
+PRIORITIZED PARAMETER EXAMPLES (x-parameter-examples when available):
+$$$$$
+- GET /api/calc/{op}/{arg1}/{arg2} | status 200 | op: add, subtract
+- GET /api/calc/{op}/{arg1}/{arg2} | status 200 | arg1: 15.5, 0
+- GET /api/calc/{op}/{arg1}/{arg2} | status 200 | arg2: 4.5, -50.25
+- GET /api/calc/{op}/{arg1}/{arg2} | status 400 | op: add, power
+- GET /api/calc/{op}/{arg1}/{arg2} | status 400 | arg1: 10, 2, 100
+- GET /api/calc/{op}/{arg1}/{arg2} | status 400 | arg2: twenty, 8, 50
+- GET /api/calc/{op}/{arg1}/{arg2} | status 500 | op: divide, multiply
+- GET /api/calc/{op}/{arg1}/{arg2} | status 500 | arg1: 100, 1.7976931348623157e+308, 5e-324
+- GET /api/calc/{op}/{arg1}/{arg2} | status 500 | arg2: 0, 100, 1e+300
+- GET /api/cookie/{name}/{val}/{site} | status 200 | name: session-id, user
+- GET /api/cookie/{name}/{val}/{site} | status 200 | site: example.com, localhost
+- GET /api/cookie/{name}/{val}/{site} | status 200 | val: abc-123-xyz-789, 1
+- GET /api/cookie/{name}/{val}/{site} | status 500 | name: user/settings, auth_token
+- GET /api/cookie/{name}/{val}/{site} | status 500 | site: example.com, api.example.org
+- GET /api/cookie/{name}/{val}/{site} | status 500 | val: true, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c-SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c-SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c-SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c, some-value
+- GET /api/costfuns/{i}/{s} | status 200 | i: 1, 0
+- GET /api/costfuns/{i}/{s} | status 200 | s: algorithm, a
+- GET /api/costfuns/{i}/{s} | status 400 | i: one, -1, 2
+- GET /api/costfuns/{i}/{s} | status 400 | s: test, negative_index
+- GET /api/costfuns/{i}/{s} | status 500 | i: 3000000000, 1, 5
+- GET /api/costfuns/{i}/{s} | status 500 | s: integer_overflow, ThisIsAnExcessivelyLongStringToTestTheLimitsOfTheAPIServerAndPotentiallyTriggerAnInternalServerErrorDueToResourceExhaustionOrTimeoutsWhenProcessingTheInputStringWhichExceedsNormalUsagePatternsAndCouldRevealUnhandledEdgeCasesInTheCostFunctionImplementation., string_with_null_char 
+- GET /api/dateparse/{dayname}/{monthname} | status 200 | dayname: Wednesday, tuesday
+- GET /api/dateparse/{dayname}/{monthname} | status 200 | monthname: August, MAR
+- GET /api/dateparse/{dayname}/{monthname} | status 500 | dayname: 123, Superday, Monday
+- GET /api/dateparse/{dayname}/{monthname} | status 500 | monthname: 456, Movember
+- GET /api/filesuffix/{directory}/{file} | status 200 | directory: /home/user/documents, /var/log/apache2
+- GET /api/filesuffix/{directory}/{file} | status 200 | file: quarterly_report.docx, access.log.1.gz
+- GET /api/filesuffix/{directory}/{file} | status 500 | directory: /var/log, a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a, /usr/share/assets
+- GET /api/filesuffix/{directory}/{file} | status 500 | file: access.log%00.bak, data.csv, image:v1.jpg
+- GET /api/notypevar/{i}/{s} | status 200 | i: 5, 0
+- GET /api/notypevar/{i}/{s} | status 200 | s: example-string, a
+- GET /api/notypevar/{i}/{s} | status 400 | i: abc, 2147483648
+- GET /api/notypevar/{i}/{s} | status 400 | s: some-string, max-int-plus-one, valid-string
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 200 | w: zebra, 99
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 200 | x: yak, 100
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 200 | z: x-ray, 9
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 200 | y: wolf, 10
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 500 | w: apple, a, first
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 500 | x: banana, b, second
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 500 | z: cherry, c
+- GET /api/ordered4/{w}/{x}/{z}/{y} | status 500 | y:  , yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy, fourth
+- GET /api/pat/{txt} | status 200 | txt: The quick brown fox jumps over the lazy dog., a
+- GET /api/pat/{txt} | status 500 | txt: (abc, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+- GET /api/pat/{txt}/{pat} | status 200 | pat: ABAB, a
+- GET /api/pat/{txt}/{pat} | status 200 | txt: ABABCABAB, banana
+- GET /api/pat/{txt}/{pat} | status 500 | txt: some-text-to-search, text-with-non-ascii-Ã©Ã¨Ã§, ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError.ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError.ThisIsAVeryLongTextStringThatKeepsGoingOnAndOnToSimulateAnInputThatMightExceedServerSideBufferLimitsOrCausePerformanceDegradationLeadingToAnInternalServerError
+- GET /api/pat/{txt}/{pat} | status 500 | pat: Ã§, pattern
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 200 | word1: The, a
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 200 | word2: quick, 1
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 200 | word3: brown, $
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 500 | word1: The
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 500 | word2: quick brown, quick
+- GET /api/text2txt/{word1}/{word2}/{word3} | status 500 | word3: fox, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+- GET /api/title/{sex}/{title} | status 200 | sex: male, f
+- GET /api/title/{sex}/{title} | status 200 | title: Smith, Li
+- GET /api/title/{sex}/{title} | status 500 | sex: neuter, female, male
+- GET /api/title/{sex}/{title} | status 500 | title: Jones, null
+$$$$$
+
+SWAGGER DOCUMENTATION:
+#####
+{"swagger":"2.0","info":{"description":"Examples of different string algorithms accessible via REST","version":"1.0","title":"API for String Case Study (SCS)"},"schemes":["http"],"host":"localhost:8080","basePath":"/","tags":[{"name":"scs-rest","description":"Scs Rest"}],"paths":{"/api/calc/{op}/{arg1}/{arg2}":{"get":{"tags":["scs-rest"],"summary":"calc","operationId":"calcUsingGET","produces":["*/*"],"parameters":[{"name":"arg1","in":"path","description":"arg1","required":true,"type":"number","format":"double","x-example":15.5},{"name":"arg2","in":"path","description":"arg2","required":true,"type":"number","format":"double","x-example":4.5},{"name":"op","in":"path","description":"op","required":true,"type":"string","x-example":"add"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"20.0"}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"timestamp":"2023-10-27T10:00:00.000Z","status":400,"error":"Bad Request","message":"Invalid number format for input string: \"twenty\"","path":"/api/calc/add/10/twenty"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-10-27T10:01:00.000Z","status":500,"error":"Internal Server Error","message":"An arithmetic error occurred: / by zero","path":"/api/calc/divide/100/0"}}}},"deprecated":false}},"/api/cookie/{name}/{val}/{site}":{"get":{"tags":["scs-rest"],"summary":"cookie","operationId":"cookieUsingGET","produces":["*/*"],"parameters":[{"name":"name","in":"path","description":"name","required":true,"type":"string","x-example":"session-id"},{"name":"site","in":"path","description":"site","required":true,"type":"string","x-example":"example.com"},{"name":"val","in":"path","description":"val","required":true,"type":"string","x-example":"abc-123-xyz-789"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"Cookie 'session-id' for site 'example.com' processed."}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-10-27T10:00:00.000Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred on the server.","path":"/api/cookie//some-value/example.com"}}}},"deprecated":false}},"/api/costfuns/{i}/{s}":{"get":{"tags":["scs-rest"],"summary":"costfuns","operationId":"costfunsUsingGET","produces":["*/*"],"parameters":[{"name":"i","in":"path","description":"i","required":true,"type":"integer","format":"int32","x-example":1},{"name":"s","in":"path","description":"s","required":true,"type":"string","x-example":"algorithm"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"9.0"}},"400":{"description":"Client error \u2014 400","examples":{"application/json":{"timestamp":"2023-10-27T10:00:15.123Z","status":400,"error":"Bad Request","message":"Invalid parameter 'i': must be a valid 32-bit integer.","path":"/api/costfuns/one/test"}}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-10-27T10:01:45.456Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while calculating the cost function."}}}},"deprecated":false}},"/api/dateparse/{dayname}/{monthname}":{"get":{"tags":["scs-rest"],"summary":"dateParse","operationId":"dateParseUsingGET","produces":["*/*"],"parameters":[{"name":"dayname","in":"path","description":"dayname","required":true,"type":"string","x-example":"Wednesday"},{"name":"monthname","in":"path","description":"monthname","required":true,"type":"string","x-example":"August"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"Successfully parsed date: Wednesday, August"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-05-19T14:30:00.000+00:00","status":500,"error":"Internal Server Error","message":"Error parsing date components. Please provide valid day and month names.","path":"/api/dateparse/Superday/Movember"}}}},"deprecated":false}},"/api/filesuffix/{directory}/{file}":{"get":{"tags":["scs-rest"],"summary":"fileSuffix","operationId":"fileSuffixUsingGET","produces":["*/*"],"parameters":[{"name":"directory","in":"path","description":"directory","required":true,"type":"string","x-example":"/home/user/documents"},{"name":"file","in":"path","description":"file","required":true,"type":"string","x-example":"quarterly_report.docx"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"docx"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-05-11T14:35:12.456+00:00","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing file suffix.","path":"/api/filesuffix/usr/share/assets/image:v1.jpg"}}}},"deprecated":false}},"/api/notypevar/{i}/{s}":{"get":{"tags":["scs-rest"],"summary":"notyPevar","operationId":"notyPevarUsingGET","produces":["*/*"],"parameters":[{"name":"i","in":"path","description":"i","required":true,"type":"integer","format":"int32","x-example":5},{"name":"s","in":"path","description":"s","required":true,"type":"string","x-example":"example-string"}],"responses":{"200":{"description":"OK","schema":{"type":"string"}},"400":{"description":"Client error \u2014 400"},"500":{"description":"Server error \u2014 500"}},"deprecated":false}},"/api/ordered4/{w}/{x}/{z}/{y}":{"get":{"tags":["scs-rest"],"summary":"ordered4","operationId":"ordered4UsingGET","produces":["*/*"],"parameters":[{"name":"w","in":"path","description":"w","required":true,"type":"string","x-example":"zebra"},{"name":"x","in":"path","description":"x","required":true,"type":"string","x-example":"yak"},{"name":"y","in":"path","description":"y","required":true,"type":"string","x-example":"wolf"},{"name":"z","in":"path","description":"z","required":true,"type":"string","x-example":"x-ray"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"wolfx-rayyakzebra"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-04-12T14:45:12.123Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing the request.","path":"/api/ordered4/first/second//fourth"}}}},"deprecated":false}},"/api/pat/{txt}":{"get":{"tags":["scs-rest"],"summary":"regex","operationId":"regexUsingGET","produces":["*/*"],"parameters":[{"name":"txt","in":"path","description":"txt","required":true,"type":"string","x-example":"The quick brown fox jumps over the lazy dog."}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"Input text processed successfully."}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-05-15T10:30:00.000Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing the regular expression.","path":"/api/pat/(abc"}}}},"deprecated":false}},"/api/pat/{txt}/{pat}":{"get":{"tags":["scs-rest"],"summary":"pat","operationId":"patUsingGET","produces":["*/*"],"parameters":[{"name":"pat","in":"path","description":"pat","required":true,"type":"string","x-example":"ABAB"},{"name":"txt","in":"path","description":"txt","required":true,"type":"string","x-example":"ABABCABAB"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"Pattern found at index 0 4"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-10-27T10:00:00.000Z","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing the pattern search.","path":"/api/pat/some-text-to-search/"}}}},"deprecated":false}},"/api/text2txt/{word1}/{word2}/{word3}":{"get":{"tags":["scs-rest"],"summary":"text2txt","operationId":"text2txtUsingGET","produces":["*/*"],"parameters":[{"name":"word1","in":"path","description":"word1","required":true,"type":"string","x-example":"The"},{"name":"word2","in":"path","description":"word2","required":true,"type":"string","x-example":"quick"},{"name":"word3","in":"path","description":"word3","required":true,"type":"string","x-example":"brown"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"The quick brown"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2024-07-15T10:30:00.000+00:00","status":500,"error":"Internal Server Error","message":"An unexpected error occurred on the server.","path":"/api/text2txt/The//fox"}}}},"deprecated":false}},"/api/title/{sex}/{title}":{"get":{"tags":["scs-rest"],"summary":"title","operationId":"titleUsingGET","produces":["*/*"],"parameters":[{"name":"sex","in":"path","description":"sex","required":true,"type":"string","x-example":"male"},{"name":"title","in":"path","description":"title","required":true,"type":"string","x-example":"Smith"}],"responses":{"200":{"description":"OK","schema":{"type":"string"},"examples":{"application/json":"Mr. Smith"}},"500":{"description":"Server error \u2014 500","examples":{"application/json":{"timestamp":"2023-08-29T14:15:22.123+00:00","status":500,"error":"Internal Server Error","message":"An unexpected error occurred while processing the title.","path":"/api/title/neuter/Jones"}}}},"deprecated":false}}}}
+#####

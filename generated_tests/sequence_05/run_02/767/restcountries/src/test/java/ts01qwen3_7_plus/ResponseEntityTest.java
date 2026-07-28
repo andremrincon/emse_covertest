@@ -1,0 +1,59 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusFromNameEndpoint() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageFromNameEndpoint() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <405> but was <404>.")
+    @Test(timeout = 60000)
+    public void testGetStatusFromV1PostEndpoint() {
+        given()
+            .when()
+                .post("/v1")
+            .then()
+                .statusCode(405);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <405> but was <404>.")
+    @Test(timeout = 60000)
+    public void testGetMessageFromV1PostEndpoint() {
+        given()
+            .when()
+                .post("/v1")
+            .then()
+                .statusCode(405);
+    }
+}

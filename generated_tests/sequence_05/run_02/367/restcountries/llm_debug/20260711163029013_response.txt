@@ -1,0 +1,41 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryTranslationsTest {
+
+    private static final String BASE = System.getProperty("baseUrl", System.getenv("BASE_URL")) == null ? "http://localhost:8080/rest" : (System.getProperty("baseUrl", System.getenv("BASE_URL")));
+
+    @Test(timeout = 60000)
+    public void testSetDeViaV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.de", equalTo("Vereinigte Staaten von Amerika"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsViaV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.es", equalTo("Estados Unidos"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrViaV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.fr", equalTo("États-Unis"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaViaV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.ja", equalTo("アメリカ合衆国"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItViaV1AlphaUS() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/v1/alpha/US").then().body("translations.it", equalTo("Stati Uniti D'America"));
+    }
+}

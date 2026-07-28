@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_InvalidN_ShouldReturn400() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/bessj/{n}/{x}", -1, 2.5);
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxZero_ShouldReturn200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/bessj/{n}/{x}", 3, 0.0);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxGreaterThanN_Path_ShouldReturn200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/bessj/{n}/{x}", 2, 5.0);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_AxLessOrEqual_ReverseRecurrence_ShouldReturn200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/bessj/{n}/{x}", 10, 1.0E-10);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_NegativeX_OddN_ShouldReturn200() {
+        given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/bessj/{n}/{x}", 3, -2.5);
+        assertEquals(200, resp.getStatusCode());
+    }
+}

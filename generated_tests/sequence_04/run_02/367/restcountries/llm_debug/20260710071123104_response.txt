@@ -1,0 +1,148 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaByCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaMultipleCodesReturnsLanguageFields() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameFullTextReturnsLanguageFields() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v2/name/France")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangReturnsCountriesWithLanguages() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CallingCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CapitalReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/capital/Paris")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2SubregionReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBlocReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+}
+```

@@ -1,0 +1,78 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testMaleValidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/male/mr")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleInvalidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/male/mrs")
+        .then()
+            .statusCode(200)
+            .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleValidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/female/mrs")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleInvalidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/female/mr")
+        .then()
+            .statusCode(200)
+            .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneValidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/none/dr")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneInvalidTitle() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/title/none/mr")
+        .then()
+            .statusCode(200)
+            .body(equalTo("-1"));
+    }
+}

@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsZero_When_iIsMinus4_And_sIsAbab() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/-4/abab");
+        assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsSix_When_valid_i_not_minus4_and_sIsAbab() {
+        given().when().get("/api/calc/add/0/1").then().statusCode(lessThan(300));
+        String unique = "abab";
+        Response resp = given().when().get("/api/costfuns/1/" + unique);
+        assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsTen_When_sIsNotAbab_and_iMayTriggerOtherBranches() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        String s = "baab";
+        Response resp = given().when().get("/api/costfuns/5/" + s);
+        assertEquals("10", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_ReturnsBadRequest_When_iIsNotAnInteger() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/one/test");
+        assertEquals(400, resp.getStatusCode());
+    }
+}

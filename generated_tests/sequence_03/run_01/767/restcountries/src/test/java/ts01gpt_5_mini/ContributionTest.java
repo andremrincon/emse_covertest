@@ -1,0 +1,76 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("rest.base");
+        if (base == null) base = System.getenv("REST_BASE");
+        if (base == null) base = System.getProperty("BASE_URL");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionAccepted() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100,\"currency\":\"EUR\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingTokenResultsBadRequest() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50,\"currency\":\"USD\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingAmountResultsBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"currency\":\"USD\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroAmountResultsBadRequest() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":0,\"currency\":\"EUR\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAmountResultsBadRequest() {
+        given().when().get("/v1/alpha/GB").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":-10,\"currency\":\"GBP\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testLargeAmountAcceptedOrHandled() {
+        given().when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100000,\"currency\":\"USD\",\"token\":\"" + token + "\"}";
+        Response resp = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

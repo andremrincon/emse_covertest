@@ -1,0 +1,85 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import io.restassured.http.ContentType;
+
+public class CORSFilterTest {
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowOriginHeaderOnV1All() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/all");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowMethodsHeaderOnV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowHeadersHeaderOnV1AlphaMultipleCodes() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnV1CurrencyUSD() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        assertEquals(null, resp.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersPresentOnV2AlphaWithFields() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{alphacode}", "US");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsOnCapitalEndpoint() {
+        given().when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/capital/{capital}", "London");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsOnNameEndpointFullTextParam() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "false").when().get("/v1/name/{name}", "France");
+        assertEquals(null, resp.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostContributeAcceptsAndHasCorsStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().contentType(ContentType.JSON).body("{\"amount\":100,\"currency\":\"USD\",\"token\":\"tok_test\"}").when().post("/contribute");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsOnV1CallingCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/callingcode/{callingcode}", "1");
+        assertEquals(null, resp.getHeader("Cache-Control"));
+    }
+}

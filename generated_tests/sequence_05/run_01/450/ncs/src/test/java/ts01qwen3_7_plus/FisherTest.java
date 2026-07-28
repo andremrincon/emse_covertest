@@ -1,0 +1,43 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @Test(timeout = 60000)
+    public void testFisherNormalPath() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherLargeXForNegativeP() {
+        given()
+            .when()
+                .get("/api/fisher/20/20/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSmallXForGreaterP() {
+        given()
+            .when()
+                .get("/api/fisher/20/20/0.00000001")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherInvalidParameter() {
+        given()
+            .when()
+                .get("/api/fisher/abc/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+}

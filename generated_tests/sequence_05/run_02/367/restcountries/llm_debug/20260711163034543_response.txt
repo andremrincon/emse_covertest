@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            env = System.getenv("BASE_URL");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankTokenReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"token\":\"\"}";
+        Response resp = given().contentType("application/json").body(body).when().post("/contribute");
+        Assert.assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithInvalidTokenReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String token = "invalid_token_" + UUID.randomUUID().toString();
+        String body = "{\"amount\":250,\"token\":\"" + token + "\"}";
+        Response resp = given().contentType("application/json").body(body).when().post("/contribute");
+        Assert.assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithUniqueTokenMayReturnAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String token = "test_token_" + UUID.randomUUID().toString();
+        String body = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        Response resp = given().contentType("application/json").body(body).when().post("/contribute");
+        Assert.assertEquals(202, resp.getStatusCode());
+    }
+}

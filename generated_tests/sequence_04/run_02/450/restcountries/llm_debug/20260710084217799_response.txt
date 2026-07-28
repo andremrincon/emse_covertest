@@ -1,0 +1,170 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeTranslationViaAlphaEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsTranslationViaNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrTranslationViaCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("translations[0].fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaTranslationViaCallingCodeEndpoint() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("translations[0].ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItTranslationViaCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("translations[0].it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeTranslationViaRegionEndpoint() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsTranslationViaAlphaCodesEndpoint() {
+        given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrTranslationViaAlphaSingleEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("translations.fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaTranslationViaNameEndpoint() {
+        given()
+                .when()
+                .get("/v1/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("translations[0].ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItTranslationViaCurrencyEndpoint() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("translations[0].it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetDeTranslationViaAllEndpoint() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetEsTranslationViaCapitalEndpoint() {
+        given()
+                .when()
+                .get("/v1/capital/Paris")
+                .then()
+                .statusCode(200)
+                .body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetFrTranslationViaRegionEndpoint() {
+        given()
+                .when()
+                .get("/v1/region/Americas")
+                .then()
+                .statusCode(200)
+                .body("translations[0].fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetJaTranslationViaAlphaGbEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("translations.ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testSetItTranslationViaAlphaUsEndpoint() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("translations.it", notNullValue());
+    }
+}
+```

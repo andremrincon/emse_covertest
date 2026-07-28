@@ -1,0 +1,53 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @Before
+    public void setup() {
+        String baseUrl = System.getProperty("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcValidOperation() {
+        given()
+            .pathParam("op", "plus")
+            .pathParam("arg1", 15.5)
+            .pathParam("arg2", 4.5)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidOperation() {
+        given()
+            .pathParam("op", "power")
+            .pathParam("arg1", 10.0)
+            .pathParam("arg2", 2.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcServerError() {
+        given()
+            .pathParam("op", "divide")
+            .pathParam("arg1", 100.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+}

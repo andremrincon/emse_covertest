@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("APP_HOST", "localhost");
+        String port = System.getenv().getOrDefault("APP_PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserZeroX() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPath() {
+        given()
+            .when()
+                .get("/api/gammq/0.001/1000.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPathSmallA() {
+        given()
+            .when()
+                .get("/api/gammq/0.5/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAValue() {
+        given()
+            .when()
+                .get("/api/gammq/-1.0/2.0")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidParameterType() {
+        given()
+            .when()
+                .get("/api/gammq/abc/2.0")
+            .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyWithZeroSide() {
+        given()
+            .when()
+                .get("/api/triangle/0/3/4")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangleMaxA() {
+        given()
+            .when()
+                .get("/api/triangle/5/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangleMaxC() {
+        given()
+            .when()
+                .get("/api/triangle/1/1/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateral() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsosceles() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/4")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScalene() {
+        given()
+            .when()
+                .get("/api/triangle/3/4/5")
+            .then()
+                .statusCode(200);
+    }
+}

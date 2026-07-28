@@ -1,0 +1,107 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("API_HOST", "localhost");
+        String port = System.getenv().getOrDefault("API_PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiAndEConstantOperators() {
+        given()
+            .when()
+                .get("/api/calc/e/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/pi/0/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtAndLogUnaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/log/1/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/sqrt/16/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTrigonometricOperators() {
+        given()
+            .when()
+                .get("/api/calc/sine/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/cosine/0/0")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/tangent/0/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusAndSubtractBinaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/subtract/10/3")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/plus/5/3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyAndDivideBinaryOperators() {
+        given()
+            .when()
+                .get("/api/calc/multiply/4/3")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/api/calc/divide/10/2")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperatorDefaultBranch() {
+        given()
+            .when()
+                .get("/api/calc/unknownop/1/2")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,167 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryServiceBaseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByCodeList_v1_multipleCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+[2] METHOD=testGetByCodeList_v2_multipleCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByCodeList_v1_multipleCodes FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryServiceBaseTest.testGetByCodeList_v1_multipleCodes(CountryServiceBaseTest.java:41)
+CODE CONTEXT:
+    38:     @Test(timeout = 60000)
+    39:     public void testGetByCodeList_v1_multipleCodes() {
+    40:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    41:         given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);  ← FAILURE HERE
+    42:     }
+    43: 
+    44:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByCodeList_v2_multipleCodes FAILURE AT LINE 47
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryServiceBaseTest.testGetByCodeList_v2_multipleCodes(CountryServiceBaseTest.java:47)
+CODE CONTEXT:
+    44:     @Test(timeout = 60000)
+    45:     public void testGetByCodeList_v2_multipleCodes() {
+    46:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    47:         given().when().get("/v2/alpha?codes=US,CA,MX").then().statusCode(400);  ← FAILURE HERE
+    48:     }
+    49: 
+    50:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("base.url");
+        if (env == null || env.isEmpty()) env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) env = "http://localhost:8080/rest";
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_twoLetterFound_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_threeLetterFound_v2() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_v1_multipleCodes() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_v2_multipleCodes() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA,MX").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_missingCodes_returns400_v2() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_exactName_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_alternativeSpelling_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/DE?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_name_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/United?fullText=false").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_alternative_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/Vatican?fullText=false").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_v2All() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_v1() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

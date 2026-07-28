@@ -1,0 +1,83 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertExcludesConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only");
+        Response arrangeResp = req.when().post("/products/{productName}/constraints/excludes", productName);
+        arrangeResp.then().statusCode(lessThan(300));
+        RequestSpecification req2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only");
+        req2.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertRequiresConstraint_responseContainsSuccessStatus() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM");
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        RequestSpecification req2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM");
+        Response act = req2.when().post("/products/{productName}/constraints/requires", productName);
+        String status = act.jsonPath().getString("status");
+        assertEquals("success", status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteSingleConstraint_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "CPU-i7")
+                .formParam("excludedFeature", "Legacy-GPU");
+        Response createResp = req.when().post("/products/{productName}/constraints/excludes", productName);
+        createResp.then().statusCode(lessThan(300));
+        Number idNum = createResp.jsonPath().get("id");
+        Long constraintId = idNum == null ? null : idNum.longValue();
+        given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProduct_removesAllConstraints_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification r1 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "Feature-A")
+                .formParam("requiredFeature", "Feature-B");
+        r1.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        RequestSpecification r2 = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "Feature-C")
+                .formParam("excludedFeature", "Feature-D");
+        r2.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}", productName).then().statusCode(204);
+    }
+}

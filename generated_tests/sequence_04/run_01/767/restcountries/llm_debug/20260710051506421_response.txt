@@ -1,0 +1,121 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CountryRestV1Test {
+
+    private static final String BASE = System.getProperty("baseUrl",
+            System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccess_US() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/US");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaBadRequest_short() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/alpha/A");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccess() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "US,CA,MX").when().get(BASE + "/v1/alpha");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListEmptyCodes() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("codes", "").when().get(BASE + "/v1/alpha");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess_USD() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/USD");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequest_short() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/currency/12");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess_FranceFullTextFalse() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("fullText", "false").when().get(BASE + "/v1/name/France");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound_numeric() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/name/123");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess_1() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/callingcode/1");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound_abc() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/callingcode/abc");
+        assertEquals(404, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess_London() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/capital/London");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionSuccess_Europe() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/region/Europe");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregionSuccess_WesternEurope() throws Exception {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        String enc = URLEncoder.encode("Western Europe", "UTF-8");
+        Response resp = given().when().get(BASE + "/v1/subregion/" + enc);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageSuccess_es() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/v1/lang/es");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testPostV1MethodNotAllowed() {
+        given().when().get(BASE + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().post(BASE + "/v1");
+        assertEquals(405, resp.getStatusCode());
+    }
+
+}

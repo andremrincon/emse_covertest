@@ -1,0 +1,74 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FileSuffixTest {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/text/file.txt");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/acrobat/file.pdf");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/word/file.doc");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/bin/file.exe");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/lib/file.dll");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDirectoryWithNoExtensionFile() {
+        Response response = given()
+                .baseUri(getBaseUrl())
+                .when()
+                .get("/api/filesuffix/text/noextension");
+
+        response.then().statusCode(200);
+    }
+}

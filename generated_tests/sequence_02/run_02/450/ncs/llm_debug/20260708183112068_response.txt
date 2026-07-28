@@ -1,0 +1,88 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderAZeroBPositive() {
+        given()
+            .pathParam("a", 0)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderAPositiveBZero() {
+        given()
+            .pathParam("a", 5)
+            .pathParam("b", 0)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBothPositive() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderAPositiveBNegative() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderANegativeBPositive() {
+        given()
+            .pathParam("a", -9)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBothNegative() {
+        given()
+            .pathParam("a", -9)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(equalTo(200));
+    }
+}

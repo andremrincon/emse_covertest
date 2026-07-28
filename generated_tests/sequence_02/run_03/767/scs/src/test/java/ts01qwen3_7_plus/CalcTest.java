@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static io.restassured.RestAssured.given;
+
+@RunWith(Parameterized.class)
+public class CalcTest {
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+            { "pi", 0.0, 0.0 },
+            { "e", 0.0, 0.0 },
+            { "sqrt", 4.0, 0.0 },
+            { "log", 10.0, 0.0 },
+            { "sine", 0.0, 0.0 },
+            { "cosine", 0.0, 0.0 },
+            { "tangent", 0.0, 0.0 },
+            { "plus", 1.0, 2.0 },
+            { "subtract", 5.0, 2.0 },
+            { "multiply", 2.0, 3.0 },
+            { "divide", 6.0, 2.0 }
+        });
+    }
+
+    private String op;
+    private double arg1;
+    private double arg2;
+
+    public CalcTest(String op, double arg1, double arg2) {
+        this.op = op;
+        this.arg1 = arg1;
+        this.arg2 = arg2;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcOperation() {
+        given()
+            .pathParam("op", op)
+            .pathParam("arg1", arg1)
+            .pathParam("arg2", arg2)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+}

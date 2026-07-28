@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_withBothFeatures_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "src-" + UUID.randomUUID().toString();
+        String excl = "excl-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().formParam("sourceFeature", src).formParam("excludedFeature", excl).when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_withOnlySourceFeature_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "srcOnly-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().formParam("sourceFeature", src).when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_withOnlyExcludedFeature_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String excl = "exclOnly-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().formParam("excludedFeature", excl).when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_withProblematicProduct_returns500() {
+        given().when().get("/").then().statusCode(404);
+        String problematicProduct = "Workstation-Z8";
+        Response resp = given().formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").when().post("/products/{productName}/constraints/excludes", problematicProduct);
+        assertEquals(500, resp.getStatusCode());
+    }
+}

@@ -1,0 +1,59 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_i5_sEqualsAbabba_returns10() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "ababba");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iMinus4_sEqualsBaab_coversEqualsBranch_returns10() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -4, "baab");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iGreaterThan666_sAbab_returns6() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 700, "abab");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iOne_sZ_compareGreaterThan_returns10() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 1, "z");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iLessThanMinus444_sZ_returns10() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "z");
+        resp.then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_iMinus4_sAbab_noConditionsMet_returns0() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        resp.then().body(equalTo("10"));
+    }
+}

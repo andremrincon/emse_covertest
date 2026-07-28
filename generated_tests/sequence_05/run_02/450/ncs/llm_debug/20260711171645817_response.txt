@@ -1,0 +1,95 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPathWithValidParameters() {
+        double a = 5.5;
+        double x = 2.3;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPathWithValidParameters() {
+        double a = 0.001;
+        double x = 1000.0;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPathWithZeroX() {
+        double a = 1.0;
+        double x = 0.0;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqWithNegativeA() {
+        double a = -1.0;
+        double x = 2.0;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqWithNegativeX() {
+        double a = 1.0;
+        double x = -1.0;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqWithZeroA() {
+        double a = 0.0;
+        double x = 1.0;
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

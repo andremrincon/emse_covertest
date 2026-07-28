@@ -1,0 +1,411 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV2NameGermanyReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testV2AlphaUSWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testV2RegionalBlocEUWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testV2CapitalParisWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=testV2NameFranceFullTextReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testV2RegionEuropeWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testV2CallingCode1ReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=testV2SubregionWesternEuropeWithLanguageFields TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+
+[9] METHOD=testV2AlphaMultipleCodesWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=testV2LangSpanishReturnsLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=testV2DemonymAmericanWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=testV2CurrencyEURWithLanguageFields TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV2NameGermanyReturnsLanguageFields FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2NameGermanyReturnsLanguageFields(LanguageTest.java:27)
+CODE CONTEXT:
+    24:                 .when()
+    25:                 .get("/v2/name/Germany")
+    26:                 .then()
+    27:                 .statusCode(404)  ← FAILURE HERE
+    28:                 .body("languages[0].iso639_1", hasItem("de"))
+    29:                 .body("languages[0].iso639_2", hasItem("deu"))
+    30:                 .body("languages[0].name", hasItem("German"))
+
+[2] METHOD=testV2AlphaUSWithLanguageFields FAILURE AT LINE 55
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2AlphaUSWithLanguageFields(LanguageTest.java:55)
+CODE CONTEXT:
+    52:                 .when()
+    53:                 .get("/v2/alpha/US")
+    54:                 .then()
+    55:                 .statusCode(404)  ← FAILURE HERE
+    56:                 .body("languages.iso639_1", hasItem("en"))
+    57:                 .body("languages.iso639_2", hasItem("eng"))
+    58:                 .body("languages.name", hasItem("English"))
+
+[3] METHOD=testV2RegionalBlocEUWithLanguageFields FAILURE AT LINE 182
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2RegionalBlocEUWithLanguageFields(LanguageTest.java:182)
+CODE CONTEXT:
+   179:                 .when()
+   180:                 .get("/v2/regionalbloc/EU")
+   181:                 .then()
+   182:                 .statusCode(404)  ← FAILURE HERE
+   183:                 .body("languages.iso639_1", hasItem("de"))
+   184:                 .body("languages.iso639_2", hasItem("deu"))
+   185:                 .body("languages.name", hasItem("German"))
+
+[4] METHOD=testV2CapitalParisWithLanguageFields FAILURE AT LINE 98
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2CapitalParisWithLanguageFields(LanguageTest.java:98)
+CODE CONTEXT:
+    95:                 .when()
+    96:                 .get("/v2/capital/Paris")
+    97:                 .then()
+    98:                 .statusCode(404)  ← FAILURE HERE
+    99:                 .body("languages.iso639_1", hasItem("fr"))
+   100:                 .body("languages.iso639_2", hasItem("fra"))
+   101:                 .body("languages.name", hasItem("French"))
+
+[5] METHOD=testV2NameFranceFullTextReturnsLanguageFields FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2NameFranceFullTextReturnsLanguageFields(LanguageTest.java:41)
+CODE CONTEXT:
+    38:                 .when()
+    39:                 .get("/v2/name/France")
+    40:                 .then()
+    41:                 .statusCode(404)  ← FAILURE HERE
+    42:                 .body("languages[0].iso639_1", hasItem("fr"))
+    43:                 .body("languages[0].iso639_2", hasItem("fra"))
+    44:                 .body("languages[0].name", hasItem("French"))
+
+[6] METHOD=testV2RegionEuropeWithLanguageFields FAILURE AT LINE 112
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2RegionEuropeWithLanguageFields(LanguageTest.java:112)
+CODE CONTEXT:
+   109:                 .when()
+   110:                 .get("/v2/region/Europe")
+   111:                 .then()
+   112:                 .statusCode(404)  ← FAILURE HERE
+   113:                 .body("languages.iso639_1", hasItem("de"))
+   114:                 .body("languages.iso639_2", hasItem("deu"))
+   115:                 .body("languages.name", hasItem("German"))
+
+[7] METHOD=testV2CallingCode1ReturnsLanguageFields FAILURE AT LINE 84
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2CallingCode1ReturnsLanguageFields(LanguageTest.java:84)
+CODE CONTEXT:
+    81:                 .when()
+    82:                 .get("/v2/callingcode/1")
+    83:                 .then()
+    84:                 .statusCode(404)  ← FAILURE HERE
+    85:                 .body("languages.iso639_1", hasItem("en"))
+    86:                 .body("languages.iso639_2", hasItem("eng"))
+    87:                 .body("languages.name", hasItem("English"))
+
+[8] METHOD=testV2SubregionWesternEuropeWithLanguageFields FAILURE AT LINE 124
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v2/subregion/Western Europe
+at ts01glm_5_2.LanguageTest.testV2SubregionWesternEuropeWithLanguageFields(LanguageTest.java:124)
+CODE CONTEXT:
+   121:         given()
+   122:                 .queryParam("fields", "languages")
+   123:                 .when()
+   124:                 .get("/v2/subregion/Western Europe")  ← FAILURE HERE
+   125:                 .then()
+   126:                 .statusCode(200)
+   127:                 .body("languages.iso639_1", hasItem("de"))
+
+[9] METHOD=testV2AlphaMultipleCodesWithLanguageFields FAILURE AT LINE 70
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2AlphaMultipleCodesWithLanguageFields(LanguageTest.java:70)
+CODE CONTEXT:
+    67:                 .when()
+    68:                 .get("/v2/alpha")
+    69:                 .then()
+    70:                 .statusCode(404)  ← FAILURE HERE
+    71:                 .body("languages.iso639_1", hasItems("en", "fr"))
+    72:                 .body("languages.iso639_2", hasItems("eng", "fra"))
+    73:                 .body("languages.name", hasItems("English", "French"))
+
+[10] METHOD=testV2LangSpanishReturnsLanguageFields FAILURE AT LINE 140
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2LangSpanishReturnsLanguageFields(LanguageTest.java:140)
+CODE CONTEXT:
+   137:                 .when()
+   138:                 .get("/v2/lang/Spanish")
+   139:                 .then()
+   140:                 .statusCode(404)  ← FAILURE HERE
+   141:                 .body("languages.iso639_1", hasItem("es"))
+   142:                 .body("languages.iso639_2", hasItem("spa"))
+   143:                 .body("languages.name", hasItem("Spanish"))
+
+[11] METHOD=testV2DemonymAmericanWithLanguageFields FAILURE AT LINE 168
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2DemonymAmericanWithLanguageFields(LanguageTest.java:168)
+CODE CONTEXT:
+   165:                 .when()
+   166:                 .get("/v2/demonym/American")
+   167:                 .then()
+   168:                 .statusCode(404)  ← FAILURE HERE
+   169:                 .body("languages.iso639_1", hasItem("en"))
+   170:                 .body("languages.iso639_2", hasItem("eng"))
+   171:                 .body("languages.name", hasItem("English"))
+
+[12] METHOD=testV2CurrencyEURWithLanguageFields FAILURE AT LINE 154
+java.lang.AssertionError:
+at ts01glm_5_2.LanguageTest.testV2CurrencyEURWithLanguageFields(LanguageTest.java:154)
+CODE CONTEXT:
+   151:                 .when()
+   152:                 .get("/v2/currency/EUR")
+   153:                 .then()
+   154:                 .statusCode(404)  ← FAILURE HERE
+   155:                 .body("languages.iso639_1", hasItem("de"))
+   156:                 .body("languages.iso639_2", hasItem("deu"))
+   157:                 .body("languages.name", hasItem("German"))
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameGermanyReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", hasItem("de"))
+                .body("languages[0].iso639_2", hasItem("deu"))
+                .body("languages[0].name", hasItem("German"))
+                .body("languages[0].nativeName", hasItem("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameFranceFullTextReturnsLanguageFields() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v2/name/France")
+                .then()
+                .statusCode(404)
+                .body("languages[0].iso639_1", hasItem("fr"))
+                .body("languages[0].iso639_2", hasItem("fra"))
+                .body("languages[0].name", hasItem("French"))
+                .body("languages[0].nativeName", is(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaUSWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("en"))
+                .body("languages.iso639_2", hasItem("eng"))
+                .body("languages.name", hasItem("English"))
+                .body("languages.nativeName", hasItem("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaMultipleCodesWithLanguageFields() {
+        given()
+                .queryParam("codes", "US,CA")
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItems("en", "fr"))
+                .body("languages.iso639_2", hasItems("eng", "fra"))
+                .body("languages.name", hasItems("English", "French"))
+                .body("languages.nativeName", hasItems("English", "français"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CallingCode1ReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("en"))
+                .body("languages.iso639_2", hasItem("eng"))
+                .body("languages.name", hasItem("English"))
+                .body("languages.nativeName", hasItem("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CapitalParisWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/capital/Paris")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("fr"))
+                .body("languages.iso639_2", hasItem("fra"))
+                .body("languages.name", hasItem("French"))
+                .body("languages.nativeName", is(notNullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionEuropeWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/region/Europe")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("de"))
+                .body("languages.iso639_2", hasItem("deu"))
+                .body("languages.name", hasItem("German"))
+                .body("languages.nativeName", hasItem("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2SubregionWesternEuropeWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"))
+                .body("languages.iso639_2", hasItem("deu"))
+                .body("languages.name", hasItem("German"))
+                .body("languages.nativeName", hasItem("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangSpanishReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("es"))
+                .body("languages.iso639_2", hasItem("spa"))
+                .body("languages.name", hasItem("Spanish"))
+                .body("languages.nativeName", hasItem("Español"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("de"))
+                .body("languages.iso639_2", hasItem("deu"))
+                .body("languages.name", hasItem("German"))
+                .body("languages.nativeName", hasItem("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2DemonymAmericanWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/demonym/American")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("en"))
+                .body("languages.iso639_2", hasItem("eng"))
+                .body("languages.name", hasItem("English"))
+                .body("languages.nativeName", hasItem("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBlocEUWithLanguageFields() {
+        given()
+                .queryParam("fields", "languages")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(404)
+                .body("languages.iso639_1", hasItem("de"))
+                .body("languages.iso639_2", hasItem("deu"))
+                .body("languages.name", hasItem("German"))
+                .body("languages.nativeName", hasItem("Deutsch"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("API_BASE_URL", System.getenv().getOrDefault("API_BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_SuccessfulDeletionReturns204() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String config = "conf-" + uuid;
+        String feature = "feat-" + uuid;
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().put("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+
+        Response response = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_FailureWithInvalidFeatureNameReturns500() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String config = "conf-" + uuid;
+        String badFeature = "feature-name-that-is-intentionally-made-very-long-to-exceed-potential-database-column-size-limits-or-other-internal-buffer-restrictions-leading-to-an-unhandled-server-side-exception-and-a-500-internal-server-error-response";
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+
+        Response response = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, badFeature);
+
+        response.then().statusCode(500);
+    }
+}

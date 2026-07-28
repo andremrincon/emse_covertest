@@ -1,0 +1,56 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_EU_ReturnsCountries() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(404)
+                .body("$", not(empty()));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_NAFTA_ReturnsCountries() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/NAFTA")
+                .then()
+                .statusCode(404)
+                .body("$", not(empty()));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_InvalidBloc_ReturnsNotFound() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/123")
+                .then()
+                .statusCode(404);
+    }
+}

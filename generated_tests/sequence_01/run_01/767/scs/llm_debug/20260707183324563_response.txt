@@ -1,0 +1,64 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class DateParseTest {
+
+    private static final String BASE = System.getProperty("baseUrl",
+            System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+
+    private void arrangeCall(String day, String month) {
+        given().when().get(BASE + "/api/dateparse/" + day + "/" + month).then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidMonJan_returnsBody2() {
+        String id = UUID.randomUUID().toString();
+        arrangeCall("mon", "feb");
+        arrangeCall("mon", "mar");
+        arrangeCall("mon", "apr");
+        arrangeCall("mon", "may");
+        arrangeCall("mon", "jun");
+        given().when().get(BASE + "/api/dateparse/mon/jan").then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayWithMar_returns200() {
+        arrangeCall("tue", "jul");
+        arrangeCall("tue", "aug");
+        arrangeCall("tue", "sep");
+        given().when().get(BASE + "/api/dateparse/xyz/mar").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitiveDayAndMonth_returns9() {
+        arrangeCall("wed", "oct");
+        arrangeCall("wed", "nov");
+        given().when().get(BASE + "/api/dateparse/Tuesday/AUG").then().body(equalTo("9"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCompletelyInvalidComponents_returns500() {
+        arrangeCall("mon", "jan");
+        arrangeCall("tue", "feb");
+        given().when().get(BASE + "/api/dateparse/123/456").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSunDec_returnsBody13() {
+        arrangeCall("thu", "mar");
+        arrangeCall("fri", "apr");
+        given().when().get(BASE + "/api/dateparse/sun/dec").then().body(equalTo("13"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWedFeb_returnsBody3() {
+        arrangeCall("sat", "may");
+        arrangeCall("sun", "jun");
+        given().when().get(BASE + "/api/dateparse/WED/FEB").then().body(equalTo("3"));
+    }
+}

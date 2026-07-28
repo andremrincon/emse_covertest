@@ -1,0 +1,177 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaReturnsCountryWithoutFields() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaReturnsCountryWithFields() {
+        given()
+                .queryParam("fields", "name;capital")
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaReturnsBadRequestForInvalidCode() {
+        given()
+                .when()
+                .get("/v2/alpha/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListReturnsNotFoundForNonExistentCodes() {
+        given()
+                .queryParam("codes", "US;CA")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(404);
+
+        given()
+                .queryParam("codes", "XX")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaListReturnsBadRequestForInvalidCodes() {
+        given()
+                .queryParam("codes", "12345")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyReturnsNotFoundForNonExistentCurrency() {
+        given()
+                .queryParam("fields", "name")
+                .when()
+                .get("/v2/currency/USD")
+                .then()
+                .statusCode(404);
+
+        given()
+                .when()
+                .get("/v2/currency/XYZ")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrencyReturnsBadRequestForInvalidCurrency() {
+        given()
+                .when()
+                .get("/v2/currency/12")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByNameReturnsNotFoundForNonExistentName() {
+        given()
+                .when()
+                .get("/v2/name/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCodeReturnsNotFoundForNonExistentCode() {
+        given()
+                .when()
+                .get("/v2/callingcode/99999")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapitalReturnsNotFoundForNonExistentCapital() {
+        given()
+                .when()
+                .get("/v2/capital/12345")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionReturnsNotFoundForNonExistentRegion() {
+        given()
+                .when()
+                .get("/v2/region/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegionReturnsNotFoundForNonExistentSubRegion() {
+        given()
+                .when()
+                .get("/v2/subregion/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguageReturnsNotFoundForNonExistentLanguage() {
+        given()
+                .when()
+                .get("/v2/lang/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonymReturnsNotFoundForNonExistentDemonym() {
+        given()
+                .when()
+                .get("/v2/demonym/123")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBlocReturnsNotFoundForNonExistentBloc() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/123")
+                .then()
+                .statusCode(404);
+    }
+}

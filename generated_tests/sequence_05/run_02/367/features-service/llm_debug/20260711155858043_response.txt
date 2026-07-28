@@ -1,0 +1,94 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+public class CORSFilterTest {
+
+    private static String BASE_URI;
+
+    @BeforeClass
+    public static void setUp() {
+        BASE_URI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int post(String path) throws Exception {
+        return post(path, null, null);
+    }
+
+    private int post(String path, String contentType, String body) throws Exception {
+        URL url = new URL(BASE_URI + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        conn.setDoOutput(true);
+        if (body != null) {
+            byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+            conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(bytes);
+            }
+        } else {
+            conn.setRequestProperty("Content-Length", "0");
+            try {
+                conn.getOutputStream().close();
+            } catch (Exception ignored) {
+            }
+        }
+        int status = conn.getResponseCode();
+        conn.disconnect();
+        return status;
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateProductThrowsDuplicatedObjectException() throws Exception {
+        String productName = "dup-product-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int status1 = post("/products/" + productName);
+        Assert.assertTrue(status1 < 300);
+
+        int status2 = post("/products/" + productName);
+        Assert.assertEquals(400, status2);
+    }
+
+    @Test(timeout = 60000)
+    public void addingDuplicateFeatureThrowsDuplicatedObjectException() throws Exception {
+        String productName = "dup-feat-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "dup-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = post("/products/" + productName);
+        Assert.assertTrue(s1 < 300);
+
+        String body = "description=" + URLEncoder.encode("Test feature description", "UTF-8");
+        int s2 = post("/products/" + productName + "/features/" + featureName, "application/x-www-form-urlencoded", body);
+        Assert.assertTrue(s2 < 300);
+
+        int s3 = post("/products/" + productName + "/features/" + featureName, "application/x-www-form-urlencoded", body);
+        Assert.assertEquals(500, s3);
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateConfigurationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "dup-config-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "dup-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = post("/products/" + productName);
+        Assert.assertTrue(s1 < 300);
+
+        int s2 = post("/products/" + productName + "/configurations/" + configurationName);
+        Assert.assertTrue(s2 < 300);
+
+        int s3 = post("/products/" + productName + "/configurations/" + configurationName);
+        Assert.assertEquals(500, s3);
+    }
+}

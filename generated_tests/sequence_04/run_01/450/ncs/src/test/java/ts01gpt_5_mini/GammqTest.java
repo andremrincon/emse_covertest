@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class GammqTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("baseUrl");
+        if (cfg == null || cfg.isEmpty()) cfg = System.getenv("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) cfg = "http://localhost:8080";
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_GserPath_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 0.001).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_GcfPath_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 1000.0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_InvalidA_Returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/{a}/{x}", -1.0, 2.3).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_InvalidX_Returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/{a}/{x}", 1.0, -0.5).then().statusCode(400);
+    }
+
+    @Ignore
+
+
+    @Test(timeout = 60000)
+    public void testGammq_ZeroX_ReturnsResultOne() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/gammq/{a}/{x}", 2.0, 0.0).then().statusCode(200).extract().response();
+        double value = resp.jsonPath().getDouble("result");
+        Assert.assertEquals(1.0, value, 1e-6);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammq_BorderCase_XEqualsAplusOne_UsesGcf_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/gammq/{a}/{x}", 2.0, 3.0).then().statusCode(200);
+    }
+}

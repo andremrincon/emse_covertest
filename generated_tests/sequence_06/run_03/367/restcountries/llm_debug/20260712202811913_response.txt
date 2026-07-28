@@ -1,0 +1,108 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.List;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_deserialization_triggersLanguageSetters_andReturns200() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        List<Language> langs = resp.jsonPath().getList("languages", Language.class);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFrance_deserialization_triggersLanguageSetters_andReturns200() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        List<Language> langs = resp.jsonPath().getList("[0].languages", Language.class);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSD_deserialization_triggersLanguageSetters_andReturns200() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        List<Language> langs = resp.jsonPath().getList("[0].languages", Language.class);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEs_deserialization_triggersLanguageSetters_andReturns200() {
+        given().when().get("/v1/lang/es").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/lang/es");
+        List<Language> langs = resp.jsonPath().getList("[0].languages", Language.class);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaInvalidFormat_returns400() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/123");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNotFound_returns404() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/XYZ");
+        resp.then().statusCode(404);
+    }
+
+    public static class Language {
+        private String iso639_1;
+        private String iso639_2;
+        private String name;
+        private String nativeName;
+
+        public Language() {
+        }
+
+        public String getIso639_1() {
+            return iso639_1;
+        }
+
+        public void setIso639_1(String iso639_1) {
+            this.iso639_1 = iso639_1;
+        }
+
+        public String getIso639_2() {
+            return iso639_2;
+        }
+
+        public void setIso639_2(String iso639_2) {
+            this.iso639_2 = iso639_2;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getNativeName() {
+            return nativeName;
+        }
+
+        public void setNativeName(String nativeName) {
+            this.nativeName = nativeName;
+        }
+    }
+}

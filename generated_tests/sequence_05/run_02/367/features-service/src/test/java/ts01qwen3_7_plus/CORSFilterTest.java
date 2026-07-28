@@ -1,0 +1,33 @@
+package ts01glm_5_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+
+public class CORSFilterTest {
+
+    private static final String PRODUCTS_PATH = "/products";
+
+    static {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = 8080;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithNonOptionsRequest() {
+        given()
+            .when()
+            .get(PRODUCTS_PATH)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithOptionsRequest() {
+        given()
+            .when()
+            .options(PRODUCTS_PATH)
+            .then()
+            .statusCode(200);
+    }
+}

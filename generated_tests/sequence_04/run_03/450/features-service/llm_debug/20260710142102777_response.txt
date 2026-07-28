@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "Test feature description").when().post("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddingConfigurationFeatureViolatesRequiresConstraintReturns500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String featureA = "featureA-" + UUID.randomUUID().toString();
+        String featureB = "featureB-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "A").when().post("/products/{productName}/features/{featureName}", product, featureA).then().statusCode(lessThan(300));
+        given().formParam("description", "B").when().post("/products/{productName}/features/{featureName}", product, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, featureA);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testWrongProductConfigurationExceptionMessageAppearsInResponseBody() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String featureA = "featureA-" + UUID.randomUUID().toString();
+        String featureB = "featureB-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "A").when().post("/products/{productName}/features/{featureName}", product, featureA).then().statusCode(lessThan(300));
+        given().formParam("description", "B").when().post("/products/{productName}/features/{featureName}", product, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, featureA);
+        act.then().body(containsString("Wrong product configuration:"));
+    }
+}

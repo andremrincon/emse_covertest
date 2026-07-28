@@ -1,0 +1,301 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[3,30] package com.jayway.restassured does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[4,39] package com.jayway.restassured.response does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[10,37] package com.jayway.restassured does not exist
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[10,1] static import only from classes and interfaces
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[19,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[26,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[37,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[37,29] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[49,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[61,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[73,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[85,9] cannot find symbol
+/local/ar_benchmark/aatools/COVERTEST/maven/emse/order_05/run_02/367/features-service/src/test/java/ts01glm_5_2/CORSFilterTest.java:[85,29] cannot find symbol
+symbol:   variable RestAssured
+location: class ts01glm_5_2.CORSFilterTest
+symbol:   method given()
+symbol:   class Response
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import java.util.UUID;
+
+public class ProductsDAOTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaRequiresEndpoint() {
+        String productName = "prod-req-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaExcludesEndpoint() {
+        String productName = "prod-exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "srcex-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithExistingConstraints() {
+        String productName = "prod-delc-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "f1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "f2-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat3 = "f3-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat3)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", feat1)
+                .formParam("requiredFeature", feat2)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", feat1)
+                .formParam("excludedFeature", feat3)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithNoConstraints() {
+        String productName = "prod-delnc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintAndDeleteConstraintById() {
+        String productName = "prod-cid-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "c1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "c2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", feat1)
+                .formParam("requiredFeature", feat2)
+            .when()
+                .post("/products/{productName}/constraints/requires", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .get("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, 1)
+            .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductViaFeatureDeletion() {
+        String productName = "prod-featdel-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat1 = "fd1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feat2 = "fd2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat1)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, feat2)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .formParam("sourceFeature", feat1)
+                .formParam("excludedFeature", feat2)
+            .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}/features/{featureName}", productName, feat1)
+            .then()
+                .statusCode(lessThan(500));
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

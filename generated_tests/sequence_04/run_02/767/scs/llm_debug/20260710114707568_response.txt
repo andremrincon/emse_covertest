@@ -1,0 +1,71 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsOkStatus() {
+        given().when().get("/api/calc/plus/1/2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/5/3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/2/3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/divide/10/2").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/pi/0/0");
+        r.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEReturnsExactBody() {
+        given().when().get("/api/calc/sqrt/16/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/10/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sine/1.57079632679/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0.78539816339/0").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/e/0/0");
+        r.then().body(equalTo(Double.toString(Math.E)));
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtProducesCorrectBody() {
+        given().when().get("/api/calc/plus/2/2").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/sqrt/4/0");
+        r.then().body(equalTo("2.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProducesServerError() {
+        given().when().get("/api/calc/multiply/3/3").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/divide/100/0");
+        r.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusReturnsSumBody() {
+        given().when().get("/api/calc/subtract/10/5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/5/2").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/plus/15.5/4.5");
+        r.then().body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSineOfZeroReturnsZeroBody() {
+        given().when().get("/api/calc/log/1/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/calc/sine/0/0");
+        r.then().body(equalTo("0.0"));
+    }
+}

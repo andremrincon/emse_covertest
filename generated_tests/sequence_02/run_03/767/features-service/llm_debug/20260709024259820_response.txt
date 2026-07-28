@@ -1,0 +1,213 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationsServiceTest {
+
+    private String baseUrl;
+    private String productName;
+    private String featureName1;
+    private String featureName2;
+    private String configName;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+
+        String uuid = UUID.randomUUID().toString();
+        productName = "Product-" + uuid;
+        featureName1 = "Feature1-" + uuid;
+        featureName2 = "Feature2-" + uuid;
+        configName = "Config-" + uuid;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProduct() {
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature1() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName1);
+        req.formParam("description", "Description 1")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature2() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName2);
+        req.formParam("description", "Description 2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfiguration() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfiguration() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        RequestSpecification reqFeature = given().pathParam("productName", productName).pathParam("featureName", featureName1);
+        reqFeature.formParam("description", "desc")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActiveFeatures() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        RequestSpecification reqFeature = given().pathParam("productName", productName).pathParam("featureName", featureName1);
+        reqFeature.formParam("description", "desc")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).pathParam("featureName", featureName1).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfiguration() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        RequestSpecification reqFeature = given().pathParam("productName", productName).pathParam("featureName", featureName1);
+        reqFeature.formParam("description", "desc")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).pathParam("featureName", featureName1).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName1)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        RequestSpecification rf1 = given().pathParam("productName", productName).pathParam("featureName", featureName1);
+        rf1.formParam("description", "desc1")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+        RequestSpecification rf2 = given().pathParam("productName", productName).pathParam("featureName", featureName2);
+        rf2.formParam("description", "desc2")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .pathParam("productName", productName);
+        req.formParam("sourceFeature", featureName1)
+           .formParam("requiredFeature", featureName2)
+        .when()
+            .post("/products/{productName}/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint() {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        RequestSpecification rf1 = given().pathParam("productName", productName).pathParam("featureName", featureName1);
+        rf1.formParam("description", "desc1")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+        RequestSpecification rf2 = given().pathParam("productName", productName).pathParam("featureName", featureName2);
+        rf2.formParam("description", "desc2")
+            .when()
+            .post("/products/{productName}/features/{featureName}")
+            .then()
+            .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .pathParam("productName", productName);
+        req.formParam("sourceFeature", featureName1)
+           .formParam("excludedFeature", featureName2)
+        .when()
+            .post("/products/{productName}/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+}

@@ -1,0 +1,73 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("APP_HOST", "localhost");
+        String port = System.getenv().getOrDefault("APP_PORT", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveSEqualsBaab() {
+        given()
+            .when()
+            .get("/api/costfuns/5/baab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanNegative444() {
+        given()
+            .when()
+            .get("/api/costfuns/-445/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666() {
+        given()
+            .when()
+            .get("/api/costfuns/667/z")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsNegativeFourSEqualsAbabba() {
+        given()
+            .when()
+            .get("/api/costfuns/-4/ababba")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsZeroSEqualsA() {
+        given()
+            .when()
+            .get("/api/costfuns/0/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEquals555SEqualsA() {
+        given()
+            .when()
+            .get("/api/costfuns/555/a")
+            .then()
+            .statusCode(200);
+    }
+}

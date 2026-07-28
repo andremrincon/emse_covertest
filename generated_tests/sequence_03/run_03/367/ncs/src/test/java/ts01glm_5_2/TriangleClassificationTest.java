@@ -1,0 +1,143 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        String port = System.getProperty("server.port");
+        if (port != null) {
+            RestAssured.port = Integer.parseInt(port);
+        }
+        String host = System.getProperty("server.host");
+        if (host != null) {
+            RestAssured.baseURI = host;
+        }
+        String basePath = System.getProperty("server.basePath");
+        if (basePath != null) {
+            RestAssured.basePath = basePath;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidSides_AllZeroOrNegative() {
+        given()
+        .when()
+            .get("/api/triangle/0/4/5")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+
+        given()
+        .when()
+            .get("/api/triangle/3/0/5")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+
+        given()
+        .when()
+            .get("/api/triangle/3/4/0")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+        .when()
+            .get("/api/triangle/3/3/3")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(3));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotATriangle_AllMaxBranches() {
+        given()
+        .when()
+            .get("/api/triangle/10/3/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+
+        given()
+        .when()
+            .get("/api/triangle/3/10/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+
+        given()
+        .when()
+            .get("/api/triangle/3/4/10")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testIsosceles_AllEqualPairs() {
+        given()
+        .when()
+            .get("/api/triangle/3/3/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(2));
+
+        given()
+        .when()
+            .get("/api/triangle/3/4/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(2));
+
+        given()
+        .when()
+            .get("/api/triangle/4/3/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testScaleneTriangle_AllMaxFalseBranches() {
+        given()
+        .when()
+            .get("/api/triangle/3/4/5")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(1));
+
+        given()
+        .when()
+            .get("/api/triangle/5/3/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(1));
+
+        given()
+        .when()
+            .get("/api/triangle/3/5/4")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(1));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotATriangle_BoundaryEqualSum() {
+        given()
+        .when()
+            .get("/api/triangle/5/2/3")
+        .then()
+            .statusCode(200)
+            .body("resultAsInt", equalTo(0));
+    }
+}

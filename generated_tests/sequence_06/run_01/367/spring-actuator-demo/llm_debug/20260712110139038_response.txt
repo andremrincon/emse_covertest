@@ -1,0 +1,85 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithDefaultName() {
+        given()
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithCustomName() {
+        given()
+            .queryParam("name", "John Smith")
+            .when()
+                .get("/")
+            .then()
+                .body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithDefaultDelay() {
+        given()
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNonZeroDelay() {
+        given()
+            .queryParam("delay", 1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithInvalidDelayType() {
+        given()
+            .queryParam("delay", "abc")
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+            .when()
+                .get("/slowApi")
+            .then()
+                .statusCode(500);
+    }
+}
+```
