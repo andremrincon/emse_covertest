@@ -1,8 +1,8 @@
-# Replication Package — Incremental Multi-Model LLM Strategy for Automated Open-Box Integration Testing of REST APIs
+# Replication Package - An Incremental Multi-Model LLM Strategy for Automated REST API Integration Testing Guided by Uncovered Code
 
-This repository holds the raw data, the generated test suites, the subject systems and the analysis scripts of the empirical study reported in:
+This repository holds the raw data, the generated test suites, the subject systems, and the analysis scripts of the empirical study reported in:
 
-> A. M. Rincon and A. M. R. Vincenzi. *Incremental Multi-Model LLM Strategy for Automated Open-Box Integration Testing of REST APIs.* Submitted to **Empirical Software Engineering** (Special Issue).
+> A. M. Rincon and A. M. R. Vincenzi. *An Incremental Multi-Model LLM Strategy for Automated REST API Integration Testing Guided by Uncovered Code.* Submitted to **Empirical Software Engineering** (Special Issue).
 
 The tool that produced these data, **COVERTEST**, lives in a separate repository:
 
