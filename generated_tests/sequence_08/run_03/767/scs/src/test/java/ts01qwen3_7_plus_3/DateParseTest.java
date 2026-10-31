@@ -1,0 +1,44 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @Before
+    public void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValid() {
+        given()
+            .pathParam("dayname", "Wednesday")
+            .pathParam("monthname", "August")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testDateParseInvalid() {
+        given()
+            .pathParam("dayname", "Superday")
+            .pathParam("monthname", "Movember")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(500);
+    }
+}

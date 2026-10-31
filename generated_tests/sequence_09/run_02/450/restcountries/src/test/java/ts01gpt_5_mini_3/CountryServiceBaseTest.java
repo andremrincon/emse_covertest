@@ -1,0 +1,81 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("test.baseUrl", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_V1_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_V2_semicolon_threeLetter_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "USA;CAN").when().get("/v2/alpha");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_V1_exactName_France_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v1/name/France");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_V1_altSpelling_DE_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v1/name/DE");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_V1_1_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/callingcode/1");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_V1_London_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/capital/London");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_V1_Europe_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/region/Europe");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_withBracketCodes_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        String encoded;
+        try {
+            encoded = URLEncoder.encode("[\"US\",\"CA\"]", "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        Response act = given().queryParam("codes", encoded).when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+}

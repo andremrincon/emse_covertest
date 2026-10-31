@@ -1,0 +1,389 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature_CoversSetNameAndSetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_CoversSetName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Initial description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Updated description")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeatures_CoversGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeature_CoversEqualsSameNameAndProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "DuplicateFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "First instance")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Second instance")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_CoversEqualsInConfigurationContext() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "ConfigFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature for configuration")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_CoversGetProductAndEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "ConfigFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature for config")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_CoversGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "DeleteFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature to delete")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithSpecialCharacters_CoversSetName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "Special-Feature-!@#$%^&*()";
+        String encodedFeatureName = encode(featureName);
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature with special characters in name")
+        .when()
+            .post("/products/" + productName + "/features/" + encodedFeatureName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesToSameProduct_CoversSetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName1 = "Feature1-" + UUID.randomUUID().toString();
+        String featureName2 = "Feature2-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "First feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName1)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Second feature")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName2)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfiguration_CoversEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "RemoveFeature-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature to remove from config")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription_CoversSetName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "UpdateFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Original description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Modified description with more details")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithFeatures_CoversGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "ProductFeature-" + UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Feature belonging to product")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .statusCode(200);
+    }
+
+    private static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

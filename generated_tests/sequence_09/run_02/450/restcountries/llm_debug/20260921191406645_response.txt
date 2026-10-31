@@ -1,0 +1,122 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            String prop = System.getProperty("api.base");
+            if (prop != null && !prop.isEmpty()) {
+                RestAssured.baseURI = prop;
+            } else {
+                RestAssured.baseURI = "http://localhost:8080/rest";
+            }
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_success_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_shortCode_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/A").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_validCodes_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA,MX&fields=name;capital").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_emptyCodes_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=XX,YY,ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badLength_returns400() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullTextTrue_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/name/Germany?fullText=true&fields=name;capital").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/callingcode/1?fields=name;capital;region").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/capital/Paris?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/region/Europe?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/subregion/Western%20Europe?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/lang/Spanish?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonym_andRegionalBloc_valid_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().when().get("/v2/demonym/American?fields=name;capital;population").then().statusCode(200);
+        given().when().get("/v2/regionalbloc/EU?fields=name;capital;currencies").then().statusCode(200);
+    }
+}

@@ -1,0 +1,76 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenWTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/a/yak/x-ray/wolf")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/banana/dragon/cherry")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+                .get("/api/ordered4/zebra/yacht/tiger/viper")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenLengthPassesButNeither() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/apple/apple/apple")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenWTooLong() {
+        given()
+            .when()
+                .get("/api/ordered4/zebrass/yak/x-ray/wolf")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWhenXTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/zebra/ab/x-ray/wolf")
+            .then()
+                .statusCode(200);
+    }
+}
+```

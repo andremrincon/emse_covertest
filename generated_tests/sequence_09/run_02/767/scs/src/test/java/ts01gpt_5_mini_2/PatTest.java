@@ -1,0 +1,92 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_with_short_pattern_returns_ok() {
+        String txt = "warmup-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", txt);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String subjectTxt = "prefix-" + UUID.randomUUID().toString();
+        String pat = "ab";
+        Response res = given().when().get("/api/pat/{txt}/{pat}", subjectTxt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_found_only_returns_ok() {
+        String warm = "warmup2-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", warm);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String pat = "abc";
+        String txt = "xxx" + pat + "yyy-" + UUID.randomUUID().toString();
+        Response res = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_found_only_returns_ok() {
+        String warm = "warmup3-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", warm);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = "zzz" + patrev + "qqq-" + UUID.randomUUID().toString();
+        Response res = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_then_reverse_adjacent_returns_ok() {
+        String warm = "warmup4-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", warm);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String pat = "abc";
+        String txt = "xx" + pat + "cba" + "yy-" + UUID.randomUUID().toString();
+        Response res = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_reverse_then_pat_adjacent_returns_ok() {
+        String warm = "warmup5-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", warm);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = "pre-" + patrev + pat + "-post-" + UUID.randomUUID().toString();
+        Response res = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_and_reverse_nonadjacent_returns_ok() {
+        String warm = "warmup6-" + UUID.randomUUID().toString();
+        Response warmRes = given().when().get("/api/pat/{txt}", warm);
+        assertThat(warmRes.getStatusCode(), lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = pat + "xxx" + patrev + "-" + UUID.randomUUID().toString();
+        Response res = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        assertEquals(200, res.getStatusCode());
+    }
+}

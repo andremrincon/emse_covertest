@@ -1,0 +1,82 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixLongVal() {
+        given()
+            .when()
+                .get("/api/cookie/UserID/User12345/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithNonUserPrefixLongVal() {
+        given()
+            .when()
+                .get("/api/cookie/userid/test123/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortVal() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmValAndAbcSite() {
+        given()
+            .when()
+                .get("/api/cookie/Session/AM/ABC.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithNonAmVal() {
+        given()
+            .when()
+                .get("/api/cookie/session/pm/abc.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNonUserIdNonSessionName() {
+        given()
+            .when()
+                .get("/api/cookie/other/someval/example.com")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}

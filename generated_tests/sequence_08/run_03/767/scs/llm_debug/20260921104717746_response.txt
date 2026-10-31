@@ -1,0 +1,58 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusOperation() {
+        given()
+            .pathParam("op", "plus")
+            .pathParam("arg1", 15.5)
+            .pathParam("arg2", 4.5)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubtractOperation() {
+        given()
+            .pathParam("op", "subtract")
+            .pathParam("arg1", 10.0)
+            .pathParam("arg2", 5.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideOperation() {
+        given()
+            .pathParam("op", "divide")
+            .pathParam("arg1", 10.0)
+            .pathParam("arg2", 2.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("5.0"));
+    }
+}
+```

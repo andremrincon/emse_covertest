@@ -1,0 +1,99 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CharMatch() {
+        RequestSpecification req = RestAssured.given();
+        req.pathParam("alphacode", "US")
+           .when()
+               .get("/v1/alpha/{alphacode}")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CharMatch() {
+        RequestSpecification req = RestAssured.given();
+        req.pathParam("alphacode", "USA")
+           .when()
+               .get("/v1/alpha/{alphacode}")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CharNoMatch() {
+        RequestSpecification req = RestAssured.given();
+        req.pathParam("alphacode", "ZZ")
+           .when()
+               .get("/v1/alpha/{alphacode}")
+           .then()
+               .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        RequestSpecification req = RestAssured.given();
+        req.queryParam("codes", "US,CA")
+           .when()
+               .get("/v1/alpha")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        RequestSpecification req = RestAssured.given();
+        req.queryParam("codes", "US,US")
+           .when()
+               .get("/v1/alpha")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        RequestSpecification req = RestAssured.given();
+        req.pathParam("name", "Germany")
+           .queryParam("fullText", true)
+           .when()
+               .get("/v1/name/{name}")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        RequestSpecification req = RestAssured.given();
+        req.pathParam("name", "Federal Republic of Germany")
+           .queryParam("fullText", true)
+           .when()
+               .get("/v1/name/{name}")
+           .then()
+               .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonTrigger() {
+        RequestSpecification req = RestAssured.given();
+        req.when()
+               .get("/v1/all")
+           .then()
+               .statusCode(200);
+    }
+}

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsTenForTypicalString() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/1/algorithm");
+        act.then().assertThat().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsSixWhenIEqualsFiveAndSAbab() {
+        given().when().get("/api/cookie/session-id/1/example.com").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/5/abab");
+        act.then().assertThat().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsZeroWhenIIsMinusFourAndSAbab() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/-4/abab");
+        act.then().assertThat().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus200WhenILessThanMinus444() {
+        given().when().get("/api/ordered4/zebra/yak/x-ray/wolf").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/-500/algorithm");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCompareToBranchesExecutedWithGreaterString() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/costfuns/2/zzzz");
+        act.then().assertThat().body(equalTo("10"));
+    }
+}

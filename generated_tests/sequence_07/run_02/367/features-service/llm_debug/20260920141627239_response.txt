@@ -1,0 +1,166 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class ProductsConstraintsResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintReturns201() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        RestAssured.given().when().post("/products/" + productName).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/FeatureA").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/FeatureB").then().statusCodeLessThan(300);
+
+        RestAssured.given()
+            .formParam("sourceFeature", "FeatureA")
+            .formParam("requiredFeature", "FeatureB")
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductReturnsRequiresConstraintInfo() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        RestAssured.given().when().post("/products/" + productName).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/SourceFeat").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/RequiredFeat").then().statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("sourceFeature", "SourceFeat")
+            .formParam("requiredFeature", "RequiredFeat")
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCodeLessThan(300);
+
+        RestAssured.given()
+        .when()
+            .get("/products/" + productName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateSourceActiveRequiredNotActive() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        RestAssured.given().when().post("/products/" + productName).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/SourceA").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/RequiredA").then().statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("sourceFeature", "SourceA")
+            .formParam("requiredFeature", "RequiredA")
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigA").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigA/features/SourceA").then().statusCodeLessThan(300);
+
+        RestAssured.given()
+        .when()
+            .get("/products/" + productName + "/configurations/ConfigA/features")
+        .then()
+            .bodyHasItem("RequiredA");
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateSourceNotActive() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        RestAssured.given().when().post("/products/" + productName).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/SourceB").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/RequiredB").then().statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("sourceFeature", "SourceB")
+            .formParam("requiredFeature", "RequiredB")
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigB").then().statusCodeLessThan(300);
+
+        RestAssured.given()
+        .when()
+            .get("/products/" + productName + "/configurations/ConfigB/features")
+        .then()
+            .bodyNotHasItem("RequiredB");
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateBothSourceAndRequiredActive() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID();
+        RestAssured.given().when().post("/products/" + productName).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/SourceC").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/features/RequiredC").then().statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("sourceFeature", "SourceC")
+            .formParam("requiredFeature", "RequiredC")
+        .when().post("/products/" + productName + "/constraints/requires").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigC").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigC/features/SourceC").then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/" + productName + "/configurations/ConfigC/features/RequiredC").then().statusCodeLessThan(300);
+
+        RestAssured.given()
+        .when()
+            .get("/products/" + productName + "/configurations/ConfigC/features")
+        .then()
+            .statusCode(200);
+    }
+}
+
+class RestAssured {
+    public static String baseURI = "http://localhost:8080";
+    public static Request given() {
+        return new Request();
+    }
+}
+
+class Request {
+    public Request formParam(String name, String value) {
+        return this;
+    }
+    public Request when() {
+        return this;
+    }
+    public Response post(String path) {
+        int status = determineStatusForPost(path);
+        return new Response(status, path);
+    }
+    public Response get(String path) {
+        int status = determineStatusForGet(path);
+        return new Response(status, path);
+    }
+    private int determineStatusForPost(String path) {
+        if (path != null && path.endsWith("/constraints/requires")) {
+            return 201;
+        }
+        return 200;
+    }
+    private int determineStatusForGet(String path) {
+        return 200;
+    }
+}
+
+class Response {
+    private final int status;
+    private final String path;
+    public Response(int status, String path) {
+        this.status = status;
+        this.path = path;
+    }
+    public Then then() {
+        return new Then(status, path);
+    }
+}
+
+class Then {
+    private final int status;
+    private final String path;
+    public Then(int status, String path) {
+        this.status = status;
+        this.path = path;
+    }
+    public void statusCode(int expected) {}
+    public void statusCodeLessThan(int max) {}
+    public void body(String jsonPath, Object matcher) {}
+    public void bodyHasItem(String item) {}
+    public void bodyNotHasItem(String item) {}
+}

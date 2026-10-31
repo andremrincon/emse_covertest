@@ -1,0 +1,76 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class TriangleClassificationTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeEdgeReturnsNotTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", -1, 4, 5)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", 3, 3, 3)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotTriangleMaxIsA() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", 10, 1, 1)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotTriangleMaxIsC() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", 1, 1, 10)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", 3, 3, 4)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testScaleneTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/{a}/{b}/{c}", 3, 4, 6)
+            .then()
+                .statusCode(200)
+                .body("triangleType", equalTo(null));
+    }
+}

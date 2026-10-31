@@ -1,0 +1,60 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetMessageV1Name() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/123");
+        response.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetStatusV1Capital() {
+        given().when().get("/v1/capital/London").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/capital/123");
+        response.then().statusCode(404).body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetMessageV2Region() {
+        given().when().get("/v2/region/Europe").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/region/123");
+        response.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetStatusV2Capital() {
+        given().when().get("/v2/capital/Paris").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/capital/12345");
+        response.then().statusCode(404).body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetMessageV2Name() {
+        given().when().get("/v2/name/Germany").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/name/123");
+        response.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testResponseEntityGetStatusV1Region() {
+        given().when().get("/v1/region/Europe").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/region/123");
+        response.then().statusCode(404).body("status", equalTo(404));
+    }
+}

@@ -1,0 +1,66 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.config.EncoderConfig;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DuplicatedObjectExceptionTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.config = RestAssured.config().encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"));
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateProductThrowsDuplicatedObjectException() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}", productName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateConfigurationThrowsDuplicatedObjectException() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addingDuplicateFeatureThrowsDuplicatedObjectException() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Test description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Test description")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(500);
+    }
+}
+```

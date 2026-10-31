@@ -1,0 +1,158 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.OutputStream;
+import java.io.IOException;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int sendRequest(String method, String path, String body, String contentType) throws IOException {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method)) {
+            conn.setDoOutput(true);
+        }
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        if (body != null) {
+            byte[] bytes = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                os.write(bytes);
+            } finally {
+                if (os != null) {
+                    try { os.close(); } catch (IOException ignored) {}
+                }
+            }
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private int createProduct(String productName) throws IOException {
+        return sendRequest("POST", "/products/" + encode(productName), null, null);
+    }
+
+    private int createFeature(String productName, String featureName) throws IOException {
+        return sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(featureName), null, null);
+    }
+
+    private int createRequiresConstraint(String productName, String sourceFeature, String requiredFeature) throws IOException {
+        String body = "sourceFeature=" + encode(sourceFeature) + "&requiredFeature=" + encode(requiredFeature);
+        return sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", body, "application/x-www-form-urlencoded");
+    }
+
+    private int createExcludesConstraint(String productName, String sourceFeature, String excludedFeature) throws IOException {
+        String body = "sourceFeature=" + encode(sourceFeature) + "&excludedFeature=" + encode(excludedFeature);
+        return sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", body, "application/x-www-form-urlencoded");
+    }
+
+    private int deleteProduct(String productName) throws IOException {
+        return sendRequest("DELETE", "/products/" + encode(productName), null, null);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaRequiresEndpoint() throws Exception {
+        String productName = "TestReq-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "RAID-Controller-Card") < 300);
+        Assert.assertTrue(createFeature(productName, "128GB-ECC-RAM") < 300);
+
+        int status = createRequiresConstraint(productName, "RAID-Controller-Card", "128GB-ECC-RAM");
+        Assert.assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaExcludesEndpoint() throws Exception {
+        String productName = "TestExc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "CPU-i9-13900H") < 300);
+        Assert.assertTrue(createFeature(productName, "Integrated-Graphics-Only") < 300);
+
+        int status = createExcludesConstraint(productName, "CPU-i9-13900H", "Integrated-Graphics-Only");
+        Assert.assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithSingleConstraint() throws Exception {
+        String productName = "TestDelSingle-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureA") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureB") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "FeatureA", "FeatureB") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithNoConstraints() throws Exception {
+        String productName = "TestDelNone-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithMultipleConstraints() throws Exception {
+        String productName = "TestDelMulti-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureC") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureD") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureE") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureF") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "FeatureC", "FeatureD") < 300);
+        Assert.assertTrue(createExcludesConstraint(productName, "FeatureE", "FeatureF") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertBothConstraintTypesAndDeleteProduct() throws Exception {
+        String productName = "TestBoth-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "Push-Notifications") < 300);
+        Assert.assertTrue(createFeature(productName, "User-Authentication") < 300);
+        Assert.assertTrue(createFeature(productName, "Color-Black") < 300);
+        Assert.assertTrue(createFeature(productName, "Logo-WhiteOnBlack") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "Push-Notifications", "User-Authentication") < 300);
+        Assert.assertTrue(createExcludesConstraint(productName, "Color-Black", "Logo-WhiteOnBlack") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+}

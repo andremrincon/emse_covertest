@@ -1,0 +1,57 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("API_BASE");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsZeroForMinus4AndAbab() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-4/abab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsTenForFiveAndAlgorithm() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/5/algorithm").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnsSixForNegative500AndAbab() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-500/abab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus200ForSGreaterThanAbabba() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/zzzz").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus200ForSEqualsBaab() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/0/baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testStatus200ForLargeIAndAbabTriggersNumericBranches() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/700/abab").then().statusCode(200);
+    }
+}

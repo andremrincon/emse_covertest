@@ -1,0 +1,82 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("test.base.uri", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeNullContribution() {
+        String body = "null";
+
+        Response response = given()
+            .contentType("application/json;charset=utf-8")
+            .body(body)
+        .when()
+            .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeNullToken() {
+        String body = "{\"amount\": 100}";
+
+        Response response = given()
+            .contentType("application/json;charset=utf-8")
+            .body(body)
+        .when()
+            .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeBlankToken() {
+        String body = "{\"amount\": 100, \"token\": \"   \"}";
+
+        Response response = given()
+            .contentType("application/json;charset=utf-8")
+            .body(body)
+        .when()
+            .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeInvalidTokenCausesException() {
+        String body = "{\"amount\": 100, \"token\": \"invalid_token\"}";
+
+        Response response = given()
+            .contentType("application/json;charset=utf-8")
+            .body(body)
+        .when()
+            .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValidTokenSuccess() {
+        String body = "{\"amount\": 100, \"token\": \"tok_visa\"}";
+
+        Response response = given()
+            .contentType("application/json;charset=utf-8")
+            .body(body)
+        .when()
+            .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+}

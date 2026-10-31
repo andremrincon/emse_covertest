@@ -1,0 +1,97 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTwoOrLess() {
+        given()
+        .when()
+            .get("/api/pat/ABCDEF/ab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given()
+        .when()
+            .get("/api/pat/ABCDEF/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseImmediatelyAfter() {
+        given()
+        .when()
+            .get("/api/pat/ABCCBA/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseLater() {
+        given()
+        .when()
+            .get("/api/pat/ABCXYZCBA/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatImmediatelyAfter() {
+        given()
+        .when()
+            .get("/api/pat/CBAABC/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatLater() {
+        given()
+        .when()
+            .get("/api/pat/CBAXYZABC/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPat() {
+        given()
+        .when()
+            .get("/api/pat/CBADEF/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+        .when()
+            .get("/api/pat/XYZDEF/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given()
+        .when()
+            .get("/api/pat/AB/ABC")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,53 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    private static final String BASE = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        String uniq = UUID.randomUUID().toString();
+        given().when().get(BASE + "/?name=" + uniq).then().statusCode(lessThan(300));
+        Response resp = given().queryParam("name", "John Smith").when().get(BASE + "/");
+        resp.then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultName() {
+        String uniq = UUID.randomUUID().toString();
+        given().when().get(BASE + "/?name=" + uniq).then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/");
+        resp.then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiDelayZeroReturns200() {
+        String uniq = UUID.randomUUID().toString();
+        given().when().get(BASE + "/?name=" + uniq).then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "0").when().get(BASE + "/slowApi");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiDelayOneReturnsResultBody() {
+        String uniq = UUID.randomUUID().toString();
+        given().when().get(BASE + "/?name=" + uniq).then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "1").when().get(BASE + "/slowApi");
+        resp.then().body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiNegativeDelayReturns500() {
+        String uniq = UUID.randomUUID().toString();
+        given().when().get(BASE + "/?name=" + uniq).then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "-1").when().get(BASE + "/slowApi");
+        resp.then().statusCode(500);
+    }
+}

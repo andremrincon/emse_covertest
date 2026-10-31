@@ -1,0 +1,101 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverse() {
+        given()
+            .when()
+                .get("/api/pat/ABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPat() {
+        given()
+            .when()
+                .get("/api/pat/BABA/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatThenReverse() {
+        given()
+            .when()
+                .get("/api/pat/ABABBABA/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromeReverseThenPat() {
+        given()
+            .when()
+                .get("/api/pat/BABAABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABABXBABA/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatNonAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/BABAXABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+            .when()
+                .get("/api/pat/hello/abc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLeq2() {
+        given()
+            .when()
+                .get("/api/pat/hello/ab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPartialMatchNoFullMatch() {
+        given()
+            .when()
+                .get("/api/pat/ABCDABAB/ABAB")
+            .then()
+                .statusCode(200);
+    }
+}
+```

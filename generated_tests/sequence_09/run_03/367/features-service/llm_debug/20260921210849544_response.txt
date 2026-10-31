@@ -1,0 +1,86 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint_success() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String source = "RAID-Controller-Card";
+        String required = "128GB-ECC-RAM";
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfiguration_addsRequiredFeature_whenSourceActive() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String source = "Feature-A-" + UUID.randomUUID().toString();
+        String required = "Feature-B-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, required).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, source).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration)
+                .then().body("$", hasItem(required));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfiguration_noAddition_whenSourceInactive() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "conf-" + UUID.randomUUID().toString();
+        String source = "Feature-C-" + UUID.randomUUID().toString();
+        String required = "Feature-D-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, required).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration)
+                .then().body("$", not(hasItem(required)));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint_error_onInvalidProductName() {
+        String invalidProduct = "%20";
+        given().when().post("/products/{productName}", "safe-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        String source = "Push-Notifications";
+        String required = "User-Authentication";
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", source)
+                .formParam("requiredFeature", required)
+                .when().post("/products/{productName}/constraints/requires", invalidProduct)
+                .then().statusCode(500);
+    }
+}

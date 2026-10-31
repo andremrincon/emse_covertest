@@ -1,0 +1,61 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("ncs.base", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositivePositiveRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/5");
+        act.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveNegativeRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/17/-5");
+        act.then().body("result", equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativePositiveRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/-9/4");
+        act.then().body("result", equalTo(-1));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeNegativeRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/-9/-5");
+        act.then().body("result", equalTo(4));
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroAProducesBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/0/5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroBProducesBadRequest() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/remainder/5/0");
+        act.then().statusCode(400);
+    }
+}

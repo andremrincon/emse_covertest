@@ -1,0 +1,79 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class ExpintTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintInvalidNThrowsError() {
+        given()
+            .when()
+                .get("/api/expint/-1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZeroValidX() {
+        given()
+            .when()
+                .get("/api/expint/0/2.5")
+            .then()
+                .statusCode(200)
+                .body(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNGreaterThanOne() {
+        given()
+            .when()
+                .get("/api/expint/2/0")
+            .then()
+                .statusCode(200)
+                .body(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOneContinuedFraction() {
+        given()
+            .when()
+                .get("/api/expint/3/2.5")
+            .then()
+                .statusCode(200)
+                .body(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXLessThanOneNOneSeriesLogPath() {
+        given()
+            .when()
+                .get("/api/expint/1/0.1")
+            .then()
+                .statusCode(200)
+                .body(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXLessThanOneNGreaterThanOneSeriesPsiPath() {
+        given()
+            .when()
+                .get("/api/expint/3/0.1")
+            .then()
+                .statusCode(200)
+                .body(notNullValue());
+    }
+}

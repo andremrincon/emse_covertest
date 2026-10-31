@@ -1,0 +1,37 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseReturns200ForTuesdayAugust() {
+        given().when().get("/api/cookie/session-id/abc-123-xyz-789/example.com").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tuesday/August").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseReturns200ForWedMAR() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/MAR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseReturns500ForInvalidSuperdayMovember() {
+        given().when().get("/api/calc/add/0/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/Superday/Movember").then().statusCode(200);
+    }
+}

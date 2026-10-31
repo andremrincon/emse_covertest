@@ -1,0 +1,355 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ProductsConfigurationsServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetConfigurationsForProductHandlesEmptyList TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/empty-conf-prod-c1b6634a-ba87-47a4-99c3-26a78b517fe4
+
+[2] METHOD=testDeleteFeatureFromProductReturns204 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-delfeat-f7ccd0f5-6bb2-4e2c-a601-38db014f900d
+
+[3] METHOD=testEvaluateConfigurationBecomesValidWhenRequirementSatisfied TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/eval-valid-prod-30cc5455-44dd-4026-a9d6-acce7739ed86
+
+[4] METHOD=testRemoveFeatureFromConfigurationReturns204 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/rem-prod-691d2c89-54ec-4b9b-bbdc-80ba111af9aa
+
+[5] METHOD=testAddFeatureToConfigurationReturns201 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-58c722d0-2781-45b1-b692-d79af7e7b06d
+
+[6] METHOD=testEvaluateConfigurationBecomesInvalidWhenMissingRequiredFeature TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/eval-invalid-prod-34ebbdc5-196e-4558-a894-25ae7bc823d2
+
+[7] METHOD=testAddDuplicateFeatureToConfigurationThrows500 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/dup-prod-9ded3716-417e-4afc-b370-928ff78d6a46
+
+[8] METHOD=testDeleteConfigurationReturns204 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/del-conf-prod-42e3afe0-1109-4fa4-9f28-940544864706
+
+[9] METHOD=testCreateConfigurationAndListConfigurations TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/test-prod-5d647b8e-ae17-4a03-8f69-5f8d0c3c5944
+
+[10] METHOD=testGetConfigurationActivedFeaturesNamesContainsAddedFeature TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/featlist-prod-94eee04d-a99d-4ea4-905b-8706ebe0ea07
+
+[11] METHOD=testAddFeatureToProductReturns201 TYPE=ERROR
+Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-feature-dce6b35a-048b-4dbd-bf59-d8b094c6bf36
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetConfigurationsForProductHandlesEmptyList FAILURE AT LINE 126
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/empty-conf-prod-c1b6634a-ba87-47a4-99c3-26a78b517fe4
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testGetConfigurationsForProductHandlesEmptyList(ProductsConfigurationsServiceTest.java:126)
+CODE CONTEXT:
+   123:     public void testGetConfigurationsForProductHandlesEmptyList() {
+   124:         String pid = UUID.randomUUID().toString();
+   125:         String productName = "empty-conf-prod-" + pid;
+   126:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   127:         given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+   128:     }
+   129: 
+
+[2] METHOD=testDeleteFeatureFromProductReturns204 FAILURE AT LINE 154
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-delfeat-f7ccd0f5-6bb2-4e2c-a601-38db014f900d
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testDeleteFeatureFromProductReturns204(ProductsConfigurationsServiceTest.java:154)
+CODE CONTEXT:
+   151:         String pid = UUID.randomUUID().toString();
+   152:         String productName = "prod-delfeat-" + pid;
+   153:         String featureName = "feat-" + pid;
+   154:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   155:         given().contentType(ContentType.URLENC).formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+   156:         given().when().delete("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(204);
+   157:     }
+
+[3] METHOD=testEvaluateConfigurationBecomesValidWhenRequirementSatisfied FAILURE AT LINE 114
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/eval-valid-prod-30cc5455-44dd-4026-a9d6-acce7739ed86
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testEvaluateConfigurationBecomesValidWhenRequirementSatisfied(ProductsConfigurationsServiceTest.java:114)
+CODE CONTEXT:
+   111:         String configurationName = "eval-valid-conf-" + pid;
+   112:         String sourceFeature = "feature-A-" + pid;
+   113:         String requiredFeature = "feature-B-" + pid;
+   114:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   115:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+   116:         given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+   117:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature).then().statusCode(lessThan(300));
+
+[4] METHOD=testRemoveFeatureFromConfigurationReturns204 FAILURE AT LINE 75
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/rem-prod-691d2c89-54ec-4b9b-bbdc-80ba111af9aa
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testRemoveFeatureFromConfigurationReturns204(ProductsConfigurationsServiceTest.java:75)
+CODE CONTEXT:
+    72:         String productName = "rem-prod-" + pid;
+    73:         String configurationName = "rem-conf-" + pid;
+    74:         String featureName = "rem-feat-" + pid;
+    75:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    76:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    77:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+    78:         given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(204);
+
+[5] METHOD=testAddFeatureToConfigurationReturns201 FAILURE AT LINE 52
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-58c722d0-2781-45b1-b692-d79af7e7b06d
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToConfigurationReturns201(ProductsConfigurationsServiceTest.java:52)
+CODE CONTEXT:
+    49:         String productName = "prod-" + pid;
+    50:         String configurationName = "conf-" + pid;
+    51:         String featureName = "feat-" + pid;
+    52:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    53:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    54:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(201);
+    55:     }
+
+[6] METHOD=testEvaluateConfigurationBecomesInvalidWhenMissingRequiredFeature FAILURE AT LINE 100
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/eval-invalid-prod-34ebbdc5-196e-4558-a894-25ae7bc823d2
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testEvaluateConfigurationBecomesInvalidWhenMissingRequiredFeature(ProductsConfigurationsServiceTest.java:100)
+CODE CONTEXT:
+    97:         String configurationName = "eval-invalid-conf-" + pid;
+    98:         String sourceFeature = "feature-A-" + pid;
+    99:         String requiredFeature = "feature-B-" + pid;
+   100:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   101:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+   102:         given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+   103:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCode(lessThan(300));
+
+[7] METHOD=testAddDuplicateFeatureToConfigurationThrows500 FAILURE AT LINE 63
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/dup-prod-9ded3716-417e-4afc-b370-928ff78d6a46
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddDuplicateFeatureToConfigurationThrows500(ProductsConfigurationsServiceTest.java:63)
+CODE CONTEXT:
+    60:         String productName = "dup-prod-" + pid;
+    61:         String configurationName = "dup-conf-" + pid;
+    62:         String featureName = "dup-feat-" + pid;
+    63:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    64:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    65:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+    66:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+
+[8] METHOD=testDeleteConfigurationReturns204 FAILURE AT LINE 135
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/del-conf-prod-42e3afe0-1109-4fa4-9f28-940544864706
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testDeleteConfigurationReturns204(ProductsConfigurationsServiceTest.java:135)
+CODE CONTEXT:
+   132:         String pid = UUID.randomUUID().toString();
+   133:         String productName = "del-conf-prod-" + pid;
+   134:         String configurationName = "del-conf-" + pid;
+   135:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   136:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+   137:         given().when().delete("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(204);
+   138:     }
+
+[9] METHOD=testCreateConfigurationAndListConfigurations FAILURE AT LINE 41
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/test-prod-5d647b8e-ae17-4a03-8f69-5f8d0c3c5944
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testCreateConfigurationAndListConfigurations(ProductsConfigurationsServiceTest.java:41)
+CODE CONTEXT:
+    38:         String pid = UUID.randomUUID().toString();
+    39:         String productName = "test-prod-" + pid;
+    40:         String configurationName = "conf-" + pid;
+    41:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    42:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    43:         given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    44:     }
+
+[10] METHOD=testGetConfigurationActivedFeaturesNamesContainsAddedFeature FAILURE AT LINE 87
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/featlist-prod-94eee04d-a99d-4ea4-905b-8706ebe0ea07
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testGetConfigurationActivedFeaturesNamesContainsAddedFeature(ProductsConfigurationsServiceTest.java:87)
+CODE CONTEXT:
+    84:         String productName = "featlist-prod-" + pid;
+    85:         String configurationName = "featlist-conf-" + pid;
+    86:         String featureName = "featlist-feat-" + pid;
+    87:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    88:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+    89:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+    90:         given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+
+[11] METHOD=testAddFeatureToProductReturns201 FAILURE AT LINE 145
+java.net.URISyntaxException: Illegal character in opaque part at index 34: localhost:8080/localhost/products/{productName}/localhost:8080/localhost/products/prod-feature-dce6b35a-048b-4dbd-bf59-d8b094c6bf36
+at ts01gpt_5_mini.ProductsConfigurationsServiceTest.testAddFeatureToProductReturns201(ProductsConfigurationsServiceTest.java:145)
+CODE CONTEXT:
+   142:         String pid = UUID.randomUUID().toString();
+   143:         String productName = "prod-feature-" + pid;
+   144:         String featureName = "feature-" + pid;
+   145:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   146:         given().contentType(ContentType.URLENC).formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(201);
+   147:     }
+   148: 
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE_URL", System.getenv().getOrDefault("API_BASE_URL", "http://localhost"));
+        String portStr = System.getProperty("API_PORT", System.getenv().getOrDefault("API_PORT", "8080"));
+        String basePath = System.getProperty("API_BASE_PATH", System.getenv().getOrDefault("API_BASE_PATH", "/"));
+        if (base.startsWith("http://")) {
+            base = base.substring(7);
+        } else if (base.startsWith("https://")) {
+            base = base.substring(8);
+        }
+        String[] parts = base.split(":");
+        RestAssured.baseURI = parts[0];
+        try {
+            RestAssured.port = Integer.parseInt(parts.length > 1 ? parts[1] : portStr);
+        } catch (NumberFormatException e) {
+            RestAssured.port = Integer.parseInt(portStr);
+        }
+        RestAssured.basePath = basePath;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfigurationAndListConfigurations() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "test-prod-" + pid;
+        String configurationName = "conf-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "prod-" + pid;
+        String configurationName = "conf-" + pid;
+        String featureName = "feat-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureToConfigurationThrows500() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "dup-prod-" + pid;
+        String configurationName = "dup-conf-" + pid;
+        String featureName = "dup-feat-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfigurationReturns204() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "rem-prod-" + pid;
+        String configurationName = "rem-conf-" + pid;
+        String featureName = "rem-feat-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesNamesContainsAddedFeature() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "featlist-prod-" + pid;
+        String configurationName = "featlist-conf-" + pid;
+        String featureName = "featlist-feat-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBecomesInvalidWhenMissingRequiredFeature() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "eval-invalid-prod-" + pid;
+        String configurationName = "eval-invalid-conf-" + pid;
+        String sourceFeature = "feature-A-" + pid;
+        String requiredFeature = "feature-B-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().body("valid", equalTo(false));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBecomesValidWhenRequirementSatisfied() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "eval-valid-prod-" + pid;
+        String configurationName = "eval-valid-conf-" + pid;
+        String sourceFeature = "feature-A-" + pid;
+        String requiredFeature = "feature-B-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProductHandlesEmptyList() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "empty-conf-prod-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationReturns204() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "del-conf-prod-" + pid;
+        String configurationName = "del-conf-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "prod-feature-" + pid;
+        String featureName = "feature-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromProductReturns204() {
+        String pid = UUID.randomUUID().toString();
+        String productName = "prod-delfeat-" + pid;
+        String featureName = "feat-" + pid;
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "desc").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,99 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .when()
+            .get("/api/pat/a/b")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundInnerLoopPatrevCharMatchButNotPatrev() {
+        given()
+            .when()
+            .get("/api/pat/xABABBxxx/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevFoundInnerLoopPatCharMatchButNotPat() {
+        given()
+            .when()
+            .get("/api/pat/xBABAxxAxxA/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatThenPatrevAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABABBABA/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevThenPatAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/BABAABAB/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatThenPatrevNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABABxBABA/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevThenPatNotAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/BABAxABAB/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatCharMatchButNotPat() {
+        given()
+            .when()
+            .get("/api/pat/AxxABAB/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevCharMatchButNotPatrev() {
+        given()
+            .when()
+            .get("/api/pat/BxxABAB/ABAB")
+            .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+}

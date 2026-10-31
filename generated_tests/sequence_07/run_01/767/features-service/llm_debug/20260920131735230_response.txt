@@ -1,0 +1,276 @@
+package ts01glm_5_2_3;
+
+import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("app.base.url");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("APP_BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String uniqueSuffix() {
+        return UUID.randomUUID().toString();
+    }
+
+    private void createProduct(String productName) {
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName, String description) {
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", description)
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configurationName) {
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configurationName, String featureName) {
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configurationName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductCoversSetNameAndSetProduct() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        createProduct(productName);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSecondFeatureToProductCoversEqualsNameMismatch() {
+        String productName = "Product-" + uniqueSuffix();
+        String feature1 = "FeatureA-" + uniqueSuffix();
+        String feature2 = "FeatureB-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, feature1, "desc1");
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", feature2)
+            .formParam("description", "desc2")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProductCoversGetProduct() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescriptionCoversSetName() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "old desc");
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "new desc")
+        .when()
+            .put("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromProductCoversGetProductAndEquals() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEqualsAndSetProduct() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        String configName = "Config-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        createConfiguration(productName, configName);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureToConfigurationCoversEqualsTrue() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        String configName = "Config-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversGetProductAndEquals() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        String configName = "Config-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+        .when()
+            .get("/products/{productName}/configurations/{configurationName}/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationCoversEquals() {
+        String productName = "Product-" + uniqueSuffix();
+        String featureName = "Feature-" + uniqueSuffix();
+        String configName = "Config-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, featureName, "desc");
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, featureName);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintCoversGetProductAndEquals() {
+        String productName = "Product-" + uniqueSuffix();
+        String sourceFeature = "SourceFeature-" + uniqueSuffix();
+        String requiredFeature = "RequiredFeature-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, sourceFeature, "desc source");
+        createFeature(productName, requiredFeature, "desc required");
+        given()
+            .pathParam("productName", productName)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/{productName}/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintCoversGetProductAndEquals() {
+        String productName = "Product-" + uniqueSuffix();
+        String sourceFeature = "SourceFeature-" + uniqueSuffix();
+        String excludedFeature = "ExcludedFeature-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, sourceFeature, "desc source");
+        createFeature(productName, excludedFeature, "desc excluded");
+        given()
+            .pathParam("productName", productName)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/{productName}/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSecondFeatureToConfigurationCoversEqualsNameMismatch() {
+        String productName = "Product-" + uniqueSuffix();
+        String feature1 = "FeatureA-" + uniqueSuffix();
+        String feature2 = "FeatureB-" + uniqueSuffix();
+        String configName = "Config-" + uniqueSuffix();
+        createProduct(productName);
+        createFeature(productName, feature1, "desc1");
+        createFeature(productName, feature2, "desc2");
+        createConfiguration(productName, configName);
+        addFeatureToConfiguration(productName, configName, feature1);
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", feature2)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+}

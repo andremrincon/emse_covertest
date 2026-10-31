@@ -1,0 +1,62 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/alpha/XYZ").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/name/123").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/callingcode/abc").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/abc").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/capital/123").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/region/123").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubregionNotFoundReturnsResponseEntity() {
+        given().when().get("/v1/subregion/123").then().statusCode(lessThan(300));
+        given().when().get("/v1/subregion/123").then().statusCode(404);
+    }
+}
+```

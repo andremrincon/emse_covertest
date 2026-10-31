@@ -1,0 +1,148 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() {
+        String productName = "Smartwatch-Series-8-" + UUID.randomUUID();
+        String featureName = "Blood-Oxygen-Sensor-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Measures SpO2").when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() {
+        String productName = "SmartWatch-Pro-" + UUID.randomUUID();
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeatures() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID();
+        String featureName = "backlit-keyboard-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then()
+                .statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature).when()
+                .post("/products/{productName}/constraints/requires", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID();
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID();
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then()
+                .statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature).when()
+                .post("/products/{productName}/constraints/excludes", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByName() {
+        String productName = "Smartwatch-Series-7-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID();
+        String featureName = "backlit-keyboard-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "RGB backlit keyboard with customizable zones")
+                .when().put("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddConfigurationToProduct() {
+        String productName = "smart-thermostat-v3-" + UUID.randomUUID();
+        String configurationName = "us-standard-wifi-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "QuantumLeap-AI-Platform-" + UUID.randomUUID();
+        String configurationName = "standard-gpu-cluster-" + UUID.randomUUID();
+        String featureName = "distributed-training-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then()
+                .statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName,
+                        configurationName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct() {
+        String productName = "Laptop-Pro-X15-" + UUID.randomUUID();
+        String configurationName = "base-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProduct() {
+        String productName = "UltraBook-Z1-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}", productName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllProducts() {
+        String productName = "Wireless-Mouse-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().get("/products").then().statusCode(200);
+    }
+}

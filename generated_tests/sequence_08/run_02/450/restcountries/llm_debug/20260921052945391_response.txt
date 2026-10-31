@@ -1,0 +1,22 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class StripeRestTest {
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidToken() {
+        String payload = "{\"amount\": 100, \"token\": \"tok_valid_123\"}";
+
+        Response response = given()
+                .contentType("application/json;charset=utf-8")
+                .body(payload)
+                .when()
+                .post("/contribute");
+
+        response.then().statusCode(400);
+    }
+}

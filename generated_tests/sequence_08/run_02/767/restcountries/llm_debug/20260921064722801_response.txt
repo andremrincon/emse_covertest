@@ -1,0 +1,171 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValid() {
+        Response response = given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalid() {
+        Response response = given()
+            .pathParam("alphacode", "123")
+        .when()
+            .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        Response response = given()
+            .pathParam("alphacode", "XYZ")
+        .when()
+            .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListValid() {
+        Response response = given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInvalid() {
+        Response response = given()
+            .queryParam("codes", "123")
+        .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        Response response = given()
+            .queryParam("codes", "XX,YY,ZZ")
+        .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListServerError() {
+        Response response = given()
+            .queryParam("codes", "[\"US\", \"CA\"]")
+        .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyValid() {
+        Response response = given()
+            .pathParam("currency", "USD")
+        .when()
+            .get("/v1/currency/{currency}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalid() {
+        Response response = given()
+            .pathParam("currency", "123")
+        .when()
+            .get("/v1/currency/{currency}");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound() {
+        Response response = given()
+            .pathParam("currency", "XYZ")
+        .when()
+            .get("/v1/currency/{currency}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameValid() {
+        Response response = given()
+            .pathParam("name", "France")
+        .when()
+            .get("/v1/name/{name}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        Response response = given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeValid() {
+        Response response = given()
+            .pathParam("callingcode", "1")
+        .when()
+            .get("/v1/callingcode/{callingcode}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalValid() {
+        Response response = given()
+            .pathParam("capital", "London")
+        .when()
+            .get("/v1/capital/{capital}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionValid() {
+        Response response = given()
+            .pathParam("region", "Europe")
+        .when()
+            .get("/v1/region/{region}");
+
+        response.then().statusCode(200);
+    }
+}
+```

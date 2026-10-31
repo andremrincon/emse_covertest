@@ -1,0 +1,35 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    private String getBaseUrl() {
+        String envUrl = System.getenv("BASE_URL");
+        return envUrl != null ? envUrl : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusFromResponseEntity() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageFromResponseEntity() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .body("message", equalTo("Not Found"));
+    }
+}

@@ -1,0 +1,111 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class LanguageTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("base.url");
+        String env = System.getenv("BASE_URL");
+        BASE = cfg != null ? cfg : (env != null ? env : "http://localhost:8080/rest");
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS_LanguageNameEnglish() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/US");
+        String name = act.jsonPath().getString("languages[0].name");
+        assertEquals("English", name);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNumericBadRequest() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaNotFoundXYZ() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/alpha/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSD_LanguageNativeNameEnglish() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/currency/USD");
+        String nativeName = act.jsonPath().getString("[0].languages[0].nativeName");
+        assertEquals("English", nativeName);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFrance_language_iso639_1_fr() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).queryParam("fullText", "false").when().get("/v1/name/France");
+        String iso = act.jsonPath().getString("[0].languages[0].iso639_1");
+        assertEquals("fr", iso);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Lang_es_status200() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/lang/es");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_US_fields_limited_status200() {
+        given().baseUri(BASE).when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_Spanish_fields_bodyNameArgentina() {
+        given().baseUri(BASE).when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).queryParam("fields", "name;capital;population").when().get("/v2/lang/Spanish");
+        String name = act.jsonPath().getString("[0].name");
+        assertNull(name);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_codes_query_200() {
+        given().baseUri(BASE).when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).queryParam("codes", "US,CA,MX").when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Callingcode_1_status200() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/callingcode/1");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Capital_London_status200() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/capital/London");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Region_Europe_status200() {
+        given().baseUri(BASE).when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/v1/region/Europe");
+        act.then().statusCode(200);
+    }
+}

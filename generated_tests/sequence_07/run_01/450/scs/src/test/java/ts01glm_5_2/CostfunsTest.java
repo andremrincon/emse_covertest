@@ -1,0 +1,45 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveWithAbab() {
+        given().when().get("/api/costfuns/5/abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanMinus444WithBaab() {
+        given().when().get("/api/costfuns/-500/baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666WithAbabba() {
+        given().when().get("/api/costfuns/700/ababba").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsMinus4WithAbab() {
+        given().when().get("/api/costfuns/-4/abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterEquals555WithSmallString() {
+        given().when().get("/api/costfuns/555/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIZeroWithAlgorithm() {
+        given().when().get("/api/costfuns/0/algorithm").then().statusCode(200);
+    }
+}

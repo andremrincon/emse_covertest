@@ -1,0 +1,83 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaReturnsNullForInvalidCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/{alphacode}", "XYZ");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithDuplicateCodes() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().queryParam("codes", "US,US").when().get("/v1/alpha");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListWithNullCodeList() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchMatchesAltSpelling() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String name = "Federal Republic of Germany";
+        String encodedName = name.replace(" ", "%20");
+        Response response = given().queryParam("fullText", true).when().get("/v1/name/{name}", encodedName);
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchMatchesAltSpelling() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/{name}", "Bundesrepublik");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaV2ReturnsNullForInvalidCode() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/alpha/{alphacode}", "ZZZ");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListV2WithValidCodes() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().queryParam("codes", "US,CA").when().get("/v2/alpha");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchV2NoMatch() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().queryParam("fullText", true).when().get("/v2/name/{name}", "NonExistentCountry");
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearchV2NoMatch() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/name/{name}", "NonExistent");
+        response.then().statusCode(404);
+    }
+}

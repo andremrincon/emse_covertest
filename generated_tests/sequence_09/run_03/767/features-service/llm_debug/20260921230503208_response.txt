@@ -1,0 +1,64 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String prop = System.getProperty("baseUrl");
+        if (env != null && !env.isEmpty()) {
+            BASE = env;
+        } else if (prop != null && !prop.isEmpty()) {
+            BASE = prop;
+        } else {
+            BASE = "http://localhost:8080";
+        }
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturns200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().baseUri(BASE).contentType("application/json").body("{\"description\":\"desc\"}")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/products/{productName}/features", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsPreflightReturnsAllowMethodsHeader() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().baseUri(BASE).contentType("application/json").body("{\"description\":\"desc\"}")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).header("Origin", "http://example.com").header("Access-Control-Request-Method", "POST")
+                .when().options("/products/{productName}/features", product);
+        act.then().header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        given().baseUri(BASE).contentType("application/json").body("{\"description\":\"to delete\"}")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+}

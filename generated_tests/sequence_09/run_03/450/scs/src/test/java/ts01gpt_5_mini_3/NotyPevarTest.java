@@ -1,0 +1,41 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void init() {
+        String baseUri = System.getProperty("api.base");
+        if (baseUri == null) baseUri = System.getenv("API_BASE");
+        if (baseUri == null) baseUri = "http://localhost:8080";
+        RestAssured.baseURI = baseUri;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_sum56_branch_executes_and_returns3() {
+        given().when().get("/api/cookie/session-id/1/localhost").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/28/any");
+        resp.then().body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_hello7_branch_executed_status200() {
+        given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/7/example-string");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_compareTo_branch_returns2_for_i5() {
+        given().when().get("/api/calc/add/15.5/4.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/5/z");
+        resp.then().body(equalTo("2"));
+    }
+}

@@ -1,0 +1,94 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_success_US() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_badRequest_numeric() {
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_XYZ() {
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_success_multiple() {
+        given().when().get("/v1/alpha?codes=US,CA,MX").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badRequest_shortCodes() {
+        given().when().get("/v1/alpha?codes=123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_internalServerError_arrayFormat() {
+        given().when().get("/v1/alpha?codes=%5B%22US%22%2C%20%22CA%22%5D").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_success_USD() {
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_badRequest_numeric() {
+        given().when().get("/v1/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_notFound_XYZ() {
+        given().when().get("/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_success_France_fullTextFalse() {
+        given().when().get("/v1/name/France?fullText=false").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_internalServerError_True() {
+        given().when().get("/v1/name/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_success_1() {
+        given().when().get("/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_success_London() {
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_success_Europe() {
+        given().when().get("/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_missingCodes_shouldBeBadRequest() {
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+}

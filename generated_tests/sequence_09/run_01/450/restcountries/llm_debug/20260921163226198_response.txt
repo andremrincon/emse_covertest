@@ -1,0 +1,66 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URL;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        String configured = System.getProperty("rest.base");
+        if (configured == null || configured.isEmpty()) {
+            configured = System.getenv("REST_BASE_URL");
+        }
+        if (configured == null || configured.isEmpty()) {
+            configured = "http://localhost:8080/rest";
+        }
+        URL url = new URL(configured);
+        String baseUri = url.getProtocol() + "://" + url.getHost();
+        RestAssured.baseURI = baseUri;
+        if (url.getPort() != -1) {
+            RestAssured.port = url.getPort();
+        }
+        RestAssured.basePath = url.getPath();
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_statusCode404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_bodyMessage() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNameServerError_status500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/True");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFound_bodyStatus() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/capital/123");
+        act.then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaQueryBadRequest_status400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha?codes=123");
+        act.then().statusCode(400);
+    }
+}

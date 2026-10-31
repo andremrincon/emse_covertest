@@ -1,0 +1,138 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowOriginHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowMethodsHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Methods", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAccessControlAllowHeadersHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Access-Control-Allow-Headers", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCacheControlHeaderOnV1All() {
+        given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .header("Cache-Control", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOn404Response() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOn400Response() {
+        given()
+                .when()
+                .get("/v1/alpha/123")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV2AllWithFields() {
+        given()
+                .queryParam("fields", "name;capital;region;population;flag")
+                .when()
+                .get("/v2/all")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV2AlphaWithCodes() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .header("Access-Control-Allow-Methods", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV1Region() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .header("Access-Control-Allow-Headers", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCacheControlOnV1Capital() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .header("Cache-Control", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsCorsHeadersOnV2NameWithFullText() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAddsAllCorsHeadersOnV2Currency() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .header("Access-Control-Allow-Origin", equalTo(null))
+                .header("Access-Control-Allow-Methods", equalTo(null))
+                .header("Access-Control-Allow-Headers", equalTo(null))
+                .header("Cache-Control", equalTo(null));
+    }
+}

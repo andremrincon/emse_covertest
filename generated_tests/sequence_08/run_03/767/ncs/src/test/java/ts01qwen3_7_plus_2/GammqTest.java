@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    private static final String BASE_URL = "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testGserPath() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/5.5/2.3")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPath() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/1.0/5.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidA() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/-1.0/2.0")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidX() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/5.5/-1.0")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithZeroX() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/5.5/0.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfWithLargeX() {
+        given()
+            .when()
+            .get(BASE_URL + "/api/gammq/0.001/1000.0")
+            .then()
+            .statusCode(200);
+    }
+}

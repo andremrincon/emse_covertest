@@ -1,0 +1,70 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDayAndMonthBothMatch_JanProducesTwo() {
+        String[] months = {"jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"};
+        String[] days = {"mon","tue","wed","thur","fri","sat","sun","holiday"};
+        for (String m : months) {
+            given().when().get("/api/dateparse/{d}/{m}", "mon", m).then().statusCode(lessThan(300));
+        }
+        for (String d : days) {
+            given().when().get("/api/dateparse/{d}/{m}", d, "jan").then().statusCode(lessThan(300));
+        }
+        given().when().get("/api/dateparse/{d}/{m}", "mon", "jan").then().assertThat().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMonthDecWithoutDayProducesTwelve() {
+        String[] dayVariants = new String[]{"x","unknown","MONDAY","zzz"};
+        for (String d : dayVariants) {
+            given().when().get("/api/dateparse/{d}/{m}", d, "dec").then().statusCode(lessThan(300));
+        }
+        given().when().get("/api/dateparse/{d}/{m}", "x", "dec").then().assertThat().body(equalTo("12"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDayOnlyMatch_TueProducesOne() {
+        String[] months = {"unknown","movember","456",""};
+        for (String m : months) {
+            given().when().get("/api/dateparse/{d}/{m}", "tue", m).then().statusCode(lessThan(300));
+        }
+        given().when().get("/api/dateparse/{d}/{m}", "tue", "noMonth").then().assertThat().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoDayNoMonthMatchProducesZero() {
+        String[] combos = {"abc/def","foo/bar","Superday/Movember","random/456"};
+        for (String combo : combos) {
+            String[] parts = combo.split("/");
+            given().when().get("/api/dateparse/{d}/{m}", parts[0], parts[1]).then().statusCode(lessThan(300));
+        }
+        given().when().get("/api/dateparse/{d}/{m}", "xyz", "unknown").then().assertThat().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSunAndSep_StatusOk() {
+        String[] months = {"sep","oct","nov","dec"};
+        for (String m : months) {
+            given().when().get("/api/dateparse/{d}/{m}", "sun", m).then().statusCode(lessThan(300));
+        }
+        given().when().get("/api/dateparse/{d}/{m}", "SUN", "SEP").then().then().statusCode(200);
+    }
+}

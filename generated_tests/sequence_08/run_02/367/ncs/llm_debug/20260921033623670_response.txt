@@ -1,0 +1,90 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import io.restassured.RestAssured;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        given()
+            .when()
+            .get("/api/bessj/1/2.5")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZero() {
+        given()
+            .when()
+            .get("/api/bessj/2/0.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBackwardRecurrence() {
+        given()
+            .when()
+            .get("/api/bessj/3/2.5")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjForwardRecurrenceAxLessThan8() {
+        given()
+            .when()
+            .get("/api/bessj/2/5.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjForwardRecurrenceAxGreaterOrEqual8() {
+        given()
+            .when()
+            .get("/api/bessj/2/10.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+            .when()
+            .get("/api/bessj/3/-5.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+            .when()
+            .get("/api/bessj/2/-5.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXAxGreaterOrEqual8() {
+        given()
+            .when()
+            .get("/api/bessj/2/-10.0")
+            .then()
+            .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,140 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintWithValidFeaturesCoversSetters() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintWithNonExistentSourceFeature() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "NonExistentSource-" + UUID.randomUUID().toString().substring(0, 8))
+                .formParam("requiredFeature", requiredFeature);
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintWithNonExistentRequiredFeature() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", "NonExistentRequired-" + UUID.randomUUID().toString().substring(0, 8));
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationSourceActiveRequiredNotActive() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(200)
+                .body(hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationBothSourceAndRequiredActive() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, requiredFeature).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(200)
+                .body(hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationSourceNotActive() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, requiredFeature).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        RestAssured.given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(200)
+                .body(not(hasItem(sourceFeature)));
+    }
+}

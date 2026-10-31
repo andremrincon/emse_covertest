@@ -1,0 +1,53 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPath() {
+        given().when().get("/api/gammq/5.5/1000.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPath() {
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserXZero() {
+        given().when().get("/api/gammq/5.5/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqSmallA() {
+        given().when().get("/api/gammq/0.001/2.3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidA() {
+        given().when().get("/api/gammq/-1.0/2.3").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidType() {
+        given().when().get("/api/gammq/abc/2.3").then().statusCode(400);
+    }
+}
+```

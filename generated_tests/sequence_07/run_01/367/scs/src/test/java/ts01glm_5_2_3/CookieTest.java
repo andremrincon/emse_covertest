@@ -1,0 +1,43 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("base.port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdBranchWithUserPrefixLongVal() {
+        given()
+            .when()
+                .get("/api/cookie/userid/usertest/example.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchWithAmAndAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionBranchElseCaseWithNonMatchingVal() {
+        given()
+            .when()
+                .get("/api/cookie/session/other/example.com")
+            .then()
+                .statusCode(200);
+    }
+}

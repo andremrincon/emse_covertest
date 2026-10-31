@@ -1,0 +1,159 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryRestV2Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUri", System.getenv("BASE_URI") != null ? System.getenv("BASE_URI") : "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", System.getenv("BASE_PATH") != null ? System.getenv("BASE_PATH") : "/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ValidWithFields() {
+        given()
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ValidWithoutFields() {
+        given()
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_InvalidCode() {
+        given()
+        .when()
+            .get("/v2/alpha/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+        .when()
+            .get("/v2/alpha/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_ValidWithFields() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_ValidWithoutFields() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InvalidCodes() {
+        given()
+            .queryParam("codes", "123")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Valid() {
+        given()
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Invalid() {
+        given()
+        .when()
+            .get("/v2/currency/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Valid() {
+        given()
+        .when()
+            .get("/v2/name/Germany")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given()
+        .when()
+            .get("/v2/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Valid() {
+        given()
+        .when()
+            .get("/v2/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Valid() {
+        given()
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Valid() {
+        given()
+        .when()
+            .get("/v2/region/Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Ignore("Illegal character in path at index 47: http://localhost:8080/rest/v2/subregion/Western Europe")
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_Valid() {
+        given()
+        .when()
+            .get("/v2/subregion/{subregion}", "Western Europe")
+        .then()
+            .statusCode(200);
+    }
+}

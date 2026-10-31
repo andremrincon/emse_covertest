@@ -1,0 +1,123 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080/rest"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_v2_success() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/alpha/US");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_v2_badRequest() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/alpha/123");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_v2_fields_returns_filtered() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        Assert.assertTrue(res.getBody().asString().contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_v2_success() {
+        RestAssured.given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("codes", "US,CA,MX").when().get("/v2/alpha");
+        Assert.assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_v2_badRequest() {
+        RestAssured.given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("codes", "%5B%22US%22,%22CA%22%5D").when().get("/v2/alpha");
+        Assert.assertEquals(400, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_v2_success() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/currency/EUR");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_v2_badRequest() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/currency/123");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_v2_success_fullText_false() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("fullText", "false").when().get("/v2/name/Germany");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_v2_success() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/callingcode/1");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_v2_with_fields() {
+        RestAssured.given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("fields", "name;capital;population").when().get("/v2/capital/Paris");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_v2_success() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/region/Europe");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_v2_success() {
+        RestAssured.given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/subregion/Western%20Europe");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLang_v2_with_fields() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().queryParam("fields", "name;capital;population").when().get("/v2/lang/Spanish");
+        Assert.assertEquals(404, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonym_v2_success() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        Response res = RestAssured.given().when().get("/v2/demonym/American");
+        Assert.assertEquals(200, res.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testPostOnV2_methodNotAllowed() {
+        RestAssured.given().when().get("/v2").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        Response res = RestAssured.given().body("{\"id\":\"" + unique + "\"}").when().post("/v2");
+        Assert.assertEquals(405, res.getStatusCode());
+    }
+}

@@ -1,0 +1,36 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.baseURI;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    static {
+        String envUrl = System.getenv("BASE_URL");
+        baseURI = (envUrl != null && !envUrl.isEmpty()) ? envUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValid() {
+        given()
+            .pathParam("dayname", "Wednesday")
+            .pathParam("monthname", "August")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalid() {
+        given()
+            .pathParam("dayname", "Superday")
+            .pathParam("monthname", "Movember")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+}

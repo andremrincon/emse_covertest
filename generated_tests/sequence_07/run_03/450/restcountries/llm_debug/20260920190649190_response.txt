@@ -1,0 +1,101 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUSReturnsCurrencyCode() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaGBReturnsCurrencyName() {
+        given()
+        .when()
+            .get("/v1/alpha/GB")
+        .then()
+            .body("currencies[0].name", equalTo("British pound"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUSReturnsCurrencySymbol() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesReturnsCountries() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDReturnsCountries() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyXOFReturnsCountries() {
+        given()
+        .when()
+            .get("/v1/currency/XOF")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFranceReturnsCountries() {
+        given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsCountries() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURReturnsCountries() {
+        given()
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(200);
+    }
+}
+```

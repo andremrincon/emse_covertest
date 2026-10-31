@@ -1,0 +1,101 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNotFound() {
+        given()
+            .when()
+                .get("/api/pat/ABCDEF/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReversePatFoundPatNotFound() {
+        given()
+            .when()
+                .get("/api/pat/CBADEF/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseBothFoundNotAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/ABCXCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFollowedByReversePalindrome() {
+        given()
+            .when()
+                .get("/api/pat/ABCCBA/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFollowedByPatPalindrome() {
+        given()
+            .when()
+                .get("/api/pat/CBAABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatTooShort() {
+        given()
+            .when()
+                .get("/api/pat/ABCDEF/AB")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given()
+            .when()
+                .get("/api/pat/XYZXYZ/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtShorterThanPat() {
+        given()
+            .when()
+                .get("/api/pat/AB/ABC")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTxtEqualsPat() {
+        given()
+            .when()
+                .get("/api/pat/ABC/ABC")
+            .then()
+                .statusCode(200);
+    }
+}
+```

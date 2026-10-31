@@ -1,0 +1,88 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConstraintsResourceTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("server.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintSuccess() {
+        String productName = "test-prod-req-" + UUID.randomUUID();
+        String sourceFeature = "source-feat-req-" + UUID.randomUUID();
+        String requiredFeature = "required-feat-req-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintSuccess() {
+        String productName = "test-prod-exc-" + UUID.randomUUID();
+        String sourceFeature = "source-feat-exc-" + UUID.randomUUID();
+        String excludedFeature = "excluded-feat-exc-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintServerError() {
+        String productName = "non-existent-prod-req-" + UUID.randomUUID();
+        String sourceFeature = "source-feat-req-err-" + UUID.randomUUID();
+        String requiredFeature = "required-feat-req-err-" + UUID.randomUUID();
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintServerError() {
+        String productName = "non-existent-prod-exc-" + UUID.randomUUID();
+        String sourceFeature = "source-feat-exc-err-" + UUID.randomUUID();
+        String excludedFeature = "excluded-feat-exc-err-" + UUID.randomUUID();
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(500);
+    }
+}
+```

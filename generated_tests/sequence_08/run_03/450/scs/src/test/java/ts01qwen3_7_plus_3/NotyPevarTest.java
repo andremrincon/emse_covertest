@@ -1,0 +1,46 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class NotyPevarTest {
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI0() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        given()
+            .baseUri(baseUrl)
+            .pathParam("i", 28)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI1() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        given()
+            .baseUri(baseUrl)
+            .pathParam("i", 7)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarBranchI2() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        given()
+            .baseUri(baseUrl)
+            .pathParam("i", 0)
+            .pathParam("s", "world")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}

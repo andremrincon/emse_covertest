@@ -1,0 +1,140 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.hasItem;
+
+public class ProductsConfigurationsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    private void arrangeCreateProduct(String productName) {
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+    }
+
+    private void arrangeCreateConfiguration(String productName, String configurationName) {
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName)
+                .when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+    }
+
+    private void arrangeAddFeatureToConfiguration(String productName, String configurationName, String featureName) {
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+    }
+
+    private void arrangeDeleteFeatureFromConfiguration(String productName, String configurationName, String featureName) {
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName)
+                .when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsNamesForProduct_twoConfigurations_returnsListContainsNames() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg1 = "cfg-" + UUID.randomUUID().toString();
+        String cfg2 = "cfg-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg1);
+        arrangeCreateConfiguration(product, cfg2);
+        when().get("/products/{productName}/configurations", product).then().body("", hasItems(cfg1, cfg2));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeaturesNames_twoFeatures_returnsListContainsNames() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String f1 = "feature-" + UUID.randomUUID().toString();
+        String f2 = "feature-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        arrangeAddFeatureToConfiguration(product, cfg, f1);
+        arrangeAddFeatureToConfiguration(product, cfg, f2);
+        when().get("/products/{productName}/configurations/{configurationName}/features", product, cfg)
+                .then().body("", hasItems(f1, f2));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_success_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        given().pathParam("productName", product).pathParam("configurationName", cfg).pathParam("featureName", feature)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_duplicate_throws500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        arrangeAddFeatureToConfiguration(product, cfg, feature);
+        given().pathParam("productName", product).pathParam("configurationName", cfg).pathParam("featureName", feature)
+                .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfiguration_success_returns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        arrangeAddFeatureToConfiguration(product, cfg, feature);
+        given().pathParam("productName", product).pathParam("configurationName", cfg).pathParam("featureName", feature)
+                .when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromConfiguration_effect_updatesConfigurationFeatures() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String fKeep = "feat-" + UUID.randomUUID().toString();
+        String fRemove = "feat-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        arrangeAddFeatureToConfiguration(product, cfg, fKeep);
+        arrangeAddFeatureToConfiguration(product, cfg, fRemove);
+        arrangeDeleteFeatureFromConfiguration(product, cfg, fRemove);
+        when().get("/products/{productName}/configurations/{configurationName}/features", product, cfg)
+                .then().body("", not(hasItem(fRemove)));
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationValidField_present_afterAddingFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String cfg = "cfg-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        arrangeCreateProduct(product);
+        arrangeCreateConfiguration(product, cfg);
+        arrangeAddFeatureToConfiguration(product, cfg, feature);
+        when().get("/products/{productName}/configurations/{configurationName}", product, cfg)
+                .then().body("valid", notNullValue());
+    }
+}

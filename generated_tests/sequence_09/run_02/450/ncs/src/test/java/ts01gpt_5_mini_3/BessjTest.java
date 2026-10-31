@@ -1,0 +1,53 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("TEST_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("BASE_URL", System.getProperty("baseUrl", "http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/-5/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjZeroXReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/2/0.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNUsesSmallAxBranch() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/2/3.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNUsesLargeAxBranch() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/2/10.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessOrEqualNBackwardRecurrence() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/5/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXWithOddNSignPath() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/bessj/3/-2.5").then().statusCode(200);
+    }
+}

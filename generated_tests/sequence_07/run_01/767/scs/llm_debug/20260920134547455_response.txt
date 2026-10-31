@@ -1,0 +1,61 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNotFound() {
+        String txt = "ABC";
+        String pat = "ABC";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseAdjacentPalindrome() {
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNonAdjacent() {
+        String txt = "ABCXACB";
+        String pat = "ABC";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatAdjacent() {
+        String txt = "CBAABC";
+        String pat = "ABC";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatNonAdjacent() {
+        String txt = "CBAXABC";
+        String pat = "ABC";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenTwoOrLessSkipsReverse() {
+        String txt = "ABABAB";
+        String pat = "AB";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(200);
+    }
+}
+```

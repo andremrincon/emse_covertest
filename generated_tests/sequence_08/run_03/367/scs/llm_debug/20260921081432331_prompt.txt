@@ -1,0 +1,269 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus_2.Ordered4Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testUnorderedValidLengths TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "aaaaabbbbbbbbbbaaaaa"
+  Actual: unordered
+
+[2] METHOD=testDecreasingOrder TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "cccccbbbbbdddddeeeee"
+  Actual: decreasing
+
+[3] METHOD=testUnorderedInvalidLengthW TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "ccccdddddbbbbbaaa"
+  Actual: unordered
+
+[4] METHOD=testUnorderedInvalidLengthX TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "ccccdddddbbbbbbb"
+  Actual: unordered
+
+[5] METHOD=testUnorderedInvalidLengthY TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "ccdddddbbbbbaaaaa"
+  Actual: unordered
+
+[6] METHOD=testIncreasingOrder TYPE=FAILURE
+1 expectation failed.
+Response body doesn't match expectation.
+Expected: "cccccdddddbbbbbaaaaa"
+  Actual: increasing
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testUnorderedValidLengths FAILURE AT LINE 71
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testUnorderedValidLengths(Ordered4Test.java:71)
+CODE CONTEXT:
+    68:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+    69:             .then()
+    70:             .statusCode(200)
+    71:             .body(equalTo("aaaaabbbbbbbbbbaaaaa"));  ← FAILURE HERE
+    72:     }
+    73: 
+    74:     @Test(timeout = 60000)
+
+[2] METHOD=testDecreasingOrder FAILURE AT LINE 52
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testDecreasingOrder(Ordered4Test.java:52)
+CODE CONTEXT:
+    49:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+    50:             .then()
+    51:             .statusCode(200)
+    52:             .body(equalTo("cccccbbbbbdddddeeeee"));  ← FAILURE HERE
+    53:     }
+    54: 
+    55:     @Test(timeout = 60000)
+
+[3] METHOD=testUnorderedInvalidLengthW FAILURE AT LINE 90
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testUnorderedInvalidLengthW(Ordered4Test.java:90)
+CODE CONTEXT:
+    87:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+    88:             .then()
+    89:             .statusCode(200)
+    90:             .body(equalTo("ccccdddddbbbbbaaa"));  ← FAILURE HERE
+    91:     }
+    92: 
+    93:     @Test(timeout = 60000)
+
+[4] METHOD=testUnorderedInvalidLengthX FAILURE AT LINE 109
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testUnorderedInvalidLengthX(Ordered4Test.java:109)
+CODE CONTEXT:
+   106:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+   107:             .then()
+   108:             .statusCode(200)
+   109:             .body(equalTo("ccccdddddbbbbbbb"));  ← FAILURE HERE
+   110:     }
+   111: 
+   112:     @Test(timeout = 60000)
+
+[5] METHOD=testUnorderedInvalidLengthY FAILURE AT LINE 128
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testUnorderedInvalidLengthY(Ordered4Test.java:128)
+CODE CONTEXT:
+   125:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+   126:             .then()
+   127:             .statusCode(200)
+   128:             .body(equalTo("ccdddddbbbbbaaaaa"));  ← FAILURE HERE
+   129:     }
+   130: }
+
+[6] METHOD=testIncreasingOrder FAILURE AT LINE 33
+java.lang.AssertionError:
+at ts01qwen3_7_plus_2.Ordered4Test.testIncreasingOrder(Ordered4Test.java:33)
+CODE CONTEXT:
+    30:             .get("/api/ordered4/{w}/{x}/{z}/{y}")
+    31:             .then()
+    32:             .statusCode(200)
+    33:             .body(equalTo("cccccdddddbbbbbaaaaa"));  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "ddddd";
+        String y = "ccccc";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("cccccdddddbbbbbaaaaa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        String w = "eeeee";
+        String x = "ddddd";
+        String z = "bbbbb";
+        String y = "ccccc";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("cccccbbbbbdddddeeeee"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "bbbbb";
+        String y = "aaaaa";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("aaaaabbbbbbbbbbaaaaa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLengthW() {
+        String w = "aaa";
+        String x = "bbbbb";
+        String z = "ddddd";
+        String y = "ccccc";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("ccccdddddbbbbbaaa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLengthX() {
+        String w = "aaaaa";
+        String x = "bbbbbbb";
+        String z = "ddddd";
+        String y = "ccccc";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("ccccdddddbbbbbbb"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLengthY() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "ddddd";
+        String y = "cc";
+
+        given()
+            .pathParam("w", w)
+            .pathParam("x", x)
+            .pathParam("z", z)
+            .pathParam("y", y)
+            .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+            .then()
+            .statusCode(200)
+            .body(equalTo("ccdddddbbbbbaaaaa"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

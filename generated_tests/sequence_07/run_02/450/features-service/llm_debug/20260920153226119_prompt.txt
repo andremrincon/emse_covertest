@@ -1,0 +1,255 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_2.EvaluationResultTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=getConfigurationFeaturesTriggersEvaluationResultCreation_2 TYPE=FAILURE
+Expected POST /products/{productName}/features to return <300 but was 500
+
+[2] METHOD=getConfigurationWithNameTriggersEvaluationResultCreation_1 TYPE=FAILURE
+Expected POST /products/{productName}/features to return <300 but was 500
+
+[3] METHOD=addFeatureToConfigurationTriggersEvaluationResultCreation_3 TYPE=FAILURE
+Expected POST /products/{productName}/features to return <300 but was 500
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=getConfigurationFeaturesTriggersEvaluationResultCreation_2 FAILURE AT LINE 56
+java.lang.AssertionError: Expected POST /products/{productName}/features to return <300 but was 500
+at ts01glm_5_2_2.EvaluationResultTest.getConfigurationFeaturesTriggersEvaluationResultCreation_2(EvaluationResultTest.java:56)
+CODE CONTEXT:
+    53:         Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+    54: 
+    55:         int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+    56:         Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);  ← FAILURE HERE
+    57: 
+    58:         int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+    59:         Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+[2] METHOD=getConfigurationWithNameTriggersEvaluationResultCreation_1 FAILURE AT LINE 34
+java.lang.AssertionError: Expected POST /products/{productName}/features to return <300 but was 500
+at ts01glm_5_2_2.EvaluationResultTest.getConfigurationWithNameTriggersEvaluationResultCreation_1(EvaluationResultTest.java:34)
+CODE CONTEXT:
+    31:         Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+    32: 
+    33:         int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+    34:         Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);  ← FAILURE HERE
+    35: 
+    36:         int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+    37:         Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+[3] METHOD=addFeatureToConfigurationTriggersEvaluationResultCreation_3 FAILURE AT LINE 78
+java.lang.AssertionError: Expected POST /products/{productName}/features to return <300 but was 500
+at ts01glm_5_2_2.EvaluationResultTest.addFeatureToConfigurationTriggersEvaluationResultCreation_3(EvaluationResultTest.java:78)
+CODE CONTEXT:
+    75:         Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+    76: 
+    77:         int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+    78:         Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);  ← FAILURE HERE
+    79: 
+    80:         int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+    81:         Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class EvaluationResultTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationWithNameTriggersEvaluationResultCreation_1() throws Exception {
+        String productName = "EvalTestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int r1 = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+
+        int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);
+
+        int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+        int r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        Assert.assertTrue("Expected POST .../configurations/.../features to return <300 but was " + r4, r4 < 300);
+
+        int r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertEquals("Expected GET configuration to return 200 but was " + r5, 200, r5);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersEvaluationResultCreation_2() throws Exception {
+        String productName = "EvalTestProduct2-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config2-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int r1 = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+
+        int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);
+
+        int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+        int r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        Assert.assertTrue("Expected POST .../configurations/.../features to return <300 but was " + r4, r4 < 300);
+
+        int r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals("Expected GET configuration features to return 200 but was " + r5, 200, r5);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationTriggersEvaluationResultCreation_3() throws Exception {
+        String productName = "EvalTestProduct3-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config3-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat3-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int r1 = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue("Expected POST /products to return <300 but was " + r1, r1 < 300);
+
+        int r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue("Expected POST /products/{productName}/features to return <300 but was " + r2, r2 < 300);
+
+        int r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue("Expected POST /products/{productName}/configurations to return <300 but was " + r3, r3 < 300);
+
+        int r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        Assert.assertEquals("Expected POST adding feature to configuration to return 201 but was " + r4, 201, r4);
+    }
+
+    private int sendRequest(String method, String pathTemplate, Object... params) throws IOException {
+        String resolvedPath = resolvePath(pathTemplate, params);
+        String full = baseUrl;
+        if (full.endsWith("/") && resolvedPath.startsWith("/")) {
+            full = full.substring(0, full.length() - 1);
+        }
+        full = full + resolvedPath;
+        URL url = new URL(full);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        conn.setDoInput(true);
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method)) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.getOutputStream().close();
+        }
+        int code = conn.getResponseCode();
+        InputStream is = null;
+        try {
+            if (code >= 200 && code < 400) {
+                is = conn.getInputStream();
+            } else {
+                is = conn.getErrorStream();
+            }
+            if (is != null) {
+                byte[] buf = new byte[1024];
+                while (is.read(buf) != -1) {
+                }
+            }
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ignored) {
+                }
+            }
+            conn.disconnect();
+        }
+        return code;
+    }
+
+    private String resolvePath(String template, Object... params) {
+        Pattern p = Pattern.compile("\\{[^/]+?\\}");
+        Matcher m = p.matcher(template);
+        StringBuffer sb = new StringBuffer();
+        int index = 0;
+        while (m.find()) {
+            String replacement = "";
+            if (index < params.length && params[index] != null) {
+                replacement = urlEncode(params[index].toString());
+            }
+            m.appendReplacement(sb, replacement);
+            index++;
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private String urlEncode(String s) {
+        StringBuilder out = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            if (isUnreserved(c)) {
+                out.append(c);
+            } else {
+                byte[] bytes;
+                try {
+                    bytes = String.valueOf(c).getBytes("UTF-8");
+                } catch (Exception e) {
+                    bytes = new byte[]{(byte) c};
+                }
+                for (byte b : bytes) {
+                    out.append('%');
+                    int upper = (b >> 4) & 0xF;
+                    int lower = b & 0xF;
+                    out.append(Character.forDigit(upper, 16));
+                    out.append(Character.forDigit(lower, 16));
+                }
+            }
+        }
+        return out.toString();
+    }
+
+    private boolean isUnreserved(char c) {
+        if (c >= 'a' && c <= 'z') return true;
+        if (c >= 'A' && c <= 'Z') return true;
+        if (c >= '0' && c <= '9') return true;
+        if (c == '-' || c == '_' || c == '.' || c == '~') return true;
+        return false;
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

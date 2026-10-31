@@ -1,0 +1,93 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSuccess() {
+        String product = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String config = "test-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature = "test-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature)
+            .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationInvalid() {
+        String product = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String config = "test-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "test-feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "test-feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + featureB).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when()
+            .post("/products/" + product + "/constraints/requires")
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + featureA)
+            .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccess() {
+        String product = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String config = "test-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature = "test-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + feature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + feature).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + feature)
+            .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureInvalid() {
+        String product = "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String config = "test-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "test-feat-a-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "test-feat-b-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + featureB).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when()
+            .post("/products/" + product + "/constraints/requires")
+            .then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + product + "/configurations/" + config + "/features/" + featureB)
+            .then().statusCode(204);
+    }
+}

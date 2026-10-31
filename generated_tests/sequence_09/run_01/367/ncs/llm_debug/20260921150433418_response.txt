@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.uri");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("BASE_URI");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAEqualsZeroReturnsBadRequest() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 0, 5).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBEqualsZeroReturnsBadRequest() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 17, 0).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveAPositiveBReturns200() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 17, 5).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveANegativeBReturnsResultTwo() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", 17, -5).then().statusCode(200).body("result", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAPositiveBReturns200() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", -9, 4).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeANegativeBReturnsResultOne() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/remainder/{a}/{b}", -9, -4).then().statusCode(200).body("result", equalTo(null));
+    }
+}

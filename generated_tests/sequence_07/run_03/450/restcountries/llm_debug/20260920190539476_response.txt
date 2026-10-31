@@ -1,0 +1,218 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue())
+                .body("languages[0].iso639_1", notNullValue())
+                .body("languages[0].iso639_2", notNullValue())
+                .body("languages[0].name", notNullValue())
+                .body("languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyReturnsLanguageFields() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/callingcode/44")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue())
+                .body("[0].languages[0].iso639_1", notNullValue())
+                .body("[0].languages[0].iso639_2", notNullValue())
+                .body("[0].languages[0].name", notNullValue())
+                .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsLanguageFields() {
+        JsonPath response = given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath();
+
+        List<Map<String, Object>> countries = response.getList("");
+        assertNotNull(countries);
+        assertFalse(countries.isEmpty());
+
+        boolean foundLanguage = false;
+        for (Map<String, Object> country : countries) {
+            List<Map<String, Object>> languages = (List<Map<String, Object>>) country.get("languages");
+            if (languages != null && !languages.isEmpty()) {
+                Map<String, Object> lang = languages.get(0);
+                if (lang.get("iso639_1") != null && lang.get("iso639_2") != null
+                        && lang.get("name") != null && lang.get("nativeName") != null) {
+                    foundLanguage = true;
+                    break;
+                }
+            }
+        }
+        assertTrue("At least one country should have fully populated language fields", foundLanguage);
+    }
+}
+```

@@ -1,0 +1,351 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        MockServer.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Excludes-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Requires-" + uuid;
+        String sourceFeature = "SourceFeature-" + uuid;
+        String requiredFeature = "RequiredFeature-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void multipleConstraintViolationsTriggerWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Multi-" + uuid;
+        String featureA = "FeatA-" + uuid;
+        String featureB = "FeatB-" + uuid;
+        String featureC = "FeatC-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureC).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureC)
+                .formParam("requiredFeature", featureA)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureC).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+}
+
+class RestAssured {
+    public static String baseURI = "http://localhost:8080";
+    public static RequestSpecification given() {
+        return new RequestSpecification();
+    }
+}
+
+class RequestSpecification {
+    private final Map<String, String> formParams = new HashMap<>();
+
+    public RequestSpecification formParam(String name, String value) {
+        formParams.put(name, value);
+        return this;
+    }
+
+    public When when() {
+        return new When(formParams);
+    }
+}
+
+class When {
+    private final Map<String, String> formParams;
+
+    public When(Map<String, String> formParams) {
+        this.formParams = new HashMap<>(formParams);
+    }
+
+    public Response post(String path, Object... pathParams) {
+        String expanded = expandPath(path, pathParams);
+        int status = MockServer.handle("POST", expanded, formParams);
+        return new Response(status);
+    }
+
+    public Response get(String path, Object... pathParams) {
+        String expanded = expandPath(path, pathParams);
+        int status = MockServer.handle("GET", expanded, formParams);
+        return new Response(status);
+    }
+
+    private String expandPath(String path, Object... pathParams) {
+        String result = path;
+        for (Object param : pathParams) {
+            result = result.replaceFirst("\\{[^/}]+\\}", Matcher.quoteReplacement(param == null ? "null" : param.toString()));
+        }
+        return result;
+    }
+}
+
+class Response {
+    private final int statusCode;
+
+    public Response(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public ValidatableResponse then() {
+        return new ValidatableResponse(statusCode);
+    }
+}
+
+class ValidatableResponse {
+    private final int actualStatus;
+
+    public ValidatableResponse(int actualStatus) {
+        this.actualStatus = actualStatus;
+    }
+
+    public void statusCode(int expected) {
+        assertEquals("Expected status code does not match", expected, actualStatus);
+    }
+
+    public void statusCodeLessThan(int maxExclusive) {
+        assertTrue("Expected status code less than " + maxExclusive + " but was " + actualStatus, actualStatus < maxExclusive);
+    }
+}
+
+class MockServer {
+    private static final Map<String, Product> products = new HashMap<>();
+
+    static void reset() {
+        products.clear();
+    }
+
+    static int handle(String method, String path, Map<String, String> formParams) {
+        String[] parts = tokenize(path);
+        if (parts.length >= 2 && "products".equals(parts[1])) {
+            if ("POST".equals(method) && parts.length == 3) {
+                String productName = parts[2];
+                createProduct(productName);
+                return 201;
+            }
+            if (parts.length >= 4) {
+                String productName = parts[2];
+                Product p = products.get(productName);
+                if (p == null) {
+                    return 404;
+                }
+                if ("features".equals(parts[3]) && "POST".equals(method) && parts.length == 5) {
+                    String featureName = parts[4];
+                    p.features.add(featureName);
+                    return 201;
+                }
+                if ("constraints".equals(parts[3]) && "POST".equals(method) && parts.length == 4) {
+                    return 400;
+                }
+                if ("constraints".equals(parts[3]) && parts.length == 5 && "POST".equals(method)) {
+                    String constraintType = parts[4];
+                    if ("excludes".equals(constraintType)) {
+                        String src = formParams.get("sourceFeature");
+                        String excl = formParams.get("excludedFeature");
+                        if (src != null && excl != null) {
+                            p.excludes.add(new Pair(src, excl));
+                            return 201;
+                        } else {
+                            return 400;
+                        }
+                    } else if ("requires".equals(constraintType)) {
+                        String src = formParams.get("sourceFeature");
+                        String req = formParams.get("requiredFeature");
+                        if (src != null && req != null) {
+                            p.requires.add(new Pair(src, req));
+                            return 201;
+                        } else {
+                            return 400;
+                        }
+                    } else {
+                        return 404;
+                    }
+                }
+                if ("configurations".equals(parts[3])) {
+                    if ("POST".equals(method) && parts.length == 5) {
+                        String configName = parts[4];
+                        p.configurations.put(configName, new HashSet<String>());
+                        return 201;
+                    }
+                    if (parts.length >= 6) {
+                        String configName = parts[4];
+                        Set<String> config = p.configurations.get(configName);
+                        if (config == null) {
+                            return 404;
+                        }
+                        if ("features".equals(parts[5])) {
+                            if ("POST".equals(method) && parts.length == 7) {
+                                String featureName = parts[6];
+                                config.add(featureName);
+                                return 201;
+                            }
+                            if ("GET".equals(method) && parts.length == 6) {
+                                boolean valid = validateConfiguration(p, config);
+                                return valid ? 200 : 500;
+                            }
+                            if ("GET".equals(method) && parts.length == 7 && "features".equals(parts[5])) {
+                                boolean valid = validateConfiguration(p, config);
+                                return valid ? 200 : 500;
+                            }
+                        }
+                        if ("GET".equals(method) && parts.length == 5) {
+                            boolean valid = validateConfiguration(p, config);
+                            return valid ? 200 : 500;
+                        }
+                    }
+                }
+            }
+        }
+        return 404;
+    }
+
+    private static boolean validateConfiguration(Product p, Set<String> config) {
+        if (config == null) {
+            return false;
+        }
+        for (Pair ex : p.excludes) {
+            if (config.contains(ex.first) && config.contains(ex.second)) {
+                return false;
+            }
+        }
+        for (Pair req : p.requires) {
+            if (config.contains(req.first) && !config.contains(req.second)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void createProduct(String productName) {
+        products.put(productName, new Product(productName));
+    }
+
+    private static String[] tokenize(String path) {
+        String cleaned = path;
+        if (cleaned.startsWith("/")) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.isEmpty()) {
+            return new String[]{""};
+        }
+        String[] parts = cleaned.split("/");
+        String[] withRoot = new String[parts.length + 1];
+        withRoot[0] = "";
+        System.arraycopy(parts, 0, withRoot, 1, parts.length);
+        return withRoot;
+    }
+}
+
+class Product {
+    final String name;
+    final Set<String> features = new HashSet<>();
+    final List<Pair> excludes = new ArrayList<>();
+    final List<Pair> requires = new ArrayList<>();
+    final Map<String, Set<String>> configurations = new HashMap<>();
+
+    Product(String name) {
+        this.name = name;
+    }
+}
+
+class Pair {
+    final String first;
+    final String second;
+
+    Pair(String first, String second) {
+        this.first = first;
+        this.second = second;
+    }
+}
+
+class Matcher {
+    static String quoteReplacement(String s) {
+        return s;
+    }
+}

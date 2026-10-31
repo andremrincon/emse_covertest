@@ -1,0 +1,61 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/pat/abc/ab")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevAdjacent() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/pat/abccba/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevSeparated() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/pat/abcXXXcba/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevAndPatAdjacent() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/pat/cbaabc/abc")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevAndPatSeparated() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/api/pat/cbaXXXabc/abc")
+        .then()
+            .statusCode(200);
+    }
+}
+```

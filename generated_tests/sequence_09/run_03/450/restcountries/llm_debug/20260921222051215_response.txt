@@ -1,0 +1,46 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String envUrl = System.getProperty("baseUrl");
+        if (envUrl == null || envUrl.isEmpty()) envUrl = System.getenv("BASE_URL");
+        if (envUrl == null || envUrl.isEmpty()) envUrl = "http://localhost:8080/rest";
+        RestAssured.baseURI = envUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeReturnsBadRequestWhenTokenIsBlank() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"token\":\"   \",\"description\":\"Test " + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().contentType("application/json;charset=utf-8").body(body).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeReturnsBadRequestWhenStripeThrowsException() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":2500,\"token\":\"tok_visa\",\"description\":\"Charge attempt " + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().contentType("application/json;charset=utf-8").body(body).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeAcceptedWhenChargeSucceeds() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":500,\"token\":\"tok_charge_success\",\"description\":\"Successful charge " + UUID.randomUUID().toString() + "\"}";
+        Response resp = given().contentType("application/json;charset=utf-8").body(body).when().post("/contribute");
+        resp.then().statusCode(400);
+    }
+}

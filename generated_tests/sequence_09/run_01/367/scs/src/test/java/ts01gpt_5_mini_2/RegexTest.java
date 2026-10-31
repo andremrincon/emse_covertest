@@ -1,0 +1,52 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class RegexTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        String prop = System.getProperty("BASE_URL");
+        BASE = Optional.ofNullable(env).orElse(Optional.ofNullable(prop).orElse("http://localhost:8080"));
+        if (BASE.endsWith("/")) {
+            BASE = BASE.substring(0, BASE.length() - 1);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testRegex_urlBranch_returns200() {
+        given().when().get(BASE + "/api/pat/hello").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/pat/http://a/a");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegex_dateBranch_returns200() {
+        given().when().get(BASE + "/api/pat/hello").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/pat/mon12jan");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegex_fpeBranch_returns200() {
+        given().when().get(BASE + "/api/pat/hello").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/pat/1.2e+10");
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegex_noneBranch_returns200() {
+        given().when().get(BASE + "/api/pat/hello").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE + "/api/pat/simpletext");
+        assertEquals(200, resp.getStatusCode());
+    }
+}

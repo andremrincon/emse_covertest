@@ -1,0 +1,120 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DuplicatedObjectExceptionTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationSuccessReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "TestProduct-" + uuid;
+        String featureName = "TestFeature-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationFailureWithExcludesConstraintReturns400() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "TestProduct-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB)
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureSuccessReturns204() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "TestProduct-" + uuid;
+        String featureName = "TestFeature-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFailureWithRequiresConstraintReturns400() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "TestProduct-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "TestConfig-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when()
+            .post("/products/{productName}/constraints/requires", productName)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA)
+            .then().statusCode(lessThan(300));
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB)
+            .then()
+            .statusCode(400);
+    }
+}

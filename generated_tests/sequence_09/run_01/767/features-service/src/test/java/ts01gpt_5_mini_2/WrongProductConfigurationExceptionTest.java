@@ -1,0 +1,64 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class WrongProductConfigurationExceptionTest {
+
+    static {
+        String base = System.getProperty("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfigurationReturns201_whenValid() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "us-standard-wifi";
+        Response respCreateProduct = given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300)).extract().response();
+        assertTrue(respCreateProduct.getStatusCode() < 300);
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201_whenValid() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "standard-gpu-cluster";
+        String featureName = "distributed-training";
+        Response respCreateProduct = given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300)).extract().response();
+        assertTrue(respCreateProduct.getStatusCode() < 300);
+        Response respCreateConfig = given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300)).extract().response();
+        assertTrue(respCreateConfig.getStatusCode() < 300);
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturns200_whenExists() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "us-standard-16gb";
+        String featureName = "fingerprint-scanner";
+        Response respCreateProduct = given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300)).extract().response();
+        assertTrue(respCreateProduct.getStatusCode() < 300);
+        Response respCreateConfig = given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300)).extract().response();
+        assertTrue(respCreateConfig.getStatusCode() < 300);
+        Response respAddFeature = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertEquals(500, respAddFeature.getStatusCode());
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertEquals(200, resp.getStatusCode());
+    }
+}

@@ -1,0 +1,60 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcConstantOperatorsPiAndE() {
+        given().when().get("/api/calc/pi/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/PI/0/0").then().statusCode(200).body(containsString("3.14"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnaryOperatorsSqrtAndLog() {
+        given().when().get("/api/calc/sqrt/16/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/1/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/SQRT/25/0").then().statusCode(200).body(containsString("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnaryTrigOperators() {
+        given().when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(200).body(containsString("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryOperatorsPlusAndSubtract() {
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/10/3").then().statusCode(200).body(containsString("7.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryOperatorsMultiplyAndDivide() {
+        given().when().get("/api/calc/multiply/6/7").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/divide/20/4").then().statusCode(200).body(containsString("5.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDefaultOperatorNoMatch() {
+        given().when().get("/api/calc/unknown/1/2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/add/1/2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/foobar/5/5").then().statusCode(200).body(containsString("0.0"));
+    }
+}

@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseURI", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCountryTranslationsViaAlphaCode() {
+        Response response = given()
+                .when()
+                .get("/v1/alpha/US");
+
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCountryTranslationsViaName() {
+        Response response = given()
+                .when()
+                .get("/v1/name/France");
+
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCountryTranslationsViaCurrency() {
+        Response response = given()
+                .when()
+                .get("/v1/currency/USD");
+
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCountryTranslationsViaRegion() {
+        Response response = given()
+                .when()
+                .get("/v1/region/Europe");
+
+        response.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testCountryTranslationsViaAlphaCodes() {
+        Response response = given()
+                .when()
+                .get("/v1/alpha?codes=US,CA,MX");
+
+        response.then().statusCode(400);
+    }
+}

@@ -1,0 +1,79 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.isEmptyString;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageOnNameNotFound() {
+        given()
+                .when()
+                .get("/v1/name/{name}", "123")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusOnNameNotFound() {
+        given()
+                .when()
+                .get("/v1/name/{name}", "123")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageOnRegionNotFound() {
+        given()
+                .when()
+                .get("/v1/region/{region}", "123")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusOnRegionNotFound() {
+        given()
+                .when()
+                .get("/v1/region/{region}", "123")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetMessageOnCapitalNotFound() {
+        given()
+                .when()
+                .get("/v1/capital/{capital}", "123")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetStatusOnCallingCodeNotFound() {
+        given()
+                .when()
+                .get("/v1/callingcode/{callingcode}", "abc")
+                .then()
+                .statusCode(404)
+                .body(isEmptyString());
+    }
+}

@@ -1,0 +1,75 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Text2TxtTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectWordTwoReturnsTwo() {
+        given()
+            .when()
+                .get("/api/text2txt/two/and/three")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectWordForReturnsFour() {
+        given()
+            .when()
+                .get("/api/text2txt/for/the/way")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectWordYouReturnsU() {
+        given()
+            .when()
+                .get("/api/text2txt/you/and/me")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectWordAreReturnsR() {
+        given()
+            .when()
+                .get("/api/text2txt/are/you/ready")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectSeeYouReturnsCu() {
+        given()
+            .when()
+                .get("/api/text2txt/see/you/soon")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectByTheWayReturnsBtw() {
+        given()
+            .when()
+                .get("/api/text2txt/by/the/way")
+            .then()
+                .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,72 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithEmptyBodyReturnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response resp = given()
+                .contentType(ContentType.JSON)
+                .body("")
+                .when()
+                .post("/contribute");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankTokenReturnsBadRequest() {
+        given().when().get("/v2?fields=name;capital;population").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"\"}";
+        Response resp = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithInvalidTokenTriggersStripeErrorReturnsBadRequest() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":500,\"token\":\"invalid_token_abc_" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute");
+        assertEquals(400, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidTokenReturnsAccepted() {
+        given().when().get("/v2?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":250,\"token\":\"tok_" + UUID.randomUUID().toString() + "\"}";
+        Response resp = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/contribute");
+        assertEquals(202, resp.getStatusCode());
+    }
+}

@@ -1,0 +1,84 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class ResponseEntityTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("capital", "123")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("region", "123")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v2/name/{name}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CapitalNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("capital", "12345")
+        .when()
+            .get("/v2/capital/{capital}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocNotFoundReturnsResponseEntityStatusAndMessage() {
+        given()
+            .pathParam("regionalbloc", "123")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+}

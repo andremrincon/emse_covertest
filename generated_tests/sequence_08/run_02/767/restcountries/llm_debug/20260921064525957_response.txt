@@ -1,0 +1,163 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URI = "http://localhost:8080/rest";
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidLength() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/alpha/ABCD")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInvalidCodes() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("codes", "ABCD")
+        .when()
+            .get("/v2/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalidLength() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/currency/US")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/name/Germany")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/region/Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/subregion/Western Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/lang/Spanish")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/demonym/American")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocFound() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountryWithFields() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountriesWithFields() {
+        given()
+            .baseUri(BASE_URI)
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountryWithoutFields() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountriesWithoutFields() {
+        given()
+            .baseUri(BASE_URI)
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+}

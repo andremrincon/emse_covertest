@@ -1,0 +1,288 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private String uniqueProduct() {
+        return "TestProd-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueFeature() {
+        return "TestFeat-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueConfig() {
+        return "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureTriggersSetNameAndSetProduct() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureWithDescriptionTriggersSetProduct() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Test description")
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesTriggersGetProduct() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}/features", productName)
+            .then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescriptionTriggersSetName() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given()
+            .formParam("description", "Updated description")
+            .when()
+            .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationTriggersEquals() {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureAgainTriggersEqualsSameObject() {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(anyOf(equalTo(201), equalTo(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSecondFeatureTriggersEqualsDifferentName() {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String feature1 = uniqueFeature();
+        String feature2 = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, feature1)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, feature2)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, feature1)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, feature2)
+            .then().statusCode(equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesTriggersGetProductAndEquals() {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}/configurations/{configurationName}/features",
+                productName, configName)
+            .then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigFeatureTriggersEquals() {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                productName, configName, featureName)
+            .then().statusCode(equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProductFeatureTriggersEquals() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductTriggersGetProduct() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .get("/products/{productName}", productName)
+            .then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProductTriggersEquals() {
+        String productName = uniqueProduct();
+        String featureName = uniqueFeature();
+
+        given().when().post("/products/{productName}", productName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then().statusCode(lessThan(300));
+
+        given().when()
+            .delete("/products/{productName}", productName)
+            .then().statusCode(equalTo(204));
+    }
+}
+```

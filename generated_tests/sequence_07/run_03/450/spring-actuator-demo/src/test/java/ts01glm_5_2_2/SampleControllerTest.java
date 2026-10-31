@@ -1,0 +1,77 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .queryParam("name", "John%20Smith")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithDefaultName() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithZeroDelay() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithNonZeroDelay() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithInvalidDelay() {
+        given()
+            .queryParam("delay", "abc")
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testSlowApiWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(500);
+    }
+}

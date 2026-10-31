@@ -1,0 +1,42 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ExpintTest {
+
+    private static final String BASE = System.getProperty("baseUrl") != null ? System.getProperty("baseUrl") : (System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testExpint_ContinuedFraction_Path_Returns200() {
+        given().when().get(BASE + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_SeriesBranch_n1_xSmall_ReturnsStatusSuccess() {
+        given().when().get(BASE + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/1/0.1").then().assertThat().body("status", equalTo("success"));
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_nZero_ComputesAndReturns200() {
+        given().when().get(BASE + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/0/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_NegativeN_Returns400() {
+        given().when().get(BASE + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/-1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_xZeroAndNOne_Returns400() {
+        given().when().get(BASE + "/api/remainder/17/5").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/expint/1/0").then().statusCode(400);
+    }
+}

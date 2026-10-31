@@ -1,0 +1,48 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    private static String baseUrl() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) return env;
+        String prop = System.getProperty("baseUrl");
+        if (prop != null && !prop.isEmpty()) return prop;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_shouldReturn201() {
+        String base = baseUrl();
+        String uuid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uuid;
+        String configuration = "standard-gpu-cluster-" + uuid;
+        given().when().post(base + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post(base + "/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().post(base + "/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, "distributed-training-" + uuid);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithRequiresConstraint_shouldActivateDerivedFeature_andReturn201() {
+        String base = baseUrl();
+        String uuid = UUID.randomUUID().toString();
+        String product = "Enterprise-Server-X1-" + uuid;
+        String configuration = "prod-config-" + uuid;
+        String sourceFeature = "RAID-Controller-Card-" + uuid;
+        String requiredFeature = "128GB-ECC-RAM-" + uuid;
+        given().when().post(base + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post(base + "/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post(base + "/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().post(base + "/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, sourceFeature);
+        act.then().statusCode(201);
+    }
+}

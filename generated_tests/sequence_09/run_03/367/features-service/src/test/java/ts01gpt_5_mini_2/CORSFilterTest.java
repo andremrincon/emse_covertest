@@ -1,0 +1,52 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        String url = System.getenv("API_BASE_URL");
+        if (url == null || url.isEmpty()) {
+            url = System.getProperty("api.base", "http://localhost:8080");
+        }
+        URI uri = new URI(url);
+        RestAssured.baseURI = uri.getScheme() + "://" + uri.getHost();
+        RestAssured.port = uri.getPort() == -1 ? ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80) : uri.getPort();
+        RestAssured.basePath = (uri.getPath() == null || uri.getPath().isEmpty()) ? "/" : uri.getPath();
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesInvokesFilterChainForNonOptionsRequest() {
+        String productName = "test-product-get-" + UUID.randomUUID();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().get("/products/{productName}/features", productName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestHandledByCORSFilterWithoutProceedingChain() {
+        String productName = "test-product-options-" + UUID.randomUUID();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().header("Origin", "http://example.com")
+               .header("Access-Control-Request-Method", "POST")
+               .when().options("/products/{productName}/features", productName)
+               .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureTriggersFilterAndCreatesFeature() {
+        String productName = "test-product-post-" + UUID.randomUUID();
+        String featureName = "feature-" + UUID.randomUUID();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RestAssured.given().formParam("description", "Automated test feature")
+               .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+               .then().statusCode(201);
+    }
+}

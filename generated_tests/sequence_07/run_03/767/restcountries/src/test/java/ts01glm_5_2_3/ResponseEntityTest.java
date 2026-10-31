@@ -1,0 +1,84 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeNotFoundReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaCodeBadRequestReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/alpha/123")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/name/123")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeNotFoundReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/callingcode/abc")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/capital/123")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionNotFoundReturnsResponseEntity() {
+        given()
+                .when()
+                .get("/v1/region/123")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+}

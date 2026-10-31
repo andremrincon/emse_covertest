@@ -1,0 +1,133 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeature() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given()
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeature() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", featureName).formParam("description", "Test").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("featureName", featureName)
+        .when()
+            .delete("/products/{productName}/features/{featureName}")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint() {
+        String productName = "Product-" + UUID.randomUUID();
+        String feature1 = "Feature1-" + UUID.randomUUID();
+        String feature2 = "Feature2-" + UUID.randomUUID();
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", feature1).formParam("description", "Test1").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", feature2).formParam("description", "Test2").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+        .when()
+            .post("/products/{productName}/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint() {
+        String productName = "Product-" + UUID.randomUUID();
+        String feature1 = "Feature1-" + UUID.randomUUID();
+        String feature2 = "Feature2-" + UUID.randomUUID();
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", feature1).formParam("description", "Test1").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", feature2).formParam("description", "Test2").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .formParam("sourceFeature", feature1)
+            .formParam("excludedFeature", feature2)
+        .when()
+            .post("/products/{productName}/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindFeatureByNameNotFound() {
+        String productName = "Product-" + UUID.randomUUID();
+        String nonExistentFeature = "NonExistent-" + UUID.randomUUID();
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .formParam("sourceFeature", nonExistentFeature)
+            .formParam("requiredFeature", "AnyFeature")
+        .when()
+            .post("/products/{productName}/constraints/requires")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "Product-" + UUID.randomUUID();
+        String configName = "Config-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("featureName", featureName).formParam("description", "Test").when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+
+        given()
+            .pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureName)
+        .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+        .then()
+            .statusCode(201);
+    }
+}

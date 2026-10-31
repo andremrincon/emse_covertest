@@ -1,0 +1,35 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("test.base.url", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Length2() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_Valid() {
+        given()
+            .pathParam("regionalbloc", "EU")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(200);
+    }
+}

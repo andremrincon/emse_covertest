@@ -1,0 +1,131 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base.url");
+        RestAssured.baseURI = env != null ? env : (prop != null ? prop : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProductThenGetProduct_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).when().get("/products/{productName}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeatures_containsAddedFeature() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "Blood-Oxygen-Sensor-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).when().get("/products/{productName}/features");
+        act.then().body("featureName", hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "backlit-keyboard-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "initial").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.").pathParam("productName", productName).pathParam("featureName", featureName).when().put("/products/{productName}/features/{featureName}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "desc").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("featureName", featureName).when().delete("/products/{productName}/features/{featureName}");
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").pathParam("productName", productName).when().post("/products/{productName}/constraints/requires");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").pathParam("productName", productName).when().post("/products/{productName}/constraints/excludes");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "distributed-training-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("description", "Distributed training feature").pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "wifi-6e-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "WiFi 6E support").pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().get("/products/{productName}/configurations/{configurationName}/features");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationFeature_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "Realtime-Analytics-Dashboard-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Realtime analytics").pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfiguration_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().delete("/products/{productName}/configurations/{configurationName}");
+        act.then().statusCode(204);
+    }
+}

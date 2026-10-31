@@ -1,0 +1,47 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class RemainderTest {
+    private static final String BASE = System.getProperty("api.base", System.getenv("API_BASE")) == null ? "http://localhost:8080" : (System.getProperty("api.base", System.getenv("API_BASE")));
+
+    @Test(timeout = 60000)
+    public void testPositiveA_PositiveB_ReturnsRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        int a = 17;
+        int b = 5;
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200).extract().response();
+        assertEquals(Math.abs(a % b), resp.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveA_NegativeB_ReturnsRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        int a = 17;
+        int b = -5;
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200).extract().response();
+        assertEquals(Math.abs(a % b), resp.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeA_PositiveB_ReturnsRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        int a = -9;
+        int b = 4;
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200).extract().response();
+        assertEquals(Math.abs(a % b), resp.jsonPath().getInt("result"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeA_NegativeB_ReturnsRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        int a = -9;
+        int b = -4;
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", a, b).then().statusCode(200).extract().response();
+        assertEquals(Math.abs(a % b), resp.jsonPath().getInt("result"));
+    }
+}

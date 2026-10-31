@@ -1,0 +1,77 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_returns201() {
+        String productName = "test-product-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, "Blood-Oxygen-Sensor");
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraint_then_addFeatureToConfiguration_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "cfg-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "RAID controller feature")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, "RAID-Controller-Card")
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "128GB ECC RAM")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, "128GB-ECC-RAM")
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then().statusCode(lessThan(300));
+        Response act = given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "RAID-Controller-Card");
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeatures_returns200() {
+        String productName = "p-" + UUID.randomUUID().toString();
+        String configurationName = "c-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Distributed training feature")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, "distributed-training")
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "distributed-training")
+                .then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertEquals(200, act.getStatusCode());
+    }
+}

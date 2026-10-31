@@ -1,0 +1,56 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("baseUrl");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withNullBody_returnsBadRequest() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        Response act = given().contentType("application/json").body("").when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withBlankToken_returnsBadRequest() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"   \"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withInvalidToken_causesStripeError_returnsBadRequest() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        String unique = UUID.randomUUID().toString();
+        String payload = "{\"amount\":500,\"token\":\"invalid_token_" + unique + "\"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withTypicalTestToken_returnsAccepted() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50,\"token\":\"tok_visa\"}";
+        Response act = given().contentType("application/json").body(payload).when().post("/contribute");
+        act.then().statusCode(202);
+    }
+}

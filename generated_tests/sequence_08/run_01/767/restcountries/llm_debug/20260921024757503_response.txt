@@ -1,0 +1,67 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("test.base.url", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByAlphaCode() {
+        Response response = given()
+                .pathParam("alphacode", "US")
+                .when()
+                .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByName() {
+        Response response = given()
+                .pathParam("name", "France")
+                .when()
+                .get("/v1/name/{name}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrency() {
+        Response response = given()
+                .pathParam("currency", "USD")
+                .when()
+                .get("/v1/currency/{currency}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCapital() {
+        Response response = given()
+                .pathParam("capital", "London")
+                .when()
+                .get("/v1/capital/{capital}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCallingCode() {
+        Response response = given()
+                .pathParam("callingcode", "1")
+                .when()
+                .get("/v1/callingcode/{callingcode}");
+
+        response.then().statusCode(200);
+    }
+}

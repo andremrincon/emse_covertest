@@ -1,0 +1,83 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) base = System.getProperty("BASE_URL", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1AlphaByAlphacode_CORSHeaders_Origin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().statusCode(200).header("Access-Control-Allow-Origin", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1AlphaList_CORSHeaders_Methods() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha?codes=US,CA,MX");
+        resp.then().statusCode(200).header("Access-Control-Allow-Methods", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Currency_CORSHeaders_AllowHeaders() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().statusCode(200).header("Access-Control-Allow-Headers", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Name_CacheControlHeader() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France?fullText=false");
+        resp.then().statusCode(200).header("Cache-Control", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostRoot_AllowsCORS_Origin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/json").body("{\"dummy\":\"value\"}").when().post("/");
+        resp.then().statusCode(200).header("Access-Control-Allow-Origin", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2All_FieldsFormat_CORSHeaders() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/all?fields=name;capital;region;population;flag");
+        resp.then().statusCode(200).header("Access-Control-Allow-Methods", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2AlphaWithFields_CORSHeader_Origin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        resp.then().statusCode(200).header("Access-Control-Allow-Origin", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Callingcode_CORSHeader_CacheControl() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/callingcode/1");
+        resp.then().statusCode(200).header("Cache-Control", org.hamcrest.Matchers.nullValue(String.class));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Capital_CORSHeaders_AllowHeaders() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/capital/London");
+        resp.then().statusCode(200).header("Access-Control-Allow-Headers", org.hamcrest.Matchers.nullValue(String.class));
+    }
+}

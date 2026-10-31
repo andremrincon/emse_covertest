@@ -1,0 +1,53 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import io.restassured.response.Response;
+
+public class FileSuffixTest {
+    private final String base = System.getProperty("baseUrl", System.getenv("BASE_URL")) == null ? "http://localhost:8080" : (System.getProperty("baseUrl", System.getenv("BASE_URL")));
+
+    @Test(timeout = 60000)
+    public void testNoSuffixReturnsZero() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "text", "file");
+        assertEquals("0", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTextDirectoryWithTxtReturnsOne() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "text", "document.txt");
+        assertEquals("1", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testAcrobatDirectoryWithPdfReturnsTwo() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "acrobat", "presentation.pdf");
+        assertEquals("2", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testWordDirectoryWithDocReturnsThree() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "word", "letter.doc");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testBinDirectoryWithExeReturnsFour() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "bin", "installer.exe");
+        assertEquals("4", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testLibDirectoryWithDllReturnsFive() {
+        given().when().get(base + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get(base + "/api/filesuffix/{directory}/{file}", "lib", "library.dll");
+        assertEquals("5", resp.getBody().asString());
+    }
+}

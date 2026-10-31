@@ -1,0 +1,63 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHello_WithName_ReturnsExpectedGreeting() {
+        String unique = "test-" + UUID.randomUUID().toString();
+        given().when().get("/?name=" + unique).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/?name=John%20Smith");
+        Assert.assertEquals("Hello John Smith!!", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHello_DefaultName_ReturnsGuestGreeting() {
+        String unique = "test-" + UUID.randomUUID().toString();
+        given().when().get("/?name=" + unique).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/");
+        Assert.assertEquals("Hello Guest!!", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_DelayZero_UsesRandomAndReturns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/slowApi?delay=0");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_PositiveDelay_Returns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/slowApi?delay=1");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPI_NegativeDelay_ProducesServerError() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/slowApi?delay=-1");
+        Assert.assertEquals(500, resp.getStatusCode());
+    }
+
+}

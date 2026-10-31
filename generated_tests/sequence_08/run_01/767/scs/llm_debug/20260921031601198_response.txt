@@ -1,0 +1,91 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThan3() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/a/a")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatPartialMatch() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/abx/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevPartialMatch() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/cbx/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevNotFound() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/abcxyz/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevFoundLater() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/abcxcba/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevFoundImmediately() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/abccba/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundPatFoundLater() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/cbaxabc/abc")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundPatFoundImmediately() {
+        given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/pat/cbaabc/abc")
+                .then()
+                .statusCode(200);
+    }
+}
+```

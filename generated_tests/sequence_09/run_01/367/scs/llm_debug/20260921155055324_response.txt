@@ -1,0 +1,40 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    private static final String BASE;
+    static {
+        String p = System.getProperty("api.base");
+        String e = System.getenv("API_BASE_URL");
+        BASE = p != null && !p.isEmpty() ? p : (e != null && !e.isEmpty() ? e : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrderReturnsIncreasing() {
+        given().when().get(BASE + "/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/ordered4/{w}/{x}/{z}/{y}", "aaaaa", "bbbbb", "ddddd", "ccccc").then().body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStrictIncreasingProducesIncreasing() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/ordered4/{w}/{x}/{z}/{y}", "aaaaa", "bbbbb", "ccccc", "ddddd").then().body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testStrictDecreasingProducesDecreasing() {
+        given().when().get(BASE + "/api/pat/{txt}", "ABABCABAB").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/ordered4/{w}/{x}/{z}/{y}", "zzzzz", "yyyyy", "xxxxx", "wwwww").then().body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthOutOfRangeYieldsUnordered() {
+        given().when().get(BASE + "/api/pat/{txt}", "banana").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/ordered4/{w}/{x}/{z}/{y}", "four", "bbbbb", "ccccc", "ddddd").then().body(equalTo("unordered"));
+    }
+}

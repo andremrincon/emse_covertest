@@ -1,0 +1,50 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withNameParam_returnsGreeting() {
+        given().queryParam("name", "John Smith").when().get("/").then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returnsGuestGreeting() {
+        given().when().get("/").then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withExplicitNonZeroDelay_returnsResult() {
+        given().queryParam("delay", 1).when().get("/slowApi").then().body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withZeroDelay_returnsResult() {
+        given().queryParam("delay", 0).when().get("/slowApi").then().body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNonIntegerDelay_returnsServerError() {
+        given().queryParam("delay", "abc").when().get("/slowApi").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNegativeDelay_returnsServerError() {
+        given().queryParam("delay", -1).when().get("/slowApi").then().statusCode(500);
+    }
+}
+```

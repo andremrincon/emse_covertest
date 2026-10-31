@@ -1,0 +1,226 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetBySubRegion_valid_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testGetByRegion_invalid_true_returns500 TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+[3] METHOD=testGetByCurrency_invalid_length_returns400 TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[4] METHOD=testGetByAlphaList_valid_codes_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <400>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetBySubRegion_valid_returns200 FAILURE AT LINE 114
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetBySubRegion_valid_returns200(CountryRestV2Test.java:114)
+CODE CONTEXT:
+   111:     public void testGetBySubRegion_valid_returns200() {
+   112:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+   113:         Response act = given().when().get("/v2/subregion/Western%20Europe");
+   114:         act.then().statusCode(404);  ← FAILURE HERE
+   115:     }
+   116: 
+   117:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByRegion_invalid_true_returns500 FAILURE AT LINE 107
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetByRegion_invalid_true_returns500(CountryRestV2Test.java:107)
+CODE CONTEXT:
+   104:     public void testGetByRegion_invalid_true_returns500() {
+   105:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+   106:         Response act = given().when().get("/v2/region/True");
+   107:         act.then().statusCode(404);  ← FAILURE HERE
+   108:     }
+   109: 
+   110:     @Test(timeout = 60000)
+
+[3] METHOD=testGetByCurrency_invalid_length_returns400 FAILURE AT LINE 79
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetByCurrency_invalid_length_returns400(CountryRestV2Test.java:79)
+CODE CONTEXT:
+    76:     public void testGetByCurrency_invalid_length_returns400() {
+    77:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    78:         Response act = given().when().get("/v2/currency/123");
+    79:         act.then().statusCode(404);  ← FAILURE HERE
+    80:     }
+    81: 
+    82:     @Test(timeout = 60000)
+
+[4] METHOD=testGetByAlphaList_valid_codes_returns200 FAILURE AT LINE 58
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.testGetByAlphaList_valid_codes_returns200(CountryRestV2Test.java:58)
+CODE CONTEXT:
+    55:     public void testGetByAlphaList_valid_codes_returns200() {
+    56:         given().when().get("/v2/all").then().statusCode(lessThan(300));
+    57:         Response act = given().queryParam("codes", "US,CA,MX").when().get("/v2/alpha");
+    58:         act.then().statusCode(400);  ← FAILURE HERE
+    59:     }
+    60: 
+    61:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid_noFields_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalid_short_alpha_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/1");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/ZZZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_withFields_returnsBodyContainsName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital").when().get("/v2/alpha/US");
+        act.then().body(containsString("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_valid_codes_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA,MX").when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_bad_codes_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalid_length_returns400() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullText_true_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v2/name/Germany");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/abc");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_fields_containsParis() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/capital/Paris");
+        act.then().body(containsString("Paris"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_invalid_true_returns500() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/region/True");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegion_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/subregion/Western%20Europe");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_notFound_returns404() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/123");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonym_valid_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/demonym/American");
+        act.then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

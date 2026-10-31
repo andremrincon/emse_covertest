@@ -1,0 +1,136 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaTooShort() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/1");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFound() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/ZZZ");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaParsedFields() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US");
+        String body = act.asString();
+        assertTrue(body.contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBadCodes() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "123").when().get("/v2/alpha");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListParsedFields() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA,MX").queryParam("fields", "name;capital;population").when().get("/v2/alpha");
+        String body = act.asString();
+        assertTrue(body.contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadLength() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/12");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyParsedFields() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/currency/EUR");
+        String body = act.asString();
+        assertTrue(body.contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameFullTextTrue() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").queryParam("fields", "name;capital;population").when().get("/v2/name/Germany");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/callingcode/abc");
+        assertEquals(404, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalParsedFields() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/capital/Paris");
+        String body = act.asString();
+        assertTrue(body.contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionStatus200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/region/Europe");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionParsedFields() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/subregion/Western%20Europe");
+        String body = act.asString();
+        assertTrue(body.contains("name"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageStatus200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/lang/Spanish");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymStatus200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;population").when().get("/v2/demonym/American");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testPostMethodNotAllowed() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().post("/v2");
+        assertEquals(405, act.getStatusCode());
+    }
+}

@@ -1,0 +1,78 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.trim().isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesNonOptionsInvokesFilter_andReturns200() {
+        String product = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsPreflightReturns200_andCorsHeadersSet() {
+        String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(500);
+        Response act = given().header("Origin", "http://example.com")
+                .header("Access-Control-Request-Method", "POST")
+                .when().options("/products/{productName}/features/{featureName}", product, "Blood Oxygen Sensor");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+        String feature = "Blood Oxygen Sensor";
+        given().when().post("/products/{productName}", product).then().statusCode(500);
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String product = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        String feature = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "temporary feature")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String product = "QuantumLeap-AI-Platform-" + UUID.randomUUID().toString();
+        String configuration = "standard-gpu-cluster-" + UUID.randomUUID().toString();
+        String feature = "distributed-training";
+        given().when().post("/products/{productName}", product).then().statusCode(500);
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                product, configuration, feature);
+        act.then().statusCode(500);
+    }
+}

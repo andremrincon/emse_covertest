@@ -1,0 +1,188 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_3.CurrencyTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV2Alpha_multipleCodes_withFields_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testV1AlphaAlphacode_invalidNumeric_returns400 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testV1AlphaAlphacode_US_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testV1Currency_USD_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testV2Currency_withFields_containsEuroInBody TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testV1Currency_nonexistent_returns404 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV2Alpha_multipleCodes_withFields_returns200 FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV2Alpha_multipleCodes_withFields_returns200(CurrencyTest.java:57)
+CODE CONTEXT:
+    54: 
+    55:     @Test(timeout = 60000)
+    56:     public void testV2Alpha_multipleCodes_withFields_returns200() {
+    57:         given().when().get("/v2/all?fields=name;capital;population;region").then().statusCode(lessThan(300));  ← FAILURE HERE
+    58:         given().when().get("/v2/alpha?codes=US,CA,MX&fields=name;capital;population").then().statusCode(200);
+    59:     }
+    60: }
+
+[2] METHOD=testV1AlphaAlphacode_invalidNumeric_returns400 FAILURE AT LINE 33
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV1AlphaAlphacode_invalidNumeric_returns400(CurrencyTest.java:33)
+CODE CONTEXT:
+    30: 
+    31:     @Test(timeout = 60000)
+    32:     public void testV1AlphaAlphacode_invalidNumeric_returns400() {
+    33:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    34:         given().when().get("/v1/alpha/123").then().statusCode(400);
+    35:     }
+    36: 
+
+[3] METHOD=testV1AlphaAlphacode_US_returns200 FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV1AlphaAlphacode_US_returns200(CurrencyTest.java:27)
+CODE CONTEXT:
+    24: 
+    25:     @Test(timeout = 60000)
+    26:     public void testV1AlphaAlphacode_US_returns200() {
+    27:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    28:         given().when().get("/v1/alpha/US").then().statusCode(200);
+    29:     }
+    30: 
+
+[4] METHOD=testV1Currency_USD_returns200 FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV1Currency_USD_returns200(CurrencyTest.java:39)
+CODE CONTEXT:
+    36: 
+    37:     @Test(timeout = 60000)
+    38:     public void testV1Currency_USD_returns200() {
+    39:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    40:         given().when().get("/v1/currency/USD").then().statusCode(200);
+    41:     }
+    42: 
+
+[5] METHOD=testV2Currency_withFields_containsEuroInBody FAILURE AT LINE 51
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV2Currency_withFields_containsEuroInBody(CurrencyTest.java:51)
+CODE CONTEXT:
+    48: 
+    49:     @Test(timeout = 60000)
+    50:     public void testV2Currency_withFields_containsEuroInBody() {
+    51:         given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));  ← FAILURE HERE
+    52:         given().when().get("/v2/currency/EUR?fields=name;capital;population").then().body(containsString("Euro"));
+    53:     }
+    54: 
+
+[6] METHOD=testV1Currency_nonexistent_returns404 FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01gpt_5_mini_3.CurrencyTest.testV1Currency_nonexistent_returns404(CurrencyTest.java:45)
+CODE CONTEXT:
+    42: 
+    43:     @Test(timeout = 60000)
+    44:     public void testV1Currency_nonexistent_returns404() {
+    45:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    46:         given().when().get("/v1/currency/XYZ").then().statusCode(404);
+    47:     }
+    48: 
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaAlphacode_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaAlphacode_invalidNumeric_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_nonexistent_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_withFields_containsEuroInBody() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().body(containsString("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_multipleCodes_withFields_returns200() {
+        given().when().get("/v2/all?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha?codes=US,CA,MX&fields=name;capital;population").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

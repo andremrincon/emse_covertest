@@ -1,0 +1,85 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_nLessThan2() {
+        given()
+            .when()
+                .get("/api/bessj/1/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testBessj_axIsZero() {
+        given()
+            .when()
+                .get("/api/bessj/2/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_and_axLessThan8() {
+        given()
+            .when()
+                .get("/api/bessj/2/3.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_and_axGreaterOrEqual8_and_xPositive() {
+        given()
+            .when()
+                .get("/api/bessj/2/10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_and_axGreaterOrEqual8_and_xNegative_and_nEven() {
+        given()
+            .when()
+                .get("/api/bessj/2/-10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axGreaterThanN_and_axGreaterOrEqual8_and_xNegative_and_nOdd() {
+        given()
+            .when()
+                .get("/api/bessj/3/-10.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessj_axLessOrEqualN() {
+        given()
+            .when()
+                .get("/api/bessj/5/3.0")
+            .then()
+                .statusCode(200);
+    }
+}

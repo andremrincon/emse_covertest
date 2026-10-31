@@ -1,0 +1,83 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListNullCodes() {
+        given()
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListSingleCode() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListMultipleCodes() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;CA")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicateCodes() {
+        given()
+            .when()
+                .get("/v1/alpha?codes=US;US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchPrimaryName() {
+        given()
+            .pathParam("name", "Germany")
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAlternativeName() {
+        given()
+            .pathParam("name", "Bundesrepublik Deutschland")
+            .queryParam("fullText", "true")
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(200);
+    }
+}

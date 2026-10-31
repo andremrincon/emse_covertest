@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Text2TxtTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testTwo() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/two/x/y")
+        .then()
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFour() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/four/x/y")
+        .then()
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testYou() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/you/x/y")
+        .then()
+            .body(equalTo("u"));
+    }
+
+    @Test(timeout = 60000)
+    public void testAre() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/are/x/y")
+        .then()
+            .body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYou() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/see/you/x")
+        .then()
+            .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWay() {
+        given()
+        .when()
+            .get(baseUrl + "/api/text2txt/by/the/way")
+        .then()
+            .body(equalTo("btw"));
+    }
+}

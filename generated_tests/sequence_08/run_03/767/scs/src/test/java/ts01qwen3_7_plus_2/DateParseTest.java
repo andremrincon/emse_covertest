@@ -1,0 +1,21 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testDateParseInit() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+        given()
+            .baseUri(baseUrl)
+            .pathParam("dayname", "Wednesday")
+            .pathParam("monthname", "August")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+}

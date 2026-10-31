@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void init() {
+        String fromProp = System.getProperty("baseUrl");
+        String fromEnv = System.getenv("BASE_URL");
+        RestAssured.baseURI = fromProp != null && !fromProp.isEmpty() ? fromProp : (fromEnv != null && !fromEnv.isEmpty() ? fromEnv : "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_returns200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/currency/EUR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Regionalbloc_EU_containsEURCodeInBody() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/regionalbloc/EU");
+        act.then().body(containsString("\"code\":\"EUR\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_invalidNumeric_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_unknownCode_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/XYZ");
+        act.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_multipleCodesWithFields_returns200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA,MX").queryParam("fields", "name;capital;population").when().get("/v2/alpha");
+        act.then().statusCode(200);
+    }
+}

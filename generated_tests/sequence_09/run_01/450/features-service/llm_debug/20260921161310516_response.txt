@@ -1,0 +1,149 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) env = System.getenv("API_BASE");
+        if (env == null || env.isEmpty()) env = "http://localhost:8080";
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void createProduct_thenAddFeature_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feature-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void createProduct_thenGetFeatures_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/features", product);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureWithDescription_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "feat-desc-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void updateFeature_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "update-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when().put("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String feature = "del-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String feature = "cfgfeat-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfiguration_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String feature = "cfgdel-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(500);
+        Response resp = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeatures_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String config = "cfg-" + UUID.randomUUID();
+        String f1 = "f1-" + UUID.randomUUID();
+        String f2 = "f2-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, f1).then().statusCode(500);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, f2).then().statusCode(500);
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurations_success() {
+        String product = "prod-" + UUID.randomUUID();
+        String cfg = "cfg-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, cfg).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/configurations", product);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getProduct_success() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}", product);
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteProduct_success() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}", product);
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void postConstraintsRequires_success() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+}

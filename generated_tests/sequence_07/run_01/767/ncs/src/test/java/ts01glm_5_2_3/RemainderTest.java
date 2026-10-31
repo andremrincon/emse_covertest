@@ -1,0 +1,80 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_positiveA_positiveB_returns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/17/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_negativeA_positiveB_returns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/-9/4")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_positiveA_negativeB_returns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/17/-5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_negativeA_negativeB_returns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/-9/-4")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_invalidA_returns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/abc/5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_zeroB_returns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/remainder/17/0")
+        .then()
+            .statusCode(200);
+    }
+}

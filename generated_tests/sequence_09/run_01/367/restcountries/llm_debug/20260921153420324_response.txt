@@ -1,0 +1,76 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaAlphacodeSuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/US");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaAlphacodeBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/123");
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencySuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/USD");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyNotFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/XYZ");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyFieldsBodyContainsEUR() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("fields", "name;capital;population").when().get("/v2/currency/EUR");
+        res.then().body("[0].currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaQueryCodesSuccess() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaQueryCodesServerError() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v1/alpha");
+        res.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaFieldsBadRequest() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "US,CA").queryParam("fields", "123").when().get("/v2/alpha");
+        res.then().statusCode(400);
+    }
+}

@@ -1,0 +1,162 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUsdReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUsReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies.code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUsReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies.name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUsReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies.symbol", equalTo("$"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEurReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEurReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].name", equalTo("Euro"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEurReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].symbol", equalTo("€"));
+    }
+}

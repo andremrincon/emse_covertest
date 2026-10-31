@@ -1,0 +1,67 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testUnorderedInvalidLength() {
+        String w = "apple";
+        String x = "banana";
+        String z = "cherry";
+        String y = "dog";
+
+        Response response = given()
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLength() {
+        String w = "apple";
+        String x = "apple";
+        String z = "apple";
+        String y = "apple";
+
+        Response response = given()
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        String w = "aaaaa";
+        String x = "bbbbb";
+        String z = "ddddd";
+        String y = "ccccc";
+
+        Response response = given()
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        String w = "ddddd";
+        String x = "ccccc";
+        String z = "aaaaa";
+        String y = "bbbbb";
+
+        Response response = given()
+                .when()
+                .get("/api/ordered4/{w}/{x}/{z}/{y}", w, x, z, y);
+
+        response.then().statusCode(200);
+    }
+}
+```

@@ -1,0 +1,218 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.StringJoiner;
+
+public class ProductsDAOTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void insertConstraintViaRequiresEndpoint() throws Exception {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        int createStatus = doPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue("Expected create product status < 300 but was " + createStatus, createStatus < 300);
+
+        Map<String, String> form = new HashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+
+        int constraintStatus = doPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", form, productName);
+        Assert.assertEquals(201, constraintStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void insertConstraintViaExcludesEndpoint() throws Exception {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        int createStatus = doPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue("Expected create product status < 300 but was " + createStatus, createStatus < 300);
+
+        Map<String, String> form = new HashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+
+        int constraintStatus = doPost("/products/{productName}/constraints/excludes", "application/x-www-form-urlencoded", form, productName);
+        Assert.assertEquals(201, constraintStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintsForProductWhenProductHasConstraints() throws Exception {
+        String productName = "UltraPhoneX-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatureA";
+        String excludedFeature = "FeatureB";
+
+        int createStatus = doPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue("Expected create product status < 300 but was " + createStatus, createStatus < 300);
+
+        Map<String, String> form = new HashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+
+        int addConstraintStatus = doPost("/products/{productName}/constraints/excludes", "application/x-www-form-urlencoded", form, productName);
+        Assert.assertTrue("Expected add constraint status < 300 but was " + addConstraintStatus, addConstraintStatus < 300);
+
+        int deleteStatus = doDelete("/products/{productName}", productName);
+        Assert.assertEquals(204, deleteStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintsForProductWhenProductHasNoConstraints() throws Exception {
+        String productName = "Basic-Charger-v1-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int createStatus = doPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue("Expected create product status < 300 but was " + createStatus, createStatus < 300);
+
+        int deleteStatus = doDelete("/products/{productName}", productName);
+        Assert.assertEquals(204, deleteStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void insertConstraintWithNonExistentProduct() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+
+        Map<String, String> form = new HashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+
+        int constraintStatus = doPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", form, productName);
+        Assert.assertEquals(404, constraintStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintsForProductWithMultipleConstraints() throws Exception {
+        String productName = "PowerBankPro-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int createStatus = doPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue("Expected create product status < 300 but was " + createStatus, createStatus < 300);
+
+        Map<String, String> form1 = new HashMap<>();
+        form1.put("sourceFeature", "FeatureA");
+        form1.put("requiredFeature", "FeatureB");
+
+        int addReqStatus = doPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", form1, productName);
+        Assert.assertTrue("Expected add requires constraint status < 300 but was " + addReqStatus, addReqStatus < 300);
+
+        Map<String, String> form2 = new HashMap<>();
+        form2.put("sourceFeature", "FeatureC");
+        form2.put("excludedFeature", "FeatureD");
+
+        int addExStatus = doPost("/products/{productName}/constraints/excludes", "application/x-www-form-urlencoded", form2, productName);
+        Assert.assertTrue("Expected add excludes constraint status < 300 but was " + addExStatus, addExStatus < 300);
+
+        int deleteStatus = doDelete("/products/{productName}", productName);
+        Assert.assertEquals(204, deleteStatus);
+    }
+
+    private int doPost(String pathTemplate, String contentType, Map<String, String> formParams, String productName) throws IOException {
+        String path = pathTemplate.replace("{productName}", urlEncode(productName));
+        String fullUrl = baseUrl + path;
+        String body = null;
+        if (formParams != null && !formParams.isEmpty()) {
+            body = encodeForm(formParams);
+        }
+        return executeRequest("POST", fullUrl, contentType, body);
+    }
+
+    private int doPost(String pathTemplate, String contentType, String body, String productName) throws IOException {
+        String path = pathTemplate.replace("{productName}", urlEncode(productName));
+        String fullUrl = baseUrl + path;
+        return executeRequest("POST", fullUrl, contentType, body);
+    }
+
+    private int doDelete(String pathTemplate, String productName) throws IOException {
+        String path = pathTemplate.replace("{productName}", urlEncode(productName));
+        String fullUrl = baseUrl + path;
+        return executeRequest("DELETE", fullUrl, null, null);
+    }
+
+    private int executeRequest(String method, String fullUrl, String contentType, String body) throws IOException {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(fullUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            conn.setDoInput(true);
+            if (body != null) {
+                conn.setDoOutput(true);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    os.close();
+                }
+            }
+            int status = conn.getResponseCode();
+            InputStream is = null;
+            try {
+                if (status >= 200 && status < 400) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+                if (is != null) {
+                    byte[] buf = new byte[1024];
+                    while (is.read(buf) != -1) {
+                    }
+                }
+            } catch (IOException e) {
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ignore) {
+                    }
+                }
+            }
+            return status;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private String encodeForm(Map<String, String> form) throws IOException {
+        StringJoiner joiner = new StringJoiner("&");
+        for (Map.Entry<String, String> e : form.entrySet()) {
+            joiner.add(urlEncode(e.getKey()) + "=" + urlEncode(e.getValue()));
+        }
+        return joiner.toString();
+    }
+
+    private String urlEncode(String s) throws IOException {
+        return URLEncoder.encode(s, "UTF-8");
+    }
+}

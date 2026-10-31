@@ -1,0 +1,98 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    static {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "Blood Oxygen Sensor";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureResponseBodyContainsFeatureName() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "ANC";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("description", "Active Noise Cancellation").when().post("/products/{productName}/features/{featureName}", product, feature);
+        resp.then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "heart-rate-monitor";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "Monitors heart rate").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        resp.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesReturns200() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature1 = "wifi-6e";
+        String feature2 = "backlit-keyboard";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "Next gen wifi").when().post("/products/{productName}/features/{featureName}", product, feature1).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "Illuminated keys").when().post("/products/{productName}/features/{featureName}", product, feature2).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/features", product);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddConfigurationFeatureReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String configuration = "standard-gpu-cluster";
+        String feature = "distributed-training";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").when().post("/products/{productName}/constraints/requires", product);
+        resp.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").when().post("/products/{productName}/constraints/excludes", product);
+        resp.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProductReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}", product);
+        resp.then().statusCode(204);
+    }
+}

@@ -1,0 +1,56 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        response.then().header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeader() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/US");
+        response.then().header("Access-Control-Allow-Methods", equalTo("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeader() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/currency/USD");
+        response.then().header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeader() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/France");
+        response.then().header("Cache-Control", equalTo("public, max-age=86400"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFilterChainProceeds() {
+        given().when().get("/v1/callingcode/1").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/callingcode/1");
+        response.then().statusCode(200);
+    }
+}
+```

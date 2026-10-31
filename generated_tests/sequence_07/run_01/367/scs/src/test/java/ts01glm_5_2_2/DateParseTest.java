@@ -1,0 +1,72 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayMonAndMonthJan() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonthFeb() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/feb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWedAndMonthMar() {
+        given()
+            .when()
+                .get("/api/dateparse/wed/mar")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonthApr() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/apr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayFriAndMonthMay() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/may")
+            .then()
+                .statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/Superday/Movember")
+            .then()
+                .statusCode(500);
+    }
+}

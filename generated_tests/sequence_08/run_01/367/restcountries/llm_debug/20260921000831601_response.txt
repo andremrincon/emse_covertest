@@ -1,0 +1,72 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryTranslationsTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaCode_US() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetName_France() {
+        given()
+            .pathParam("name", "France")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCurrency_USD() {
+        given()
+            .pathParam("currency", "USD")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingcode_1() {
+        given()
+            .pathParam("callingcode", "1")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapital_London() {
+        given()
+            .pathParam("capital", "London")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

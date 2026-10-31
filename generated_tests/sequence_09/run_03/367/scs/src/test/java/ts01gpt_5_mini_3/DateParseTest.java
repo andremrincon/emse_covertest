@@ -1,0 +1,68 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    private static String escapePath(String s) {
+        return s.replace(" ", "%20");
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithJan_returnsTwo() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Mon", "Jan");
+        assertEquals("2", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithDec_returnsThirteen() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "SUN", "Dec");
+        assertEquals("13", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayNotMatchWithMar_returnsThree() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "weekday", "Mar");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Ignore("expected:<500> but was:<200>")
+    @Test(timeout = 60000)
+    public void testInvalidMonth_returnsServerError() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Tuesday", "Movember");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithOct_returnsEleven() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "mon", "oct");
+        assertEquals("11", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testThurDayWithSep_returnsTen() {
+        given().when().get("/api/pat/{txt}", escapePath("The quick brown fox jumps over the lazy dog.")).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Thur", "Sep");
+        assertEquals("10", resp.getBody().asString());
+    }
+}

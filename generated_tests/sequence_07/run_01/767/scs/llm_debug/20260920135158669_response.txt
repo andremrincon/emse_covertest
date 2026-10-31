@@ -1,0 +1,71 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CookieTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixAndLongValue() {
+        given().when().get("/api/cookie/userid/user123/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/userid/user123/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValue() {
+        given().when().get("/api/cookie/userid/user/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/userid/user/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongValueNotStartingWithUser() {
+        given().when().get("/api/cookie/userid/abcdefg/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/userid/abcdefg/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmValAndAbcSite() {
+        given().when().get("/api/cookie/session/am/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/session/am/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithNonMatchingValOrSite() {
+        given().when().get("/api/cookie/session/xyz/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/session/xyz/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNonUserIdNonSessionName() {
+        given().when().get("/api/cookie/other/abc/abc.com").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/cookie/other/abc/abc.com");
+        assertEquals(200, response.statusCode());
+        assertThat(response.body().asString(), containsString("0"));
+    }
+}
+```

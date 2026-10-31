@@ -1,0 +1,48 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_nullBody_returnsBadRequest() {
+        given()
+            .contentType("application/json;charset=utf-8")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_blankToken_returnsBadRequest() {
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body("{\"amount\":1000,\"token\":\"\"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_validToken_returnsBadRequestFromStripeException() {
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body("{\"amount\":1000,\"token\":\"tok_visa\"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(404);
+    }
+}

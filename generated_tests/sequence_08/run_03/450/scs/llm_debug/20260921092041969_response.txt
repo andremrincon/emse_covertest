@@ -1,0 +1,77 @@
+```java
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I5_S_Baab() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "baab")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_Neg500_S_A() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_700_S_Ababba() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "ababba")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_Neg4_S_Ababba() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "ababba")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_0_S_A() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "a")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Invalid_I() {
+        given()
+            .pathParam("i", "one")
+            .pathParam("s", "test")
+        .when()
+            .get(baseUrl + "/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(400);
+    }
+}
+```

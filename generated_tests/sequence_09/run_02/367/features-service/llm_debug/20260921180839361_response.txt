@@ -1,0 +1,98 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint_returns201() {
+        String product = "Enterprise-Server-X1-" + UUID.randomUUID();
+        String src = "RAID-Controller-Card";
+        String req = "128GB-ECC-RAM";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, "cfg-" + UUID.randomUUID()).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", src).formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testRequiresEvaluation_addsDerivedFeature_whenSourceActive() {
+        String product = "Mobile-App-Basic-" + UUID.randomUUID();
+        String configuration = "production-" + UUID.randomUUID();
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "User-Authentication";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, sourceFeature).then().statusCode(500);
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration)
+                .then().assertThat().body("$", hasItem(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void testRequiresEvaluation_noDerived_whenSourceInactive() {
+        String product = "Desktop-PC-" + UUID.randomUUID();
+        String configuration = "dev-" + UUID.randomUUID();
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration)
+                .then().assertThat().body("$", not(hasItem(requiredFeature)));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductContainsConstraintType_afterCreatingRequires() {
+        String product = "Enterprise-Server-X1-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", product)
+                .then().assertThat().body(containsString("requires"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint_withOnlySourceFeature_returns201() {
+        String product = "Web-Hosting-Package-" + UUID.randomUUID();
+        String sourceFeature = "SSD-Storage";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature)
+                .when().post("/products/{productName}/constraints/requires", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint_withSpecialNames_returns201() {
+        String product = "Custom-Product-" + UUID.randomUUID();
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "128GB-ECC-RAM";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+                .when().post("/products/{productName}/constraints/requires", product)
+                .then().statusCode(201);
+    }
+}

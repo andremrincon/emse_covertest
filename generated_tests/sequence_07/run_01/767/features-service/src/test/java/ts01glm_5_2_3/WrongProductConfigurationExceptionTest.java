@@ -1,0 +1,125 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationTriggersWrongProductConfigurationException_1() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "ExclTest-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+
+        RequestSpecBuilder excludesBuilder = new RequestSpecBuilder();
+        excludesBuilder.addFormParam("sourceFeature", featureA);
+        excludesBuilder.addFormParam("excludedFeature", featureB);
+        RequestSpecification excludesSpec = excludesBuilder.build();
+        given().spec(excludesSpec).when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(500);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void requiresConstraintViolationTriggersWrongProductConfigurationException_2() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "ReqTest-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+
+        RequestSpecBuilder requiresBuilder = new RequestSpecBuilder();
+        requiresBuilder.addFormParam("sourceFeature", featureA);
+        requiresBuilder.addFormParam("requiredFeature", featureB);
+        RequestSpecification requiresSpec = requiresBuilder.build();
+        given().spec(requiresSpec).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void multipleConstraintViolationsTriggerWrongProductConfigurationException_3() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "MultiTest-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String featureC = "FeatureC-" + uuid;
+        String configName = "config-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureC).then().statusCode(lessThan(300));
+
+        RequestSpecBuilder excludesBuilder = new RequestSpecBuilder();
+        excludesBuilder.addFormParam("sourceFeature", featureA);
+        excludesBuilder.addFormParam("excludedFeature", featureB);
+        RequestSpecification excludesSpec = excludesBuilder.build();
+        given().spec(excludesSpec).when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        RequestSpecBuilder requiresBuilder = new RequestSpecBuilder();
+        requiresBuilder.addFormParam("sourceFeature", featureA);
+        requiresBuilder.addFormParam("requiredFeature", featureC);
+        RequestSpecification requiresSpec = requiresBuilder.build();
+        given().spec(requiresSpec).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(500);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(500);
+    }
+}

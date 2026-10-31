@@ -1,0 +1,69 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    private static final String BASE_URL = "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("name", "John Smith")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithDefaultName() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithZeroDelay() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithPositiveDelay() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSlowApiWithInvalidDelay() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("delay", "abc")
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(500);
+    }
+}
+```

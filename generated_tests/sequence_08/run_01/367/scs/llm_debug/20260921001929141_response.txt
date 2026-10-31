@@ -1,0 +1,74 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertEquals;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testConstants() {
+        String resPi = given().when().get("/api/calc/pi/1.0/1.0").then().extract().asString();
+        String resE = given().when().get("/api/calc/e/1.0/1.0").then().extract().asString();
+        
+        assertEquals(String.valueOf(Math.PI), resPi);
+        assertEquals(String.valueOf(Math.E), resE);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnary1() {
+        String resSqrt = given().when().get("/api/calc/sqrt/4.0/1.0").then().extract().asString();
+        String resLog = given().when().get("/api/calc/log/1.0/1.0").then().extract().asString();
+        
+        assertEquals("2.0", resSqrt);
+        assertEquals("0.0", resLog);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnary2() {
+        String resSine = given().when().get("/api/calc/sine/0.0/1.0").then().extract().asString();
+        String resCosine = given().when().get("/api/calc/cosine/0.0/1.0").then().extract().asString();
+        String resTangent = given().when().get("/api/calc/tangent/0.0/1.0").then().extract().asString();
+        
+        assertEquals("0.0", resSine);
+        assertEquals("1.0", resCosine);
+        assertEquals("0.0", resTangent);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinary1() {
+        String resPlus = given().when().get("/api/calc/plus/5.0/3.0").then().extract().asString();
+        String resSubtract = given().when().get("/api/calc/subtract/5.0/3.0").then().extract().asString();
+        
+        assertEquals("8.0", resPlus);
+        assertEquals("2.0", resSubtract);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinary2() {
+        String resMultiply = given().when().get("/api/calc/multiply/5.0/3.0").then().extract().asString();
+        String resDivide = given().when().get("/api/calc/divide/6.0/3.0").then().extract().asString();
+        
+        assertEquals("15.0", resMultiply);
+        assertEquals("2.0", resDivide);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOp() {
+        String resUnknown = given().when().get("/api/calc/unknown/5.0/3.0").then().extract().asString();
+        
+        assertEquals("0.0", resUnknown);
+    }
+}

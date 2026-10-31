@@ -1,0 +1,77 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class ExpintTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeNReturns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/-1/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeXReturns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/3/-999.9")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintZeroXAndNOneReturns400() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/1/0.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintContinuedFractionReturns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/3/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesWithPsiReturns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/2/0.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintSeriesWithNm1ZeroReturns200() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/expint/1/0.1")
+        .then()
+            .statusCode(200);
+    }
+}
+```

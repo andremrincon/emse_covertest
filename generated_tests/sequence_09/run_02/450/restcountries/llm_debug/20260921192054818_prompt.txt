@@ -1,0 +1,163 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testSetIso6391ViaV1AlphaUS TYPE=ERROR
+The parameter "iso639_1" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[2] METHOD=testSetNativeNameViaV1AlphaUS TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[3] METHOD=testSetNameViaV1NameFrance TYPE=ERROR
+The parameter "name" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[4] METHOD=testSetNativeNameViaV1CurrencyUSD TYPE=ERROR
+The parameter "nativeName" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+[5] METHOD=testSetIso6392ViaV1CurrencyUSD TYPE=ERROR
+The parameter "iso639_2" was used but not defined. Define parameters using the JsonPath.params(...) function
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testSetIso6391ViaV1AlphaUS FAILURE AT LINE 25
+at ts01gpt_5_mini_2.LanguageTest.testSetIso6391ViaV1AlphaUS(LanguageTest.java:25)
+CODE CONTEXT:
+    22:     public void testSetIso6391ViaV1AlphaUS() {
+    23:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    24:         Response resp = given().when().get("/v1/alpha/US");
+    25:         resp.then().body("languages[0].iso639_1", equalTo("en"));  ← FAILURE HERE
+    26:     }
+    27: 
+    28:     @Test(timeout = 60000)
+
+[2] METHOD=testSetNativeNameViaV1AlphaUS FAILURE AT LINE 46
+at ts01gpt_5_mini_2.LanguageTest.testSetNativeNameViaV1AlphaUS(LanguageTest.java:46)
+CODE CONTEXT:
+    43:     public void testSetNativeNameViaV1AlphaUS() {
+    44:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    45:         Response resp = given().when().get("/v1/alpha/US");
+    46:         resp.then().body("languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    47:     }
+    48: 
+    49:     @Test(timeout = 60000)
+
+[3] METHOD=testSetNameViaV1NameFrance FAILURE AT LINE 39
+at ts01gpt_5_mini_2.LanguageTest.testSetNameViaV1NameFrance(LanguageTest.java:39)
+CODE CONTEXT:
+    36:     public void testSetNameViaV1NameFrance() {
+    37:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    38:         Response resp = given().when().get("/v1/name/France");
+    39:         resp.then().body("[0].languages[0].name", equalTo("French"));  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[4] METHOD=testSetNativeNameViaV1CurrencyUSD FAILURE AT LINE 60
+at ts01gpt_5_mini_2.LanguageTest.testSetNativeNameViaV1CurrencyUSD(LanguageTest.java:60)
+CODE CONTEXT:
+    57:     public void testSetNativeNameViaV1CurrencyUSD() {
+    58:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    59:         Response resp = given().when().get("/v1/currency/USD");
+    60:         resp.then().body("[0].languages[0].nativeName", equalTo("English"));  ← FAILURE HERE
+    61:     }
+    62: }
+
+[5] METHOD=testSetIso6392ViaV1CurrencyUSD FAILURE AT LINE 32
+at ts01gpt_5_mini_2.LanguageTest.testSetIso6392ViaV1CurrencyUSD(LanguageTest.java:32)
+CODE CONTEXT:
+    29:     public void testSetIso6392ViaV1CurrencyUSD() {
+    30:         given().when().get("/v1/all").then().statusCode(lessThan(300));
+    31:         Response resp = given().when().get("/v1/currency/USD");
+    32:         resp.then().body("[0].languages[0].iso639_2", equalTo("eng"));  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso6391ViaV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso6392ViaV1CurrencyUSD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().body("[0].languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNameViaV1NameFrance() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/name/France");
+        resp.then().body("[0].languages[0].name", equalTo("French"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeNameViaV1AlphaUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/alpha/US");
+        resp.then().body("languages[0].nativeName", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso6391ViaV2Callingcode1() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v2/callingcode/1");
+        resp.then().body("[0].languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeNameViaV1CurrencyUSD() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/v1/currency/USD");
+        resp.then().body("[0].languages[0].nativeName", equalTo("English"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

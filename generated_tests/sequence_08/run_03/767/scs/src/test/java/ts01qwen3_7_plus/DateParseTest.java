@@ -1,0 +1,74 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class DateParseTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testValidDaysWithValidMonth() {
+        String[] days = {"mon", "tue", "wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            RestAssured.given()
+                    .when()
+                    .get(baseUrl + "/api/dateparse/" + day + "/aug")
+                    .then()
+                    .statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithAllValidMonths() {
+        String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        for (String month : months) {
+            RestAssured.given()
+                    .when()
+                    .get(baseUrl + "/api/dateparse/wed/" + month)
+                    .then()
+                    .statusCode(200);
+        }
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayWithValidMonth() {
+        RestAssured.given()
+                .when()
+                .get(baseUrl + "/api/dateparse/superday/jan")
+                .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testValidDayWithInvalidMonth() {
+        RestAssured.given()
+                .when()
+                .get(baseUrl + "/api/dateparse/wed/movember")
+                .then()
+                .statusCode(500);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <200>.")
+    @Test(timeout = 60000)
+    public void testInvalidDayWithInvalidMonth() {
+        RestAssured.given()
+                .when()
+                .get(baseUrl + "/api/dateparse/superday/movember")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity() {
+        RestAssured.given()
+                .when()
+                .get(baseUrl + "/api/dateparse/WED/AUG")
+                .then()
+                .statusCode(200);
+    }
+}

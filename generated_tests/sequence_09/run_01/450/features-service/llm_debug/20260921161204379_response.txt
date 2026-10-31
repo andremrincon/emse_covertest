@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    private static final String BASE;
+    static {
+        String env = System.getProperty("api.base");
+        if (env == null || env.isEmpty()) env = System.getenv("API_BASE");
+        if (env == null || env.isEmpty()) env = "http://localhost:8080";
+        BASE = env;
+    }
+
+    @Test(timeout = 60000)
+    public void optionsRequest_shouldReturnCORSHeaders_forOptionsMethod() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post(BASE + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().options(BASE + "/products/{productName}/features", product).then().header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void getFeatures_shouldReturn200_and_useCORSFilter_forNonOptionsMethod() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post(BASE + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "desc").when().post(BASE + "/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().get(BASE + "/products/{productName}/features", product).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeature_shouldReturn201_forValidInput() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "Blood Oxygen Sensor";
+        given().when().post(BASE + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").when().post(BASE + "/products/{productName}/features/{featureName}", product, feature).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_shouldReturn204_forExistingFeature() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given().when().post(BASE + "/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "temp").when().post(BASE + "/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().delete(BASE + "/products/{productName}/features/{featureName}", product, feature).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeature_withLongOrProblematicProduct_shouldReturn500() {
+        String product = "Gaming-PC-Tower";
+        String feature = "Liquid Cooling";
+        given().when().post(BASE + "/products/{productName}", "prod-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        given().formParam("description", "test").when().post(BASE + "/products/{productName}/features/{featureName}", product, feature).then().statusCode(500);
+    }
+}

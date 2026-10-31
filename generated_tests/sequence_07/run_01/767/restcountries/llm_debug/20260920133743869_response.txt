@@ -1,0 +1,88 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("name", "123")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404)
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("region", "123")
+                .when()
+                .get("/v1/region/{region}")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("capital", "123")
+                .when()
+                .get("/v1/capital/{capital}")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingcodeNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("callingcode", "abc")
+                .when()
+                .get("/v1/callingcode/{callingcode}")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetSubregionNotFoundReturnsResponseEntityWithStatusAndMessage() {
+        given()
+                .pathParam("subregion", "123")
+                .when()
+                .get("/v1/subregion/{subregion}")
+                .then()
+                .statusCode(404)
+                .body("status", equalTo(404))
+                .body("message", notNullValue());
+    }
+}

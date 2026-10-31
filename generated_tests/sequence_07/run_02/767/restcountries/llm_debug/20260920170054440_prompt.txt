@@ -1,0 +1,218 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_3.CountryServiceBaseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetByCodeList_MissingCodesParameter TYPE=FAILURE
+1 expectation failed.
+Expected status code <400> but was <404>.
+
+[2] METHOD=testGetByCodeList_ValidCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=testFulltextSearch_ExactNameMatch TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=testFulltextSearch_AltSpellingMatch TYPE=ERROR
+Illegal character in path at index 46: http://localhost:8080/rest/rest/v1/name/United States of America
+
+[5] METHOD=testGetByCodeList_MixedValidInvalidCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=testLoadJson_DataLoadedSuccessfully TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=testGetByAlpha_TwoCharCodeMatch TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetByCodeList_MissingCodesParameter FAILURE AT LINE 49
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testGetByCodeList_MissingCodesParameter(CountryServiceBaseTest.java:49)
+CODE CONTEXT:
+    46: 
+    47:     @Test(timeout = 60000)
+    48:     public void testGetByCodeList_MissingCodesParameter() {
+    49:         given().when().get("/v1/alpha").then().statusCode(404);  ← FAILURE HERE
+    50:     }
+    51: 
+    52:     @Test(timeout = 60000)
+
+[2] METHOD=testGetByCodeList_ValidCodes FAILURE AT LINE 34
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testGetByCodeList_ValidCodes(CountryServiceBaseTest.java:34)
+CODE CONTEXT:
+    31: 
+    32:     @Test(timeout = 60000)
+    33:     public void testGetByCodeList_ValidCodes() {
+    34:         given().when().queryParam("codes", "US;CA").get("/v1/alpha").then().statusCode(404);  ← FAILURE HERE
+    35:     }
+    36: 
+    37:     @Test(timeout = 60000)
+
+[3] METHOD=testFulltextSearch_ExactNameMatch FAILURE AT LINE 59
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testFulltextSearch_ExactNameMatch(CountryServiceBaseTest.java:59)
+CODE CONTEXT:
+    56: 
+    57:     @Test(timeout = 60000)
+    58:     public void testFulltextSearch_ExactNameMatch() {
+    59:         given().when().queryParam("fullText", "true").get("/v1/name/France").then().statusCode(404);  ← FAILURE HERE
+    60:     }
+    61: 
+    62:     @Test(timeout = 60000)
+
+[4] METHOD=testFulltextSearch_AltSpellingMatch FAILURE AT LINE 54
+java.net.URISyntaxException: Illegal character in path at index 46: http://localhost:8080/rest/rest/v1/name/United States of America
+at ts01glm_5_2_3.CountryServiceBaseTest.testFulltextSearch_AltSpellingMatch(CountryServiceBaseTest.java:54)
+CODE CONTEXT:
+    51: 
+    52:     @Test(timeout = 60000)
+    53:     public void testFulltextSearch_AltSpellingMatch() {
+    54:         given().when().queryParam("fullText", "true").get("/v1/name/United States of America").then().statusCode(200);  ← FAILURE HERE
+    55:     }
+    56: 
+    57:     @Test(timeout = 60000)
+
+[5] METHOD=testGetByCodeList_MixedValidInvalidCodes FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testGetByCodeList_MixedValidInvalidCodes(CountryServiceBaseTest.java:39)
+CODE CONTEXT:
+    36: 
+    37:     @Test(timeout = 60000)
+    38:     public void testGetByCodeList_MixedValidInvalidCodes() {
+    39:         given().when().queryParam("codes", "US;XX").get("/v1/alpha").then().statusCode(404);  ← FAILURE HERE
+    40:     }
+    41: 
+    42:     @Test(timeout = 60000)
+
+[6] METHOD=testLoadJson_DataLoadedSuccessfully FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testLoadJson_DataLoadedSuccessfully(CountryServiceBaseTest.java:74)
+CODE CONTEXT:
+    71: 
+    72:     @Test(timeout = 60000)
+    73:     public void testLoadJson_DataLoadedSuccessfully() {
+    74:         given().when().get("/v1/all").then().statusCode(404);  ← FAILURE HERE
+    75:     }
+    76: }
+
+[7] METHOD=testGetByAlpha_TwoCharCodeMatch FAILURE AT LINE 19
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryServiceBaseTest.testGetByAlpha_TwoCharCodeMatch(CountryServiceBaseTest.java:19)
+CODE CONTEXT:
+    16: 
+    17:     @Test(timeout = 60000)
+    18:     public void testGetByAlpha_TwoCharCodeMatch() {
+    19:         given().when().get("/v1/alpha/US").then().statusCode(404);  ← FAILURE HERE
+    20:     }
+    21: 
+    22:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_TwoCharCodeMatch() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_TwoCharCodeNoMatch() {
+        given().when().get("/v1/alpha/XX").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ThreeCharCodeNoMatch() {
+        given().when().get("/v1/alpha/XXX").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_ValidCodes() {
+        given().when().queryParam("codes", "US;CA").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_MixedValidInvalidCodes() {
+        given().when().queryParam("codes", "US;XX").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_AllInvalidCodes() {
+        given().when().queryParam("codes", "XX;YY;ZZ").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_MissingCodesParameter() {
+        given().when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_AltSpellingMatch() {
+        given().when().queryParam("fullText", "true").get("/v1/name/United States of America").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_ExactNameMatch() {
+        given().when().queryParam("fullText", "true").get("/v1/name/France").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_NoMatch() {
+        given().when().queryParam("fullText", "true").get("/v1/name/NonExistentCountryName").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_V2_ThreeCharCodeNoMatch() {
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_DataLoadedSuccessfully() {
+        given().when().get("/v1/all").then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

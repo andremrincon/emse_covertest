@@ -1,0 +1,65 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import java.util.UUID;
+
+public class PatTest {
+
+    private static final String BASE = System.getProperty("api.base",
+            System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+
+    @Test(timeout = 60000)
+    public void testPat_PatLengthTwo_ReturnsZero() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "health-" + uuid).then().statusCode(lessThan(300));
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", "irrelevant-" + uuid, "ab").then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPat_PatFound_NoReverse_ReturnsOne() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "ready-" + uuid).then().statusCode(lessThan(300));
+        String txt = "xxabcyy-" + uuid;
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", txt, "abc").then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPat_ReverseFoundOnly_ReturnsTwo() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "prep-" + uuid).then().statusCode(lessThan(300));
+        String txt = "zzcbayy-" + uuid;
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", txt, "abc").then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPat_PatFollowedImmediatelyByReverse_ReturnsIndex() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "ping-" + uuid).then().statusCode(lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = "xx" + pat + patrev + "yy-" + uuid;
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", txt, pat).then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPat_ReverseFollowedImmediatelyByPat_ReturnsIndex() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "check-" + uuid).then().statusCode(lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = "zz" + patrev + pat + "aa-" + uuid;
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", txt, pat).then().body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPat_PatAndReverseNonAdjacent_ReturnsFirstIndex() {
+        String uuid = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/pat/{txt}", "start-" + uuid).then().statusCode(lessThan(300));
+        String pat = "abc";
+        String patrev = "cba";
+        String txt = pat + "XX" + patrev + "-" + uuid;
+        given().baseUri(BASE).when().get("/api/pat/{txt}/{pat}", txt, pat).then().body(equalTo("0"));
+    }
+}

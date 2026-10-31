@@ -1,0 +1,104 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost";
+        }
+        RestAssured.baseURI = base;
+        String port = System.getenv("API_PORT");
+        if (port != null && !port.isEmpty()) {
+            try {
+                RestAssured.port = Integer.parseInt(port);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_setsId() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", "RAID-Controller-Card")
+            .formParam("requiredFeature", "128GB-ECC-RAM")
+            .when()
+            .post("/products/{productName}/constraints/requires", productName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_setsId() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", "CPU-i9-13900H")
+            .formParam("excludedFeature", "Integrated-Graphics-Only")
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraint_byId() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response createResp = given().contentType("application/x-www-form-urlencoded")
+            .formParam("sourceFeature", "CPU-i9-13900H")
+            .formParam("excludedFeature", "Integrated-Graphics-Only")
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+            .statusCode(lessThan(300))
+            .extract()
+            .response();
+        long constraintId;
+        String location = createResp.getHeader("Location");
+        if (location != null && !location.isEmpty()) {
+            String[] parts = location.split("/");
+            String last = parts[parts.length - 1];
+            long parsed = 1L;
+            try {
+                parsed = Long.parseLong(last);
+            } catch (Exception ignored) {
+            }
+            constraintId = parsed;
+        } else {
+            String body = createResp.getBody() == null ? "" : createResp.getBody().asString();
+            long parsed = 1L;
+            if (body != null && !body.isEmpty()) {
+                Pattern p = Pattern.compile("\"id\"\\s*:\\s*(\\d+)");
+                Matcher m = p.matcher(body);
+                if (m.find()) {
+                    try {
+                        parsed = Long.parseLong(m.group(1));
+                    } catch (Exception ignored) {
+                    }
+                } else {
+                    String s = body.trim();
+                    try {
+                        parsed = Long.parseLong(s);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            constraintId = parsed;
+        }
+        given().when().delete("/products/{productName}/constraints/{constraintId}", productName, constraintId).then().statusCode(204);
+    }
+}

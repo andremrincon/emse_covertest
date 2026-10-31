@@ -1,0 +1,166 @@
+```java
+package ts01glm_5_2;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaWithFieldsReturns200() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaNotFoundReturns404() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/alpha/ZZZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListBadRequestReturns400() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "1")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFoundReturns404() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("codes", "XX;YY;ZZ")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllCountriesWithFieldsReturns200() {
+        given()
+            .baseUri(BASE_URL)
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyBadRequestReturns400() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/currency/12")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFoundReturns404() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/name/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/callingcode/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalNotFoundReturns404() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/capital/12345")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/region/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/subregion/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageNotFoundReturns404() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/lang/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/demonym/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocInternalServerErrorReturns500() {
+        given()
+            .baseUri(BASE_URL)
+        .when()
+            .get("/v2/regionalbloc/True")
+        .then()
+            .statusCode(500);
+    }
+}
+```

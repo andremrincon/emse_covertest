@@ -1,0 +1,48 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsUrl() {
+        given()
+            .pathParam("txt", "http://a/b")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsDate() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFpe() {
+        given()
+            .pathParam("txt", "1.1e+11")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNone() {
+        given()
+            .pathParam("txt", "none")
+        .when()
+            .get("http://localhost:8080/api/pat/{txt}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+}

@@ -1,0 +1,62 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) cfg = System.getenv("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) cfg = "http://localhost:8080";
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_continuedFractionPath_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_seriesPath_smallX_returnsStatusSuccessInBody() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/0.1");
+        act.then().body("status", equalTo("success"));
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_nZero_returns200() {
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/0/2.5");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_xZero_nm1NonZero_returns200() {
+        given().when().get("/api/remainder/17/4").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/3/0.0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_negativeN_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/-1/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_xZero_nIsOne_returns400() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/expint/1/0.0");
+        act.then().statusCode(400);
+    }
+}

@@ -1,0 +1,143 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Invalid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/alpha/1")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/alpha/ZZZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/alpha?codes=US,CA")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Invalid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/alpha?codes=A")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/currency/USD")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Invalid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/currency/12")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_NotFound() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/name/France")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFound() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/name/NonExistentCountry")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/callingcode/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/capital/London")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/region/Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/subregion/Western Europe")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Valid() {
+        given()
+            .when()
+                .get("http://localhost:8080/rest/v1/lang/es")
+            .then()
+                .statusCode(200);
+    }
+}

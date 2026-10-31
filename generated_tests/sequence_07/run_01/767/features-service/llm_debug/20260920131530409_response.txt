@@ -1,0 +1,245 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintSuccess() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature);
+
+        req.when()
+                .post("/products/{productName}/constraints/requires", productName)
+        .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintSuccess() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, excludedFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature);
+
+        req.when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintSuccess() {
+        String productName = "UltraPhoneX-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, sourceFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, requiredFeature)
+            .then()
+                .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature);
+
+        Response postResponse = req.when()
+                .post("/products/{productName}/constraints/requires", productName);
+
+        String location = postResponse.then()
+                .statusCode(201)
+                .extract()
+                .header("Location");
+
+        String constraintIdStr = location.substring(location.lastIndexOf("/") + 1);
+        Long constraintId = Long.parseLong(constraintIdStr);
+
+        given()
+        .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, constraintId)
+        .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintForNonExistentProduct() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SSD-Storage";
+        String requiredFeature = "Graphics-Card";
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature);
+
+        req.when()
+                .post("/products/{productName}/constraints/requires", productName)
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintForNonExistentProduct() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "PSU-Redundant";
+        String excludedFeature = "OS-Home";
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature);
+
+        req.when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintWithMissingFormParams() {
+        String productName = "Desktop-PC-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC);
+
+        req.when()
+                .post("/products/{productName}/constraints/requires", productName)
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithMissingFormParams() {
+        String productName = "Workstation-Z8-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        RequestSpecification req = given()
+            .contentType(ContentType.URLENC);
+
+        req.when()
+                .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintWithInvalidIdFormat() {
+        String productName = "PowerBankPro-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+        .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, "abc-def")
+        .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteNonExistentConstraint() {
+        String productName = "SmartWatchSE-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+        .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, 9876)
+        .then()
+                .statusCode(500);
+    }
+}

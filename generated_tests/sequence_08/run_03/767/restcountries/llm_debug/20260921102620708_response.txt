@@ -1,0 +1,57 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundReturns404() {
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get(baseUrl + "/v1/name/123")
+            .then()
+            .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameServerErrorReturns500() {
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get(baseUrl + "/v1/name/True")
+            .then()
+            .body("status", equalTo(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalNotFoundReturns404() {
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get(baseUrl + "/v1/capital/123")
+            .then()
+            .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionServerErrorReturns500() {
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get(baseUrl + "/v1/region/True")
+            .then()
+            .body("message", equalTo("Internal Server Error"));
+    }
+}
+```

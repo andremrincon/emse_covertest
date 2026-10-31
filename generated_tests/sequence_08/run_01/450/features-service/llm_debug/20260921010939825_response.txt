@@ -1,0 +1,156 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setup() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private void createProduct(String productName) {
+        given()
+            .when()
+            .post("/products/{productName}", productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createExcludesConstraint(String productName, String sourceFeature, String excludedFeature) {
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBothFeaturesActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat1);
+        addFeatureToConfiguration(product, config, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(false));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlySourceFeatureActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat1);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlyExcludedFeatureActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNoFeaturesActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+}
+```

@@ -1,0 +1,125 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+
+public class ProductsConfigurationsServiceTest {
+
+    private static String BASE_URI = "http://localhost:8080";
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        BASE_URI = baseUrl;
+    }
+
+    private static class Response {
+        int status;
+        String body;
+
+        Response(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private Response get(String pathTemplate, String... params) {
+        return request("GET", pathTemplate, null, params);
+    }
+
+    private Response post(String pathTemplate, String... params) {
+        return request("POST", pathTemplate, null, params);
+    }
+
+    private Response delete(String pathTemplate, String... params) {
+        return request("DELETE", pathTemplate, null, params);
+    }
+
+    private Response postForm(String pathTemplate, Map<String, String> formParams, String... params) {
+        return request("POST", pathTemplate, formParams, params);
+    }
+
+    private Response request(String method, String pathTemplate, Map<String, String> formParams, String... params) {
+        try {
+            String path = formatPath(pathTemplate, params);
+            String urlString = joinBaseUriAndPath(BASE_URI, path);
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            if (formParams != null && !formParams.isEmpty()) {
+                StringBuilder formBody = new StringBuilder();
+                for (Map.Entry<String, String> e : formParams.entrySet()) {
+                    if (formBody.length() > 0) formBody.append("&");
+                    formBody.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                    formBody.append("=");
+                    formBody.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+                }
+                byte[] bytes = formBody.toString().getBytes("UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+                os.close();
+            } else {
+                if ("POST".equals(method) || "PUT".equals(method)) {
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Length", "0");
+                    OutputStream os = conn.getOutputStream();
+                    os.close();
+                }
+            }
+            int status = conn.getResponseCode();
+            InputStream is;
+            if (status >= 400) {
+                is = conn.getErrorStream();
+            } else {
+                is = conn.getInputStream();
+            }
+            String body = "";
+            if (is != null) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    sb.append(line);
+                }
+                in.close();
+                body = sb.toString();
+            }
+            conn.disconnect();
+            return new Response(status, body);
+        } catch (Exception e) {
+            Assert.fail("Request failed: " + e.getMessage());
+            return new Response(0, "");
+        }
+    }
+
+    private String formatPath(String template, String... params) {
+        String result = template;
+        try {
+            for (String p : params) {
+                result = result.replaceFirst("\\{[^}]*\\}", URLEncoder.encode(p, "UTF-8"));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }

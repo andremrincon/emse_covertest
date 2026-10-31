@@ -1,0 +1,126 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowOriginHeader() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowMethodsHeader() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowHeadersHeader() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsCacheControlHeader() {
+        given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToV2All() {
+        given()
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToV2Alpha() {
+        given()
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToCapital() {
+        given()
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToRegion() {
+        given()
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToSubregion() {
+        given()
+        .when()
+            .get("/v1/subregion/Western Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToLang() {
+        given()
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToCallingCode() {
+        given()
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToRegionalBloc() {
+        given()
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("TARGET_HOST", "localhost");
+        String port = System.getenv().getOrDefault("TARGET_PORT", "8080");
+        RestAssured.baseURI = "http://" + host;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordTwo() {
+        given()
+            .when()
+                .get("/api/text2txt/two/words/here")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordFor() {
+        given()
+            .when()
+                .get("/api/text2txt/for/the/record")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordYou() {
+        given()
+            .when()
+                .get("/api/text2txt/you/are/cool")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordAnd() {
+        given()
+            .when()
+                .get("/api/text2txt/and/then/now")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordAre() {
+        given()
+            .when()
+                .get("/api/text2txt/are/we/there")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYou() {
+        given()
+            .when()
+                .get("/api/text2txt/see/you/later")
+            .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,51 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("test.server");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("TEST_SERVER");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_with_fullNames_returns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Wednesday", "August");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_with_caseVariantMonth_returns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "tuesday", "MAR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_with_invalidNames_returns500() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "Superday", "Movember");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateparse_with_numericInputs_returns500() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/dateparse/{dayname}/{monthname}", "123", "456");
+        act.then().statusCode(200);
+    }
+}

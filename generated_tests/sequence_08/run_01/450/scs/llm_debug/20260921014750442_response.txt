@@ -1,0 +1,47 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class RegexTest {
+
+    @Test(timeout = 60000)
+    public void testUrl() {
+        given()
+            .pathParam("txt", "http://a/b")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDate() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpe() {
+        given()
+            .pathParam("txt", "12.34e+56")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNone() {
+        given()
+            .pathParam("txt", "hello")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

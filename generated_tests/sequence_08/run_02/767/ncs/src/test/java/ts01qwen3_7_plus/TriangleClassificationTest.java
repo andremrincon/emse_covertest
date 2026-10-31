@@ -1,0 +1,69 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+public class TriangleClassificationTest {
+
+    private static final String BASE_URL = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_AInvalid() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/0/1/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_BInvalid() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/1/0/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_CInvalid() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/1/1/0")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_Equilateral() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/3/3/3")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_InvalidMax() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/5/2/2")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleClassification_Scalene() {
+        RestAssured.given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/triangle/3/4/5")
+                .then()
+                .statusCode(200);
+    }
+}

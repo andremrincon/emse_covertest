@@ -1,0 +1,75 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.equalTo;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridValidUser() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/userid/user12345/example.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridInvalidUser() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/userid/admin1234/example.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridShortVal() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/userid/user1/example.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionValid() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/session/am/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionInvalid() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/session/pm/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testOtherName() {
+        RestAssured.given()
+                .when()
+                .get("/api/cookie/other/val/site")
+                .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}

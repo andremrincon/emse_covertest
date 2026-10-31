@@ -1,0 +1,72 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testWordTwoReturnsAbbreviation2() {
+        when()
+            .get("/api/text2txt/two/test/test")
+            .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordForReturnsAbbreviation4() {
+        when()
+            .get("/api/text2txt/for/test/test")
+            .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordYouReturnsAbbreviationU() {
+        when()
+            .get("/api/text2txt/you/test/test")
+            .then()
+            .statusCode(200)
+            .body(equalTo("u"));
+    }
+
+    @Test(timeout = 60000)
+    public void testWordAreReturnsAbbreviationR() {
+        when()
+            .get("/api/text2txt/are/test/test")
+            .then()
+            .statusCode(200)
+            .body(equalTo("r"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYouReturnsAbbreviationCu() {
+        when()
+            .get("/api/text2txt/see/you/test")
+            .then()
+            .statusCode(200)
+            .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWayReturnsAbbreviationBtw() {
+        when()
+            .get("/api/text2txt/by/the/way")
+            .then()
+            .statusCode(200)
+            .body(equalTo("btw"));
+    }
+}
+```

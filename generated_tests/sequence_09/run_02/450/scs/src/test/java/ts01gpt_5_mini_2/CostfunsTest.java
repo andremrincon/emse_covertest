@@ -1,0 +1,64 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            RestAssured.baseURI = System.getProperty("API_BASE", "http://localhost:8080");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_returns_zero_when_i_minus4_and_s_abab() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", -4).pathParam("s", "abab").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_triggers_i_equals_5_branch_with_s_baab() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", 5).pathParam("s", "baab").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_triggers_i_less_than_minus444_branch() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", -500).pathParam("s", "algorithm").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_triggers_i_less_or_equal_minus333_branch() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", -333).pathParam("s", "algorithm").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_triggers_i_greater_than_666_and_string_compare_branches() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", 700).pathParam("s", "zzzz").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_triggers_i_greater_or_equal_555_with_s_abab_results_in_six() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().pathParam("i", 555).pathParam("s", "abab").when().get("/api/costfuns/{i}/{s}").then().statusCode(200).extract().response();
+        assertEquals("10", act.getBody().asString());
+    }
+}

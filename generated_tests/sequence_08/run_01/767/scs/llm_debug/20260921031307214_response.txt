@@ -1,0 +1,58 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    static {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsUrl() {
+        String txt = "http://a/b";
+        given()
+            .when()
+            .get("/api/pat/{txt}", txt)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsDate() {
+        String txt = "mon01jan";
+        given()
+            .when()
+            .get("/api/pat/{txt}", txt)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFpe() {
+        String txt = "1.2e+34";
+        given()
+            .when()
+            .get("/api/pat/{txt}", txt)
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNone() {
+        String txt = "invalid";
+        given()
+            .when()
+            .get("/api/pat/{txt}", txt)
+            .then()
+            .statusCode(200);
+    }
+}

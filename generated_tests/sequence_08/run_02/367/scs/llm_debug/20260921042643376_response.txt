@@ -1,0 +1,50 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        Response response = given().get(baseUrl + "/api/pat/a/a");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundPatRevNotFound() {
+        Response response = given().get(baseUrl + "/api/pat/abcxxx/abc");
+        response.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFirstCharMatchButNoMatchThenPatRevFound() {
+        Response response = given().get(baseUrl + "/api/pat/abxxcba/abc");
+        response.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundThenPatRevImmediatelyAfter() {
+        Response response = given().get(baseUrl + "/api/pat/abccba/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundThenPatRevFalseMatchThenFoundLater() {
+        Response response = given().get(baseUrl + "/api/pat/abcxcxxcba/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundThenPatFalseMatchThenFoundLater() {
+        Response response = given().get(baseUrl + "/api/pat/cbaxxabaxxabc/abc");
+        response.then().statusCode(200).body(equalTo("0"));
+    }
+}
+```

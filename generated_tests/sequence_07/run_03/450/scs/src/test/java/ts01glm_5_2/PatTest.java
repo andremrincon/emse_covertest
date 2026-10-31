@@ -1,0 +1,115 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqual2() {
+        given()
+            .pathParam("txt", "abc")
+            .pathParam("pat", "ab")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundOnly() {
+        given()
+            .pathParam("txt", "ABCDEF")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevAdjacent() {
+        given()
+            .pathParam("txt", "ABCCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevNonAdjacent() {
+        given()
+            .pathParam("txt", "ABCXCBA")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFirstPatAdjacent() {
+        given()
+            .pathParam("txt", "CBAABC")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFirstPatNonAdjacent() {
+        given()
+            .pathParam("txt", "CBAXABC")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundOnly() {
+        given()
+            .pathParam("txt", "CBADEF")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+            .pathParam("txt", "XYZXYZ")
+            .pathParam("pat", "ABC")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSingleTxtEndpoint() {
+        given()
+            .pathParam("txt", "The quick brown fox".replace(" ", "%20"))
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

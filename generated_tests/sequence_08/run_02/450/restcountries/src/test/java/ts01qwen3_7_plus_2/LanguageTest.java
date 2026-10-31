@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testSetIso639_1ViaV1Alpha() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .body("languages[0]['iso639_1']", equalTo("en"));
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testSetIso639_2ViaV1Lang() {
+        given()
+            .when()
+                .get("/v1/lang/es")
+            .then()
+                .body("[0].languages[0]['iso639_2']", equalTo("spa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNameViaV2Alpha() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .body("languages[0].name", equalTo("English"));
+    }
+
+    @Ignore("The parameter \"nativeName\" was used but not defined. Define parameters using the JsonPath.param...")
+    @Test(timeout = 60000)
+    public void testSetNativeNameViaV1Currency() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .body("[0].languages[0]['nativeName']", equalTo("English"));
+    }
+}

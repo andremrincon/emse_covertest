@@ -1,0 +1,78 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfPathWithLargeX() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/1000.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserPathWithSmallX() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/2.3")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserWithXZero() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNegativeA() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/-1.0/2.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNegativeX() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/5.5/-1.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonNumericA() {
+        given()
+            .accept("application/json")
+        .when()
+            .get("/api/gammq/abc/2.0")
+        .then()
+            .statusCode(400);
+    }
+}
+```

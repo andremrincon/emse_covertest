@@ -1,0 +1,265 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsDAOTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDeleteConstraintsForProductWithSingleConstraint TYPE=FAILURE
+
+
+[2] METHOD=testInsertBothConstraintTypesAndDeleteProduct TYPE=FAILURE
+
+
+[3] METHOD=testDeleteConstraintsForProductWithMultipleConstraints TYPE=FAILURE
+
+
+[4] METHOD=testInsertConstraintViaExcludesEndpoint TYPE=FAILURE
+
+
+[5] METHOD=testInsertConstraintViaRequiresEndpoint TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDeleteConstraintsForProductWithSingleConstraint FAILURE AT LINE 109
+java.lang.AssertionError
+at ts01glm_5_2.ProductsDAOTest.testDeleteConstraintsForProductWithSingleConstraint(ProductsDAOTest.java:109)
+CODE CONTEXT:
+   106:         String productName = "TestDelSingle-" + UUID.randomUUID().toString().substring(0, 8);
+   107: 
+   108:         Assert.assertTrue(createProduct(productName) < 300);
+   109:         Assert.assertTrue(createFeature(productName, "FeatureA") < 300);  ← FAILURE HERE
+   110:         Assert.assertTrue(createFeature(productName, "FeatureB") < 300);
+   111:         Assert.assertTrue(createRequiresConstraint(productName, "FeatureA", "FeatureB") < 300);
+   112: 
+
+[2] METHOD=testInsertBothConstraintTypesAndDeleteProduct FAILURE AT LINE 148
+java.lang.AssertionError
+at ts01glm_5_2.ProductsDAOTest.testInsertBothConstraintTypesAndDeleteProduct(ProductsDAOTest.java:148)
+CODE CONTEXT:
+   145:         String productName = "TestBoth-" + UUID.randomUUID().toString().substring(0, 8);
+   146: 
+   147:         Assert.assertTrue(createProduct(productName) < 300);
+   148:         Assert.assertTrue(createFeature(productName, "Push-Notifications") < 300);  ← FAILURE HERE
+   149:         Assert.assertTrue(createFeature(productName, "User-Authentication") < 300);
+   150:         Assert.assertTrue(createFeature(productName, "Color-Black") < 300);
+   151:         Assert.assertTrue(createFeature(productName, "Logo-WhiteOnBlack") < 300);
+
+[3] METHOD=testDeleteConstraintsForProductWithMultipleConstraints FAILURE AT LINE 132
+java.lang.AssertionError
+at ts01glm_5_2.ProductsDAOTest.testDeleteConstraintsForProductWithMultipleConstraints(ProductsDAOTest.java:132)
+CODE CONTEXT:
+   129:         String productName = "TestDelMulti-" + UUID.randomUUID().toString().substring(0, 8);
+   130: 
+   131:         Assert.assertTrue(createProduct(productName) < 300);
+   132:         Assert.assertTrue(createFeature(productName, "FeatureC") < 300);  ← FAILURE HERE
+   133:         Assert.assertTrue(createFeature(productName, "FeatureD") < 300);
+   134:         Assert.assertTrue(createFeature(productName, "FeatureE") < 300);
+   135:         Assert.assertTrue(createFeature(productName, "FeatureF") < 300);
+
+[4] METHOD=testInsertConstraintViaExcludesEndpoint FAILURE AT LINE 97
+java.lang.AssertionError
+at ts01glm_5_2.ProductsDAOTest.testInsertConstraintViaExcludesEndpoint(ProductsDAOTest.java:97)
+CODE CONTEXT:
+    94:         String productName = "TestExc-" + UUID.randomUUID().toString().substring(0, 8);
+    95: 
+    96:         Assert.assertTrue(createProduct(productName) < 300);
+    97:         Assert.assertTrue(createFeature(productName, "CPU-i9-13900H") < 300);  ← FAILURE HERE
+    98:         Assert.assertTrue(createFeature(productName, "Integrated-Graphics-Only") < 300);
+    99: 
+   100:         int status = createExcludesConstraint(productName, "CPU-i9-13900H", "Integrated-Graphics-Only");
+
+[5] METHOD=testInsertConstraintViaRequiresEndpoint FAILURE AT LINE 85
+java.lang.AssertionError
+at ts01glm_5_2.ProductsDAOTest.testInsertConstraintViaRequiresEndpoint(ProductsDAOTest.java:85)
+CODE CONTEXT:
+    82:         String productName = "TestReq-" + UUID.randomUUID().toString().substring(0, 8);
+    83: 
+    84:         Assert.assertTrue(createProduct(productName) < 300);
+    85:         Assert.assertTrue(createFeature(productName, "RAID-Controller-Card") < 300);  ← FAILURE HERE
+    86:         Assert.assertTrue(createFeature(productName, "128GB-ECC-RAM") < 300);
+    87: 
+    88:         int status = createRequiresConstraint(productName, "RAID-Controller-Card", "128GB-ECC-RAM");
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.OutputStream;
+import java.io.IOException;
+
+public class ProductsDAOTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int sendRequest(String method, String path, String body, String contentType) throws IOException {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method)) {
+            conn.setDoOutput(true);
+        }
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        if (body != null) {
+            byte[] bytes = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                os.write(bytes);
+            } finally {
+                if (os != null) {
+                    try { os.close(); } catch (IOException ignored) {}
+                }
+            }
+        }
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private int createProduct(String productName) throws IOException {
+        return sendRequest("POST", "/products/" + encode(productName), null, null);
+    }
+
+    private int createFeature(String productName, String featureName) throws IOException {
+        return sendRequest("POST", "/products/" + encode(productName) + "/features/" + encode(featureName), null, null);
+    }
+
+    private int createRequiresConstraint(String productName, String sourceFeature, String requiredFeature) throws IOException {
+        String body = "sourceFeature=" + encode(sourceFeature) + "&requiredFeature=" + encode(requiredFeature);
+        return sendRequest("POST", "/products/" + encode(productName) + "/constraints/requires", body, "application/x-www-form-urlencoded");
+    }
+
+    private int createExcludesConstraint(String productName, String sourceFeature, String excludedFeature) throws IOException {
+        String body = "sourceFeature=" + encode(sourceFeature) + "&excludedFeature=" + encode(excludedFeature);
+        return sendRequest("POST", "/products/" + encode(productName) + "/constraints/excludes", body, "application/x-www-form-urlencoded");
+    }
+
+    private int deleteProduct(String productName) throws IOException {
+        return sendRequest("DELETE", "/products/" + encode(productName), null, null);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaRequiresEndpoint() throws Exception {
+        String productName = "TestReq-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "RAID-Controller-Card") < 300);
+        Assert.assertTrue(createFeature(productName, "128GB-ECC-RAM") < 300);
+
+        int status = createRequiresConstraint(productName, "RAID-Controller-Card", "128GB-ECC-RAM");
+        Assert.assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaExcludesEndpoint() throws Exception {
+        String productName = "TestExc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "CPU-i9-13900H") < 300);
+        Assert.assertTrue(createFeature(productName, "Integrated-Graphics-Only") < 300);
+
+        int status = createExcludesConstraint(productName, "CPU-i9-13900H", "Integrated-Graphics-Only");
+        Assert.assertEquals(201, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithSingleConstraint() throws Exception {
+        String productName = "TestDelSingle-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureA") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureB") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "FeatureA", "FeatureB") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithNoConstraints() throws Exception {
+        String productName = "TestDelNone-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithMultipleConstraints() throws Exception {
+        String productName = "TestDelMulti-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureC") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureD") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureE") < 300);
+        Assert.assertTrue(createFeature(productName, "FeatureF") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "FeatureC", "FeatureD") < 300);
+        Assert.assertTrue(createExcludesConstraint(productName, "FeatureE", "FeatureF") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertBothConstraintTypesAndDeleteProduct() throws Exception {
+        String productName = "TestBoth-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(createProduct(productName) < 300);
+        Assert.assertTrue(createFeature(productName, "Push-Notifications") < 300);
+        Assert.assertTrue(createFeature(productName, "User-Authentication") < 300);
+        Assert.assertTrue(createFeature(productName, "Color-Black") < 300);
+        Assert.assertTrue(createFeature(productName, "Logo-WhiteOnBlack") < 300);
+        Assert.assertTrue(createRequiresConstraint(productName, "Push-Notifications", "User-Authentication") < 300);
+        Assert.assertTrue(createExcludesConstraint(productName, "Color-Black", "Logo-WhiteOnBlack") < 300);
+
+        int status = deleteProduct(productName);
+        Assert.assertEquals(204, status);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

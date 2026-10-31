@@ -1,0 +1,57 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    @Before
+    public void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given()
+                .formParam("sourceFeature", feature1)
+                .formParam("excludedFeature", feature2)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes");
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraint() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String feature1 = "Feature1-" + UUID.randomUUID().toString();
+        String feature2 = "Feature2-" + UUID.randomUUID().toString();
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given()
+                .formParam("sourceFeature", feature1)
+                .formParam("requiredFeature", feature2)
+                .when()
+                .post("/products/" + productName + "/constraints/requires");
+
+        response.then().statusCode(201);
+    }
+}

@@ -1,0 +1,64 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        given().when().get("/api/bessj/1/2.5").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjXZero() {
+        given().when().get("/api/bessj/3/0.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjForwardRecurrenceAbsXLessThan8() {
+        given().when().get("/api/bessj/3/5.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjForwardRecurrenceAbsXGreaterThanOrEqual8() {
+        given().when().get("/api/bessj/3/10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBackwardRecurrencePositiveX() {
+        given().when().get("/api/bessj/10/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddNForwardRecurrence() {
+        given().when().get("/api/bessj/3/-10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenNForwardRecurrence() {
+        given().when().get("/api/bessj/4/-10.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjBackwardRecurrenceNegativeXOddN() {
+        given().when().get("/api/bessj/11/-2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNType() {
+        given().when().get("/api/bessj/abc/2.5").then().statusCode(400);
+    }
+}
+```

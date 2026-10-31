@@ -1,0 +1,98 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "a", "a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatch() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "def", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatMatchNoPatrev() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "abc", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevMatchNoPat() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "cba", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevImmediate() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "abccba", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevAndPatImmediate() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "cbaabc", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatrevLater() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "abcxxcba", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatrevAndPatLater() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "cbaxxabc", "abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPartialMatches() {
+        given()
+            .when()
+            .get("/api/pat/{txt}/{pat}", "abxcbx", "abc")
+            .then()
+            .statusCode(200);
+    }
+}
+```

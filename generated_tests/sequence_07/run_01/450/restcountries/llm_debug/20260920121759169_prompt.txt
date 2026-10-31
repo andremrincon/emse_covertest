@@ -1,0 +1,379 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_3.CountryTranslationsTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testV1AllReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=testV1CapitalReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testV1LangReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testV1AlphaGBReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testV1AlphaByCodeReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testV1CurrencyReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testV1RegionReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testV1CurrencyXOFReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testV1RegionAfricaReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testV1CallingCodeReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[11] METHOD=testV1NameFullTextReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[12] METHOD=testV1AlphaMultipleCodesReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[13] METHOD=testV1CallingCode44ReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[14] METHOD=testV1NameReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[15] METHOD=testV1SubregionReturnsTranslations TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testV1AllReturnsTranslations FAILURE AT LINE 81
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1AllReturnsTranslations(CountryTranslationsTest.java:81)
+CODE CONTEXT:
+    78: 
+    79:     @Test(timeout = 60000)
+    80:     public void testV1AllReturnsTranslations() {
+    81:         given().when().get("/v1/all").then().statusCode(404).body("translations[0].de", notNullValue());  ← FAILURE HERE
+    82:     }
+    83: 
+    84:     @Test(timeout = 60000)
+
+[2] METHOD=testV1CapitalReturnsTranslations FAILURE AT LINE 57
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1CapitalReturnsTranslations(CountryTranslationsTest.java:57)
+CODE CONTEXT:
+    54: 
+    55:     @Test(timeout = 60000)
+    56:     public void testV1CapitalReturnsTranslations() {
+    57:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    58:         given().when().get("/v1/capital/London").then().statusCode(200).body("translations[0].es", notNullValue());
+    59:     }
+    60: 
+
+[3] METHOD=testV1LangReturnsTranslations FAILURE AT LINE 75
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1LangReturnsTranslations(CountryTranslationsTest.java:75)
+CODE CONTEXT:
+    72: 
+    73:     @Test(timeout = 60000)
+    74:     public void testV1LangReturnsTranslations() {
+    75:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    76:         given().when().get("/v1/lang/es").then().statusCode(200).body("translations[0].it", notNullValue());
+    77:     }
+    78: 
+
+[4] METHOD=testV1AlphaGBReturnsTranslations FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1AlphaGBReturnsTranslations(CountryTranslationsTest.java:86)
+CODE CONTEXT:
+    83: 
+    84:     @Test(timeout = 60000)
+    85:     public void testV1AlphaGBReturnsTranslations() {
+    86:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    87:         given().when().get("/v1/alpha/GB").then().statusCode(200).body("translations.de", notNullValue());
+    88:     }
+    89: 
+
+[5] METHOD=testV1AlphaByCodeReturnsTranslations FAILURE AT LINE 21
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1AlphaByCodeReturnsTranslations(CountryTranslationsTest.java:21)
+CODE CONTEXT:
+    18: 
+    19:     @Test(timeout = 60000)
+    20:     public void testV1AlphaByCodeReturnsTranslations() {
+    21:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    22:         given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.de", notNullValue());
+    23:     }
+    24: 
+
+[6] METHOD=testV1CurrencyReturnsTranslations FAILURE AT LINE 45
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1CurrencyReturnsTranslations(CountryTranslationsTest.java:45)
+CODE CONTEXT:
+    42: 
+    43:     @Test(timeout = 60000)
+    44:     public void testV1CurrencyReturnsTranslations() {
+    45:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    46:         given().when().get("/v1/currency/USD").then().statusCode(200).body("translations[0].it", notNullValue());
+    47:     }
+    48: 
+
+[7] METHOD=testV1RegionReturnsTranslations FAILURE AT LINE 63
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1RegionReturnsTranslations(CountryTranslationsTest.java:63)
+CODE CONTEXT:
+    60: 
+    61:     @Test(timeout = 60000)
+    62:     public void testV1RegionReturnsTranslations() {
+    63:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    64:         given().when().get("/v1/region/Europe").then().statusCode(200).body("translations[0].fr", notNullValue());
+    65:     }
+    66: 
+
+[8] METHOD=testV1CurrencyXOFReturnsTranslations FAILURE AT LINE 92
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1CurrencyXOFReturnsTranslations(CountryTranslationsTest.java:92)
+CODE CONTEXT:
+    89: 
+    90:     @Test(timeout = 60000)
+    91:     public void testV1CurrencyXOFReturnsTranslations() {
+    92:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    93:         given().when().get("/v1/currency/XOF").then().statusCode(200).body("translations[0].de", notNullValue());
+    94:     }
+    95: 
+
+[9] METHOD=testV1RegionAfricaReturnsTranslations FAILURE AT LINE 104
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1RegionAfricaReturnsTranslations(CountryTranslationsTest.java:104)
+CODE CONTEXT:
+   101: 
+   102:     @Test(timeout = 60000)
+   103:     public void testV1RegionAfricaReturnsTranslations() {
+   104:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+   105:         given().when().get("/v1/region/africa").then().statusCode(200).body("translations[0].fr", notNullValue());
+   106:     }
+   107: }
+
+[10] METHOD=testV1CallingCodeReturnsTranslations FAILURE AT LINE 51
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1CallingCodeReturnsTranslations(CountryTranslationsTest.java:51)
+CODE CONTEXT:
+    48: 
+    49:     @Test(timeout = 60000)
+    50:     public void testV1CallingCodeReturnsTranslations() {
+    51:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    52:         given().when().get("/v1/callingcode/1").then().statusCode(200).body("translations[0].de", notNullValue());
+    53:     }
+    54: 
+
+[11] METHOD=testV1NameFullTextReturnsTranslations FAILURE AT LINE 39
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1NameFullTextReturnsTranslations(CountryTranslationsTest.java:39)
+CODE CONTEXT:
+    36: 
+    37:     @Test(timeout = 60000)
+    38:     public void testV1NameFullTextReturnsTranslations() {
+    39:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    40:         given().when().get("/v1/name/France?fullText=true").then().statusCode(200).body("translations[0].ja", notNullValue());
+    41:     }
+    42: 
+
+[12] METHOD=testV1AlphaMultipleCodesReturnsTranslations FAILURE AT LINE 27
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1AlphaMultipleCodesReturnsTranslations(CountryTranslationsTest.java:27)
+CODE CONTEXT:
+    24: 
+    25:     @Test(timeout = 60000)
+    26:     public void testV1AlphaMultipleCodesReturnsTranslations() {
+    27:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    28:         given().when().get("/v1/alpha?codes=US,CA,MX").then().statusCode(200).body("translations[0].es", notNullValue());
+    29:     }
+    30: 
+
+[13] METHOD=testV1CallingCode44ReturnsTranslations FAILURE AT LINE 98
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1CallingCode44ReturnsTranslations(CountryTranslationsTest.java:98)
+CODE CONTEXT:
+    95: 
+    96:     @Test(timeout = 60000)
+    97:     public void testV1CallingCode44ReturnsTranslations() {
+    98:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    99:         given().when().get("/v1/callingcode/44").then().statusCode(200).body("translations[0].es", notNullValue());
+   100:     }
+   101: 
+
+[14] METHOD=testV1NameReturnsTranslations FAILURE AT LINE 33
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1NameReturnsTranslations(CountryTranslationsTest.java:33)
+CODE CONTEXT:
+    30: 
+    31:     @Test(timeout = 60000)
+    32:     public void testV1NameReturnsTranslations() {
+    33:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    34:         given().when().get("/v1/name/France").then().statusCode(200).body("translations[0].fr", notNullValue());
+    35:     }
+    36: 
+
+[15] METHOD=testV1SubregionReturnsTranslations FAILURE AT LINE 69
+java.lang.AssertionError:
+at ts01glm_5_2_3.CountryTranslationsTest.testV1SubregionReturnsTranslations(CountryTranslationsTest.java:69)
+CODE CONTEXT:
+    66: 
+    67:     @Test(timeout = 60000)
+    68:     public void testV1SubregionReturnsTranslations() {
+    69:         given().when().get("/v1/all").then().statusCode(lessThan(300));  ← FAILURE HERE
+    70:         given().when().get("/v1/subregion/Western Europe").then().statusCode(200).body("translations[0].ja", notNullValue());
+    71:     }
+    72: 
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes=US,CA,MX").then().statusCode(200).body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France").then().statusCode(200).body("translations[0].fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFullTextReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/France?fullText=true").then().statusCode(200).body("translations[0].ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("translations[0].it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCodeReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/1").then().statusCode(200).body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/London").then().statusCode(200).body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/Europe").then().statusCode(200).body("translations[0].fr", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1SubregionReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/subregion/Western Europe").then().statusCode(200).body("translations[0].ja", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().statusCode(200).body("translations[0].it", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(404).body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaGBReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/GB").then().statusCode(200).body("translations.de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyXOFReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/XOF").then().statusCode(200).body("translations[0].de", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCode44ReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/callingcode/44").then().statusCode(200).body("translations[0].es", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionAfricaReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/africa").then().statusCode(200).body("translations[0].fr", notNullValue());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

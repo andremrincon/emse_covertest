@@ -1,0 +1,449 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.hamcrest.MatcherAssert;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher as RegexMatcher;
+import java.nio.charset.Charset;
+
+import static org.hamcrest.Matchers.*;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setup() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static class Response {
+        final int statusCode;
+        final String body;
+        final Map<String, List<String>> headers;
+
+        Response(int statusCode, String body, Map<String, List<String>> headers) {
+            this.statusCode = statusCode;
+            this.body = body;
+            this.headers = headers;
+        }
+
+        String header(String name) {
+            if (name == null) return null;
+            List<String> vals = headers.get(name);
+            if (vals == null) {
+                for (Map.Entry<String, List<String>> e : headers.entrySet()) {
+                    if (name.equalsIgnoreCase(e.getKey())) {
+                        vals = e.getValue();
+                        break;
+                    }
+                }
+            }
+            if (vals == null || vals.isEmpty()) return null;
+            return vals.get(0);
+        }
+    }
+
+    private static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String formatPath(String template, Object... args) {
+        String result = template;
+        for (Object arg : args) {
+            String encoded = encode(String.valueOf(arg));
+            result = result.replaceFirst("\\{[^}]+\\}", encoded);
+        }
+        return result;
+    }
+
+    private static String formEncode(Map<String, String> params) {
+        if (params == null || params.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) sb.append("&");
+            first = false;
+            sb.append(encode(e.getKey())).append("=").append(encode(e.getValue()));
+        }
+        return sb.toString();
+    }
+
+    private static Response request(String method, String pathTemplate, Map<String, String> formParams, String contentType, Object... args) throws IOException {
+        String path = formatPath(pathTemplate, args);
+        URL url = new URL(baseUri + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        if (formParams != null && !formParams.isEmpty()) {
+            String body = formEncode(formParams);
+            conn.setDoOutput(true);
+            byte[] bytes = body.getBytes(Charset.forName("UTF-8"));
+            conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+            DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+            try {
+                dos.write(bytes);
+                dos.flush();
+            } finally {
+                dos.close();
+            }
+        }
+        int status = conn.getResponseCode();
+        InputStream is;
+        try {
+            if (status >= 200 && status < 400) {
+                is = conn.getInputStream();
+            } else {
+                is = conn.getErrorStream();
+                if (is == null) {
+                    is = conn.getInputStream();
+                }
+            }
+        } catch (IOException e) {
+            is = conn.getErrorStream();
+            if (is == null) {
+                throw e;
+            }
+        }
+        String body = "";
+        if (is != null) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            body = sb.toString();
+            try {
+                br.close();
+            } catch (IOException ignored) {}
+        }
+        Map<String, List<String>> headers = conn.getHeaderFields();
+        conn.disconnect();
+        return new Response(status, body, headers == null ? new HashMap<String, List<String>>() : headers);
+    }
+
+    private static Response post(String pathTemplate, Object... args) throws IOException {
+        return request("POST", pathTemplate, null, null, args);
+    }
+
+    private static Response postForm(String pathTemplate, Map<String, String> formParams, Object... args) throws IOException {
+        return request("POST", pathTemplate, formParams, "application/x-www-form-urlencoded", args);
+    }
+
+    private static Response putForm(String pathTemplate, Map<String, String> formParams, Object... args) throws IOException {
+        return request("PUT", pathTemplate, formParams, "application/x-www-form-urlencoded", args);
+    }
+
+    private static Response delete(String pathTemplate, Object... args) throws IOException {
+        return request("DELETE", pathTemplate, null, null, args);
+    }
+
+    private static Response get(String pathTemplate, Object... args) throws IOException {
+        return request("GET", pathTemplate, null, null, args);
+    }
+
+    private static int countOccurrences(String haystack, String needle) {
+        if (haystack == null || haystack.isEmpty() || needle == null || needle.isEmpty()) return 0;
+        int count = 0;
+        int idx = 0;
+        while ((idx = haystack.indexOf(needle, idx)) != -1) {
+            count++;
+            idx += needle.length();
+        }
+        return count;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProductReturns201() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("description", "Test description");
+        Response r2 = postForm("/products/{productName}/features/{featureName}", form, productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromProductReturns204() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("description", "Test description");
+        Response r2 = postForm("/products/{productName}/features/{featureName}", form, productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = delete("/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(r3.statusCode, equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void findProductFeatureByNameReturns200OnUpdate() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "backlit-keyboard";
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Map<String, String> form1 = new HashMap<String, String>();
+        form1.put("description", "Original description");
+        Response r2 = postForm("/products/{productName}/features/{featureName}", form1, productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Map<String, String> form2 = new HashMap<String, String>();
+        form2.put("description", "RGB backlit keyboard with customizable zones and per-key lighting.");
+        Response r3 = putForm("/products/{productName}/features/{featureName}", form2, productName, featureName);
+        MatcherAssert.assertThat(r3.statusCode, equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void findProductFeatureByNameThrowsOnNotFound() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("description", "Updated description");
+        Response r2 = putForm("/products/{productName}/features/{featureName}", form, productName, "nonexistent-feature");
+        MatcherAssert.assertThat(r2.statusCode, anyOf(equalTo(404), equalTo(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void hasFeatureNamedReturnsTrueWhenAddingRequiresConstraint() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, sourceFeature);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, requiredFeature);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        Response r4 = postForm("/products/{productName}/constraints/requires", form, productName);
+        MatcherAssert.assertThat(r4.statusCode, equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void hasFeatureNamedReturnsFalseWhenFeatureDoesNotExist() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", "NonExistentFeature");
+        form.put("requiredFeature", "AlsoNonExistent");
+        Response r2 = postForm("/products/{productName}/constraints/requires", form, productName);
+        MatcherAssert.assertThat(r2.statusCode, anyOf(equalTo(400), equalTo(404), equalTo(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureConstraintExcludesReturns201() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, sourceFeature);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, excludedFeature);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Response r4 = postForm("/products/{productName}/constraints/excludes", form, productName);
+        MatcherAssert.assertThat(r4.statusCode, equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void getProductReturns200WithFeatures() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = get("/products/{productName}", productName);
+        MatcherAssert.assertThat(r3.statusCode, equalTo(200));
+        MatcherAssert.assertThat(r3.body.contains("\"name\":\"" + productName + "\""), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void getFeaturesForProductReturns200() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = get("/products/{productName}/features", productName);
+        MatcherAssert.assertThat(r3.statusCode, equalTo(200));
+        int count = countOccurrences(r3.body, "\"name\"");
+        MatcherAssert.assertThat(count, greaterThanOrEqualTo(1));
+    }
+
+    @Test(timeout = 60000)
+    public void buildWithFeaturesViaGetProductAfterMultipleFeaturesAdded() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, feature1);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, feature2);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Response r4 = get("/products/{productName}/features", productName);
+        MatcherAssert.assertThat(r4.statusCode, equalTo(200));
+        int count = countOccurrences(r4.body, "\"name\"");
+        MatcherAssert.assertThat(count, equalTo(2));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureWithoutDescriptionReturns201() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = post("/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteProductReturns204() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = delete("/products/{productName}", productName);
+        MatcherAssert.assertThat(r2.statusCode, equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationReturns201() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "Feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Response r4 = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(r4.statusCode, equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureFromConfigurationReturns204() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "Feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, featureName);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Response r4 = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(r4.statusCode, lessThan(300));
+
+        Response r5 = delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(r5.statusCode, equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintReturns204() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        MatcherAssert.assertThat(r1.statusCode, lessThan(300));
+
+        Response r2 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, sourceFeature);
+        MatcherAssert.assertThat(r2.statusCode, lessThan(300));
+
+        Response r3 = postForm("/products/{productName}/features/{featureName}", new HashMap<String, String>(), productName, requiredFeature);
+        MatcherAssert.assertThat(r3.statusCode, lessThan(300));
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        Response r4 = postForm("/products/{productName}/constraints/requires", form, productName);
+        MatcherAssert.assertThat(r4.statusCode, lessThan(300));
+        String constraintLocation = r4.header("Location");
+
+        Response r5 = get("/products/{productName}", productName);
+        MatcherAssert.assertThat(r5.statusCode, lessThan(300));
+
+        Response r6 = delete("/products/{productName}/constraints/{constraintId}", productName, 1);
+        MatcherAssert.assertThat(r6.statusCode, anyOf(equalTo(204), equalTo(404), equalTo(500)));
+    }
+}

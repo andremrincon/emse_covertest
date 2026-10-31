@@ -1,0 +1,57 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlBranch() {
+        given()
+            .pathParam("txt", "http://a/a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateBranch() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpeBranch() {
+        given()
+            .pathParam("txt", "1.1e+11")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneBranch() {
+        given()
+            .pathParam("txt", "xyz")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

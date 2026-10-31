@@ -1,0 +1,61 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiEndpointReturns200() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "HealthCheck-" + uid).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "e", "0.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "4.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "log", "1.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sine", "0.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "cosine", "0.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "tangent", "0.0", "0.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "1.5", "2.5").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "5.0", "3.0").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0.0", "0.0");
+        Assert.assertEquals(200, act.statusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtComputesSquareRootBody() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "HealthCheckB-" + uid).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "10.0", "5.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "subtract", "10.0", "1.0").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "sqrt", "9.0", "0.0");
+        Assert.assertEquals("3.0", act.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturns500() {
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/pat/{txt}", "HealthCheckC-" + uid).then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "2.0", "3.0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "plus", "7.0", "8.0").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100.0", "0.0");
+        Assert.assertEquals(200, act.statusCode());
+    }
+}

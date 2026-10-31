@@ -1,0 +1,282 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class WrongProductConfigurationExceptionTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int send(String method, String pathTemplate, Map<String, String> formParams, Object... pathParams) {
+        try {
+            String fullUrl = buildUrl(pathTemplate, pathParams);
+            URL url = new URL(fullUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            if (formParams != null && (method.equals("POST") || method.equals("PUT"))) {
+                conn.setDoOutput(true);
+                String body = buildFormBody(formParams);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+                os.close();
+            } else {
+                conn.setDoOutput(false);
+            }
+            int status = conn.getResponseCode();
+            conn.disconnect();
+            return status;
+        } catch (Exception e) {
+            fail("Request failed: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    private String buildUrl(String template, Object... params) throws Exception {
+        String path = template;
+        if (params != null) {
+            for (Object p : params) {
+                String replacement = URLEncoder.encode(String.valueOf(p), "UTF-8");
+                path = path.replaceFirst("\\{[^/}]*\\}", replacement);
+            }
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return baseUrl + path;
+    }
+
+    private String buildFormBody(Map<String, String> formParams) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : formParams.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_success() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "A test feature description");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form, productName, featureName);
+        assertEquals(201, s2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_duplicateThrowsException() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "dup-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        Map<String, String> form1 = new LinkedHashMap<>();
+        form1.put("description", "First");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form1, productName, featureName);
+        assertTrue(s2 < 300);
+
+        Map<String, String> form2 = new LinkedHashMap<>();
+        form2.put("description", "Second");
+        int s3 = send("POST", "/products/{productName}/features/{featureName}", form2, productName, featureName);
+        assertEquals(500, s3);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_withoutDescription() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "nodesc-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        assertEquals(201, s2);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_success() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "del-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "To be deleted");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form, productName, featureName);
+        assertTrue(s2 < 300);
+
+        int s3 = send("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        assertEquals(204, s3);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_withActiveConfiguration() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "active-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "Active feature");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form, productName, featureName);
+        assertTrue(s2 < 300);
+        int s3 = send("POST", "/products/{productName}/configurations/{configurationName}", null, productName, configName);
+        assertTrue(s3 < 300);
+        int s4 = send("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, productName, configName, featureName);
+        assertTrue(s4 < 300);
+
+        int s5 = send("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        assertEquals(204, s5);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_notFound() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "nonexistent-feature";
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+
+        int s2 = send("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        assertEquals(500, s2);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_removesFromMultipleConfigurations() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "multi-config-feature-" + UUID.randomUUID().toString().substring(0, 8);
+        String config1 = "config1-" + UUID.randomUUID().toString().substring(0, 8);
+        String config2 = "config2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "Multi config feature");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form, productName, featureName);
+        assertTrue(s2 < 300);
+        int s3 = send("POST", "/products/{productName}/configurations/{configurationName}", null, productName, config1);
+        assertTrue(s3 < 300);
+        int s4 = send("POST", "/products/{productName}/configurations/{configurationName}", null, productName, config2);
+        assertTrue(s4 < 300);
+        int s5 = send("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, productName, config1, featureName);
+        assertTrue(s5 < 300);
+        int s6 = send("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, productName, config2, featureName);
+        assertTrue(s6 < 300);
+
+        int s7 = send("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        assertEquals(204, s7);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_success() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-req-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-req-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(s2 < 300);
+        int s3 = send("POST", "/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        assertTrue(s3 < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        int s4 = send("POST", "/products/{productName}/constraints/requires", form, productName);
+        assertEquals(201, s4);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_productNotFound() {
+        String productName = "nonexistent-product-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", "FeatureA");
+        form.put("requiredFeature", "FeatureB");
+        int s = send("POST", "/products/{productName}/constraints/requires", form, productName);
+        assertEquals(500, s);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_success() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-exc-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-exc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(s2 < 300);
+        int s3 = send("POST", "/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        assertTrue(s3 < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        int s4 = send("POST", "/products/{productName}/constraints/excludes", form, productName);
+        assertEquals(201, s4);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_productNotFound() {
+        String productName = "nonexistent-product-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", "FeatureA");
+        form.put("excludedFeature", "FeatureB");
+        int s = send("POST", "/products/{productName}/constraints/excludes", form, productName);
+        assertEquals(500, s);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_thenUpdateFeature() {
+        String productName = "test-product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "upd-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int s1 = send("POST", "/products/{productName}", null, productName);
+        assertTrue(s1 < 300);
+        Map<String, String> form1 = new LinkedHashMap<>();
+        form1.put("description", "Original description");
+        int s2 = send("POST", "/products/{productName}/features/{featureName}", form1, productName, featureName);
+        assertTrue(s2 < 300);
+
+        Map<String, String> form2 = new LinkedHashMap<>();
+        form2.put("description", "Updated description");
+        int s3 = send("PUT", "/products/{productName}/features/{featureName}", form2, productName, featureName);
+        assertEquals(200, s3);
+    }
+}

@@ -1,0 +1,59 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserPath() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfPath() {
+        given()
+            .pathParam("a", 0.001)
+            .pathParam("x", 1000.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidA() {
+        given()
+            .pathParam("a", -1.0)
+            .pathParam("x", 2.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidX() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", -3.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}

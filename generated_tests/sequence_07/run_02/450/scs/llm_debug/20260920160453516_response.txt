@@ -1,0 +1,46 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithValidTitleMr() {
+        given().when().get("/api/title/male/mr").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithInvalidTitleMrs() {
+        given().when().get("/api/title/male/mrs").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithValidTitleMrs() {
+        given().when().get("/api/title/female/mrs").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithInvalidTitleMr() {
+        given().when().get("/api/title/female/mr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneSexWithValidTitleDr() {
+        given().when().get("/api/title/none/dr").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexWithTitleMr() {
+        given().when().get("/api/title/other/mr").then().statusCode(200);
+    }
+}

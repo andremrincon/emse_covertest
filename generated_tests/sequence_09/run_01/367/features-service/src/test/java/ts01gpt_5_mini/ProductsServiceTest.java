@@ -1,0 +1,97 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ProductsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.trim().isEmpty()) {
+            String env = System.getenv("API_BASE_URL");
+            base = (env == null || env.trim().isEmpty()) ? "http://localhost:8080" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Success() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Duplicate_ShouldReturn500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "dup-feature-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "first").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response act = given().formParam("description", "second").when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_RemovesFromConfigurationsAndReturns204() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().formParam("description", "x").when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct_Nonexistent_ShouldReturn500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "nonexistent-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct_Success() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProduct_NonexistentProduct_ShouldReturn500() {
+        String product = "missing-" + UUID.randomUUID().toString();
+        Response act = given().formParam("sourceFeature", "Push-Notifications").formParam("requiredFeature", "User-Authentication").when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct_Success() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProduct_NonexistentProduct_ShouldReturn500() {
+        String product = "missing-" + UUID.randomUUID().toString();
+        Response act = given().formParam("sourceFeature", "Color-Black").formParam("excludedFeature", "Logo-White-On-Black").when().post("/products/{productName}/constraints/excludes", product);
+        assertEquals(500, act.getStatusCode());
+    }
+}

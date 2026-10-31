@@ -1,0 +1,80 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUpClass() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost";
+        }
+        String port = System.getenv("PORT");
+        if (port != null && !port.isEmpty()) {
+            RestAssured.port = Integer.parseInt(port);
+        } else {
+            RestAssured.port = 8080;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsFive() {
+        given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanNegative444() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/z")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIEqualsNegativeFour() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/700/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectILessThanOrEqualNegative333NotLessThan444() {
+        given()
+            .when()
+                .get("/api/costfuns/-400/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNormalPathWithAbabString() {
+        given()
+            .when()
+                .get("/api/costfuns/1/abab")
+            .then()
+                .statusCode(200);
+    }
+}

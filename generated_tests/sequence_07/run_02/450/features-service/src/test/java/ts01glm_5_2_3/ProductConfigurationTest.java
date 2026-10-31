@@ -1,0 +1,318 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesAndCollectFeatureNamesWhenProductHasFeatures() {
+        String productName = "test-prod-avail-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-avail-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-avail-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithNoProductFeatures() {
+        String productName = "test-prod-nofeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-nofeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveStringMethodAddsFeatureToConfiguration() {
+        String productName = "test-prod-active-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-active-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-active-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesMethodReturnsActiveFeatureNames() {
+        String productName = "test-prod-actfeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-actfeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-actfeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesMethodWithNoActiveFeatures() {
+        String productName = "test-prod-noact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-noact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveStringMethodRemovesFeatureFromConfiguration() {
+        String productName = "test-prod-deact-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-deact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-deact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureNotInConfiguration() {
+        String productName = "test-prod-deactnf-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-deactnf-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-deactnf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureReturnsTrueWhenFeatureIsActive() {
+        String productName = "test-prod-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "test-src-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "test-req-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, requiredFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .post("/products/{productName}/constraints/requires", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureReturnsFalseWhenFeatureNotActive() {
+        String productName = "test-prod-hasnf-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "test-src-hasnf-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "test-req-hasnf-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-hasnf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .post("/products/{productName}/constraints/requires", productName)
+                .then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidFalseThroughExcludesConstraintViolation() {
+        String productName = "test-prod-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "test-src-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "test-exc-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-valid-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductMethodThroughConfigurationRetrieval() {
+        String productName = "test-prod-getprod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-getprod-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesWithMultipleFeatures() {
+        String productName = "test-prod-multfeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "test-feat1-mult-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "test-feat2-mult-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-mult-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, feature2).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature1)
+                .then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature2)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then().statusCode(200)
+                .body(".", hasItems(feature1, feature2));
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveAndDeactiveSameFeature() {
+        String productName = "test-prod-actdeact-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feat-actdeact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-actdeact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when()
+                .delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidThroughRequiresConstraintViolation() {
+        String productName = "test-prod-reqvalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "test-src-reqvalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "test-req-reqvalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-reqvalid-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .post("/products/{productName}/constraints/requires", productName)
+                .then().statusCode(201);
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureWithExcludesConstraintWhenBothActive() {
+        String productName = "test-prod-exclhas-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "test-src-exclhas-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "test-exc-exclhas-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "test-config-exclhas-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature)
+                .then().statusCode(lessThan(300));
+
+        given().when()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+
+        given().when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then().statusCode(200);
+    }
+}

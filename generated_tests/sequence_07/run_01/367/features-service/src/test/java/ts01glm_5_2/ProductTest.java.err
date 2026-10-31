@@ -1,0 +1,79 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.hamcrest.MatcherAssert;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher as RegexMatcher;
+import java.nio.charset.Charset;
+
+import static org.hamcrest.Matchers.*;
+
+public class ProductTest {
+
+    private static String baseUri;
+
+    @BeforeClass
+    public static void setup() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static class Response {
+        final int statusCode;
+        final String body;
+        final Map<String, List<String>> headers;
+
+        Response(int statusCode, String body, Map<String, List<String>> headers) {
+            this.statusCode = statusCode;
+            this.body = body;
+            this.headers = headers;
+        }
+
+        String header(String name) {
+            if (name == null) return null;
+            List<String> vals = headers.get(name);
+            if (vals == null) {
+                for (Map.Entry<String, List<String>> e : headers.entrySet()) {
+                    if (name.equalsIgnoreCase(e.getKey())) {
+                        vals = e.getValue();
+                        break;
+                    }
+                }
+            }
+            if (vals == null || vals.isEmpty()) return null;
+            return vals.get(0);
+        }
+    }
+
+    private static String encode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String formatPath(String template, Object... args) {
+        String result = template;
+        for (Object arg : args) {
+            String encoded = encode(String.valueOf(arg));
+            result = result.replaceFirst("\\{[^}]+\\}", encoded);
+        }
+        return result;
+    }

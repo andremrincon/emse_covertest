@@ -1,0 +1,321 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class FeatureConstraintTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("base.url");
+        }
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        baseUrl = env;
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintCoversSetForProductAndSetId() throws Exception {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doPost("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(r2.status < 300);
+
+        HttpResponse r3 = doPost("/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        Assert.assertTrue(r3.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+
+        HttpResponse r4 = doPost("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(201, r4.status);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintCoversSetForProductAndSetId() throws Exception {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doPost("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(r2.status < 300);
+
+        HttpResponse r3 = doPost("/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        Assert.assertTrue(r3.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+
+        HttpResponse r4 = doPost("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(201, r4.status);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintCoversGetId() throws Exception {
+        String productName = "UltraPhoneX-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doPost("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(r2.status < 300);
+
+        HttpResponse r3 = doPost("/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        Assert.assertTrue(r3.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+
+        HttpResponse r4 = doPost("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(201, r4.status);
+
+        String location = r4.getHeader("Location");
+        String constraintId = "1";
+        if (location != null && !location.isEmpty()) {
+            String[] parts = location.split("/");
+            constraintId = parts[parts.length - 1];
+        }
+
+        HttpResponse r5 = doDelete("/products/{productName}/constraints/{constraintId}", productName, constraintId);
+        Assert.assertEquals(204, r5.status);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithConstraintsCoversGetIdViaSerialization() throws Exception {
+        String productName = "SmartWatch-S3-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "GPS";
+        String excludedFeature = "NFC";
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doPost("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        Assert.assertTrue(r2.status < 300);
+
+        HttpResponse r3 = doPost("/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        Assert.assertTrue(r3.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+
+        HttpResponse r4 = doPost("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertTrue(r4.status < 300);
+
+        HttpResponse r5 = doGet("/products/{productName}", productName);
+        Assert.assertEquals(200, r5.status);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintWithNonExistentFeatureReturns500() throws Exception {
+        String productName = "Desktop-PC-" + UUID.randomUUID().toString().substring(0, 8);
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "NonExistentFeature");
+        form.put("requiredFeature", "AlsoNonExistent");
+
+        HttpResponse r2 = doPost("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(500, r2.status);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintWithNonExistentFeatureReturns500() throws Exception {
+        String productName = "Workstation-Z8-" + UUID.randomUUID().toString().substring(0, 8);
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "NonExistentSource");
+        form.put("excludedFeature", "NonExistentExcluded");
+
+        HttpResponse r2 = doPost("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(500, r2.status);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteNonExistentConstraintReturns500() throws Exception {
+        String productName = "PowerBankPro-" + UUID.randomUUID().toString().substring(0, 8);
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doDelete("/products/{productName}/constraints/{constraintId}", productName, "99999");
+        Assert.assertEquals(500, r2.status);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintWithInvalidIdFormatReturns500() throws Exception {
+        String productName = "Basic-Charger-v1-" + UUID.randomUUID().toString().substring(0, 8);
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doDelete("/products/{productName}/constraints/{constraintId}", productName, "abc-def");
+        Assert.assertEquals(500, r2.status);
+    }
+
+    @Test(timeout = 60000)
+    public void addBothRequiresAndExcludesConstraintsCoversAllSetters() throws Exception {
+        String productName = "Mobile-App-Basic-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "Push-Notifications";
+        String featureB = "User-Authentication";
+        String featureC = "Offline-Mode";
+
+        HttpResponse r1 = doPost("/products/{productName}", null, productName);
+        Assert.assertTrue(r1.status < 300);
+
+        HttpResponse r2 = doPost("/products/{productName}/features/{featureName}", null, productName, featureA);
+        Assert.assertTrue(r2.status < 300);
+
+        HttpResponse r3 = doPost("/products/{productName}/features/{featureName}", null, productName, featureB);
+        Assert.assertTrue(r3.status < 300);
+
+        HttpResponse r4 = doPost("/products/{productName}/features/{featureName}", null, productName, featureC);
+        Assert.assertTrue(r4.status < 300);
+
+        Map<String, String> form1 = new LinkedHashMap<String, String>();
+        form1.put("sourceFeature", featureA);
+        form1.put("requiredFeature", featureB);
+
+        HttpResponse r5 = doPost("/products/{productName}/constraints/requires", form1, productName);
+        Assert.assertTrue(r5.status < 300);
+
+        Map<String, String> form2 = new LinkedHashMap<String, String>();
+        form2.put("sourceFeature", featureA);
+        form2.put("excludedFeature", featureC);
+
+        HttpResponse r6 = doPost("/products/{productName}/constraints/excludes", form2, productName);
+        Assert.assertEquals(201, r6.status);
+    }
+
+    private static HttpResponse doGet(String pathTemplate, Object... pathParams) throws IOException {
+        String full = buildUrl(pathTemplate, pathParams);
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(full);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.connect();
+            int status = conn.getResponseCode();
+            Map<String, List<String>> headers = conn.getHeaderFields();
+            return new HttpResponse(status, headers);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static HttpResponse doDelete(String pathTemplate, Object... pathParams) throws IOException {
+        String full = buildUrl(pathTemplate, pathParams);
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(full);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("DELETE");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.connect();
+            int status = conn.getResponseCode();
+            Map<String, List<String>> headers = conn.getHeaderFields();
+            return new HttpResponse(status, headers);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static HttpResponse doPost(String pathTemplate, Map<String, String> formParams, Object... pathParams) throws IOException {
+        String full = buildUrl(pathTemplate, pathParams);
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(full);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(formParams != null);
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            if (formParams != null) {
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                byte[] body = buildFormBody(formParams).getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(body.length));
+                conn.connect();
+                OutputStream out = null;
+                try {
+                    out = new BufferedOutputStream(conn.getOutputStream());
+                    out.write(body);
+                    out.flush();
+                } finally {
+                    if (out != null) try { out.close(); } catch (IOException ignored) {}
+                }
+            } else {
+                conn.connect();
+            }
+            int status = conn.getResponseCode();
+            Map<String, List<String>> headers = conn.getHeaderFields();
+            return new HttpResponse(status, headers);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static String buildUrl(String pathTemplate, Object... pathParams) throws UnsupportedEncodingException {
+        String path = pathTemplate;
+        if (pathParams != null) {
+            for (Object p : pathParams) {
+                if (p == null) continue;
+                String encoded = URLEncoder.encode(p.toString(), "UTF-8");
+                Pattern pattern = Pattern.compile("\\{[^/}]+\\}");
+                Matcher matcher = pattern.matcher(path);
+                if (matcher.find()) {
+                    String placeholder = matcher.group();
+                    path = path.substring(0, matcher.start()) + encoded + path.substring(matcher.end());
+                } else {
+                    path = path + "/" + encoded;
+                }
+            }
+        }
+        if (path.startsWith("/")) {
+            return baseUrl + path;
+        } else {
+            return baseUrl + "/" + path;
+        }
+    }

@@ -1,0 +1,77 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveDividendPositiveDivisor() {
+        given()
+        .when()
+            .get("/api/remainder/17/5")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testPositiveDividendNegativeDivisor() {
+        given()
+        .when()
+            .get("/api/remainder/17/-5")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeDividendPositiveDivisor() {
+        given()
+        .when()
+            .get("/api/remainder/-9/5")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeDividendNegativeDivisor() {
+        given()
+        .when()
+            .get("/api/remainder/-9/-5")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDividendZeroReturnsBadRequest() {
+        given()
+        .when()
+            .get("/api/remainder/0/5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDivisorZeroReturnsBadRequest() {
+        given()
+        .when()
+            .get("/api/remainder/17/0")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,59 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withName_returnsGreeting() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response res = given().queryParam("name", "John Smith").when().get("/");
+        res.then().body(equalTo("Hello John Smith!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withoutName_returnsGuestGreeting() {
+        given().when().get("/?name=A").then().statusCode(lessThan(300));
+        Response res = given().when().get("/");
+        res.then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withZeroDelay_returnsResult() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response res = given().queryParam("delay", 0).when().get("/slowApi");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withPositiveDelay_returnsResult() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response res = given().queryParam("delay", 1).when().get("/slowApi");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNegativeDelay_returnsServerError() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response res = given().queryParam("delay", -1).when().get("/slowApi");
+        res.then().statusCode(500);
+    }
+}

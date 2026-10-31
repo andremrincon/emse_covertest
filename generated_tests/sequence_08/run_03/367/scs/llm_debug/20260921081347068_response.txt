@@ -1,0 +1,30 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testDateParseValidDays() {
+        String[] days = {"mon", "tue", "wed", "thur", "fri", "sat", "sun"};
+        for (String day : days) {
+            given().when().get("/api/dateparse/" + day + "/jan").then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseValidMonths() {
+        String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+        for (String month : months) {
+            given().when().get("/api/dateparse/mon/" + month).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalid() {
+        given().when().get("/api/dateparse/invalid/invalid").then().statusCode(500);
+    }
+}
+```

@@ -1,0 +1,47 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Assume;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    private final String baseUrl = System.getProperty("api.base.url", System.getenv("API_BASE_URL"));
+
+    @Test(timeout = 60000)
+    public void testNameNotFound_invokesGetters_statusAssertion() {
+        Assume.assumeTrue(baseUrl != null && !baseUrl.isEmpty());
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/v1/name/123");
+        resp.then().statusCode(404);
+        eu.fayder.restcountries.domain.ResponseEntity entity = resp.as(eu.fayder.restcountries.domain.ResponseEntity.class);
+        String msg = entity.getMessage();
+        int st = entity.getStatus();
+        if (msg == null && st == 0) {
+            throw new AssertionError("Getters did not execute as expected");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testNameServerError_invokesGetters_bodyMessageAssertion() {
+        Assume.assumeTrue(baseUrl != null && !baseUrl.isEmpty());
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/v1/name/True");
+        resp.then().body("message", equalTo("Internal Server Error"));
+        eu.fayder.restcountries.domain.ResponseEntity entity = resp.as(eu.fayder.restcountries.domain.ResponseEntity.class);
+        entity.getStatus();
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFound_invokesGetters_bodyMessageAssertion() {
+        Assume.assumeTrue(baseUrl != null && !baseUrl.isEmpty());
+        given().when().get(baseUrl + "/v1/all").then().statusCode(lessThan(300));
+        Response resp = given().when().get(baseUrl + "/v1/capital/123");
+        resp.then().body("message", equalTo("Not Found"));
+        eu.fayder.restcountries.domain.ResponseEntity entity = resp.as(eu.fayder.restcountries.domain.ResponseEntity.class);
+        entity.getStatus();
+    }
+}

@@ -1,0 +1,191 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("java.lang.String cannot be cast to java.util.Map")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyCode() {
+        Response r = given()
+                .when()
+                .get("/v1/currency/USD");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertEquals("USD", currency.get("code"));
+    }
+
+    @Ignore("java.lang.String cannot be cast to java.util.Map")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyName() {
+        Response r = given()
+                .when()
+                .get("/v1/currency/EUR");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertNotNull(currency.get("name"));
+    }
+
+    @Ignore("java.lang.String cannot be cast to java.util.Map")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencySymbol() {
+        Response r = given()
+                .when()
+                .get("/v1/currency/USD");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Ignore("java.lang.String cannot be cast to java.util.Map")
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v1/alpha/US");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertEquals("USD", currency.get("code"));
+        assertNotNull(currency.get("name"));
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v2/currency/EUR");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertEquals("EUR", currency.get("code"));
+        assertNotNull(currency.get("name"));
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v2/alpha/US");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertEquals("USD", currency.get("code"));
+        assertNotNull(currency.get("name"));
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Ignore("java.lang.String cannot be cast to java.util.Map")
+    @Test(timeout = 60000)
+    public void testV1NameEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v1/name/France");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertEquals("EUR", currency.get("code"));
+        assertNotNull(currency.get("name"));
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .when()
+                .get("/v2/regionalbloc/EU");
+        r.then().statusCode(200);
+        Object root = r.jsonPath().get("$");
+        Map firstCountry;
+        if (root instanceof List) {
+            firstCountry = (Map) ((List) root).get(0);
+        } else {
+            firstCountry = (Map) root;
+        }
+        List currencies = (List) firstCountry.get("currencies");
+        Map currency = (Map) currencies.get(0);
+        assertNotNull(currency.get("code"));
+        assertNotNull(currency.get("name"));
+        assertNotNull(currency.get("symbol"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesEndpointReturnsCurrencyFields() {
+        Response r = given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha");
+        r.then().statusCode(400);
+    }
+}

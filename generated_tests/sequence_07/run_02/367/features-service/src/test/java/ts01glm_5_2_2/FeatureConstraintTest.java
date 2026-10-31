@@ -1,0 +1,199 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintExercisesSetForProductAndSetId() {
+        String productName = "TestReq-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceFeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "RequiredFeatureA").then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "SourceFeatureA")
+            .formParam("requiredFeature", "RequiredFeatureA")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintExercisesSetForProductAndSetId() {
+        String productName = "TestExc-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceFeatureB").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "ExcludedFeatureB").then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "SourceFeatureB")
+            .formParam("excludedFeature", "ExcludedFeatureB")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithConstraintsExercisesGetId() {
+        String productName = "TestGet-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceFeatureC").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "RequiredFeatureC").then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", "SourceFeatureC")
+            .formParam("requiredFeature", "RequiredFeatureC")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}", productName)
+        .then()
+            .statusCode(200)
+            .body("constraints", not(empty()));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintExercisesGetId() {
+        String productName = "TestDel-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceFeatureD").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "RequiredFeatureD").then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", "SourceFeatureD")
+            .formParam("requiredFeature", "RequiredFeatureD")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then().statusCode(lessThan(300));
+
+        Integer constraintId = given()
+            .when()
+            .get("/products/{productName}", productName)
+            .then()
+            .statusCode(200)
+            .extract().path("constraints[0].id");
+
+        given()
+            .when()
+            .delete("/products/{productName}/constraints/{constraintId}", productName, constraintId)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateBothConstraintTypesExercisesSetForProductMultipleTimes() {
+        String productName = "TestBoth-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatX").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatY").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatZ").then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "FeatX")
+            .formParam("requiredFeature", "FeatY")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "FeatX")
+            .formParam("excludedFeature", "FeatZ")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithExcludesConstraintExercisesGetId() {
+        String productName = "TestGetExc-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceE").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "ExcludedE").then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", "SourceE")
+            .formParam("excludedFeature", "ExcludedE")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}", productName)
+        .then()
+            .statusCode(200)
+            .body("constraints", not(empty()));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteExcludesConstraintExercisesGetId() {
+        String productName = "TestDelExc-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceF").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "ExcludedF").then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", "SourceF")
+            .formParam("excludedFeature", "ExcludedF")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+
+        Integer constraintId = given()
+            .when()
+            .get("/products/{productName}", productName)
+            .then()
+            .statusCode(200)
+            .extract().path("constraints[0].id");
+
+        given()
+            .when()
+            .delete("/products/{productName}/constraints/{constraintId}", productName, constraintId)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintWithNonExistentProductReturnsError() {
+        String productName = "NonExistent-" + UUID.randomUUID();
+
+        given()
+            .formParam("sourceFeature", "FeatureA")
+            .formParam("requiredFeature", "FeatureB")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteNonExistentConstraintReturnsError() {
+        String productName = "TestDelNonExistent-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/{productName}/constraints/{constraintId}", productName, 999999)
+        .then()
+            .statusCode(500);
+    }
+}

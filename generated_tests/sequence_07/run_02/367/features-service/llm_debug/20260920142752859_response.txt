@@ -1,0 +1,116 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_nonOptionsRequest_chainsFilterAndSetsCorsHeaders() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(lessThan(300))
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", containsString("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequest_doesNotChainFilter() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .statusCode(lessThan(500))
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"))
+                .header("Access-Control-Allow-Headers", equalTo("x-requested-with"))
+                .header("Access-Control-Max-Age", equalTo("3600"));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_postRequest_chainsFilter() {
+        String productName = "CORS-Test-" + UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_deleteRequest_chainsFilter() {
+        String productName = "CORS-Del-" + UUID.randomUUID().toString().substring(0, 8);
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .delete("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_putRequest_chainsFilter() {
+        String productName = "CORS-Put-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "cors-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+                .post("/products/{productName}", productName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .contentType("application/x-www-form-urlencoded")
+            .formParam("description", "Updated via CORS filter test")
+            .when()
+                .put("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilter_optionsRequestOnNestedPath_setsCorsHeaders() {
+        given()
+            .when()
+                .options("/products/{productName}/configurations/{configurationName}/features", "test-product", "test-config")
+            .then()
+                .statusCode(lessThan(500))
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Max-Age", equalTo("3600"));
+    }
+}
+```

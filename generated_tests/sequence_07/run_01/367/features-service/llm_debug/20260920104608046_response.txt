@@ -1,0 +1,56 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsHeadersOnGetRequest() {
+        String productName = "AeroBook-Pro-15-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .get("/products/" + productName + "/features")
+            .then()
+            .statusCode(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterHandlesOptionsRequest() {
+        given()
+            .when()
+            .options("/products")
+            .then()
+            .statusCode(notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterSetsHeadersOnPostRequest() {
+        String productName = "Smartwatch-Series-8-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "BloodOxygenSensor-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .when()
+            .post("/products/" + productName + "/features/" + featureName)
+            .then()
+            .statusCode(notNullValue());
+    }
+}
+```

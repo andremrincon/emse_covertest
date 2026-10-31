@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderV1All() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeaderV1Alpha() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/US").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeaderV1Currency() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/currency/USD").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeaderV1Name() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/France").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderV2All() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/all").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeaderV2Alpha() {
+        given().when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/alpha/US").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeaderV2Currency() {
+        given().when().get("/v2/currency/EUR").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/currency/EUR").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeaderV2Name() {
+        given().when().get("/v2/name/Germany").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/name/Germany").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeaderV1CallingCode() {
+        given().when().get("/v1/callingcode/1").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/callingcode/1").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeaderV1Capital() {
+        given().when().get("/v1/capital/London").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/capital/London").then().statusCode(200).extract().response();
+        assertEquals(null, response.getHeader("Access-Control-Allow-Methods"));
+    }
+}

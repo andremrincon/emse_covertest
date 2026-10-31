@@ -1,0 +1,76 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testDateParseMonJan() {
+        RestAssured.given()
+                .pathParam("dayname", "mon")
+                .pathParam("monthname", "jan")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTueFeb() {
+        RestAssured.given()
+                .pathParam("dayname", "tue")
+                .pathParam("monthname", "feb")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWedMar() {
+        RestAssured.given()
+                .pathParam("dayname", "wed")
+                .pathParam("monthname", "mar")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseThurApr() {
+        RestAssured.given()
+                .pathParam("dayname", "thur")
+                .pathParam("monthname", "apr")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFriMay() {
+        RestAssured.given()
+                .pathParam("dayname", "fri")
+                .pathParam("monthname", "may")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalid() {
+        RestAssured.given()
+                .pathParam("dayname", "123")
+                .pathParam("monthname", "456")
+                .when()
+                .get(baseUrl + "/api/dateparse/{dayname}/{monthname}")
+                .then()
+                .statusCode(200);
+    }
+}

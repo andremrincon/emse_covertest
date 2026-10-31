@@ -1,0 +1,77 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDStatus() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDBody() {
+        given()
+            .when()
+                .get("/v1/currency/USD")
+            .then()
+                .body("currencies[0].code", equalTo(Arrays.asList("USD")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURStatus() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURBody() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .body("currencies[0].code", equalTo(Arrays.asList("EUR")));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyInvalidStatus() {
+        given()
+            .when()
+                .get("/v1/currency/123")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyNotFoundStatus() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+}

@@ -1,0 +1,65 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I5_S_Baab() {
+        given()
+            .when()
+                .get("/api/costfuns/5/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_Neg500_S_A() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I600_S_Ababba() {
+        given()
+            .when()
+                .get("/api/costfuns/600/ababba")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I700_S_Abab() {
+        given()
+            .when()
+                .get("/api/costfuns/700/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_I_Neg4_S_Abab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .statusCode(200);
+    }
+}
+```

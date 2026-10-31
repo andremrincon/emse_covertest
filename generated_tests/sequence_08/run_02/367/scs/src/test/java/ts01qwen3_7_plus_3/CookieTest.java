@@ -1,0 +1,85 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CookieTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridValidUser() {
+        RestAssured.given()
+                .pathParam("name", "userid")
+                .pathParam("val", "user1234")
+                .pathParam("site", "example.com")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridShortVal() {
+        RestAssured.given()
+                .pathParam("name", "userid")
+                .pathParam("val", "user1")
+                .pathParam("site", "example.com")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUseridInvalidUser() {
+        RestAssured.given()
+                .pathParam("name", "userid")
+                .pathParam("val", "test1234")
+                .pathParam("site", "example.com")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionAmAbc() {
+        RestAssured.given()
+                .pathParam("name", "session")
+                .pathParam("val", "am")
+                .pathParam("site", "abc.com")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionPmAbc() {
+        RestAssured.given()
+                .pathParam("name", "session")
+                .pathParam("val", "pm")
+                .pathParam("site", "abc.com")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOtherName() {
+        RestAssured.given()
+                .pathParam("name", "other")
+                .pathParam("val", "val")
+                .pathParam("site", "site")
+                .when()
+                .get("/api/cookie/{name}/{val}/{site}")
+                .then()
+                .statusCode(200);
+    }
+}

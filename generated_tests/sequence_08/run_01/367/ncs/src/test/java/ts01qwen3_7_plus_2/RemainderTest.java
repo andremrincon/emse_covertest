@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RemainderTest {
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveAAndPositiveB() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveAAndNegativeB() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeAAndPositiveB() {
+        given()
+            .pathParam("a", -17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeAAndNegativeB() {
+        given()
+            .pathParam("a", -17)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,69 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Text2TxtTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testForBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/for/quick/brown")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFourBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/four/quick/brown")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYouBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/see/you/brown")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWayBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/by/the/way")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheNotWayBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/by/the/brown")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testByNotTheBranch() {
+        given()
+            .when()
+            .get("/api/text2txt/by/quick/brown")
+            .then()
+            .statusCode(200);
+    }
+}

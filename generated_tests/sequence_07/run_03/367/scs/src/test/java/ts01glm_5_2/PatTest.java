@@ -1,0 +1,96 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanThree() {
+        given()
+            .when()
+            .get("/api/pat/abc/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABCcba/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABCxyzcba/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNotFound() {
+        given()
+            .when()
+            .get("/api/pat/ABCdef/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/cbaABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/cbaxyzABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatNotFound() {
+        given()
+            .when()
+            .get("/api/pat/cbadef/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+            .when()
+            .get("/api/pat/xyzdef/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPartialMatchesNoFullMatch() {
+        given()
+            .when()
+            .get("/api/pat/ABxcbx/ABC")
+            .then()
+            .statusCode(200);
+    }
+}

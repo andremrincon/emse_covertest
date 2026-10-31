@@ -1,0 +1,71 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMondayJanuary() {
+        given()
+            .when()
+                .get("/api/dateparse/mon/jan")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTuesdayFebruary() {
+        given()
+            .when()
+                .get("/api/dateparse/tue/feb")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWednesdayMarch() {
+        given()
+            .when()
+                .get("/api/dateparse/wed/mar")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseThursdayApril() {
+        given()
+            .when()
+                .get("/api/dateparse/thur/apr")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFridayMay() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/may")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayAndMonth() {
+        given()
+            .when()
+                .get("/api/dateparse/Superday/Movember")
+            .then()
+                .statusCode(200);
+    }
+}

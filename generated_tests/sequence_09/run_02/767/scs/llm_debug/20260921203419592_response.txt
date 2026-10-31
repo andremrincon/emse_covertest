@@ -1,0 +1,50 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    private String baseUrl() {
+        String b = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        return b == null ? "http://localhost:8080" : b;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointReturnsUrlRecognition() {
+        String base = baseUrl();
+        given().when().get(base + "/api/pat/a").then().statusCode(lessThan(300));
+        String encoded = "http%3A%2F%2Fjohn%2Fdoe";
+        Response act = given().when().get(base + "/api/pat/" + encoded);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointReturnsDateRecognition() {
+        String base = baseUrl();
+        given().when().get(base + "/api/pat/a").then().statusCode(lessThan(300));
+        String txt = "mon12jan";
+        Response act = given().when().get(base + "/api/pat/" + txt);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointReturnsFpeRecognition() {
+        String base = baseUrl();
+        given().when().get(base + "/api/pat/a").then().statusCode(lessThan(300));
+        String encoded = "15.5e%2B04";
+        Response act = given().when().get(base + "/api/pat/" + encoded);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatEndpointReturnsNoneForUnmatchedText() {
+        String base = baseUrl();
+        given().when().get(base + "/api/pat/a").then().statusCode(lessThan(300));
+        String txt = "hello";
+        Response act = given().when().get(base + "/api/pat/" + txt);
+        act.then().statusCode(200);
+    }
+}

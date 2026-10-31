@@ -1,0 +1,325 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsConstraintsResourceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddExcludesConstraintToProductSuccess TYPE=FAILURE
+
+
+[2] METHOD=testAddRequiresConstraintToProductSuccess TYPE=FAILURE
+
+
+[3] METHOD=testAddRequiresConstraintWithNonExistentFeatures TYPE=FAILURE
+expected:<500> but was:<201>
+
+[4] METHOD=testAddExcludesConstraintWithNonExistentFeatures TYPE=FAILURE
+expected:<500> but was:<201>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddExcludesConstraintToProductSuccess FAILURE AT LINE 69
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConstraintsResourceTest.testAddExcludesConstraintToProductSuccess(ProductsConstraintsResourceTest.java:69)
+CODE CONTEXT:
+    66:         Assert.assertTrue(code1 < 300);
+    67: 
+    68:         int code2 = postNoBody("/products/{productName}/features/{featureName}", productName, sourceFeature);
+    69:         Assert.assertTrue(code2 < 300);  ← FAILURE HERE
+    70: 
+    71:         int code3 = postNoBody("/products/{productName}/features/{featureName}", productName, excludedFeature);
+    72:         Assert.assertTrue(code3 < 300);
+
+[2] METHOD=testAddRequiresConstraintToProductSuccess FAILURE AT LINE 47
+java.lang.AssertionError
+at ts01glm_5_2.ProductsConstraintsResourceTest.testAddRequiresConstraintToProductSuccess(ProductsConstraintsResourceTest.java:47)
+CODE CONTEXT:
+    44:         Assert.assertTrue(code1 < 300);
+    45: 
+    46:         int code2 = postNoBody("/products/{productName}/features/{featureName}", productName, sourceFeature);
+    47:         Assert.assertTrue(code2 < 300);  ← FAILURE HERE
+    48: 
+    49:         int code3 = postNoBody("/products/{productName}/features/{featureName}", productName, requiredFeature);
+    50:         Assert.assertTrue(code3 < 300);
+
+[3] METHOD=testAddRequiresConstraintWithNonExistentFeatures FAILURE AT LINE 114
+java.lang.AssertionError: expected:<500> but was:<201>
+at ts01glm_5_2.ProductsConstraintsResourceTest.testAddRequiresConstraintWithNonExistentFeatures(ProductsConstraintsResourceTest.java:114)
+CODE CONTEXT:
+   111:         form.put("sourceFeature", "NonExistentSource");
+   112:         form.put("requiredFeature", "NonExistentRequired");
+   113:         int code = postForm("/products/{productName}/constraints/requires", form, productName);
+   114:         Assert.assertEquals(500, code);  ← FAILURE HERE
+   115:     }
+   116: 
+   117:     @Test(timeout = 60000)
+
+[4] METHOD=testAddExcludesConstraintWithNonExistentFeatures FAILURE AT LINE 128
+java.lang.AssertionError: expected:<500> but was:<201>
+at ts01glm_5_2.ProductsConstraintsResourceTest.testAddExcludesConstraintWithNonExistentFeatures(ProductsConstraintsResourceTest.java:128)
+CODE CONTEXT:
+   125:         form.put("sourceFeature", "NonExistentSource");
+   126:         form.put("excludedFeature", "NonExistentExcluded");
+   127:         int code = postForm("/products/{productName}/constraints/excludes", form, productName);
+   128:         Assert.assertEquals(500, code);  ← FAILURE HERE
+   129:     }
+   130: 
+   131:     private int postNoBody(String pathTemplate, String... vars) throws IOException {
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseURI;
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        baseURI = baseUrl;
+        if (baseURI.endsWith("/")) {
+            baseURI = baseURI.substring(0, baseURI.length() - 1);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProductSuccess() throws Exception {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        int code1 = postNoBody("/products/{productName}", productName);
+        Assert.assertTrue(code1 < 300);
+
+        int code2 = postNoBody("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        Assert.assertTrue(code2 < 300);
+
+        int code3 = postNoBody("/products/{productName}/features/{featureName}", productName, requiredFeature);
+        Assert.assertTrue(code3 < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        int code4 = postForm("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(201, code4);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProductSuccess() throws Exception {
+        String productName = "TestProduct-Excludes-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        int code1 = postNoBody("/products/{productName}", productName);
+        Assert.assertTrue(code1 < 300);
+
+        int code2 = postNoBody("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        Assert.assertTrue(code2 < 300);
+
+        int code3 = postNoBody("/products/{productName}/features/{featureName}", productName, excludedFeature);
+        Assert.assertTrue(code3 < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        int code4 = postForm("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(201, code4);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintWithNonExistentProduct() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "FeatureA");
+        form.put("requiredFeature", "FeatureB");
+        int code = postForm("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintWithNonExistentProduct() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "FeatureA");
+        form.put("excludedFeature", "FeatureB");
+        int code = postForm("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintWithNonExistentFeatures() throws Exception {
+        String productName = "TestProduct-ReqNoFeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code1 = postNoBody("/products/{productName}", productName);
+        Assert.assertTrue(code1 < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "NonExistentSource");
+        form.put("requiredFeature", "NonExistentRequired");
+        int code = postForm("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintWithNonExistentFeatures() throws Exception {
+        String productName = "TestProduct-ExcNoFeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code1 = postNoBody("/products/{productName}", productName);
+        Assert.assertTrue(code1 < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", "NonExistentSource");
+        form.put("excludedFeature", "NonExistentExcluded");
+        int code = postForm("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(500, code);
+    }
+
+    private int postNoBody(String pathTemplate, String... vars) throws IOException {
+        String path = fillUri(pathTemplate, vars);
+        URL url = new URL(baseURI + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(false);
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.connect();
+            int code = conn.getResponseCode();
+            consumeStream(conn);
+            return code;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private int postForm(String pathTemplate, Map<String, String> formParams, String... vars) throws IOException {
+        String path = fillUri(pathTemplate, vars);
+        URL url = new URL(baseURI + path);
+        byte[] body = buildFormBody(formParams).getBytes("UTF-8");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("Content-Length", Integer.toString(body.length));
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            OutputStream os = conn.getOutputStream();
+            os.write(body);
+            os.flush();
+            os.close();
+            int code = conn.getResponseCode();
+            consumeStream(conn);
+            return code;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private String buildFormBody(Map<String, String> params) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+
+    private String fillUri(String template, String... vars) throws IOException {
+        String result = template;
+        for (String v : vars) {
+            int start = result.indexOf('{');
+            if (start == -1) {
+                break;
+            }
+            int end = result.indexOf('}', start);
+            if (end == -1) {
+                break;
+            }
+            String encoded = URLEncoder.encode(v, "UTF-8");
+            result = result.substring(0, start) + encoded + result.substring(end + 1);
+        }
+        return result;
+    }
+
+    private void consumeStream(HttpURLConnection conn) {
+        InputStream is = null;
+        try {
+            try {
+                is = conn.getInputStream();
+            } catch (IOException e) {
+                is = conn.getErrorStream();
+            }
+            if (is == null) {
+                return;
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int r;
+            while ((r = is.read(buf)) != -1) {
+                baos.write(buf, 0, r);
+            }
+            baos.toByteArray();
+        } catch (Exception ignored) {
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

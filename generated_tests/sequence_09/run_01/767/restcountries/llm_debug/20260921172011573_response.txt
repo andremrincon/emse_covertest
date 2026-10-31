@@ -1,0 +1,76 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesAddsCORSHeaders() {
+        given().queryParam("fields", "name;capital;region;population;flag").when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("codes", "US,CA").when().get("/v1/alpha");
+        assertEquals("*", act.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodeValidAddsAllowMethods() {
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        assertEquals("GET", act.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodeInvalidFormatProduces400AndCORS() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/123");
+        assertEquals("Accept, X-Requested-With", act.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyValidAddsCacheControl() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        assertEquals("public, max-age=86400", act.getHeader("Cache-Control"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameWithFullTextAddsCORS() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fullText", "true").when().get("/v1/name/France");
+        assertEquals("*", act.getHeader("Access-Control-Allow-Origin"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllFieldsAddsAllowMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().queryParam("fields", "name;capital;region;population;flag").when().get("/v2/all");
+        assertEquals("GET", act.getHeader("Access-Control-Allow-Methods"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPostV2ReturnsMethodNotAllowedAndHasCORSHeaders() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().body("{\"dummy\":\"value\"}").when().post("/v2");
+        assertEquals("Accept, X-Requested-With", act.getHeader("Access-Control-Allow-Headers"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingcodeNotFoundStillHasCacheControl() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/callingcode/abc");
+        assertEquals("public, max-age=86400", act.getHeader("Cache-Control"));
+    }
+}

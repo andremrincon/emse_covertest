@@ -1,0 +1,92 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TriangleClassificationTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidEdgeA() {
+        given()
+                .pathParam("a", 0)
+                .pathParam("b", 4)
+                .pathParam("c", 5)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateral() {
+        given()
+                .pathParam("a", 1)
+                .pathParam("b", 1)
+                .pathParam("c", 1)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyNotTriangleMaxA() {
+        given()
+                .pathParam("a", 5)
+                .pathParam("b", 2)
+                .pathParam("c", 2)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyNotTriangleMaxC() {
+        given()
+                .pathParam("a", 2)
+                .pathParam("b", 2)
+                .pathParam("c", 5)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsosceles() {
+        given()
+                .pathParam("a", 3)
+                .pathParam("b", 3)
+                .pathParam("c", 4)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScalene() {
+        given()
+                .pathParam("a", 3)
+                .pathParam("b", 4)
+                .pathParam("c", 5)
+        .when()
+                .get("/api/triangle/{a}/{b}/{c}")
+        .then()
+                .statusCode(200);
+    }
+}
+```

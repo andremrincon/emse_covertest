@@ -1,0 +1,65 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RegexTest {
+
+    @Before
+    public void setup() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlMatch() {
+        String txt = "http://a/b";
+        
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateMatch() {
+        String txt = "mon01jan";
+        
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpeMatch() {
+        String txt = "00.00e+00";
+        
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneMatch() {
+        String txt = "xyz";
+        
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}
+```

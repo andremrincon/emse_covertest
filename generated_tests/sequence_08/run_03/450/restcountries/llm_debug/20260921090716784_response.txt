@@ -1,0 +1,119 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertTrue;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_BadRequest() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_NotFound() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_BadRequest() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().queryParam("codes", "A").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Success() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().queryParam("codes", "XX,YY,ZZ").when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().queryParam("codes", "[\"US\", \"CA\"]").when().get("/v1/alpha").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_BadRequest() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Success() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/name/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/callingcode/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/capital/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/region/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/subregion/True").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InternalServerError() {
+        Response resp = given().when().get("/v1/all");
+        assertTrue(resp.getStatusCode() < 300);
+        given().when().get("/v1/lang/True").then().statusCode(500);
+    }
+}

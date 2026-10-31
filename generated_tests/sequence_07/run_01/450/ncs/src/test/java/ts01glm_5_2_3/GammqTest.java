@@ -1,0 +1,46 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalConvergence() {
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 1000.0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalConvergence() {
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 2.3).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZeroBranch() {
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 0.0).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidANegative() {
+        given().when().get("/api/gammq/{a}/{x}", -1.0, 2.3).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNonConvergenceLargeA() {
+        given().when().get("/api/gammq/{a}/{x}", "100000000.0", "100000002.0").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNonConvergenceLargeA() {
+        given().when().get("/api/gammq/{a}/{x}", "100000000.0", "100000000.5").then().statusCode(400);
+    }
+}

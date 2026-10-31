@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class ExpintTest {
+
+    private static final String BASE_URL = "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeN() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/-1/2.5");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeX() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/3/-999.9");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZero() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/0/2.5");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZeroNOne() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/1/0.0");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThanOne() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/3/2.5");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXBetweenZeroAndOne() {
+        Response response = given()
+                .baseUri(BASE_URL)
+                .when()
+                .get("/api/expint/3/0.1");
+        response.then().statusCode(200);
+    }
+}

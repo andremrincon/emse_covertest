@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("test.base.url", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_TwoLetterCode() {
+        given()
+            .pathParam("lang", "es")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_ThreeLetterCode() {
+        given()
+            .pathParam("lang", "eng")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InvalidLength() {
+        given()
+            .pathParam("lang", "abcd")
+        .when()
+            .get("/v2/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_ValidAcronym() {
+        given()
+            .pathParam("regionalbloc", "EU")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_InvalidAcronym() {
+        given()
+            .pathParam("regionalbloc", "INVALID")
+        .when()
+            .get("/v2/regionalbloc/{regionalbloc}")
+        .then()
+            .statusCode(404);
+    }
+}

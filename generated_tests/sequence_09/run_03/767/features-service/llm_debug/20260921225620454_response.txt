@@ -1,0 +1,94 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv().getOrDefault("API_BASE", "http://localhost"));
+        String portStr = System.getProperty("API_PORT", System.getenv().getOrDefault("API_PORT", "8080"));
+        RestAssured.baseURI = base;
+        try {
+            RestAssured.port = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            RestAssured.port = 80;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_triggersDerivedChain() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+        String featureA = "featA-" + uuid;
+        String featureB = "featB-" + uuid;
+        String featureC = "featC-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureB).formParam("requiredFeature", featureC).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_includesTransitivelyDerivedFeature() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+        String featureA = "featA-" + uuid;
+        String featureB = "featB-" + uuid;
+        String featureC = "featC-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", featureB).formParam("requiredFeature", featureC).when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCode(500);
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        act.then().body("$", hasItem(featureC));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_returns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String sourceFeature = "src-" + uuid;
+        String requiredFeature = "req-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testPostProduct_returns201() {
+        String productName = "product-" + UUID.randomUUID().toString();
+        Response act = given().when().post("/products/{productName}", productName);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfiguration_returns204() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        act.then().statusCode(204);
+    }
+}

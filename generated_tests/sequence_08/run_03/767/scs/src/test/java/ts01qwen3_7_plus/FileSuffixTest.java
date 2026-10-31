@@ -1,0 +1,91 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FileSuffixTest {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixNoExtension() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "text")
+            .pathParam("file", "test")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixText() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "text")
+            .pathParam("file", "test.txt")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixAcrobat() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "acrobat")
+            .pathParam("file", "test.pdf")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixWord() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "word")
+            .pathParam("file", "test.doc")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixBin() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "bin")
+            .pathParam("file", "test.exe")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFileSuffixLib() {
+        given()
+            .baseUri(getBaseUrl())
+            .pathParam("directory", "lib")
+            .pathParam("file", "test.dll")
+        .when()
+            .get("/api/filesuffix/{directory}/{file}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("5"));
+    }
+}

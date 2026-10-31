@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1() {
+        given()
+            .when()
+            .get("/api/fisher/1/1/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a2_b1() {
+        given()
+            .when()
+            .get("/api/fisher/10/1/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b2() {
+        given()
+            .when()
+            .get("/api/fisher/1/2/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a2_b2() {
+        given()
+            .when()
+            .get("/api/fisher/10/4/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_pLessThanZero() {
+        given()
+            .when()
+            .get("/api/fisher/10/5/1.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_pGreaterThanOne() {
+        given()
+            .when()
+            .get("/api/fisher/10/5/0.9999999999999999")
+            .then()
+            .statusCode(200);
+    }
+}

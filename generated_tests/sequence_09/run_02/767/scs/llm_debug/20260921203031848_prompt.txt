@@ -1,0 +1,97 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/generated_tests/sequence_09/run_02/767/scs/src/test/java/ts01gpt_5_mini_2/DateParseTest.java:[68,74] cannot find symbol
+symbol:   method then()
+location: interface io.restassured.response.ValidatableResponse
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01gpt_5_mini_2;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CookieTest {
+    private static final String BASE_URL;
+    static {
+        String v = System.getProperty("api.base.url");
+        if (v == null) v = System.getenv("API_BASE_URL");
+        if (v == null) v = "http://localhost:8080";
+        BASE_URL = v;
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_long_value_starting_user_returns_1() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String unique = "user" + UUID.randomUUID().toString().replace("-", "").substring(0,8);
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", unique, "example.com");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_value_length_six_returns_0() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", "user12", "localhost");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_long_value_not_starting_user_returns_0() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String val = "abcd" + UUID.randomUUID().toString().replace("-", "").substring(0,6);
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", val, "example.com");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void session_with_am_and_abc_com_returns_1() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "session", "am", "abc.com");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void session_with_other_values_returns_2() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "session", "bm", "other.com");
+        act.then().body(equalTo("2"));
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

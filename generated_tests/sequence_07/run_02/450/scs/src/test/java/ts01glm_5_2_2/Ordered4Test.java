@@ -1,0 +1,78 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+                .when()
+                .get("/api/ordered4/apple/banana/zebra/mango")
+                .then()
+                .statusCode(200)
+                .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+                .when()
+                .get("/api/ordered4/zebra/mango/apple/banana")
+                .then()
+                .statusCode(200)
+                .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithInvalidLengths() {
+        given()
+                .when()
+                .get("/api/ordered4/a/b/c/d")
+                .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengthsButNoOrder() {
+        given()
+                .when()
+                .get("/api/ordered4/apple/apple/apple/apple")
+                .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingWithLengthFive() {
+        given()
+                .when()
+                .get("/api/ordered4/alpha/bravo/zulu/yanke")
+                .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithOneTooLong() {
+        given()
+                .when()
+                .get("/api/ordered4/apple/banana/zebra/verylongstring")
+                .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+}

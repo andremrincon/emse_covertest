@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("apiBase");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturnZeroWhenIIsMinus4() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", -4, "abab");
+        assertEquals("0", r.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testIEquals5ProducesSix() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", 5, "abab");
+        assertEquals("6", r.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testLessOrEqualMinus333StatusOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", -333, "abab");
+        r.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLessThanMinus444StatusOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", -445, "abab");
+        r.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCompareToGreaterThanZeroSetsTen() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", -4, "zzzz");
+        assertEquals("10", r.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testSEqualsBaabBranchExecuted() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response r = given().when().get("/api/costfuns/{i}/{s}", -4, "baab");
+        assertEquals("10", r.asString().trim());
+    }
+}

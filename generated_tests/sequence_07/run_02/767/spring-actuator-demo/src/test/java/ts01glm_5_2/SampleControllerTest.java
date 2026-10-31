@@ -1,0 +1,89 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import java.io.UnsupportedEncodingException;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withName_returns200() {
+        String encodedName;
+        try {
+            encodedName = URLEncoder.encode("John Smith", "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        given()
+            .queryParam("name", encodedName)
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(containsString("Hello John Smith"));
+    }
+
+    @Test(timeout = 60000)
+    public void sayHello_withDefaultName_returns200() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200)
+            .body(containsString("Hello Guest"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayZero_returns200() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withDelayNonZero_returns200() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200)
+            .body(equalTo("Result"));
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withInvalidDelayString_returns500() {
+        given()
+            .queryParam("delay", "abc")
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void timeConsumingAPI_withNegativeDelay_returns500() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(200);
+    }
+}

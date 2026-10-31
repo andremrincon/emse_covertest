@@ -1,0 +1,73 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("base.url", "http://localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatFollowedByReverse() {
+        given()
+        .when()
+            .get("/api/pat/ABABBABA/ABAB")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseFoundNotAdjacent() {
+        given()
+        .when()
+            .get("/api/pat/ABABXBABA/ABAB")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromeReverseFollowedByPat() {
+        given()
+        .when()
+            .get("/api/pat/BABAABAB/ABAB")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatFoundNotAdjacent() {
+        given()
+        .when()
+            .get("/api/pat/BABAXABAB/ABAB")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatNorReverseFound() {
+        given()
+        .when()
+            .get("/api/pat/hello/ABC")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternLengthTooShort() {
+        given()
+        .when()
+            .get("/api/pat/hello/AB")
+        .then()
+            .statusCode(200);
+    }
+}

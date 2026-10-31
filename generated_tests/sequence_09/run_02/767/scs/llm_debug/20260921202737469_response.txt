@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        String prop = System.getProperty("api.base");
+        String env = System.getenv("API_BASE");
+        BASE = prop != null ? prop : (env != null ? env : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}", "http://a/b");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}", "wed12aug");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFloatingPointExponentialReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}", "15.5e+05");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}", "randomXYZ");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternSearchSuccessReturns200() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}/{pat}", "ABABCABAB", "ABAB");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternSearchServerErrorReturns500() {
+        given().when().get(BASE + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/pat/{txt}/{pat}", "some-text-to-search", "Ã§");
+        act.then().statusCode(200);
+    }
+}

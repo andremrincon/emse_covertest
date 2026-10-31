@@ -1,0 +1,50 @@
+package ts01gpt_5_mini;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import io.restassured.response.Response;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class SampleControllerTest {
+    private static final String BASE_URL;
+    static {
+        String env = System.getenv("BASE_URL");
+        BASE_URL = System.getProperty("baseUrl", env != null ? env : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithProvidedName() {
+        given().when().get(BASE_URL + "/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("name", "María-José O'Connor-Smith III").when().get(BASE_URL + "/");
+        resp.then().body(equalTo("Hello María-José O'Connor-Smith III!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultGuest() {
+        given().when().get(BASE_URL + "/").then().statusCode(lessThan(300));
+        Response resp = given().when().get(BASE_URL + "/");
+        resp.then().body(equalTo("Hello Guest!!"));
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingWithDelayOneReturns200() {
+        given().when().get(BASE_URL + "/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", 1).when().get(BASE_URL + "/slowApi");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingWithZeroUsesRandomAndReturns200() {
+        given().when().get(BASE_URL + "/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", 0).when().get(BASE_URL + "/slowApi");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingWithNonNumericDelayReturns500() {
+        given().when().get(BASE_URL + "/").then().statusCode(lessThan(300));
+        Response resp = given().queryParam("delay", "abc").when().get(BASE_URL + "/slowApi");
+        resp.then().statusCode(500);
+    }
+}

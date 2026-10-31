@@ -1,0 +1,425 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_2.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDoFilterAppliedToV2RegionEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[2] METHOD=testDoFilterAppliedToV2CurrencyEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[3] METHOD=testDoFilterAddsAccessControlAllowMethodsHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Methods" was not "GET", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=780
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[4] METHOD=testDoFilterAddsCacheControlHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Cache-Control" was not "public, max-age=86400", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[5] METHOD=testDoFilterAppliedToV2NameEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=966
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[6] METHOD=testDoFilterAppliedToV2CallingcodeEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[7] METHOD=testDoFilterAppliedToV2CapitalEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=1068
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[8] METHOD=testDoFilterAppliedToV2LangEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[9] METHOD=testDoFilterAppliedToV2AllEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[10] METHOD=testDoFilterAddsAccessControlAllowHeadersHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Headers" was not "Accept, X-Requested-With", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=739
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[11] METHOD=testDoFilterAppliedToV2AlphaEndpoint TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=1301
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[12] METHOD=testDoFilterAddsAccessControlAllowOriginHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Sun, 20 Sep 2026 23:26:27 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDoFilterAppliedToV2RegionEndpoint FAILURE AT LINE 134
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2RegionEndpoint(CORSFilterTest.java:134)
+CODE CONTEXT:
+   131:                 .get("/v2/region/Europe")
+   132:             .then()
+   133:                 .statusCode(200)
+   134:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   135:     }
+   136: 
+   137:     @Test(timeout = 60000)
+
+[2] METHOD=testDoFilterAppliedToV2CurrencyEndpoint FAILURE AT LINE 94
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2CurrencyEndpoint(CORSFilterTest.java:94)
+CODE CONTEXT:
+    91:                 .get("/v2/currency/EUR")
+    92:             .then()
+    93:                 .statusCode(200)
+    94:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    95:     }
+    96: 
+    97:     @Test(timeout = 60000)
+
+[3] METHOD=testDoFilterAddsAccessControlAllowMethodsHeader FAILURE AT LINE 44
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAddsAccessControlAllowMethodsHeader(CORSFilterTest.java:44)
+CODE CONTEXT:
+    41:                 .get("/v1/alpha/US")
+    42:             .then()
+    43:                 .statusCode(200)
+    44:                 .header("Access-Control-Allow-Methods", equalTo("GET"));  ← FAILURE HERE
+    45:     }
+    46: 
+    47:     @Test(timeout = 60000)
+
+[4] METHOD=testDoFilterAddsCacheControlHeader FAILURE AT LINE 64
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAddsCacheControlHeader(CORSFilterTest.java:64)
+CODE CONTEXT:
+    61:                 .get("/v1/region/Europe")
+    62:             .then()
+    63:                 .statusCode(200)
+    64:                 .header("Cache-Control", equalTo("public, max-age=86400"));  ← FAILURE HERE
+    65:     }
+    66: 
+    67:     @Test(timeout = 60000)
+
+[5] METHOD=testDoFilterAppliedToV2NameEndpoint FAILURE AT LINE 104
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2NameEndpoint(CORSFilterTest.java:104)
+CODE CONTEXT:
+   101:                 .get("/v2/name/Germany")
+   102:             .then()
+   103:                 .statusCode(200)
+   104:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   105:     }
+   106: 
+   107:     @Test(timeout = 60000)
+
+[6] METHOD=testDoFilterAppliedToV2CallingcodeEndpoint FAILURE AT LINE 114
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2CallingcodeEndpoint(CORSFilterTest.java:114)
+CODE CONTEXT:
+   111:                 .get("/v2/callingcode/1")
+   112:             .then()
+   113:                 .statusCode(200)
+   114:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   115:     }
+   116: 
+   117:     @Test(timeout = 60000)
+
+[7] METHOD=testDoFilterAppliedToV2CapitalEndpoint FAILURE AT LINE 124
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2CapitalEndpoint(CORSFilterTest.java:124)
+CODE CONTEXT:
+   121:                 .get("/v2/capital/Paris")
+   122:             .then()
+   123:                 .statusCode(200)
+   124:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+   125:     }
+   126: 
+   127:     @Test(timeout = 60000)
+
+[8] METHOD=testDoFilterAppliedToV2LangEndpoint FAILURE AT LINE 143
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2LangEndpoint(CORSFilterTest.java:143)
+CODE CONTEXT:
+   140:             .when()
+   141:                 .get("/v2/lang/Spanish")
+   142:             .then()
+   143:                 .statusCode(404)  ← FAILURE HERE
+   144:                 .header("Access-Control-Allow-Origin", equalTo("*"));
+   145:     }
+   146: }
+
+[9] METHOD=testDoFilterAppliedToV2AllEndpoint FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2AllEndpoint(CORSFilterTest.java:74)
+CODE CONTEXT:
+    71:                 .get("/v2/all")
+    72:             .then()
+    73:                 .statusCode(200)
+    74:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    75:     }
+    76: 
+    77:     @Test(timeout = 60000)
+
+[10] METHOD=testDoFilterAddsAccessControlAllowHeadersHeader FAILURE AT LINE 54
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAddsAccessControlAllowHeadersHeader(CORSFilterTest.java:54)
+CODE CONTEXT:
+    51:                 .get("/v1/name/France")
+    52:             .then()
+    53:                 .statusCode(200)
+    54:                 .header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));  ← FAILURE HERE
+    55:     }
+    56: 
+    57:     @Test(timeout = 60000)
+
+[11] METHOD=testDoFilterAppliedToV2AlphaEndpoint FAILURE AT LINE 84
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAppliedToV2AlphaEndpoint(CORSFilterTest.java:84)
+CODE CONTEXT:
+    81:                 .get("/v2/alpha/US")
+    82:             .then()
+    83:                 .statusCode(200)
+    84:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    85:     }
+    86: 
+    87:     @Test(timeout = 60000)
+
+[12] METHOD=testDoFilterAddsAccessControlAllowOriginHeader FAILURE AT LINE 34
+java.lang.AssertionError:
+at ts01glm_5_2_2.CORSFilterTest.testDoFilterAddsAccessControlAllowOriginHeader(CORSFilterTest.java:34)
+CODE CONTEXT:
+    31:                 .get("/v1/all")
+    32:             .then()
+    33:                 .statusCode(200)
+    34:                 .header("Access-Control-Allow-Origin", equalTo("*"));  ← FAILURE HERE
+    35:     }
+    36: 
+    37:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowOriginHeader() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowMethodsHeader() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Methods", equalTo("GET"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsAccessControlAllowHeadersHeader() {
+        given()
+            .when()
+                .get("/v1/name/France")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAddsCacheControlHeader() {
+        given()
+            .when()
+                .get("/v1/region/Europe")
+            .then()
+                .statusCode(200)
+                .header("Cache-Control", equalTo("public, max-age=86400"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2AllEndpoint() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2AlphaEndpoint() {
+        given()
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2CurrencyEndpoint() {
+        given()
+            .when()
+                .get("/v2/currency/EUR")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2NameEndpoint() {
+        given()
+            .when()
+                .get("/v2/name/Germany")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2CallingcodeEndpoint() {
+        given()
+            .when()
+                .get("/v2/callingcode/1")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2CapitalEndpoint() {
+        given()
+            .when()
+                .get("/v2/capital/Paris")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2RegionEndpoint() {
+        given()
+            .when()
+                .get("/v2/region/Europe")
+            .then()
+                .statusCode(200)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterAppliedToV2LangEndpoint() {
+        given()
+            .when()
+                .get("/v2/lang/Spanish")
+            .then()
+                .statusCode(404)
+                .header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

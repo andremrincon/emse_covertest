@@ -1,0 +1,184 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_3.DateParseTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testDayNotMatchWithMar_returnsThree TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+[2] METHOD=testDayMatchWithJan_returnsTwo TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+[3] METHOD=testDayMatchWithDec_returnsThirteen TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+[4] METHOD=testThurDayWithSep_returnsTen TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+[5] METHOD=testDayMatchWithOct_returnsEleven TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+[6] METHOD=testInvalidMonth_returnsServerError TYPE=ERROR
+Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testDayNotMatchWithMar_returnsThree FAILURE AT LINE 37
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testDayNotMatchWithMar_returnsThree(DateParseTest.java:37)
+CODE CONTEXT:
+    34: 
+    35:     @Test(timeout = 60000)
+    36:     public void testDayNotMatchWithMar_returnsThree() {
+    37:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    38:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "weekday", "Mar");
+    39:         assertEquals("3", resp.getBody().asString());
+    40:     }
+
+[2] METHOD=testDayMatchWithJan_returnsTwo FAILURE AT LINE 23
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testDayMatchWithJan_returnsTwo(DateParseTest.java:23)
+CODE CONTEXT:
+    20: 
+    21:     @Test(timeout = 60000)
+    22:     public void testDayMatchWithJan_returnsTwo() {
+    23:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    24:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "Mon", "Jan");
+    25:         assertEquals("2", resp.getBody().asString());
+    26:     }
+
+[3] METHOD=testDayMatchWithDec_returnsThirteen FAILURE AT LINE 30
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testDayMatchWithDec_returnsThirteen(DateParseTest.java:30)
+CODE CONTEXT:
+    27: 
+    28:     @Test(timeout = 60000)
+    29:     public void testDayMatchWithDec_returnsThirteen() {
+    30:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    31:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "SUN", "Dec");
+    32:         assertEquals("13", resp.getBody().asString());
+    33:     }
+
+[4] METHOD=testThurDayWithSep_returnsTen FAILURE AT LINE 58
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testThurDayWithSep_returnsTen(DateParseTest.java:58)
+CODE CONTEXT:
+    55: 
+    56:     @Test(timeout = 60000)
+    57:     public void testThurDayWithSep_returnsTen() {
+    58:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    59:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "Thur", "Sep");
+    60:         assertEquals("10", resp.getBody().asString());
+    61:     }
+
+[5] METHOD=testDayMatchWithOct_returnsEleven FAILURE AT LINE 51
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testDayMatchWithOct_returnsEleven(DateParseTest.java:51)
+CODE CONTEXT:
+    48: 
+    49:     @Test(timeout = 60000)
+    50:     public void testDayMatchWithOct_returnsEleven() {
+    51:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    52:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "mon", "oct");
+    53:         assertEquals("11", resp.getBody().asString());
+    54:     }
+
+[6] METHOD=testInvalidMonth_returnsServerError FAILURE AT LINE 44
+java.net.URISyntaxException: Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps over the lazy dog.
+at ts01gpt_5_mini_3.DateParseTest.testInvalidMonth_returnsServerError(DateParseTest.java:44)
+CODE CONTEXT:
+    41: 
+    42:     @Test(timeout = 60000)
+    43:     public void testInvalidMonth_returnsServerError() {
+    44:         given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));  ← FAILURE HERE
+    45:         Response resp = given().when().get("/api/dateparse/{day}/{month}", "Tuesday", "Movember");
+    46:         assertEquals(500, resp.getStatusCode());
+    47:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithJan_returnsTwo() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Mon", "Jan");
+        assertEquals("2", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithDec_returnsThirteen() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "SUN", "Dec");
+        assertEquals("13", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayNotMatchWithMar_returnsThree() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "weekday", "Mar");
+        assertEquals("3", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidMonth_returnsServerError() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Tuesday", "Movember");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDayMatchWithOct_returnsEleven() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "mon", "oct");
+        assertEquals("11", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testThurDayWithSep_returnsTen() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/dateparse/{day}/{month}", "Thur", "Sep");
+        assertEquals("10", resp.getBody().asString());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,206 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testFilterInitAndDoFilterV1All TYPE=FAILURE
+expected:<200> but was:<404>
+
+[2] METHOD=testFilterDoFilterV2Alpha TYPE=FAILURE
+expected:<200> but was:<404>
+
+[3] METHOD=testCorsHeaderCacheControl TYPE=FAILURE
+expected:<public, max-age=86400> but was:<null>
+
+[4] METHOD=testCorsHeaderAccessControlAllowHeaders TYPE=FAILURE
+expected:<Accept, X-Requested-With> but was:<null>
+
+[5] METHOD=testCorsHeaderAccessControlAllowMethods TYPE=FAILURE
+expected:<GET> but was:<null>
+
+[6] METHOD=testCorsHeaderAccessControlAllowOrigin TYPE=FAILURE
+expected:<*> but was:<null>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testFilterInitAndDoFilterV1All FAILURE AT LINE 23
+java.lang.AssertionError: expected:<200> but was:<404>
+at ts01qwen3_7_plus.CORSFilterTest.testFilterInitAndDoFilterV1All(CORSFilterTest.java:23)
+CODE CONTEXT:
+    20:             .then()
+    21:                 .extract()
+    22:                 .statusCode();
+    23:         assertEquals(200, statusCode);  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[2] METHOD=testFilterDoFilterV2Alpha FAILURE AT LINE 35
+java.lang.AssertionError: expected:<200> but was:<404>
+at ts01qwen3_7_plus.CORSFilterTest.testFilterDoFilterV2Alpha(CORSFilterTest.java:35)
+CODE CONTEXT:
+    32:             .then()
+    33:                 .extract()
+    34:                 .statusCode();
+    35:         assertEquals(200, statusCode);  ← FAILURE HERE
+    36:     }
+    37: 
+    38:     @Test(timeout = 60000)
+
+[3] METHOD=testCorsHeaderCacheControl FAILURE AT LINE 83
+java.lang.AssertionError: expected:<public, max-age=86400> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testCorsHeaderCacheControl(CORSFilterTest.java:83)
+CODE CONTEXT:
+    80:             .then()
+    81:                 .extract()
+    82:                 .header("Cache-Control");
+    83:         assertEquals("public, max-age=86400", header);  ← FAILURE HERE
+    84:     }
+    85: }
+
+[4] METHOD=testCorsHeaderAccessControlAllowHeaders FAILURE AT LINE 71
+java.lang.AssertionError: expected:<Accept, X-Requested-With> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testCorsHeaderAccessControlAllowHeaders(CORSFilterTest.java:71)
+CODE CONTEXT:
+    68:             .then()
+    69:                 .extract()
+    70:                 .header("Access-Control-Allow-Headers");
+    71:         assertEquals("Accept, X-Requested-With", header);  ← FAILURE HERE
+    72:     }
+    73: 
+    74:     @Test(timeout = 60000)
+
+[5] METHOD=testCorsHeaderAccessControlAllowMethods FAILURE AT LINE 59
+java.lang.AssertionError: expected:<GET> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testCorsHeaderAccessControlAllowMethods(CORSFilterTest.java:59)
+CODE CONTEXT:
+    56:             .then()
+    57:                 .extract()
+    58:                 .header("Access-Control-Allow-Methods");
+    59:         assertEquals("GET", header);  ← FAILURE HERE
+    60:     }
+    61: 
+    62:     @Test(timeout = 60000)
+
+[6] METHOD=testCorsHeaderAccessControlAllowOrigin FAILURE AT LINE 47
+java.lang.AssertionError: expected:<*> but was:<null>
+at ts01qwen3_7_plus.CORSFilterTest.testCorsHeaderAccessControlAllowOrigin(CORSFilterTest.java:47)
+CODE CONTEXT:
+    44:             .then()
+    45:                 .extract()
+    46:                 .header("Access-Control-Allow-Origin");
+    47:         assertEquals("*", header);  ← FAILURE HERE
+    48:     }
+    49: 
+    50:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertEquals;
+
+public class CORSFilterTest {
+
+    private String getBaseUrl() {
+        return System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testFilterInitAndDoFilterV1All() {
+        int statusCode = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v1/all")
+            .then()
+                .extract()
+                .statusCode();
+        assertEquals(200, statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void testFilterDoFilterV2Alpha() {
+        int statusCode = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .extract()
+                .statusCode();
+        assertEquals(200, statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderAccessControlAllowOrigin() {
+        String header = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v1/all")
+            .then()
+                .extract()
+                .header("Access-Control-Allow-Origin");
+        assertEquals("*", header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderAccessControlAllowMethods() {
+        String header = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v1/all")
+            .then()
+                .extract()
+                .header("Access-Control-Allow-Methods");
+        assertEquals("GET", header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderAccessControlAllowHeaders() {
+        String header = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v1/all")
+            .then()
+                .extract()
+                .header("Access-Control-Allow-Headers");
+        assertEquals("Accept, X-Requested-With", header);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderCacheControl() {
+        String header = given()
+                .baseUri(getBaseUrl())
+            .when()
+                .get("/v1/all")
+            .then()
+                .extract()
+                .header("Cache-Control");
+        assertEquals("public, max-age=86400", header);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

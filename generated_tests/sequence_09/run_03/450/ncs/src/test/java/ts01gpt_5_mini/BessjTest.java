@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setup() {
+        String b = System.getProperty("BASE_URL");
+        if (b == null || b.isEmpty()) b = System.getenv("BASE_URL");
+        if (b == null || b.isEmpty()) b = "http://localhost:8080";
+        RestAssured.baseURI = b;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZeroReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/3/0.0");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterBranchReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/2/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjSmallAxBackwardRecurrenceReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/3/1e-10");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeNReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/-5/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThanTwoReturns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/1/2.5");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXWithOddNReturns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/bessj/3/-2.5");
+        act.then().statusCode(200);
+    }
+}

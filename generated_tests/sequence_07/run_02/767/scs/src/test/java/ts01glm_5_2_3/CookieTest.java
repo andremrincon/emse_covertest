@@ -1,0 +1,52 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieUserIdWithUserPrefixAndLongValue_1() {
+        given()
+                .when()
+                .get("/api/cookie/userid/user1234/example.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionWithAmAndAbcDotCom_1() {
+        given()
+                .when()
+                .get("/api/cookie/session/am/abc.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionElseBranchReturnsTwo_1() {
+        given()
+                .when()
+                .get("/api/cookie/session/other/other.com")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+}

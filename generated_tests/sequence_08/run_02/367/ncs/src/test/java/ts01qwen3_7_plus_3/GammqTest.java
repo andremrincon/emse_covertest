@@ -1,0 +1,89 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidA() {
+        double a = -1.0;
+        double x = 2.0;
+
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqInvalidX() {
+        double a = 2.0;
+        double x = -1.0;
+
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserXZero() {
+        double a = 2.0;
+        double x = 0.0;
+
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGserLoop() {
+        double a = 5.5;
+        double x = 2.3;
+
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGammqGcfLoop() {
+        double a = 1.0;
+        double x = 5.0;
+
+        given()
+            .pathParam("a", a)
+            .pathParam("x", x)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+}

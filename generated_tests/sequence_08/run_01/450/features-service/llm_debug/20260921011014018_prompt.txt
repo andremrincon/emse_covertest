@@ -1,0 +1,196 @@
+Fix the following Java test that has compilation errors.
+
+    TARGET JAVA VERSION: 1.8
+
+COMPILATION ERRORS:
+/local/ar_benchmark/aatools/COVERTEST/maven/generated_tests/sequence_08/run_01/450/features-service/src/test/java/ts01qwen3_7_plus_2/ProductsConfigurationFeaturesResourceTest.java:[66,17] cannot find symbol
+symbol:   method formParam(java.lang.String,java.lang.String)
+location: interface io.restassured.response.Response
+[ERROR]
+
+CURRENT TEST CODE:
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setup() {
+        baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    private void createProduct(String productName) {
+        given()
+            .when()
+            .post("/products/{productName}", productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createFeature(String productName, String featureName) {
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createConfiguration(String productName, String configName) {
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}", productName, configName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void createExcludesConstraint(String productName, String sourceFeature, String excludedFeature) {
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+            .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    private void addFeatureToConfiguration(String productName, String configName, String featureName) {
+        given()
+            .when()
+            .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName)
+            .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBothFeaturesActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat1);
+        addFeatureToConfiguration(product, config, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(false));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlySourceFeatureActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat1);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlyExcludedFeatureActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+        addFeatureToConfiguration(product, config, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNoFeaturesActive() {
+        String product = "prod-" + UUID.randomUUID();
+        String feat1 = "feat1-" + UUID.randomUUID();
+        String feat2 = "feat2-" + UUID.randomUUID();
+        String config = "config-" + UUID.randomUUID();
+
+        createProduct(product);
+        createFeature(product, feat1);
+        createFeature(product, feat2);
+        createConfiguration(product, config);
+        createExcludesConstraint(product, feat1, feat2);
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+            .then()
+            .statusCode(200)
+            .body("valid", equalTo(true));
+    }
+}
+
+Please analyze the compilation errors and provide a corrected version of the test.
+
+IMPORTANT INSTRUCTIONS:
+1. Fix ALL compilation errors
+2. Use correct Java syntax
+3. Define all required variables and constants
+4. Use proper class names (simple name only, not full path)
+5. Avoid duplicate method names (add suffixes like _1, _2 if needed)
+6. Maintain the same test intent and coverage goals
+7. Use proper REST Assured patterns
+8. **CRITICAL**: Return the COMPLETE test class code from beginning to end
+9. **CRITICAL**: Do NOT truncate or omit any part of the code
+10. **CRITICAL**: Ensure all methods are complete with closing braces
+11. **CRITICAL**: Ensure the class has a proper closing brace at the end
+12. In case of Compilation failure like src/test/java/PACKAGE_NAME/**CORRECT_NAME_TEST**.java 
+class **WRONG_NAME_TEST** is public, should be declared in a file named **WRONG_NAME_TEST**.java, 
+I want to keep file name as **CORRECT_NAME_TEST**.java and you much to change internal public class name 
+to **CORRECT_NAME_TEST**
+13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+Common issues to fix:
+- Undefined variables (PRODUCT, CONFIG, FEATURE, etc.) -> define as constants or use string literals
+- Wrong class names (org/path/ClassName) -> use simple name (ClassName)
+- Duplicate method names -> rename with unique suffixes
+- Missing imports -> add required imports
+- Incomplete code -> complete all methods and close all braces
+
+You have access to a large context window (100k tokens), so there is NO need to truncate the code.
+Return ONLY the COMPLETE corrected Java test class code, without explanations or markdown formatting.
+The code MUST be complete from package declaration to final closing brace.

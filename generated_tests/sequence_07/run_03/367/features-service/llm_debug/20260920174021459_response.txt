@@ -1,0 +1,210 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String product = "Laptop-Pro-15-" + UUID.randomUUID();
+        String source = "CPU-i9-13900H-" + UUID.randomUUID();
+        String excluded = "Integrated-Graphics-Only-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductRetrievesExcludesConstraint() {
+        String product = "Custom-T-Shirt-" + UUID.randomUUID();
+        String source = "Color-Black-" + UUID.randomUUID();
+        String excluded = "Logo-White-On-Black-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}", product)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBothFeaturesActive() {
+        String product = "Workstation-Z8-" + UUID.randomUUID();
+        String config = "production-us-east-1-" + UUID.randomUUID();
+        String source = "PSU-Redundant-" + UUID.randomUUID();
+        String excluded = "OS-Windows-11-Pro-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excluded).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationOnlySourceActive() {
+        String product = "Smart-Watch-S3-" + UUID.randomUUID();
+        String config = "dev-" + UUID.randomUUID();
+        String source = "Strap-Leather-" + UUID.randomUUID();
+        String excluded = "OS-Home-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceNotActive() {
+        String product = "Laptop-Pro-15-" + UUID.randomUUID();
+        String config = "base-" + UUID.randomUUID();
+        String source = "CPU-i9-13900H-" + UUID.randomUUID();
+        String excluded = "Integrated-Graphics-Only-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excluded).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNeitherFeatureActive() {
+        String product = "Custom-T-Shirt-" + UUID.randomUUID();
+        String config = "standard-" + UUID.randomUUID();
+        String source = "Color-Black-" + UUID.randomUUID();
+        String excluded = "Logo-White-On-Black-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}", product, config)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActiveFeaturesTriggersEvaluation() {
+        String product = "Workstation-Z8-" + UUID.randomUUID();
+        String config = "us-standard-16gb-" + UUID.randomUUID();
+        String source = "PSU-Redundant-" + UUID.randomUUID();
+        String excluded = "OS-Windows-11-Pro-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, excluded).then().statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", source)
+            .formParam("excludedFeature", excluded)
+        .when()
+            .post("/products/{productName}/constraints/excludes", product)
+        .then()
+            .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excluded).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .get("/products/{productName}/configurations/{configurationName}/features", product, config)
+        .then()
+            .statusCode(200);
+    }
+}
+```

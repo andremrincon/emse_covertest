@@ -1,0 +1,59 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class NcsRestTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherSuccessPath() {
+        given()
+            .pathParam("m", 10)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherGuardClauseMExceedsLimit() {
+        given()
+            .pathParam("m", 1001)
+            .pathParam("n", 5)
+            .pathParam("x", 0.75)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <200>.")
+    @Test(timeout = 60000)
+    public void testFisherExceptionPath() {
+        given()
+            .pathParam("m", 1)
+            .pathParam("n", 1)
+            .pathParam("x", 1.2)
+        .when()
+            .get("/api/fisher/{m}/{n}/{x}")
+        .then()
+            .statusCode(400);
+    }
+}

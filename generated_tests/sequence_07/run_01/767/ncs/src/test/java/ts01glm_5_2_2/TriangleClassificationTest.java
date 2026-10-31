@@ -1,0 +1,70 @@
+package ts01glm_5_2_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyNonPositiveA() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/0/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyNonPositiveB() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/0/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyEquilateral() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyDegenerateTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/2/3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsosceles() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/2/2/3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScalene() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/3/4/5")
+            .then()
+                .statusCode(200);
+    }
+}

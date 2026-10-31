@@ -1,0 +1,166 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returnsNotFoundForNonexistentCode() {
+        given()
+            .when()
+                .get("/v2/alpha/ZZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsBadRequestForShortCodes() {
+        given()
+            .queryParam("codes", "A")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsNotFoundForNonexistentCodes() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsInternalServerErrorForMalformedCodes() {
+        given()
+            .queryParam("codes", ";;;")
+            .when()
+                .get("/v2/alpha/")
+            .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returnsBadRequestForInvalidLength() {
+        given()
+            .when()
+                .get("/v2/currency/12")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returnsNotFoundForUnknownCurrency() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_returnsNotFoundForNonexistentName() {
+        given()
+            .when()
+                .get("/v2/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_returnsNotFoundForInvalidCode() {
+        given()
+            .when()
+                .get("/v2/callingcode/abc")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_returnsNotFoundForNonexistentCapital() {
+        given()
+            .when()
+                .get("/v2/capital/12345")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_returnsNotFoundForNonexistentRegion() {
+        given()
+            .when()
+                .get("/v2/region/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubRegion_returnsNotFoundForNonexistentSubregion() {
+        given()
+            .when()
+                .get("/v2/subregion/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_returnsNotFoundForNonexistentLanguage() {
+        given()
+            .when()
+                .get("/v2/lang/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByDemonym_returnsNotFoundForNonexistentDemonym() {
+        given()
+            .when()
+                .get("/v2/demonym/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegionalBloc_returnsNotFoundForNonexistentBloc() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void parsedCountry_returnsFilteredFieldsWhenFieldsProvided() {
+        given()
+            .queryParam("fields", "name;capital")
+            .when()
+                .get("/v2/all")
+            .then()
+                .statusCode(lessThan(300));
+
+        given()
+            .queryParam("fields", "name;capital")
+            .when()
+                .get("/v2/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,86 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ValidCode() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_InvalidCode() {
+        given()
+            .pathParam("alphacode", "ZZZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_ValidCodes() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_DuplicateCodes() {
+        given()
+            .queryParam("codes", "US,US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_PrimaryName() {
+        given()
+            .pathParam("name", "Germany")
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearch_AlternativeName() {
+        given()
+            .pathParam("name", "Federal Republic of Germany")
+            .queryParam("fullText", true)
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJson_TriggerLoad() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+}

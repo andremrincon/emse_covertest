@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ExpintTest {
+
+    @Test(timeout = 60000)
+    public void testExpintXGreaterThan1() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/3/2.5");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXLessThanOrEqualTo1() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/3/0.1");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeN() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/-1/2.5");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNZero() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/0/2.5");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintXZero() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/3/0.0");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintContinuedFractionFailed() {
+        given().when().get("/api/expint/1/1.0").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/expint/100/1e100");
+        response.then().statusCode(400);
+    }
+}

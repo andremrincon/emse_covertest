@@ -1,0 +1,59 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Text2TxtTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtFor() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/for/x/x");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtFour() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/four/x/x");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYou() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/see/you/x");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtByTheWay() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/by/the/way");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtAre() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/are/x/x");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtDefault() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        Response response = given().when().get("/api/text2txt/hello/world/test");
+        response.then().statusCode(200);
+    }
+}

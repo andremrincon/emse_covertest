@@ -1,0 +1,41 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0]['iso639_1']", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2() {
+        given().when().get("/v1/lang/es").then().statusCode(lessThan(300));
+        given().when().get("/v1/lang/es").then().body("[0].languages[0]['iso639_2']", equalTo("spa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName() {
+        given().when().get("/v2/lang/Spanish").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName() {
+        given().when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v2/alpha/US").then().body("languages[0].nativeName", equalTo("English"));
+    }
+}

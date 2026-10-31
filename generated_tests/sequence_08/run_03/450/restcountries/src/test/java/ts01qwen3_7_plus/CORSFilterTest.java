@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String envUrl = System.getenv("BASE_URL");
+        String baseUrl = System.getProperty("baseUrl", envUrl != null ? envUrl : "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginHeader() {
+        given().when().get("/v1/all").then().statusCode(404);
+        Response response = given().when().get("/v1/all").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Access-Control-Allow-Origin"), is(nullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(404);
+        Response response = given().when().get("/v1/all").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Access-Control-Allow-Methods"), is(nullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeadersHeader() {
+        given().when().get("/v1/all").then().statusCode(404);
+        Response response = given().when().get("/v1/all").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Access-Control-Allow-Headers"), is(nullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(404);
+        Response response = given().when().get("/v1/all").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Cache-Control"), is(nullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV2All() {
+        given().when().get("/v2/all").then().statusCode(404);
+        Response response = given().when().get("/v2/all").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Access-Control-Allow-Origin"), is(nullValue()));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersOnV1Alpha() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+        Response response = given().when().get("/v1/alpha/US").then().statusCode(404).extract().response();
+        assertThat(response.getHeader("Access-Control-Allow-Methods"), is(nullValue()));
+    }
+}

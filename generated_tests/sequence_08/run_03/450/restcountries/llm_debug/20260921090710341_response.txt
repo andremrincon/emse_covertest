@@ -1,0 +1,155 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaSuccessWithFields() {
+        given()
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListSuccessWithFields() {
+        given()
+            .queryParam("codes", "US,CA")
+            .queryParam("fields", "name")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListNotFound() {
+        given()
+            .queryParam("codes", "XX,YY,ZZ")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListServerError() {
+        given()
+            .queryParam("codes", "US|CA|MX")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencySuccess() {
+        given()
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyNotFound() {
+        given()
+        .when()
+            .get("/v2/currency/XYZ")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyServerError() {
+        given()
+        .when()
+            .get("/v2/currency/{}")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameSuccess() {
+        given()
+        .when()
+            .get("/v2/name/Germany")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        given()
+        .when()
+            .get("/v2/name/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameServerError() {
+        given()
+        .when()
+            .get("/v2/name/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeSuccess() {
+        given()
+        .when()
+            .get("/v2/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeNotFound() {
+        given()
+        .when()
+            .get("/v2/callingcode/abc")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeServerError() {
+        given()
+        .when()
+            .get("/v2/callingcode/True")
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalSuccess() {
+        given()
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalNotFound() {
+        given()
+        .when()
+            .get("/v2/capital/12345")
+        .then()
+            .statusCode(404);
+    }
+}

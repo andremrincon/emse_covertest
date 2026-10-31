@@ -1,0 +1,145 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = "http://localhost:8080/rest";
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_valid() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha/US")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidLength() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha/1")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_missingCodes() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_emptyCodes() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha?codes=")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha?codes=XX,YY")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/alpha?codes=[\"US\", \"CA\"]")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/currency/USD")
+            .then()
+                .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalidLength() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/currency/US")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/currency/INVALIDCURRENCYCODE")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/name/True")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/callingcode/True")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/capital/True")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/region/True")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/subregion/True")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_exception() {
+        given()
+            .when()
+                .get(BASE_URL + "/v1/lang/True")
+            .then()
+                .statusCode(404);
+    }
+}

@@ -1,0 +1,165 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_BadRequest_ShortCode() {
+        given()
+            .pathParam("alphacode", "1")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_NotFound_UnknownCode() {
+        given()
+            .pathParam("alphacode", "XYZ")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_Success_ValidCode() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_BadRequest_NoCodesParam() {
+        given()
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_NotFound_UnknownCodes() {
+        given()
+            .queryParam("codes", "XX;YY")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_BadRequest_InvalidLength() {
+        given()
+            .pathParam("currency", "12")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_NotFound_UnknownCurrency() {
+        given()
+            .pathParam("currency", "XYZ")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_NotFound_UnknownName() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_NotFound_InvalidCode() {
+        given()
+            .pathParam("callingcode", "abc")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_NotFound_UnknownCapital() {
+        given()
+            .pathParam("capital", "NonExistentCapital")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_NotFound_UnknownRegion() {
+        given()
+            .pathParam("region", "123")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_NotFound_UnknownSubregion() {
+        given()
+            .pathParam("subregion", "123")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_NotFound_UnknownLanguage() {
+        given()
+            .pathParam("lang", "123")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getAllCountries_Success() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doPOST_MethodNotAllowed() {
+        given()
+        .when()
+            .post("/v1")
+        .then()
+            .statusCode(405);
+    }
+}

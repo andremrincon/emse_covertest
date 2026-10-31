@@ -1,0 +1,126 @@
+package ts01glm_5_2_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class CountryRestV1Test {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaUsReturnsLanguageIso639_1() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha/US")
+        .then()
+            .body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaGbReturnsLanguageIso639_2() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha/GB")
+        .then()
+            .body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangEsReturnsLanguageName() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/lang/es")
+        .then()
+            .body("[0].languages[0].name", equalTo("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangZhReturnsLanguageNativeName() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/lang/zh")
+        .then()
+            .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void v1NameFranceReturnsLanguageIso639_1() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/name/France")
+        .then()
+            .body("[0].languages[0].iso639_1", equalTo("fr"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1CurrencyUsdReturnsLanguageName() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/currency/USD")
+        .then()
+            .body("[0].languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1RegionEuropeReturnsLanguageNativeName() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/region/Europe")
+        .then()
+            .body("[0].languages[0].nativeName", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void v2AlphaUsReturnsLanguageIso639_1() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/alpha/US")
+        .then()
+            .body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void v2LangSpanishReturnsLanguageName() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/lang/Spanish")
+        .then()
+            .body("[0].languages[0].name", equalTo("Spanish"));
+    }
+
+    @Test(timeout = 60000)
+    public void v2NameGermanyReturnsLanguageNativeName() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/name/Germany")
+        .then()
+            .body("[0].languages[0].nativeName", equalTo("Deutsch"));
+    }
+
+    @Test(timeout = 60000)
+    public void v2Callingcode1ReturnsLanguageIso639_2() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/callingcode/1")
+        .then()
+            .body("[0].languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaDeReturnsLanguageNativeName() {
+        given()
+        .when()
+            .get(baseUrl + "/v1/alpha/DE")
+        .then()
+            .body("languages[0].nativeName", equalTo("Deutsch"));
+    }
+}

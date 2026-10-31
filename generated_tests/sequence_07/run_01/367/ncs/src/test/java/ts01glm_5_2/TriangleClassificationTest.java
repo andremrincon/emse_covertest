@@ -1,0 +1,70 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class TriangleClassificationTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_EdgeAZero_ReturnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/0/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_EdgeBZero_ReturnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/0/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_EdgeCZero_ReturnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/1/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_AllEdgesEqual_ReturnsEquilateral() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_DegenerateMaxA_ReturnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/3/1/1")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassify_DegenerateMaxB_ReturnsNotTriangle() {
+        given()
+            .when()
+                .get(baseUrl + "/api/triangle/1/3/1")
+            .then()
+                .statusCode(200);
+    }
+}

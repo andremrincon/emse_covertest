@@ -1,0 +1,47 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import java.net.URLEncoder;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlBranch() throws Exception {
+        given().when().get("/api/pat/{txt}", URLEncoder.encode("The quick brown fox jumps over the lazy dog.","UTF-8")).then().statusCode(lessThan(300));
+        String encoded = URLEncoder.encode("http://a/a", "UTF-8");
+        given().when().get("/api/pat/{txt}", encoded).then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateBranch() throws Exception {
+        given().when().get("/api/pat/{txt}", URLEncoder.encode("The quick brown fox jumps over the lazy dog.","UTF-8")).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "wed12jan").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpeBranch() throws Exception {
+        given().when().get("/api/pat/{txt}", URLEncoder.encode("The quick brown fox jumps over the lazy dog.","UTF-8")).then().statusCode(lessThan(300));
+        String encoded = URLEncoder.encode("1.2e+34", "UTF-8");
+        given().when().get("/api/pat/{txt}", encoded).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneBranch() throws Exception {
+        given().when().get("/api/pat/{txt}", URLEncoder.encode("The quick brown fox jumps over the lazy dog.","UTF-8")).then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "hello").then().statusCode(200);
+    }
+}

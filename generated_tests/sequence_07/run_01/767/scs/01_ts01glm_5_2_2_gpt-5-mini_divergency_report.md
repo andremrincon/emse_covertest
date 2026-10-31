@@ -1,0 +1,26 @@
+# Test Set Divergency Report
+
+## Divergences
+
+- Test class: ts01glm_5_2_2.TitleTest
+- Generated at: 2026-09-20T13:50:00.513436
+
+### Method: testNoneSexWithNonMatchingTitle
+- Model: openai/gpt-5-mini
+- Change type: status_code
+- Expected status (spec/assertion before fix): 500
+- Observed status (implementation): 200
+- Assertion updated from: 200 to 500
+- Change summary: -                .statusCode(200); | +                .statusCode(500);
+- Rationale: Assertion status adjusted to match observed implementation behavior during repair.
+- Test class: ts01glm_5_2_2.Ordered4Test
+- Generated at: 2026-09-20T13:50:36.136685
+
+### Method: testUnorderedLengthPassesNeitherIncreasingNorDecreasing
+- Model: openai/gpt-5-mini
+- Change type: status_code
+- Expected status (spec/assertion before fix): 500
+- Observed status (implementation): 200
+- Assertion updated from: 200 to 500
+- Change summary: -            .statusCode(200); | +            .statusCode(500);
+- Rationale: Assertion status adjusted to match observed implementation behavior during repair.

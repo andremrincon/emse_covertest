@@ -1,0 +1,80 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryTranslationsTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String fromProp = System.getProperty("base.url");
+        String fromEnv = System.getenv("BASE_URL");
+        if (fromProp != null && !fromProp.isEmpty()) {
+            BASE = fromProp;
+        } else if (fromEnv != null && !fromEnv.isEmpty()) {
+            BASE = fromEnv;
+        } else {
+            BASE = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = BASE;
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_withEmptyJson_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        Response act = given()
+                .contentType("application/json")
+                .body("{}")
+                .when()
+                .post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_withBlankToken_returnsBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String payload = "{\"token\":\"   \",\"amount\":500}";
+        Response act = given()
+                .contentType("application/json")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_withValidToken_returnsAccepted() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"token\":\"" + token + "\",\"amount\":1000}";
+        Response act = given()
+                .contentType("application/json")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        act.then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_withValidToken_responseBodyHasStatusField() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"token\":\"" + token + "\",\"amount\":250}";
+        Response act = given()
+                .contentType("application/json")
+                .body(payload)
+                .when()
+                .post("/contribute");
+        act.then().body("status", equalTo("accepted"));
+    }
+}

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TriangleClassificationTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidWhenNonPositiveEdgeProducesOkStatus_1() {
+        given().when().get("/api/remainder/{a}/{b}", 17, 5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/triangle/{a}/{b}/{c}", 0, 1, 1);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangleProducesOkStatus_2() {
+        given().when().get("/api/bessj/{n}/{x}", 3, 2.5).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/triangle/{a}/{b}/{c}", 2, 2, 2);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTriangleInequalityViolationProducesOkStatus_3() {
+        given().when().get("/api/expint/{n}/{x}", 1, 0.1).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/triangle/{a}/{b}/{c}", 1, 2, 3);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangleProducesOkStatus_4() {
+        given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/triangle/{a}/{b}/{c}", 2, 2, 3);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testScaleneTriangleProducesOkStatus_5() {
+        given().when().get("/api/gammq/{a}/{x}", 5.5, 2.3).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5);
+        resp.then().statusCode(200);
+    }
+}

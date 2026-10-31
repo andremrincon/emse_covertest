@@ -1,0 +1,67 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class ProductsServiceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private int send(String method, String pathTemplate, Map<String, String> formParams, Object... pathParams) {
+        try {
+            String fullUrl = buildUrl(pathTemplate, pathParams);
+            URL url = new URL(fullUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            if (formParams != null && (method.equals("POST") || method.equals("PUT"))) {
+                conn.setDoOutput(true);
+                String body = buildFormBody(formParams);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+                os.close();
+            } else {
+                conn.setDoOutput(false);
+            }
+            int status = conn.getResponseCode();
+            conn.disconnect();
+            return status;
+        } catch (Exception e) {
+            fail("Request failed: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    private String buildUrl(String template, Object... params) throws Exception {
+        String path = template;
+        if (params != null) {
+            for (Object p : params) {
+                String replacement = URLEncoder.encode(String.valueOf(p), "UTF-8");
+                path = path.replaceFirst("\\{[^/}]*\\}", replacement);
+            }
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return baseUrl + path;
+    }

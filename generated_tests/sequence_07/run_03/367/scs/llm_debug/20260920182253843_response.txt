@@ -1,0 +1,84 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.specification.RequestSpecification;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+
+    private RequestSpecification requestSpec;
+
+    @Before
+    public void setUp() {
+        requestSpec = new RequestSpecBuilder()
+                .setBaseUri(BASE_URL)
+                .build();
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFive() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/5/a")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanMinus444() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/-500/a")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/700/a")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsMinusFour() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/-4/abab")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSEqualsBaab() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/0/baab")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanOrEqualMinus333WithoutLessThanMinus444() {
+        given()
+                .spec(requestSpec)
+        .when()
+                .get("/api/costfuns/-400/a")
+        .then()
+                .statusCode(200);
+    }
+}
+```

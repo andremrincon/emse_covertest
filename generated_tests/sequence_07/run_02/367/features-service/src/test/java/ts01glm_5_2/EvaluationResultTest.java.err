@@ -1,0 +1,175 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class EvaluationResultTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluationResultConstructionOnValidConfiguration() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + java.util.UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluationResultConstructionWithRequiresConstraint() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + java.util.UUID.randomUUID().toString();
+        String requiredFeature = "RequiredFeature-" + java.util.UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/features/" + requiredFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("requiredFeature", requiredFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/requires")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configurationName + "/features")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluationResultConstructionWithExcludesConstraint() {
+        String productName = "TestProduct-" + java.util.UUID.randomUUID().toString();
+        String configurationName = "TestConfig-" + java.util.UUID.randomUUID().toString();
+        String sourceFeature = "SourceFeature-" + java.util.UUID.randomUUID().toString();
+        String excludedFeature = "ExcludedFeature-" + java.util.UUID.randomUUID().toString();
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/features/" + sourceFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/features/" + excludedFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + productName + "/constraints/excludes")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .contentType(ContentType.URLENC)
+        .when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + sourceFeature)
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + productName + "/configurations/" + configurationName)
+        .then()
+            .statusCode(200);
+    }
+}

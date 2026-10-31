@@ -1,0 +1,136 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterProcessesGetRequestAndChainsToNextFilter() {
+        given()
+                .when()
+                .get("/products")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsHeadersOnGetRequest() {
+        given()
+                .when()
+                .get("/products")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsAllowMethodsHeaderOnGetRequest() {
+        given()
+                .when()
+                .get("/products")
+                .then()
+                .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSkipsChainForOptionsRequest() {
+        given()
+                .when()
+                .options("/products")
+                .then()
+                .statusCode(lessThan(500));
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsHeadersOnOptionsRequest() {
+        given()
+                .when()
+                .options("/products")
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsMaxAgeHeaderOnPostRequest() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString();
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products")
+                .then()
+                .header("Access-Control-Max-Age", "3600");
+    }
+}
+```        String productName = "test-del-constraints-" + UUID.randomUUID().toString().substring(0, 8);
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "SourceFeat").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "ExcludedFeat").then().statusCode(lessThan(300));
+        given()
+            .formParam("sourceFeature", "SourceFeat")
+            .formParam("excludedFeature", "ExcludedFeat")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/{productName}", productName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithoutConstraints() {
+        String productName = "test-del-no-constraints-" + UUID.randomUUID().toString().substring(0, 8);
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .delete("/products/{productName}", productName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintRequiresOnNonExistentProduct() {
+        String productName = "non-existent-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .formParam("sourceFeature", "FeatureA")
+            .formParam("requiredFeature", "FeatureB")
+        .when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintExcludesOnNonExistentProduct() {
+        String productName = "non-existent-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+            .formParam("sourceFeature", "FeatureA")
+            .formParam("excludedFeature", "FeatureB")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+}
+```

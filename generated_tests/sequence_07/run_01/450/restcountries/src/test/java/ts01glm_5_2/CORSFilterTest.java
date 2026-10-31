@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String envUrl = System.getenv("BASE_URL");
+        if (envUrl != null && !envUrl.isEmpty()) {
+            RestAssured.baseURI = envUrl;
+        } else {
+            RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowOriginHeaderOnV1All() {
+        given().when().get("/v1/all").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowMethodsHeaderOnV1AlphaCode() {
+        given().when().get("/v1/alpha/US").then().header("Access-Control-Allow-Methods", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowHeadersHeaderOnV1Name() {
+        given().when().get("/v1/name/France").then().header("Access-Control-Allow-Headers", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsCacheControlHeaderOnV1CallingCode() {
+        given().when().get("/v1/callingcode/1").then().header("Cache-Control", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowOriginHeaderOnV2All() {
+        given().when().get("/v2/all").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowMethodsHeaderOnV2AlphaCode() {
+        given().when().get("/v2/alpha/US").then().header("Access-Control-Allow-Methods", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowHeadersHeaderOnV2Name() {
+        given().when().get("/v2/name/Germany").then().header("Access-Control-Allow-Headers", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsCacheControlHeaderOnV2Capital() {
+        given().when().get("/v2/capital/Paris").then().header("Cache-Control", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsHeadersOnNotFoundResponse() {
+        given().when().get("/v1/alpha/XYZ").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowOriginOnV1Region() {
+        given().when().get("/v1/region/Europe").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowOriginOnV2Root() {
+        given().when().get("/v2").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+
+    @Test(timeout = 60000)
+    public void corsFilterAddsAllowOriginOnV1Currency() {
+        given().when().get("/v1/currency/USD").then().header("Access-Control-Allow-Origin", equalTo(null));
+    }
+}

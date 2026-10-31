@@ -1,0 +1,117 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseURI = System.getProperty("baseURI");
+        if (baseURI == null) {
+            baseURI = "http://localhost";
+        }
+        RestAssured.baseURI = baseURI;
+        String port = System.getProperty("port");
+        if (port == null) {
+            port = "8080";
+        }
+        RestAssured.port = Integer.parseInt(port);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithBothValidFeatures() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/CPU-i9-13900H", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/Integrated-Graphics-Only", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "CPU-i9-13900H")
+            .formParam("excludedFeature", "Integrated-Graphics-Only")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithAnotherFeaturePair() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/Color-Black", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/Logo-White-On-Black", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "Color-Black")
+            .formParam("excludedFeature", "Logo-White-On-Black")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithOnlySourceFeatureParam() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/PSU-Redundant", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "PSU-Redundant")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithOnlyExcludedFeatureParam() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/OS-Home", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("excludedFeature", "OS-Home")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithSameFeatureAsBoth() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/PSU-Redundant", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "PSU-Redundant")
+            .formParam("excludedFeature", "PSU-Redundant")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintWithNonExistentFeatures() {
+        String productName = "Product-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", "PSU-Redundant")
+            .formParam("excludedFeature", "OS-Home")
+        .when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(500);
+    }
+}
+```

@@ -1,0 +1,83 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithValidTitleReturnsOne() {
+        given()
+            .when()
+                .get("/api/title/male/mr")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithInvalidTitleReturnsMinusOne() {
+        given()
+            .when()
+                .get("/api/title/male/smith")
+            .then()
+                .statusCode(200)
+                .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithValidTitleReturnsZero() {
+        given()
+            .when()
+                .get("/api/title/female/mrs")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleWithInvalidTitleReturnsMinusOne() {
+        given()
+            .when()
+                .get("/api/title/female/smith")
+            .then()
+                .statusCode(200)
+                .body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithValidTitleReturnsTwo() {
+        given()
+            .when()
+                .get("/api/title/none/dr")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneWithInvalidTitleReturnsMinusOne() {
+        given()
+            .when()
+                .get("/api/title/none/smith")
+            .then()
+                .statusCode(200)
+                .body(equalTo("-1"));
+    }
+}

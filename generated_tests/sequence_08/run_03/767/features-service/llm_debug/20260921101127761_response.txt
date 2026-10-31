@@ -1,0 +1,118 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String p = "P-" + UUID.randomUUID();
+        String sf = "SF-" + UUID.randomUUID();
+        String ef = "EF-" + UUID.randomUUID();
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + ef).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sf)
+            .formParam("excludedFeature", ef)
+        .when()
+            .post("/products/" + p + "/constraints/excludes")
+        .then()
+            .statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + p);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationBothActive() {
+        String p = "P-" + UUID.randomUUID();
+        String sf = "SF-" + UUID.randomUUID();
+        String ef = "EF-" + UUID.randomUUID();
+        String c = "C-" + UUID.randomUUID();
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + ef).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sf).formParam("excludedFeature", ef).when().post("/products/" + p + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + ef).then().statusCode(500);
+
+        Response response = given().when().get("/products/" + p + "/configurations/" + c);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationSourceActiveOnly() {
+        String p = "P-" + UUID.randomUUID();
+        String sf = "SF-" + UUID.randomUUID();
+        String ef = "EF-" + UUID.randomUUID();
+        String c = "C-" + UUID.randomUUID();
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + ef).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sf).formParam("excludedFeature", ef).when().post("/products/" + p + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + sf).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + p + "/configurations/" + c);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationExcludedActiveOnly() {
+        String p = "P-" + UUID.randomUUID();
+        String sf = "SF-" + UUID.randomUUID();
+        String ef = "EF-" + UUID.randomUUID();
+        String c = "C-" + UUID.randomUUID();
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + ef).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sf).formParam("excludedFeature", ef).when().post("/products/" + p + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c + "/features/" + ef).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + p + "/configurations/" + c);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationNeitherActive() {
+        String p = "P-" + UUID.randomUUID();
+        String sf = "SF-" + UUID.randomUUID();
+        String ef = "EF-" + UUID.randomUUID();
+        String c = "C-" + UUID.randomUUID();
+
+        given().when().post("/products/" + p).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + sf).then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/features/" + ef).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sf).formParam("excludedFeature", ef).when().post("/products/" + p + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + p + "/configurations/" + c).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + p + "/configurations/" + c);
+
+        response.then().statusCode(200);
+    }
+}

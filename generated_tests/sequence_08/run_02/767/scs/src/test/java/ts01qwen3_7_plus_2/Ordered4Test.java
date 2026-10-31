@@ -1,0 +1,58 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    private String getBaseUrl() {
+        String baseUrl = System.getenv("BASE_URL");
+        return (baseUrl != null && !baseUrl.isEmpty()) ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthsReturnsUnordered() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/ordered4/a/b/c/d")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidLengthsUnorderedReturnsUnordered() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/ordered4/aaaaa/bbbbb/bbbbb/ccccc")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidLengthsIncreasingReturnsIncreasing() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidLengthsDecreasingReturnsDecreasing() {
+        given()
+            .baseUri(getBaseUrl())
+        .when()
+            .get("/api/ordered4/ddddd/ccccc/aaaaa/bbbbb")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+}

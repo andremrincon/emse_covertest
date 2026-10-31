@@ -1,0 +1,50 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.util.UUID;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class ProductConfigurationTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        this.baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static class Response {
+        final int status;
+        final String body;
+
+        Response(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private String resolvePath(String path, Object... params) {
+        String result = path;
+        for (Object param : params) {
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(String.valueOf(param), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                encoded = String.valueOf(param);
+            }
+            result = result.replaceFirst("\\{[^/}]+\\}", encoded);
+        }
+        return result;
+    }

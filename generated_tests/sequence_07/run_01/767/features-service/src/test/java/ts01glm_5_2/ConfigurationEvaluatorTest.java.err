@@ -1,0 +1,45 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.Scanner;
+
+public class ConfigurationEvaluatorTest {
+
+    private String baseURI;
+
+    @Before
+    public void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            baseURI = env;
+        } else {
+            baseURI = "http://localhost:8080";
+        }
+    }
+
+    private String formatPath(String template, Object... values) {
+        String s = template;
+        for (Object v : values) {
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(String.valueOf(v), "UTF-8");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            s = s.replaceFirst("\\{[^}]+\\}", encoded);
+        }
+        return s;
+    }

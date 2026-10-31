@@ -1,0 +1,47 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIEquals5Branch() {
+        given().when().get("/api/costfuns/5/algorithm").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanOrEqualNegative333Branch() {
+        given().when().get("/api/costfuns/-400/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666Branch() {
+        given().when().get("/api/costfuns/667/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThanOrEqual555Branch() {
+        given().when().get("/api/costfuns/600/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSEqualsBaabBranch() {
+        given().when().get("/api/costfuns/1/baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSCompareToAbabbaEqualBranch() {
+        given().when().get("/api/costfuns/1/ababba").then().statusCode(200);
+    }
+}
+```

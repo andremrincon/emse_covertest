@@ -1,0 +1,297 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_2.LanguageTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=v1CurrencyReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[2] METHOD=v1RegionReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[3] METHOD=v1NameReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[4] METHOD=v1AlphaByCodeReturnsCountryWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[5] METHOD=v1CapitalReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[6] METHOD=v1LangReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[7] METHOD=v1AlphaByCodesReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[8] METHOD=v1SubregionReturnsCountriesWithLanguages TYPE=ERROR
+Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+
+[9] METHOD=v2NameReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[10] METHOD=v2AlphaWithFieldsReturnsCountryWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[11] METHOD=v1CallingCodeReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+[12] METHOD=v2LangReturnsCountriesWithLanguages TYPE=FAILURE
+1 expectation failed.
+Expected status code <200> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=v1CurrencyReturnsCountriesWithLanguages FAILURE AT LINE 38
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1CurrencyReturnsCountriesWithLanguages(LanguageTest.java:38)
+CODE CONTEXT:
+    35: 
+    36:     @Test(timeout = 60000)
+    37:     public void v1CurrencyReturnsCountriesWithLanguages() {
+    38:         given().when().get("/v1/currency/USD").then().statusCode(404);  ← FAILURE HERE
+    39:     }
+    40: 
+    41:     @Test(timeout = 60000)
+
+[2] METHOD=v1RegionReturnsCountriesWithLanguages FAILURE AT LINE 53
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1RegionReturnsCountriesWithLanguages(LanguageTest.java:53)
+CODE CONTEXT:
+    50: 
+    51:     @Test(timeout = 60000)
+    52:     public void v1RegionReturnsCountriesWithLanguages() {
+    53:         given().when().get("/v1/region/Europe").then().statusCode(404);  ← FAILURE HERE
+    54:     }
+    55: 
+    56:     @Test(timeout = 60000)
+
+[3] METHOD=v1NameReturnsCountriesWithLanguages FAILURE AT LINE 28
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1NameReturnsCountriesWithLanguages(LanguageTest.java:28)
+CODE CONTEXT:
+    25: 
+    26:     @Test(timeout = 60000)
+    27:     public void v1NameReturnsCountriesWithLanguages() {
+    28:         given().when().get("/v1/name/France").then().statusCode(404);  ← FAILURE HERE
+    29:     }
+    30: 
+    31:     @Test(timeout = 60000)
+
+[4] METHOD=v1AlphaByCodeReturnsCountryWithLanguages FAILURE AT LINE 18
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1AlphaByCodeReturnsCountryWithLanguages(LanguageTest.java:18)
+CODE CONTEXT:
+    15: 
+    16:     @Test(timeout = 60000)
+    17:     public void v1AlphaByCodeReturnsCountryWithLanguages() {
+    18:         given().when().get("/v1/alpha/US").then().statusCode(404);  ← FAILURE HERE
+    19:     }
+    20: 
+    21:     @Test(timeout = 60000)
+
+[5] METHOD=v1CapitalReturnsCountriesWithLanguages FAILURE AT LINE 48
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1CapitalReturnsCountriesWithLanguages(LanguageTest.java:48)
+CODE CONTEXT:
+    45: 
+    46:     @Test(timeout = 60000)
+    47:     public void v1CapitalReturnsCountriesWithLanguages() {
+    48:         given().when().get("/v1/capital/London").then().statusCode(404);  ← FAILURE HERE
+    49:     }
+    50: 
+    51:     @Test(timeout = 60000)
+
+[6] METHOD=v1LangReturnsCountriesWithLanguages FAILURE AT LINE 33
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1LangReturnsCountriesWithLanguages(LanguageTest.java:33)
+CODE CONTEXT:
+    30: 
+    31:     @Test(timeout = 60000)
+    32:     public void v1LangReturnsCountriesWithLanguages() {
+    33:         given().when().get("/v1/lang/es").then().statusCode(404);  ← FAILURE HERE
+    34:     }
+    35: 
+    36:     @Test(timeout = 60000)
+
+[7] METHOD=v1AlphaByCodesReturnsCountriesWithLanguages FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1AlphaByCodesReturnsCountriesWithLanguages(LanguageTest.java:23)
+CODE CONTEXT:
+    20: 
+    21:     @Test(timeout = 60000)
+    22:     public void v1AlphaByCodesReturnsCountriesWithLanguages() {
+    23:         given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(404);  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[8] METHOD=v1SubregionReturnsCountriesWithLanguages FAILURE AT LINE 58
+java.net.URISyntaxException: Illegal character in path at index 52: http://localhost:8080/rest/rest/v1/subregion/Western Europe
+at ts01glm_5_2_2.LanguageTest.v1SubregionReturnsCountriesWithLanguages(LanguageTest.java:58)
+CODE CONTEXT:
+    55: 
+    56:     @Test(timeout = 60000)
+    57:     public void v1SubregionReturnsCountriesWithLanguages() {
+    58:         given().pathParam("subregion", "Western Europe").when().get("/v1/subregion/{subregion}").then().statusCode(200);  ← FAILURE HERE
+    59:     }
+    60: 
+    61:     @Test(timeout = 60000)
+
+[9] METHOD=v2NameReturnsCountriesWithLanguages FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v2NameReturnsCountriesWithLanguages(LanguageTest.java:68)
+CODE CONTEXT:
+    65: 
+    66:     @Test(timeout = 60000)
+    67:     public void v2NameReturnsCountriesWithLanguages() {
+    68:         given().when().get("/v2/name/Germany").then().statusCode(404);  ← FAILURE HERE
+    69:     }
+    70: 
+    71:     @Test(timeout = 60000)
+
+[10] METHOD=v2AlphaWithFieldsReturnsCountryWithLanguages FAILURE AT LINE 73
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v2AlphaWithFieldsReturnsCountryWithLanguages(LanguageTest.java:73)
+CODE CONTEXT:
+    70: 
+    71:     @Test(timeout = 60000)
+    72:     public void v2AlphaWithFieldsReturnsCountryWithLanguages() {
+    73:         given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(404);  ← FAILURE HERE
+    74:     }
+    75: }
+
+[11] METHOD=v1CallingCodeReturnsCountriesWithLanguages FAILURE AT LINE 43
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v1CallingCodeReturnsCountriesWithLanguages(LanguageTest.java:43)
+CODE CONTEXT:
+    40: 
+    41:     @Test(timeout = 60000)
+    42:     public void v1CallingCodeReturnsCountriesWithLanguages() {
+    43:         given().when().get("/v1/callingcode/1").then().statusCode(404);  ← FAILURE HERE
+    44:     }
+    45: 
+    46:     @Test(timeout = 60000)
+
+[12] METHOD=v2LangReturnsCountriesWithLanguages FAILURE AT LINE 63
+java.lang.AssertionError:
+at ts01glm_5_2_2.LanguageTest.v2LangReturnsCountriesWithLanguages(LanguageTest.java:63)
+CODE CONTEXT:
+    60: 
+    61:     @Test(timeout = 60000)
+    62:     public void v2LangReturnsCountriesWithLanguages() {
+    63:         given().when().get("/v2/lang/Spanish").then().statusCode(404);  ← FAILURE HERE
+    64:     }
+    65: 
+    66:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import org.junit.Before;
+import org.junit.Test;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("server.url", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCountryWithLanguages() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodesReturnsCountriesWithLanguages() {
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1NameReturnsCountriesWithLanguages() {
+        given().when().get("/v1/name/France").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangReturnsCountriesWithLanguages() {
+        given().when().get("/v1/lang/es").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CurrencyReturnsCountriesWithLanguages() {
+        given().when().get("/v1/currency/USD").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CallingCodeReturnsCountriesWithLanguages() {
+        given().when().get("/v1/callingcode/1").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CapitalReturnsCountriesWithLanguages() {
+        given().when().get("/v1/capital/London").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1RegionReturnsCountriesWithLanguages() {
+        given().when().get("/v1/region/Europe").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1SubregionReturnsCountriesWithLanguages() {
+        given().pathParam("subregion", "Western Europe").when().get("/v1/subregion/{subregion}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void v2LangReturnsCountriesWithLanguages() {
+        given().when().get("/v2/lang/Spanish").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2NameReturnsCountriesWithLanguages() {
+        given().when().get("/v2/name/Germany").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2AlphaWithFieldsReturnsCountryWithLanguages() {
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(404);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,97 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Scanner;
+
+public class DuplicatedObjectExceptionTest {
+
+    private static String baseURI;
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateProductCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "DupProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int firstStatus = post("/products/{productName}", productName);
+        Assert.assertTrue("Expected first creation status < 300 but was " + firstStatus, firstStatus < 300);
+
+        int secondStatus = post("/products/{productName}", productName);
+        Assert.assertEquals("Expected duplicate creation to return status 500", 500, secondStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateFeatureCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "DupProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "DupFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int pStatus = post("/products/{productName}", productName);
+        Assert.assertTrue("Expected product creation status < 300 but was " + pStatus, pStatus < 300);
+
+        int fStatus = post("/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue("Expected feature creation status < 300 but was " + fStatus, fStatus < 300);
+
+        int duplicateFStatus = post("/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertEquals("Expected duplicate feature creation to return status 500", 500, duplicateFStatus);
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateConfigurationCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "DupProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "DupConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int pStatus = post("/products/{productName}", productName);
+        Assert.assertTrue("Expected product creation status < 300 but was " + pStatus, pStatus < 300);
+
+        int cStatus = post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue("Expected configuration creation status < 300 but was " + cStatus, cStatus < 300);
+
+        int duplicateCStatus = post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertEquals("Expected duplicate configuration creation to return status 500", 500, duplicateCStatus);
+    }
+
+    private int post(String pathTemplate, String... values) throws Exception {
+        String path = formatPath(pathTemplate, values);
+        String full = buildUrl(path);
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(full);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            conn.connect();
+            int code = conn.getResponseCode();
+            consumeStream(conn);
+            return code;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private String formatPath(String template, String... values) throws Exception {
+        String result = template;
+        for (String v : values) {
+            String encoded = URLEncoder.encode(v, "UTF-8");
+            result = result.replaceFirst("\\{[^/}]*\\}", encoded);
+        }
+        return result;
+    }

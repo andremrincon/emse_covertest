@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testDaySunMonthJan() {
+        given()
+            .when()
+                .get("/api/dateparse/sun/jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayMonthFeb() {
+        given()
+            .when()
+                .get("/api/dateparse/xyz/feb")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDayTueMonthMar() {
+        given()
+            .when()
+                .get("/api/dateparse/tue/mar")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDayWedMonthApr() {
+        given()
+            .when()
+                .get("/api/dateparse/wed/apr")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDayThurMonthMay() {
+        given()
+            .when()
+                .get("/api/dateparse/thur/may")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDayFriMonthJun() {
+        given()
+            .when()
+                .get("/api/dateparse/fri/jun")
+            .then()
+                .statusCode(200);
+    }
+}
+```

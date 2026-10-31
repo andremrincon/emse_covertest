@@ -1,0 +1,57 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base != null && !base.isEmpty()) {
+            RestAssured.baseURI = base;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantOperator() {
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        when().get("/api/calc/pi/0/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSqrtUnaryOperator() {
+        given().when().get("/api/calc/log/10/0").then().statusCode(lessThan(300));
+        when().get("/api/calc/sqrt/16/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSineTrigOperator() {
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        when().get("/api/calc/sine/0/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTangentTrigOperator() {
+        given().when().get("/api/calc/plus/5/3").then().statusCode(lessThan(300));
+        when().get("/api/calc/tangent/0/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubtractBinaryOperator() {
+        given().when().get("/api/calc/multiply/3/4").then().statusCode(lessThan(300));
+        when().get("/api/calc/subtract/10/3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideBinaryOperatorAndDefaultBranch() {
+        given().when().get("/api/calc/unknownop/1/1").then().statusCode(lessThan(300));
+        when().get("/api/calc/divide/10/2").then().statusCode(200);
+    }
+}

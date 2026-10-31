@@ -1,0 +1,151 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertTrue;
+
+public class ConstraintRequiresTest {
+
+    private String getBase() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) return env;
+        String prop = System.getProperty("baseUrl");
+        if (prop != null && !prop.isEmpty()) return prop;
+        return "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        RestAssured.baseURI = getBase();
+        String product = "Smartwatch Series 8 " + UUID.randomUUID().toString();
+        Response pre = given().when().post("/products/{productName}", product);
+        assertTrue(pre.getStatusCode() < 300);
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", product, "Blood Oxygen Sensor");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_returns200() {
+        RestAssured.baseURI = getBase();
+        String product = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, "16GB LPDDR5 RAM");
+        assertTrue(pre2.getStatusCode() < 300);
+        Response act = given().when().get("/products/{productName}/features", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_returns200() {
+        RestAssured.baseURI = getBase();
+        String product = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        String feature = "backlit-keyboard";
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when().put("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_returns204() {
+        RestAssured.baseURI = getBase();
+        String product = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        String feature = "heart-rate-monitor";
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().contentType("application/x-www-form-urlencoded")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_returns201() {
+        RestAssured.baseURI = getBase();
+        String product = "QuantumLeap-AI-Platform-" + UUID.randomUUID().toString();
+        String config = "standard-gpu-cluster-" + UUID.randomUUID().toString();
+        String feature = "distributed-training";
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().when().post("/products/{productName}/configurations/{configurationName}", product, config);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration_returns204() {
+        RestAssured.baseURI = getBase();
+        String product = "QuantumLeap-AI-" + UUID.randomUUID().toString();
+        String config = "Premium-Tier-" + UUID.randomUUID().toString();
+        String feature = "Realtime-Analytics-Dashboard";
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().when().post("/products/{productName}/configurations/{configurationName}", product, config);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response pre3 = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        assertTrue(pre3.getStatusCode() < 300);
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeatures_returns200() {
+        RestAssured.baseURI = getBase();
+        String product = "ultra-laptop-x1-" + UUID.randomUUID().toString();
+        String config = "us-standard-16gb-" + UUID.randomUUID().toString();
+        String feature = "fingerprint-scanner";
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().when().post("/products/{productName}/configurations/{configurationName}", product, config);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response pre3 = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature);
+        assertTrue(pre3.getStatusCode() < 300);
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct_returns200() {
+        RestAssured.baseURI = getBase();
+        String product = "Laptop-Pro-X15-" + UUID.randomUUID().toString();
+        String config = "us-standard-wifi-" + UUID.randomUUID().toString();
+        Response pre1 = given().when().post("/products/{productName}", product);
+        assertTrue(pre1.getStatusCode() < 300);
+        Response pre2 = given().when().post("/products/{productName}/configurations/{configurationName}", product, config);
+        assertTrue(pre2.getStatusCode() < 300);
+        Response act = given().when().get("/products/{productName}/configurations", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddProduct_returns201() {
+        RestAssured.baseURI = getBase();
+        String product = "Wireless Mouse " + UUID.randomUUID().toString();
+        Response act = given().when().post("/products/{productName}", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByName_returns200() {
+        RestAssured.baseURI = getBase();
+        String product = "Smartwatch Series 7 " + UUID.randomUUID().toString();
+        Response pre = given().when().post("/products/{productName}", product);
+        assertTrue(pre.getStatusCode() < 300);
+        Response act = given().when().get("/products/{productName}", product);
+        act.then().statusCode(200);
+    }
+}

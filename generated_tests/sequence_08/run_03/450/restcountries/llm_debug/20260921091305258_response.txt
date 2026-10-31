@@ -1,0 +1,35 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+public class NotFoundExceptionMapperTest {
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperAlphaCode() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+
+        RestAssured.given()
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperName() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+
+        RestAssured.given()
+                .pathParam("name", "123")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404);
+    }
+}
+```

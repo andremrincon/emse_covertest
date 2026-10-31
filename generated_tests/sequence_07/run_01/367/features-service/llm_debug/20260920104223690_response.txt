@@ -1,0 +1,106 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseURI;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            baseURI = env;
+        } else {
+            baseURI = "http://localhost:8080";
+        }
+    }
+
+    private static int request(String method, String pathPattern, Object... params) throws IOException {
+        String path = pathPattern;
+        for (Object p : params) {
+            String encoded = URLEncoder.encode(String.valueOf(p), "UTF-8");
+            path = path.replaceFirst("\\{[^/]+\\}", encoded);
+        }
+        String full = baseURI.endsWith("/") && path.startsWith("/") ? baseURI.substring(0, baseURI.length() - 1) + path : baseURI + path;
+        URL url = new URL(full);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(60000);
+        conn.setReadTimeout(60000);
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
+            conn.setDoOutput(true);
+            conn.setFixedLengthStreamingMode(0);
+        }
+        try {
+            return conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationTriggersEvaluationResultConstruction() throws Exception {
+        String productName = "EvalTestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "default-config";
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        Assert.assertTrue(code < 300);
+
+        code = request("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersEvaluationResultConstruction() throws Exception {
+        String productName = "EvalTestProduct2-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base";
+        String featureName = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = request("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        code = request("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        Assert.assertTrue(code < 300);
+
+        code = request("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationForNonExistentProductTriggersEvaluationResultConstruction() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "nonexistent-config";
+
+        int code = request("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertTrue(code < 300);
+    }
+}

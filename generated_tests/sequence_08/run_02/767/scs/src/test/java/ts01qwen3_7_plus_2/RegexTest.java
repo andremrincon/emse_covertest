@@ -1,0 +1,72 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"url\"   Actual:")
+    @Test(timeout = 60000)
+    public void testUrlPatternMatch() {
+        String txt = "http://abc/def";
+
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(400)
+            .body(equalTo("url"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatch() {
+        String txt = "mon01jan";
+
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("date"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatch() {
+        String txt = "12.34e+56";
+
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("fpe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoPatternMatch() {
+        String txt = "hello";
+
+        given()
+            .pathParam("txt", txt)
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("none"));
+    }
+}

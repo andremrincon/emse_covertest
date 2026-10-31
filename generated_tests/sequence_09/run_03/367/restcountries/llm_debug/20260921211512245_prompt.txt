@@ -1,0 +1,412 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CountryRestV2Test
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAlphaListBadRequestForMalformedCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[2] METHOD=testAlphaNotFoundForUnknownAlpha TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[3] METHOD=testRegionalBlocWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[4] METHOD=testAlphaBadRequestForInvalidAlpha TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[5] METHOD=testAlphaListWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[6] METHOD=testCallingCodeWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[7] METHOD=testCurrencyNotFoundForUnknownCurrency TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[8] METHOD=testNameNotFoundForNumericName TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[9] METHOD=testNameFullTextFalseReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[10] METHOD=testAlphaWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[11] METHOD=testAlphaListNotFoundForUnknownCodes TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[12] METHOD=testCurrencyWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[13] METHOD=testCapitalWithFieldsReturns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[14] METHOD=testCurrencyBadRequestForInvalidCurrency TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+[15] METHOD=testCallingCodeNotFoundForUnknownCode TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <404> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAlphaListBadRequestForMalformedCodes FAILURE AT LINE 62
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaListBadRequestForMalformedCodes(CountryRestV2Test.java:62)
+CODE CONTEXT:
+    59: 
+    60:     @Test(timeout = 60000)
+    61:     public void testAlphaListBadRequestForMalformedCodes() {
+    62:         arrangeOkCalls();  ← FAILURE HERE
+    63:         given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha").then().statusCode(400);
+    64:     }
+    65: 
+
+[2] METHOD=testAlphaNotFoundForUnknownAlpha FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaNotFoundForUnknownAlpha(CountryRestV2Test.java:50)
+CODE CONTEXT:
+    47: 
+    48:     @Test(timeout = 60000)
+    49:     public void testAlphaNotFoundForUnknownAlpha() {
+    50:         arrangeOkCalls();  ← FAILURE HERE
+    51:         given().pathParam("alpha", "ZZZ").when().get("/v2/alpha/{alpha}").then().statusCode(404);
+    52:     }
+    53: 
+
+[3] METHOD=testRegionalBlocWithFieldsReturns200 FAILURE AT LINE 122
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testRegionalBlocWithFieldsReturns200(CountryRestV2Test.java:122)
+CODE CONTEXT:
+   119: 
+   120:     @Test(timeout = 60000)
+   121:     public void testRegionalBlocWithFieldsReturns200() {
+   122:         arrangeOkCalls();  ← FAILURE HERE
+   123:         given().pathParam("regionalbloc", "EU").queryParam("fields", "name;capital;currencies").when().get("/v2/regionalbloc/{regionalbloc}").then().statusCode(200);
+   124:     }
+   125: }
+
+[4] METHOD=testAlphaBadRequestForInvalidAlpha FAILURE AT LINE 44
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaBadRequestForInvalidAlpha(CountryRestV2Test.java:44)
+CODE CONTEXT:
+    41: 
+    42:     @Test(timeout = 60000)
+    43:     public void testAlphaBadRequestForInvalidAlpha() {
+    44:         arrangeOkCalls();  ← FAILURE HERE
+    45:         given().pathParam("alpha", "123").when().get("/v2/alpha/{alpha}").then().statusCode(400);
+    46:     }
+    47: 
+
+[5] METHOD=testAlphaListWithFieldsReturns200 FAILURE AT LINE 56
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaListWithFieldsReturns200(CountryRestV2Test.java:56)
+CODE CONTEXT:
+    53: 
+    54:     @Test(timeout = 60000)
+    55:     public void testAlphaListWithFieldsReturns200() {
+    56:         arrangeOkCalls();  ← FAILURE HERE
+    57:         given().queryParam("codes", "US").queryParam("fields", "name;capital").when().get("/v2/alpha").then().statusCode(200);
+    58:     }
+    59: 
+
+[6] METHOD=testCallingCodeWithFieldsReturns200 FAILURE AT LINE 104
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCallingCodeWithFieldsReturns200(CountryRestV2Test.java:104)
+CODE CONTEXT:
+   101: 
+   102:     @Test(timeout = 60000)
+   103:     public void testCallingCodeWithFieldsReturns200() {
+   104:         arrangeOkCalls();  ← FAILURE HERE
+   105:         given().pathParam("callingcode", "1").queryParam("fields", "name;capital;region").when().get("/v2/callingcode/{callingcode}").then().statusCode(200);
+   106:     }
+   107: 
+
+[7] METHOD=testCurrencyNotFoundForUnknownCurrency FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCurrencyNotFoundForUnknownCurrency(CountryRestV2Test.java:86)
+CODE CONTEXT:
+    83: 
+    84:     @Test(timeout = 60000)
+    85:     public void testCurrencyNotFoundForUnknownCurrency() {
+    86:         arrangeOkCalls();  ← FAILURE HERE
+    87:         given().pathParam("currency", "XYZ").when().get("/v2/currency/{currency}").then().statusCode(404);
+    88:     }
+    89: 
+
+[8] METHOD=testNameNotFoundForNumericName FAILURE AT LINE 98
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testNameNotFoundForNumericName(CountryRestV2Test.java:98)
+CODE CONTEXT:
+    95: 
+    96:     @Test(timeout = 60000)
+    97:     public void testNameNotFoundForNumericName() {
+    98:         arrangeOkCalls();  ← FAILURE HERE
+    99:         given().pathParam("name", "123").when().get("/v2/name/{name}").then().statusCode(404);
+   100:     }
+   101: 
+
+[9] METHOD=testNameFullTextFalseReturns200 FAILURE AT LINE 92
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testNameFullTextFalseReturns200(CountryRestV2Test.java:92)
+CODE CONTEXT:
+    89: 
+    90:     @Test(timeout = 60000)
+    91:     public void testNameFullTextFalseReturns200() {
+    92:         arrangeOkCalls();  ← FAILURE HERE
+    93:         given().pathParam("name", "France").queryParam("fullText", "false").when().get("/v2/name/{name}").then().statusCode(200);
+    94:     }
+    95: 
+
+[10] METHOD=testAlphaWithFieldsReturns200 FAILURE AT LINE 38
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaWithFieldsReturns200(CountryRestV2Test.java:38)
+CODE CONTEXT:
+    35: 
+    36:     @Test(timeout = 60000)
+    37:     public void testAlphaWithFieldsReturns200() {
+    38:         arrangeOkCalls();  ← FAILURE HERE
+    39:         given().queryParam("fields", "name;capital").pathParam("alpha", "US").when().get("/v2/alpha/{alpha}").then().statusCode(200);
+    40:     }
+    41: 
+
+[11] METHOD=testAlphaListNotFoundForUnknownCodes FAILURE AT LINE 68
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testAlphaListNotFoundForUnknownCodes(CountryRestV2Test.java:68)
+CODE CONTEXT:
+    65: 
+    66:     @Test(timeout = 60000)
+    67:     public void testAlphaListNotFoundForUnknownCodes() {
+    68:         arrangeOkCalls();  ← FAILURE HERE
+    69:         given().queryParam("codes", "999").when().get("/v2/alpha").then().statusCode(404);
+    70:     }
+    71: 
+
+[12] METHOD=testCurrencyWithFieldsReturns200 FAILURE AT LINE 74
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCurrencyWithFieldsReturns200(CountryRestV2Test.java:74)
+CODE CONTEXT:
+    71: 
+    72:     @Test(timeout = 60000)
+    73:     public void testCurrencyWithFieldsReturns200() {
+    74:         arrangeOkCalls();  ← FAILURE HERE
+    75:         given().pathParam("currency", "EUR").queryParam("fields", "name;capital;population").when().get("/v2/currency/{currency}").then().statusCode(200);
+    76:     }
+    77: 
+
+[13] METHOD=testCapitalWithFieldsReturns200 FAILURE AT LINE 116
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCapitalWithFieldsReturns200(CountryRestV2Test.java:116)
+CODE CONTEXT:
+   113: 
+   114:     @Test(timeout = 60000)
+   115:     public void testCapitalWithFieldsReturns200() {
+   116:         arrangeOkCalls();  ← FAILURE HERE
+   117:         given().pathParam("capital", "Paris").queryParam("fields", "name;capital;population").when().get("/v2/capital/{capital}").then().statusCode(200);
+   118:     }
+   119: 
+
+[14] METHOD=testCurrencyBadRequestForInvalidCurrency FAILURE AT LINE 80
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCurrencyBadRequestForInvalidCurrency(CountryRestV2Test.java:80)
+CODE CONTEXT:
+    77: 
+    78:     @Test(timeout = 60000)
+    79:     public void testCurrencyBadRequestForInvalidCurrency() {
+    80:         arrangeOkCalls();  ← FAILURE HERE
+    81:         given().pathParam("currency", "12").when().get("/v2/currency/{currency}").then().statusCode(400);
+    82:     }
+    83: 
+
+[15] METHOD=testCallingCodeNotFoundForUnknownCode FAILURE AT LINE 110
+java.lang.AssertionError:
+at ts01gpt_5_mini.CountryRestV2Test.arrangeOkCalls(CountryRestV2Test.java:31)
+at ts01gpt_5_mini.CountryRestV2Test.testCallingCodeNotFoundForUnknownCode(CountryRestV2Test.java:110)
+CODE CONTEXT:
+   107: 
+   108:     @Test(timeout = 60000)
+   109:     public void testCallingCodeNotFoundForUnknownCode() {
+   110:         arrangeOkCalls();  ← FAILURE HERE
+   111:         given().pathParam("callingcode", "999999").when().get("/v2/callingcode/{callingcode}").then().statusCode(404);
+   112:     }
+   113: 
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            String env = System.getenv("BASE_URL");
+            base = (env == null || env.isEmpty()) ? "http://localhost:8080/rest" : env;
+        }
+        RestAssured.baseURI = base;
+    }
+
+    private void arrangeOkCalls() {
+        given().when().queryParam("fields", "name;capital;population;region").get("/v2/all").then().statusCode(lessThan(300));
+        given().when().pathParam("alpha", "US").get("/v2/alpha/{alpha}").then().statusCode(lessThan(300));
+        given().when().queryParam("codes", "US").get("/v2/alpha").then().statusCode(lessThan(300));
+        given().when().pathParam("currency", "EUR").get("/v2/currency/{currency}").then().statusCode(lessThan(300));
+        given().when().pathParam("name", "France").queryParam("fullText", "false").get("/v2/name/{name}").then().statusCode(lessThan(300));
+        given().when().pathParam("callingcode", "1").get("/v2/callingcode/{callingcode}").then().statusCode(lessThan(300));
+        given().when().pathParam("capital", "Paris").get("/v2/capital/{capital}").then().statusCode(lessThan(300));
+        given().when().pathParam("region", "Europe").get("/v2/region/{region}").then().statusCode(lessThan(300));
+        given().when().pathParam("subregion", "Western Europe").get("/v2/subregion/{subregion}").then().statusCode(lessThan(300));
+        given().when().pathParam("lang", "Spanish").get("/v2/lang/{lang}").then().statusCode(lessThan(300));
+        given().when().pathParam("demonym", "American").get("/v2/demonym/{demonym}").then().statusCode(lessThan(300));
+        given().when().pathParam("regionalbloc", "EU").get("/v2/regionalbloc/{regionalbloc}").then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().queryParam("fields", "name;capital").pathParam("alpha", "US").when().get("/v2/alpha/{alpha}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaBadRequestForInvalidAlpha() {
+        arrangeOkCalls();
+        given().pathParam("alpha", "123").when().get("/v2/alpha/{alpha}").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaNotFoundForUnknownAlpha() {
+        arrangeOkCalls();
+        given().pathParam("alpha", "ZZZ").when().get("/v2/alpha/{alpha}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().queryParam("codes", "US").queryParam("fields", "name;capital").when().get("/v2/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListBadRequestForMalformedCodes() {
+        arrangeOkCalls();
+        given().queryParam("codes", "[\"US\",\"CA\"]").when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testAlphaListNotFoundForUnknownCodes() {
+        arrangeOkCalls();
+        given().queryParam("codes", "999").when().get("/v2/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().pathParam("currency", "EUR").queryParam("fields", "name;capital;population").when().get("/v2/currency/{currency}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyBadRequestForInvalidCurrency() {
+        arrangeOkCalls();
+        given().pathParam("currency", "12").when().get("/v2/currency/{currency}").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNotFoundForUnknownCurrency() {
+        arrangeOkCalls();
+        given().pathParam("currency", "XYZ").when().get("/v2/currency/{currency}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameFullTextFalseReturns200() {
+        arrangeOkCalls();
+        given().pathParam("name", "France").queryParam("fullText", "false").when().get("/v2/name/{name}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundForNumericName() {
+        arrangeOkCalls();
+        given().pathParam("name", "123").when().get("/v2/name/{name}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().pathParam("callingcode", "1").queryParam("fields", "name;capital;region").when().get("/v2/callingcode/{callingcode}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCallingCodeNotFoundForUnknownCode() {
+        arrangeOkCalls();
+        given().pathParam("callingcode", "999999").when().get("/v2/callingcode/{callingcode}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().pathParam("capital", "Paris").queryParam("fields", "name;capital;population").when().get("/v2/capital/{capital}").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionalBlocWithFieldsReturns200() {
+        arrangeOkCalls();
+        given().pathParam("regionalbloc", "EU").queryParam("fields", "name;capital;currencies").when().get("/v2/regionalbloc/{regionalbloc}").then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

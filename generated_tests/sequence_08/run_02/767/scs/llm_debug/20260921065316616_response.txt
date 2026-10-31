@@ -1,0 +1,47 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testAllValidOperations() {
+        String[] ops = {"pi", "e", "sqrt", "log", "sine", "cosine", "tangent", "plus", "subtract", "multiply", "divide"};
+        for (String op : ops) {
+            given().when().get("/api/calc/" + op + "/10.0/2.0").then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZero() {
+        given().when().get("/api/calc/divide/100.0/0.0").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNumberFormat() {
+        given().when().get("/api/calc/plus/10.0/twenty").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidOperation() {
+        given().when().get("/api/calc/invalid/10.0/2.0").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testLargeNumbers() {
+        given().when().get("/api/calc/multiply/1.7976931348623157e+308/1e+300").then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeNumbers() {
+        given().when().get("/api/calc/subtract/-50.25/10.0").then().statusCode(200);
+    }
+}

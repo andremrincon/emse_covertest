@@ -1,0 +1,53 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base", System.getenv("API_BASE") != null ? System.getenv("API_BASE") : "http://localhost:8080/rest");
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_US_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_numeric_badRequest_400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_USD_status200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Currency_EUR_withFields_status200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;population").when().get("/v2/currency/{currency}", "EUR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_US_fields_responseContainsName() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/{alphacode}", "US").then().body("name", equalTo("United States of America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Currency_unknownCurrency_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "XYZ").then().statusCode(404);
+    }
+}

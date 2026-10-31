@@ -1,0 +1,63 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedShortLength() {
+        given()
+            .when()
+                .get("/api/ordered4/a/apple/cherry/mango")
+            .then()
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedLongLength() {
+        given()
+            .when()
+                .get("/api/ordered4/applepie/apple/cherry/mango")
+            .then()
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/berry/dates/cherry")
+            .then()
+                .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/dates/cherry/apple/berry")
+            .then()
+                .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedValidLengths() {
+        given()
+            .when()
+                .get("/api/ordered4/apple/berry/cherry/dates")
+            .then()
+                .body(equalTo("unordered"));
+    }
+}
+```

@@ -1,0 +1,60 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setUpClass() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithJanFebMarMonths() {
+        given().when().get("/api/dateparse/mon/jan").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/feb").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/wed/mar")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithAprMayJunMonths() {
+        given().when().get("/api/dateparse/thur/apr").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/may").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/sat/jun")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithJulAugSepMonths() {
+        given().when().get("/api/dateparse/sun/jul").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/mon/aug").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/tue/sep")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithOctNovDecMonths() {
+        given().when().get("/api/dateparse/wed/oct").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/thur/nov").then().statusCode(lessThan(300));
+        given().when().get("/api/dateparse/fri/dec")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndInvalidMonth() {
+        given().when().get("/api/dateparse/xyz/xyz")
+            .then().statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayWithInvalidMonth() {
+        given().when().get("/api/dateparse/mon/xyz")
+            .then().statusCode(lessThan(300));
+    }
+}

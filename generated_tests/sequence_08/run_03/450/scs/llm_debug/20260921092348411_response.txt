@@ -1,0 +1,52 @@
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Test;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testValidDayValidMonth() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "jan")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayValidMonth() {
+        given()
+            .pathParam("dayname", "xyz")
+            .pathParam("monthname", "jan")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayInvalidMonth() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "xyz")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayInvalidMonth() {
+        given()
+            .pathParam("dayname", "xyz")
+            .pathParam("monthname", "xyz")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(500);
+    }
+}

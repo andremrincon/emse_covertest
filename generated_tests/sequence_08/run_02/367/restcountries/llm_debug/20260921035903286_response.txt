@@ -1,0 +1,77 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class LanguageTest {
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodeSetsLanguageFields() {
+        // Arrange
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/alpha/US");
+
+        // Assert
+        response.then().statusCode(200);
+        assertEquals("en", response.jsonPath().getString("languages[0].iso639_1"));
+        assertEquals("eng", response.jsonPath().getString("languages[0].iso639_2"));
+        assertEquals("English", response.jsonPath().getString("languages[0].name"));
+        assertEquals("English", response.jsonPath().getString("languages[0].nativeName"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangSetsLanguageFields() {
+        // Arrange
+        given().when().get("/v1/lang/es").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/lang/es");
+
+        // Assert
+        response.then().statusCode(200);
+        assertEquals("es", response.jsonPath().getString("[0].languages[0].iso639_1"));
+        assertEquals("spa", response.jsonPath().getString("[0].languages[0].iso639_2"));
+        assertEquals("Spanish", response.jsonPath().getString("[0].languages[0].name"));
+        assertEquals("Español", response.jsonPath().getString("[0].languages[0].nativeName"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencySetsLanguageFields() {
+        // Arrange
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/currency/USD");
+
+        // Assert
+        response.then().statusCode(200);
+        assertEquals("en", response.jsonPath().getString("[0].languages[0].iso639_1"));
+        assertEquals("eng", response.jsonPath().getString("[0].languages[0].iso639_2"));
+        assertEquals("English", response.jsonPath().getString("[0].languages[0].name"));
+        assertEquals("English", response.jsonPath().getString("[0].languages[0].nativeName"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameSetsLanguageFields() {
+        // Arrange
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+
+        // Act
+        Response response = given().when().get("/v1/name/France");
+
+        // Assert
+        response.then().statusCode(200);
+        assertEquals("fr", response.jsonPath().getString("[0].languages[0].iso639_1"));
+        assertEquals("fra", response.jsonPath().getString("[0].languages[0].iso639_2"));
+        assertEquals("French", response.jsonPath().getString("[0].languages[0].name"));
+        assertEquals("français", response.jsonPath().getString("[0].languages[0].nativeName"));
+    }
+}
+```

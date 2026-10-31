@@ -1,0 +1,312 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.util.UUID;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConstraintsResourceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        this.baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private static class Response {
+        final int status;
+        final String body;
+
+        Response(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private String resolvePath(String path, Object... params) {
+        String result = path;
+        for (Object param : params) {
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(String.valueOf(param), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                encoded = String.valueOf(param);
+            }
+            result = result.replaceFirst("\\{[^/}]+\\}", encoded);
+        }
+        return result;
+    }
+
+    private Response doRequest(String method, String path, Object... params) {
+        HttpURLConnection conn = null;
+        try {
+            String resolved = resolvePath(path, params);
+            URL url = new URL(baseUrl + resolved);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            conn.setDoInput(true);
+            int status = conn.getResponseCode();
+            InputStream is = null;
+            try {
+                if (status >= 200 && status < 400) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+            } catch (IOException e) {
+                is = conn.getErrorStream();
+            }
+            String body = "";
+            if (is != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                body = sb.toString();
+                br.close();
+            }
+            return new Response(status, body);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private void assertStatusLessThan(String method, String path, int upperExclusive, Object... params) {
+        Response r = doRequest(method, path, params);
+        assertTrue("Expected status < " + upperExclusive + " but was " + r.status, r.status < upperExclusive);
+    }
+
+    private void assertStatusEquals(String method, String path, int expected, Object... params) {
+        Response r = doRequest(method, path, params);
+        assertTrue("Expected status == " + expected + " but was " + r.status, r.status == expected);
+    }
+
+    private void assertBodyContains(String method, String path, Object[] params, String item, boolean shouldContain) {
+        Response r = doRequest(method, path, params);
+        if (shouldContain) {
+            assertTrue("Response body did not contain expected item: " + item + " Body: " + r.body, r.body != null && r.body.contains(item));
+        } else {
+            assertFalse("Response body contained item but should not: " + item + " Body: " + r.body, r.body != null && r.body.contains(item));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesViaGetConfiguration() {
+        String productName = "test-prod-avail-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-avail-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-avail-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("GET", "/products/{productName}/configurations/{configurationName}", 200, productName, configurationName);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesViaGetConfigurationFeatures() {
+        String productName = "test-prod-active-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-active-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-active-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertStatusEquals("GET", "/products/{productName}/configurations/{configurationName}/features", 200, productName, configurationName);
+    }
+
+    @Test(timeout = 60000)
+    public void testActiveFeatureViaPostConfigurationFeature() {
+        String productName = "test-prod-addfeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-addfeat-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-addfeat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 201, productName, configurationName, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureViaDeleteConfigurationFeature() {
+        String productName = "test-prod-deact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-deact-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-deact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertStatusEquals("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 204, productName, configurationName, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testSetValidViaCreateConfiguration() {
+        String productName = "test-prod-setvalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-setvalid-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+
+        assertStatusEquals("POST", "/products/{productName}/configurations/{configurationName}", 201, productName, configurationName);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductViaGetConfiguration() {
+        String productName = "test-prod-getprod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-getprod-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("GET", "/products/{productName}/configurations/{configurationName}", 200, productName, configurationName);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureAfterActivation() {
+        String productName = "test-prod-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-hasact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertBodyContains("GET", "/products/{productName}/configurations/{configurationName}/features", new Object[]{productName, configurationName}, featureName, true);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasActiveFeatureFalseWhenNoFeaturesActivated() {
+        String productName = "test-prod-noact-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-noact-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-noact-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertBodyContains("GET", "/products/{productName}/configurations/{configurationName}/features", new Object[]{productName, configurationName}, featureName, false);
+    }
+
+    @Test(timeout = 60000)
+    public void testCollectFeatureNamesWithMultipleFeatures() {
+        String productName = "test-prod-multi-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-multi-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "feat-multi1-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "feat-multi2-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, feature1);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, feature2);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, feature1);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, feature2);
+
+        assertBodyContains("GET", "/products/{productName}/configurations/{configurationName}/features", new Object[]{productName, configurationName}, feature1, true);
+        assertBodyContains("GET", "/products/{productName}/configurations/{configurationName}/features", new Object[]{productName, configurationName}, feature2, true);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactiveFeatureNotActivated() {
+        String productName = "test-prod-deactna-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-deactna-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-deactna-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 204, productName, configurationName, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsListForProduct() {
+        String productName = "test-prod-list-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-list-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("GET", "/products/{productName}/configurations", 200, productName);
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithEmptyProductFeatures() {
+        String productName = "test-prod-empty-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-empty-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+
+        assertStatusEquals("GET", "/products/{productName}/configurations/{configurationName}", 200, productName, configurationName);
+    }
+
+    @Test(timeout = 60000)
+    public void testReActivateFeatureAfterDeactivation() {
+        String productName = "test-prod-react-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-react-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-react-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+        assertStatusLessThan("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertStatusEquals("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 201, productName, configurationName, featureName);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesAfterDeactivationIsEmpty() {
+        String productName = "test-prod-deactempty-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-deactempty-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-deactempty-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+        assertStatusLessThan("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertBodyContains("GET", "/products/{productName}/configurations/{configurationName}/features", new Object[]{productName, configurationName}, featureName, false);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationAfterFeatureOperations() {
+        String productName = "test-prod-delconf-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-delconf-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-delconf-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan("POST", "/products/{productName}", 300, productName);
+        assertStatusLessThan("POST", "/products/{productName}/features/{featureName}", 300, productName, featureName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}", 300, productName, configurationName);
+        assertStatusLessThan("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+        assertStatusLessThan("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", 300, productName, configurationName, featureName);
+
+        assertStatusEquals("DELETE", "/products/{productName}/configurations/{configurationName}", 204, productName, configurationName);
+    }
+}

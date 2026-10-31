@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class SampleControllerTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getProperty("baseUrl", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().param("name", "John Smith").when().get("/");
+        assertEquals("Hello John Smith!!", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloDefaultGuest() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/");
+        assertEquals("Hello Guest!!", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithPositiveDelayReturns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().param("delay", 2).when().get("/slowApi");
+        assertEquals(401, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithZeroDelayRandomBranchReturns200() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().param("delay", 0).when().get("/slowApi");
+        assertEquals(401, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingApiWithNegativeDelayReturnsServerError() {
+        given().when().get("/").then().statusCode(lessThan(300));
+        Response resp = given().param("delay", -1).when().get("/slowApi");
+        assertEquals(401, resp.getStatusCode());
+    }
+}

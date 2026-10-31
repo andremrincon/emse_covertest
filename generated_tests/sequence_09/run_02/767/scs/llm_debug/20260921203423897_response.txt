@@ -1,0 +1,45 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class DateParseTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidAbbrevDayAndMonthReturnsComputedValue() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/dateparse/wed/mar").andReturn();
+        res.then().body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayAndMonthReturnsServerError() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/dateparse/Superday/Movember").andReturn();
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAbbrevDayMonAndDecReturnsThirteen() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response res = given().when().get("/api/dateparse/mon/dec").andReturn();
+        res.then().body(equalTo("13"));
+    }
+}

@@ -1,0 +1,428 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FeatureConstraintTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintExercisesSetIdAndSetForProduct() {
+        String uniqueProduct = "ReqProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", uniqueProduct)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintExercisesSetIdAndSetForProduct() {
+        String uniqueProduct = "ExclProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", uniqueProduct)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintExercisesGetId() {
+        String uniqueProduct = "DelProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SSD-Storage";
+        String requiredFeature = "Graphics-Card";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        String constraintId = given()
+                .when()
+                .get("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getString("constraints[0].id");
+
+        given()
+                .when()
+                .delete("/products/{productName}/constraints/{constraintId}", uniqueProduct, constraintId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithConstraintsExercisesGetId() {
+        String uniqueProduct = "GetProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "Push-Notifications";
+        String excludedFeature = "OS-Home";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(200)
+                .body("constraints", not(empty()));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithRequiresConstraintExercisesGetId() {
+        String uniqueProduct = "EvalProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "base-config";
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", uniqueProduct, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", uniqueProduct, configName, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", uniqueProduct, configName, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", uniqueProduct, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithExcludesConstraintExercisesGetId() {
+        String uniqueProduct = "EvalExcl-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "standard";
+        String sourceFeature = "Color-Black";
+        String excludedFeature = "Logo-White-On-Black";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", uniqueProduct, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}/features/{featureName}", uniqueProduct, configName, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", uniqueProduct, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithNameExercisesGetIdViaConstraints() {
+        String uniqueProduct = "ConfigProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "dev";
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "User-Authentication";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, requiredFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/configurations/{configurationName}", uniqueProduct, configName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}", uniqueProduct, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteExcludesConstraintExercisesGetId() {
+        String uniqueProduct = "DelExclProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "PSU-Redundant";
+        String excludedFeature = "OS-Windows-11-Pro";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        String constraintId = given()
+                .when()
+                .get("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getString("constraints[0].id");
+
+        given()
+                .when()
+                .delete("/products/{productName}/constraints/{constraintId}", uniqueProduct, constraintId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAllProductsAfterConstraintCreationExercisesGetId() {
+        String uniqueProduct = "AllProducts-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "Strap-Leather";
+        String excludedFeature = "PSU-Redundant";
+
+        given()
+                .when()
+                .post("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, sourceFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .post("/products/{productName}/features/{featureName}", uniqueProduct, excludedFeature)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", uniqueProduct)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}", uniqueProduct)
+                .then()
+                .statusCode(200)
+                .body("constraints[0].id", notNullValue());
+    }
+}

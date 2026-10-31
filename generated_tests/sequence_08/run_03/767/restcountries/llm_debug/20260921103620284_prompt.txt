@@ -1,0 +1,255 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus_3.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCorsFilterAddsAllowHeadersHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Headers" was not "Accept, X-Requested-With", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Mon, 21 Sep 2026 13:35:29 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[2] METHOD=testCorsFilterAddsAllowOriginHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Origin" was not "*", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Transfer-Encoding=chunked
+Date=Mon, 21 Sep 2026 13:35:29 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[3] METHOD=testCorsFilterAddsCacheControlHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Cache-Control" was not "public, max-age=86400", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=739
+Date=Mon, 21 Sep 2026 13:35:29 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+[4] METHOD=testCorsFilterAppliesToSubregion TYPE=ERROR
+Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+
+[5] METHOD=testCorsFilterAddsAllowMethodsHeader TYPE=FAILURE
+1 expectation failed.
+Expected header "Access-Control-Allow-Methods" was not "GET", was "null". Headers are:
+Content-Type=application/json;charset=utf-8
+Content-Length=780
+Date=Mon, 21 Sep 2026 13:35:29 GMT
+Keep-Alive=timeout=60
+Connection=keep-alive
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCorsFilterAddsAllowHeadersHeader FAILURE AT LINE 41
+java.lang.AssertionError:
+at ts01qwen3_7_plus_3.CORSFilterTest.testCorsFilterAddsAllowHeadersHeader(CORSFilterTest.java:41)
+CODE CONTEXT:
+    38:         .when()
+    39:             .get("/v1/currency/USD")
+    40:         .then()
+    41:             .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");  ← FAILURE HERE
+    42:     }
+    43: 
+    44:     @Test(timeout = 60000)
+
+[2] METHOD=testCorsFilterAddsAllowOriginHeader FAILURE AT LINE 23
+java.lang.AssertionError:
+at ts01qwen3_7_plus_3.CORSFilterTest.testCorsFilterAddsAllowOriginHeader(CORSFilterTest.java:23)
+CODE CONTEXT:
+    20:         .when()
+    21:             .get("/v1/all")
+    22:         .then()
+    23:             .header("Access-Control-Allow-Origin", "*");  ← FAILURE HERE
+    24:     }
+    25: 
+    26:     @Test(timeout = 60000)
+
+[3] METHOD=testCorsFilterAddsCacheControlHeader FAILURE AT LINE 50
+java.lang.AssertionError:
+at ts01qwen3_7_plus_3.CORSFilterTest.testCorsFilterAddsCacheControlHeader(CORSFilterTest.java:50)
+CODE CONTEXT:
+    47:         .when()
+    48:             .get("/v1/name/France")
+    49:         .then()
+    50:             .header("Cache-Control", "public, max-age=86400");  ← FAILURE HERE
+    51:     }
+    52: 
+    53:     @Test(timeout = 60000)
+
+[4] METHOD=testCorsFilterAppliesToSubregion FAILURE AT LINE 93
+java.net.URISyntaxException: Illegal character in path at index 47: http://localhost:8080/rest/v1/subregion/Western Europe
+at ts01qwen3_7_plus_3.CORSFilterTest.testCorsFilterAppliesToSubregion(CORSFilterTest.java:93)
+CODE CONTEXT:
+    90:     public void testCorsFilterAppliesToSubregion() {
+    91:         given()
+    92:         .when()
+    93:             .get("/v1/subregion/Western Europe")  ← FAILURE HERE
+    94:         .then()
+    95:             .statusCode(200);
+    96:     }
+
+[5] METHOD=testCorsFilterAddsAllowMethodsHeader FAILURE AT LINE 32
+java.lang.AssertionError:
+at ts01qwen3_7_plus_3.CORSFilterTest.testCorsFilterAddsAllowMethodsHeader(CORSFilterTest.java:32)
+CODE CONTEXT:
+    29:         .when()
+    30:             .get("/v1/alpha/US")
+    31:         .then()
+    32:             .header("Access-Control-Allow-Methods", "GET");  ← FAILURE HERE
+    33:     }
+    34: 
+    35:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+        RestAssured.basePath = "/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowOriginHeader() {
+        given()
+        .when()
+            .get("/v1/all")
+        .then()
+            .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowMethodsHeader() {
+        given()
+        .when()
+            .get("/v1/alpha/US")
+        .then()
+            .header("Access-Control-Allow-Methods", "GET");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsAllowHeadersHeader() {
+        given()
+        .when()
+            .get("/v1/currency/USD")
+        .then()
+            .header("Access-Control-Allow-Headers", "Accept, X-Requested-With");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAddsCacheControlHeader() {
+        given()
+        .when()
+            .get("/v1/name/France")
+        .then()
+            .header("Cache-Control", "public, max-age=86400");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToV2All() {
+        given()
+        .when()
+            .get("/v2/all")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToV2Alpha() {
+        given()
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToCapital() {
+        given()
+        .when()
+            .get("/v1/capital/London")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToRegion() {
+        given()
+        .when()
+            .get("/v1/region/Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToSubregion() {
+        given()
+        .when()
+            .get("/v1/subregion/Western Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToLang() {
+        given()
+        .when()
+            .get("/v1/lang/es")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToCallingCode() {
+        given()
+        .when()
+            .get("/v1/callingcode/1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterAppliesToRegionalBloc() {
+        given()
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

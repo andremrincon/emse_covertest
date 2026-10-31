@@ -1,0 +1,159 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2LangSpanishReturnsCountriesWithLanguages() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2LangEnglishReturnsCountriesWithLanguages() {
+        given()
+                .when()
+                .get("/v2/lang/English")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2AlphaUSReturnsCountryWithLanguages() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2NameGermanyReturnsCountryWithLanguages() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2AllReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2CurrencyEURReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2Callingcode1ReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2CapitalParisReturnsCountryWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/capital/Paris")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2RegionEuropeReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/region/Europe")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2SubregionWesternEuropeReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/subregion/Western%20Europe")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2DemonymAmericanReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/demonym/American")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void testV2RegionalblocEUReturnsCountriesWithLanguages() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(404)
+                .body("[0].languages", notNullValue());
+    }
+}

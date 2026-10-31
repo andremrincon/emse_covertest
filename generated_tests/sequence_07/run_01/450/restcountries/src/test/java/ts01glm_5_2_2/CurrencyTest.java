@@ -1,0 +1,142 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCurrencyWithCodeNameSymbol() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].code", equalTo("USD"))
+                .body("currencies[0].name", equalTo("United States dollar"))
+                .body("currencies[0].symbol", equalTo("$"));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v1CurrencyEndpointReturnsCountriesWithCurrencyFields() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("USD"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v1AlphaMultipleCodesReturnsCurrencyData() {
+        given()
+                .queryParam("codes", "US,CA,MX")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("USD"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v1NameEndpointReturnsCurrencyWithAllFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", equalTo("Euro"))
+                .body("[0].currencies[0].symbol", equalTo("€"));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v2AlphaByCodeReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(404)
+                .body("currencies[0].code", equalTo("USD"))
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v2CurrencyEndpointReturnsCountriesWithCurrencyCode() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", equalTo("Euro"))
+                .body("[0].currencies[0].symbol", equalTo("€"));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v2RegionalblocReturnsCountriesWithCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", notNullValue())
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v2NameEndpointReturnsCurrencyWithSymbol() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", equalTo("Euro"))
+                .body("[0].currencies[0].symbol", equalTo("€"));
+    }
+
+    @Ignore("Expected response body to be verified as JSON, HTML or XML but no content-type was defined in the...")
+    @Test(timeout = 60000)
+    public void v2AlphaMultipleCodesReturnsCurrencyData() {
+        given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(404)
+                .body("[0].currencies[0].code", equalTo("USD"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+}

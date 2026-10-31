@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleValidMrUppercase() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "MALE", "MR");
+        assertEquals("1", resp.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleValidMrs() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "female", "mrs");
+        assertEquals("0", resp.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneValidProf() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "none", "prof");
+        assertEquals("2", resp.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleInvalidTitleReturnsMinusOne() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "male", "Smith");
+        assertEquals("-1", resp.asString().trim());
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownSexProducesServerErrorStatus() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "neuter", "Jones");
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleRevAlternateCase() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/title/{sex}/{title}", "FEMALE", "REV");
+        assertEquals("0", resp.asString().trim());
+    }
+}

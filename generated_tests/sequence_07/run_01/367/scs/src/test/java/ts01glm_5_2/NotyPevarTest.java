@@ -1,0 +1,74 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI0True() {
+        given()
+            .when()
+            .get("/api/notypevar/28/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI1True() {
+        given()
+            .when()
+            .get("/api/notypevar/7/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectBranchI2TrueI3False() {
+        given()
+            .when()
+            .get("/api/notypevar/0/zzz")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectAllBranchesFalse() {
+        given()
+            .when()
+            .get("/api/notypevar/0/a")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidIntegerInput() {
+        given()
+            .when()
+            .get("/api/notypevar/abc/a")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectIntegerOverflowInput() {
+        given()
+            .when()
+            .get("/api/notypevar/2147483648/a")
+            .then()
+            .statusCode(400);
+    }
+}

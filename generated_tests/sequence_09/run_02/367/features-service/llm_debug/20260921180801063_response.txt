@@ -1,0 +1,90 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ProductsServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductSuccess() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feature-" + UUID.randomUUID().toString();
+        String encProduct = URLEncoder.encode(product, StandardCharsets.UTF_8.name());
+        String encFeature = URLEncoder.encode(feature, StandardCharsets.UTF_8.name());
+        given().when().post("/products/{productName}", encProduct).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").when().post("/products/{productName}/features/{featureName}", encProduct, encFeature);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductDuplicate() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "dupfeature-" + UUID.randomUUID().toString();
+        String encProduct = URLEncoder.encode(product, StandardCharsets.UTF_8.name());
+        String encFeature = URLEncoder.encode(feature, StandardCharsets.UTF_8.name());
+        given().when().post("/products/{productName}", encProduct).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "first").when().post("/products/{productName}/features/{featureName}", encProduct, encFeature).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("description", "second").when().post("/products/{productName}/features/{featureName}", encProduct, encFeature);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureRemovesFromConfigurations() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String feature = "feat-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String encProduct = URLEncoder.encode(product, StandardCharsets.UTF_8.name());
+        String encFeature = URLEncoder.encode(feature, StandardCharsets.UTF_8.name());
+        String encConfig = URLEncoder.encode(config, StandardCharsets.UTF_8.name());
+        given().when().post("/products/{productName}", encProduct).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "to be deleted").when().post("/products/{productName}/features/{featureName}", encProduct, encFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", encProduct, encConfig).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", encProduct, encConfig, encFeature).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", encProduct, encFeature);
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintSuccess() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String srcFeature = "RAID-Controller-Card";
+        String reqFeature = "128GB-ECC-RAM";
+        String encProduct = URLEncoder.encode(product, StandardCharsets.UTF_8.name());
+        given().when().post("/products/{productName}", encProduct).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", srcFeature).formParam("requiredFeature", reqFeature).when().post("/products/{productName}/constraints/requires", encProduct);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintSuccess() throws Exception {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String srcFeature = "CPU-i9-13900H";
+        String exclFeature = "Integrated-Graphics-Only";
+        String encProduct = URLEncoder.encode(product, StandardCharsets.UTF_8.name());
+        given().when().post("/products/{productName}", encProduct).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", srcFeature).formParam("excludedFeature", exclFeature).when().post("/products/{productName}/constraints/excludes", encProduct);
+        assertEquals(201, resp.getStatusCode());
+    }
+}

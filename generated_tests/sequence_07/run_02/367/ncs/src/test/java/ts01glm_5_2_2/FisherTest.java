@@ -1,0 +1,40 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @Test(timeout = 60000)
+    public void testFisherA1B1() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        given()
+            .when()
+            .get(baseUrl + "/api/fisher/3/3/0.75")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherANot1B1PGreaterThan1() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        given()
+            .when()
+            .get(baseUrl + "/api/fisher/2/3/1000.0")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherA1BNot1PLessThan0() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        given()
+            .when()
+            .get(baseUrl + "/api/fisher/3/100/0.75")
+            .then()
+            .statusCode(200);
+    }
+}

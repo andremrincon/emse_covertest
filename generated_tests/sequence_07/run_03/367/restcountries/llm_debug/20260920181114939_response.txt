@@ -1,0 +1,82 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl != null) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080/rest";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundReturnsStatusField() {
+        given()
+                .when()
+                .get("/v1/name/123")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalNotFoundReturnsMessageField() {
+        given()
+                .when()
+                .get("/v1/capital/123")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionNotFoundReturnsStatusField() {
+        given()
+                .when()
+                .get("/v1/region/123")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingcodeNotFoundReturnsMessageField() {
+        given()
+                .when()
+                .get("/v1/callingcode/abc")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetLangNotFoundReturnsStatusField() {
+        given()
+                .when()
+                .get("/v1/lang/123")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetAlphaNotFoundReturnsMessageField() {
+        given()
+                .when()
+                .get("/v1/alpha/XYZ")
+                .then()
+                .statusCode(404)
+                .body(equalTo(""));
+    }
+}

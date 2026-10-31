@@ -1,0 +1,128 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NcsRestTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_valid_n() {
+        given()
+            .when()
+                .get("/api/bessj/3/2.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_n_less_than_2() {
+        given()
+            .when()
+                .get("/api/bessj/2/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_n_greater_than_1000() {
+        given()
+            .when()
+                .get("/api/bessj/1001/2.5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void fisher_valid() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fisher_m_greater_than_1000() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void fisher_n_greater_than_1000() {
+        given()
+            .when()
+                .get("/api/fisher/10/1001/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void gammq_valid() {
+        given()
+            .when()
+                .get("/api/gammq/5.5/2.3")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_valid() {
+        given()
+            .when()
+                .get("/api/remainder/17/5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_a_exceeds_limit() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_b_exceeds_limit() {
+        given()
+            .when()
+                .get("/api/remainder/17/10001")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_a_below_limit() {
+        given()
+            .when()
+                .get("/api/remainder/-10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void remainder_b_below_limit() {
+        given()
+            .when()
+                .get("/api/remainder/17/-10001")
+            .then()
+                .statusCode(400);
+    }
+}
+```

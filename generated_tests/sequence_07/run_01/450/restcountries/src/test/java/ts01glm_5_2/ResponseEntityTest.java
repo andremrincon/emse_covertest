@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.basePath = "";
+    }
+
+    @Test(timeout = 60000)
+    public void testNameNotFoundReturnsResponseEntityStatus() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testCapitalNotFoundReturnsResponseEntityWithStatusField() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionNotFoundReturnsResponseEntityWithMessageField() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCurrencyNotFoundReturnsResponseEntityStatus() {
+        given()
+            .when()
+                .get("/v2/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testDemonymNotFoundReturnsResponseEntityStatusField() {
+        given()
+            .when()
+                .get("/v2/demonym/123")
+            .then()
+                .body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void testRegionalBlocNotFoundReturnsResponseEntityMessageField() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/123")
+            .then()
+                .body("message", equalTo("Not Found"));
+    }
+}

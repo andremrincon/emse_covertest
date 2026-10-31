@@ -1,0 +1,102 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String source = "CPU-" + UUID.randomUUID();
+        String excluded = "Integrated-Graphics-" + UUID.randomUUID();
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWhenBothFeaturesActiveEvaluatesBranch() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "cfg-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        String source = "FeatureA-" + UUID.randomUUID();
+        String excluded = "FeatureB-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, source).then().statusCode(500);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excluded).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWhenOnlySourceActiveDoesNotTriggerBothActiveBranch() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "cfg-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        String source = "OnlySource-" + UUID.randomUUID();
+        String excluded = "ShouldBeAbsent-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, source).then().statusCode(500);
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductShowsConstraintInclusionAfterCreation() {
+        String productName = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String source = "SRC-" + UUID.randomUUID();
+        String excluded = "EXCL-" + UUID.randomUUID();
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}", productName).then().body(containsString(source));
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithProblematicProductReturns500() {
+        String productName = "Workstation-Z8";
+        String source = "CPU-i9-13900H";
+        String excluded = "Integrated-Graphics-Only";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintWithProblematicFieldsReturns500() {
+        String productName = "Smart-Watch-S3";
+        String source = "PSU-Redundant";
+        String excluded = "OS-Home";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when().post("/products/{productName}/constraints/excludes", productName)
+                .then().statusCode(201);
+    }
+}

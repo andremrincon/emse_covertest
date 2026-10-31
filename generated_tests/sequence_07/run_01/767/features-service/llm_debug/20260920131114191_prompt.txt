@@ -1,0 +1,507 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductConfigurationTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testGetProductFeaturesAfterConfigurationCreation TYPE=FAILURE
+
+
+[2] METHOD=testAddExcludesConstraintWithActiveFeatures TYPE=FAILURE
+
+
+[3] METHOD=testActivedFeaturesAfterDeactivation TYPE=FAILURE
+
+
+[4] METHOD=testGetActivedFeaturesWithFeature TYPE=FAILURE
+
+
+[5] METHOD=testReAddFeatureAfterRemoval TYPE=FAILURE
+
+
+[6] METHOD=testDeleteFeatureFromConfiguration TYPE=FAILURE
+
+
+[7] METHOD=testAddFeatureToConfiguration TYPE=FAILURE
+
+
+[8] METHOD=testGetConfigurationWithActivedFeatures TYPE=FAILURE
+
+
+[9] METHOD=testAddMultipleFeaturesToConfiguration TYPE=FAILURE
+
+
+[10] METHOD=testAddRequiresConstraintWithActiveFeatures TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testGetProductFeaturesAfterConfigurationCreation FAILURE AT LINE 273
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testGetProductFeaturesAfterConfigurationCreation(ProductConfigurationTest.java:273)
+CODE CONTEXT:
+   270:         int code = sendRequest("POST", "/products/{productName}", productName);
+   271:         Assert.assertTrue(code < 300);
+   272:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   273:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   274:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   275:         Assert.assertTrue(code < 300);
+   276:         code = sendRequest("GET", "/products/{productName}/features", productName);
+
+[2] METHOD=testAddExcludesConstraintWithActiveFeatures FAILURE AT LINE 312
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testAddExcludesConstraintWithActiveFeatures(ProductConfigurationTest.java:312)
+CODE CONTEXT:
+   309:         int code = sendRequest("POST", "/products/{productName}", productName);
+   310:         Assert.assertTrue(code < 300);
+   311:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   312:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   313:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   314:         Assert.assertTrue(code < 300);
+   315:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+
+[3] METHOD=testActivedFeaturesAfterDeactivation FAILURE AT LINE 235
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testActivedFeaturesAfterDeactivation(ProductConfigurationTest.java:235)
+CODE CONTEXT:
+   232:         int code = sendRequest("POST", "/products/{productName}", productName);
+   233:         Assert.assertTrue(code < 300);
+   234:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   235:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   236:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   237:         Assert.assertTrue(code < 300);
+   238:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[4] METHOD=testGetActivedFeaturesWithFeature FAILURE AT LINE 140
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testGetActivedFeaturesWithFeature(ProductConfigurationTest.java:140)
+CODE CONTEXT:
+   137:         int code = sendRequest("POST", "/products/{productName}", productName);
+   138:         Assert.assertTrue(code < 300);
+   139:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   140:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   141:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   142:         Assert.assertTrue(code < 300);
+   143:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[5] METHOD=testReAddFeatureAfterRemoval FAILURE AT LINE 254
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testReAddFeatureAfterRemoval(ProductConfigurationTest.java:254)
+CODE CONTEXT:
+   251:         int code = sendRequest("POST", "/products/{productName}", productName);
+   252:         Assert.assertTrue(code < 300);
+   253:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   254:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   255:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   256:         Assert.assertTrue(code < 300);
+   257:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[6] METHOD=testDeleteFeatureFromConfiguration FAILURE AT LINE 169
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testDeleteFeatureFromConfiguration(ProductConfigurationTest.java:169)
+CODE CONTEXT:
+   166:         int code = sendRequest("POST", "/products/{productName}", productName);
+   167:         Assert.assertTrue(code < 300);
+   168:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   169:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   170:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   171:         Assert.assertTrue(code < 300);
+   172:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[7] METHOD=testAddFeatureToConfiguration FAILURE AT LINE 125
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testAddFeatureToConfiguration(ProductConfigurationTest.java:125)
+CODE CONTEXT:
+   122:         int code = sendRequest("POST", "/products/{productName}", productName);
+   123:         Assert.assertTrue(code < 300);
+   124:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   125:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   126:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   127:         Assert.assertTrue(code < 300);
+   128:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[8] METHOD=testGetConfigurationWithActivedFeatures FAILURE AT LINE 218
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testGetConfigurationWithActivedFeatures(ProductConfigurationTest.java:218)
+CODE CONTEXT:
+   215:         int code = sendRequest("POST", "/products/{productName}", productName);
+   216:         Assert.assertTrue(code < 300);
+   217:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   218:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   219:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+   220:         Assert.assertTrue(code < 300);
+   221:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+
+[9] METHOD=testAddMultipleFeaturesToConfiguration FAILURE AT LINE 199
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testAddMultipleFeaturesToConfiguration(ProductConfigurationTest.java:199)
+CODE CONTEXT:
+   196:         int code = sendRequest("POST", "/products/{productName}", productName);
+   197:         Assert.assertTrue(code < 300);
+   198:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   199:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   200:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   201:         Assert.assertTrue(code < 300);
+   202:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+
+[10] METHOD=testAddRequiresConstraintWithActiveFeatures FAILURE AT LINE 289
+java.lang.AssertionError
+at ts01glm_5_2.ProductConfigurationTest.testAddRequiresConstraintWithActiveFeatures(ProductConfigurationTest.java:289)
+CODE CONTEXT:
+   286:         int code = sendRequest("POST", "/products/{productName}", productName);
+   287:         Assert.assertTrue(code < 300);
+   288:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   289:         Assert.assertTrue(code < 300);  ← FAILURE HERE
+   290:         code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   291:         Assert.assertTrue(code < 300);
+   292:         code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+
+public class ProductConfigurationTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uniqueProduct() {
+        return "TestProd-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueConfig() {
+        return "TestCfg-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueFeature() {
+        return "TestFeat-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String substitute(String template, String... params) throws UnsupportedEncodingException {
+        String result = template;
+        for (String p : params) {
+            result = result.replaceFirst("\\{[^/]+\\}", URLEncoder.encode(p, "UTF-8"));
+        }
+        return result;
+    }
+
+    private int sendRequest(String method, String pathTemplate, String... params) throws Exception {
+        String path = substitute(pathTemplate, params);
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setInstanceFollowRedirects(false);
+        conn.connect();
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private int sendPostWithForm(String pathTemplate, Map<String, String> formParams, String... params) throws Exception {
+        String path = substitute(pathTemplate, params);
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        StringBuilder body = new StringBuilder();
+        for (Map.Entry<String, String> e : formParams.entrySet()) {
+            if (body.length() > 0) {
+                body.append("&");
+            }
+            body.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            body.append("=");
+            body.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        byte[] bytes = body.toString().getBytes("UTF-8");
+        conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+        OutputStream os = conn.getOutputStream();
+        os.write(bytes);
+        os.flush();
+        os.close();
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfiguration() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations", productName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationByName() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActivedFeaturesWithFeature() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetActivedFeaturesEmpty() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfiguration() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddMultipleFeaturesToConfiguration() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String feature1 = uniqueFeature();
+        String feature2 = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature1);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature2);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithActivedFeatures() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testActivedFeaturesAfterDeactivation() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testReAddFeatureAfterRemoval() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesAfterConfigurationCreation() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String featureName = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("GET", "/products/{productName}/features", productName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintWithActiveFeatures() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String feature1 = uniqueFeature();
+        String feature2 = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature1);
+        Assert.assertTrue(code < 300);
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", feature1);
+        form.put("requiredFeature", feature2);
+        code = sendPostWithForm("/products/{productName}/constraints/requires", form, productName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintWithActiveFeatures() throws Exception {
+        String productName = uniqueProduct();
+        String configName = uniqueConfig();
+        String feature1 = uniqueFeature();
+        String feature2 = uniqueFeature();
+        int code = sendRequest("POST", "/products/{productName}", productName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        Assert.assertTrue(code < 300);
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, feature1);
+        Assert.assertTrue(code < 300);
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", feature1);
+        form.put("excludedFeature", feature2);
+        code = sendPostWithForm("/products/{productName}/constraints/excludes", form, productName);
+        Assert.assertEquals(201, code);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

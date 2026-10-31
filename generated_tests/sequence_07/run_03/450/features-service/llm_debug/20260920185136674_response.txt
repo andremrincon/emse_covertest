@@ -1,0 +1,108 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConfigurationsServiceTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterGetRequestNonOptionsPath() {
+        String productName = "AeroBook-Pro-15-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given().when().get("/products/{productName}/features", productName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterOptionsRequestExercisesElseBranch() {
+        Response response = RestAssured.given().when().options("/products");
+
+        assertNotNull(response);
+        assertTrue(response.getStatusCode() < 500);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPostRequestNonOptionsPath() {
+        String productName = "Smartwatch-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "BloodOxygenSensor-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given();
+        req.formParam("description", "Measures the oxygen saturation of your blood on demand.");
+        Response response = req.when().post("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPutRequestNonOptionsPath() {
+        String productName = "AeroBook-Pro-15-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "backlit-keyboard-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req1 = RestAssured.given();
+        req1.formParam("description", "Initial description");
+        req1.when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        RequestSpecification req2 = RestAssured.given();
+        req2.formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.");
+        Response response = req2.when().put("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterDeleteRequestNonOptionsPath() {
+        String productName = "SmartWatch-Pro-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "heart-rate-monitor-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        RequestSpecification req = RestAssured.given();
+        req.formParam("description", "Heart rate monitoring");
+        req.when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given().when()
+                .delete("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsHeadersOnResponse() {
+        String productName = "USB-C-Adapter-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        Response response = RestAssured.given().when().get("/products/{productName}", productName);
+
+        response.then().statusCode(200);
+        String allowOrigin = response.getHeader("Access-Control-Allow-Origin");
+        assertNotNull(allowOrigin);
+        assertTrue(allowOrigin.equals("*"));
+    }
+}

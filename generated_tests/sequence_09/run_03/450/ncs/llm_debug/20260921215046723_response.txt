@@ -1,0 +1,62 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = System.getProperty("api.base", "http://localhost:8080");
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aZero_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 0, 5);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_bZero_returns400() {
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 17, 0);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_positiveA_positiveB_returnsRemainder() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 17, 5);
+        resp.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_positiveA_negativeB_returnsRemainder() {
+        given().when().get("/api/triangle/2/2/3").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", 17, -5);
+        resp.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_negativeA_positiveB_returnsRemainder() {
+        given().when().get("/api/triangle/4/5/6").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", -9, 4);
+        resp.then().statusCode(200).body(equalTo("-1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_negativeA_negativeB_returnsRemainder() {
+        given().when().get("/api/triangle/5/5/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/remainder/{a}/{b}", -9, -4);
+        resp.then().statusCode(200).body(equalTo("1"));
+    }
+}

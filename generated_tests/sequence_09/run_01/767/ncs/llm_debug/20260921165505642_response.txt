@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    private static final String BASE = System.getProperty("api.base", System.getenv("API_BASE") != null ? System.getenv("API_BASE") : "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testRemainder_aIsZero_returnsBadRequest() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/0/5");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_bIsZero_returnsBadRequest() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/5/0");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aPositive_bPositive_returnsOk() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/17/5");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aPositive_bNegative_returnsOk() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/17/-5");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aNegative_bPositive_returnsOk() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/-9/4");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aNegative_bNegative_returnsOk() {
+        given().baseUri(BASE).when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().baseUri(BASE).when().get("/api/remainder/-9/-4");
+        resp.then().statusCode(200);
+    }
+}

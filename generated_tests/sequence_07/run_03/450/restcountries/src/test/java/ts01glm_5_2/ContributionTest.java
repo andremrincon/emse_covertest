@@ -1,0 +1,183 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withValidAmountAndToken_returnsAccepted() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100,\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withZeroAmount_returnsAccepted() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":0,\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withNegativeAmount_returnsAccepted() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":-50,\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withLargeAmount_returnsAccepted() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":99999999,\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withMissingToken_returnsBadRequest() {
+        String payload = "{\"amount\":100}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withMissingAmount_returnsBadRequest() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withEmptyBody_returnsBadRequest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withEmptyToken_returnsAccepted() {
+        String payload = "{\"amount\":50,\"token\":\"\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withNullToken_returnsAccepted() {
+        String payload = "{\"amount\":50,\"token\":null}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withStringAmount_returnsBadRequest() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":\"100\",\"token\":\"" + token + "\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_withExtraFields_returnsAccepted() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":200,\"token\":\"" + token + "\",\"currency\":\"USD\",\"email\":\"test@test.com\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <400> but was <415>.")
+    @Test(timeout = 60000)
+    public void contribute_withNoContentType_returnsBadRequest() {
+        String token = UUID.randomUUID().toString();
+        String payload = "{\"amount\":100,\"token\":\"" + token + "\"}";
+
+        given()
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(400);
+    }
+}

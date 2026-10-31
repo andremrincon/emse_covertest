@@ -1,0 +1,52 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("api.base", System.getenv("API_BASE_URL") != null ? System.getenv("API_BASE_URL") : "http://localhost:8080");
+        RestAssured.baseURI = env;
+    }
+
+    private String enc(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternReturns200() throws Exception {
+        given().when().get("/api/pat/{txt}", enc("a")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("http://abc/def"));
+        act.then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternReturns200() throws Exception {
+        given().when().get("/api/pat/{txt}", enc("a")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("wed12jan"));
+        act.then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternReturns200() throws Exception {
+        given().when().get("/api/pat/{txt}", enc("a")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("12.34e+56"));
+        act.then().statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternReturns200() throws Exception {
+        given().when().get("/api/pat/{txt}", enc("a")).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", enc("no-match-text"));
+        act.then().statusCode(equalTo(200));
+    }
+}

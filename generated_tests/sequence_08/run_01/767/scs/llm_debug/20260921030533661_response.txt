@@ -1,0 +1,88 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantPi() {
+        given()
+            .when()
+                .get("/api/calc/pi/0.0/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantE() {
+        given()
+            .when()
+                .get("/api/calc/e/0.0/0.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOperators() {
+        String[] ops = {"sqrt", "log", "sine", "cosine", "tangent"};
+        for (String op : ops) {
+            given()
+                .when()
+                    .get("/api/calc/" + op + "/1.0/0.0")
+                .then()
+                    .statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryAddSubtract() {
+        given()
+            .when()
+                .get("/api/calc/plus/1.0/2.0")
+            .then()
+                .statusCode(200);
+        
+        given()
+            .when()
+                .get("/api/calc/subtract/2.0/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryMultiplyDivide() {
+        given()
+            .when()
+                .get("/api/calc/multiply/2.0/3.0")
+            .then()
+                .statusCode(200);
+        
+        given()
+            .when()
+                .get("/api/calc/divide/6.0/2.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidOperator() {
+        given()
+            .when()
+                .get("/api/calc/unknown/1.0/2.0")
+            .then()
+                .statusCode(200);
+    }
+}

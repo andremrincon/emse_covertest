@@ -1,0 +1,98 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserNormalPath() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/5.5/2.3")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZeroPath() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/5.5/0.0")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfNormalPath() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/5.5/1000.0")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testExeInvalidA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/-1.0/2.3")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExeInvalidX() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/5.5/-1.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidTypeA() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/abc/2.3")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserConvergenceFailure() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/1000.0/1000.0")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfConvergenceFailure() {
+        given()
+            .accept(ContentType.JSON)
+        .when()
+            .get("/api/gammq/1000.0/1001.0")
+        .then()
+            .statusCode(200);
+    }
+}

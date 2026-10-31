@@ -1,0 +1,74 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonthNov() {
+        given()
+            .pathParam("dayname", "wed")
+            .pathParam("monthname", "nov")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayValidMonth() {
+        given()
+            .pathParam("dayname", "invalid")
+            .pathParam("monthname", "jan")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayInvalidMonth() {
+        given()
+            .pathParam("dayname", "mon")
+            .pathParam("monthname", "invalid")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidDayInvalidMonth() {
+        given()
+            .pathParam("dayname", "xyz")
+            .pathParam("monthname", "abc")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonthDec() {
+        given()
+            .pathParam("dayname", "fri")
+            .pathParam("monthname", "dec")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testValidDayAndMonthAug() {
+        given()
+            .pathParam("dayname", "sun")
+            .pathParam("monthname", "aug")
+        .when()
+            .get("/api/dateparse/{dayname}/{monthname}")
+        .then()
+            .statusCode(lessThan(300));
+    }
+}

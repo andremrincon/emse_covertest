@@ -1,0 +1,87 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseNotFound() {
+        String txt = "ABCDEF";
+        String pat = "ABC";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundPatNotFound() {
+        String txt = "CBADEF";
+        String pat = "ABC";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseFoundNonAdjacent() {
+        String txt = "ABCXCBA";
+        String pat = "ABC";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromePatFollowedByReverse() {
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPalindromeReverseFollowedByPat() {
+        String txt = "CBAABC";
+        String pat = "ABC";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLengthTooShort() {
+        String txt = "ABABCABAB";
+        String pat = "AB";
+        given()
+        .when()
+            .get("/api/pat/{txt}/{pat}", txt, pat)
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+}

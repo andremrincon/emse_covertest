@@ -1,0 +1,54 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            RestAssured.baseURI = System.getProperty("BASE_URL", System.getProperty("baseUrl", "http://localhost:8080"));
+        }
+        RestAssured.basePath = "/";
+    }
+
+    @Test(timeout = 60000)
+    public void postConfiguration_with_excessively_long_name_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}", product, longConfigName);
+        Assert.assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void postFeature_with_malformed_featureName_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String config = "standard-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        String maliciousFeatureName = "new-feature";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, maliciousFeatureName);
+        Assert.assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfiguration_with_numeric_name_12345_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String configName = "12345";
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configName).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", product, configName);
+        Assert.assertEquals(200, act.getStatusCode());
+    }
+}

@@ -1,0 +1,68 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyUSD() {
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCountryByCurrencyXOF() {
+        given().when().get("/v1/currency/XOF").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2CurrencyEURWithFields() {
+        given().when().queryParam("fields", "name;currencies").get("/v2/currency/EUR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1AlphaUSReturnsCurrencies() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2AlphaGBWithCurrenciesField() {
+        given().when().queryParam("fields", "name;currencies").get("/v2/alpha/GB").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2RegionalblocEUWithCurrencies() {
+        given().when().queryParam("fields", "name;capital;currencies").get("/v2/regionalbloc/EU").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1NameFranceReturnsCurrencies() {
+        given().when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV2AllWithCurrenciesField() {
+        given().when().queryParam("fields", "name;currencies").get("/v2/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1AllReturnsCurrencies() {
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+}
+```

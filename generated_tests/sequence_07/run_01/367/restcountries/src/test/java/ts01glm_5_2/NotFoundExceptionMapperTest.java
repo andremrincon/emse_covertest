@@ -1,0 +1,30 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotFoundExceptionMapperTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForNonExistentRootPath() {
+        given().when().get("/nonexistent" + System.currentTimeMillis()).then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForNonExistentV1SubPath() {
+        given().when().get("/v1/nonexistent" + System.currentTimeMillis()).then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperReturns404ForNonExistentV2SubPath() {
+        given().when().get("/v2/nonexistent" + System.currentTimeMillis()).then().statusCode(404);
+    }
+}

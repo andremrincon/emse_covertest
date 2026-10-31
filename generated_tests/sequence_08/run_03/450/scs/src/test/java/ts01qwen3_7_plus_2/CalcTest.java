@@ -1,0 +1,67 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @Test(timeout = 60000)
+    public void testLog() {
+        given()
+            .pathParam("op", "log")
+            .pathParam("arg1", 10.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSine() {
+        given()
+            .pathParam("op", "sine")
+            .pathParam("arg1", 0.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCosine() {
+        given()
+            .pathParam("op", "cosine")
+            .pathParam("arg1", 0.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTangent() {
+        given()
+            .pathParam("op", "tangent")
+            .pathParam("arg1", 0.0)
+            .pathParam("arg2", 0.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubtract() {
+        given()
+            .pathParam("op", "subtract")
+            .pathParam("arg1", 10.0)
+            .pathParam("arg2", 5.0)
+        .when()
+            .get("/api/calc/{op}/{arg1}/{arg2}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,76 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.net.URI;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() throws Exception {
+        String base = System.getProperty("api.base", System.getenv("API_BASE"));
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        URI uri = new URI(base);
+        String scheme = uri.getScheme() == null ? "http" : uri.getScheme();
+        String host = uri.getHost() == null ? "localhost" : uri.getHost();
+        RestAssured.baseURI = scheme + "://" + host;
+        if (uri.getPort() != -1) RestAssured.port = uri.getPort();
+        RestAssured.basePath = uri.getPath() == null || uri.getPath().isEmpty() ? "" : uri.getPath();
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_nullJson_returnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given()
+                .contentType("application/json;charset=utf-8")
+                .body("null")
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_missingTokenField_returnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String json = "{\"amount\":100}";
+        given()
+                .contentType("application/json;charset=utf-8")
+                .body(json)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_blankTokenSpaces_returnsBadRequest() {
+        given().when().get("/v2?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        String json = "{\"amount\":250,\"token\":\"   \"}";
+        given()
+                .contentType("application/json;charset=utf-8")
+                .body(json)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContribute_validToken_returnsAccepted() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String token = "tok_visa_" + UUID.randomUUID().toString();
+        String json = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        given()
+                .contentType("application/json;charset=utf-8")
+                .body(json)
+                .when()
+                .post("/contribute")
+                .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,92 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_validCode_returns200() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_unknownCode_returns404() {
+        given().when().get("/v1/alpha/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_shortCode_returns400() {
+        given().when().get("/v1/alpha/A").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_validCodes_returns200() {
+        given().queryParam("codes", "US;CA").when().get("/v1/alpha/").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_unknownCodes_returns404() {
+        given().queryParam("codes", "XX;YY;ZZ").when().get("/v1/alpha/").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_noCodesParam_returns400() {
+        given().when().get("/v1/alpha/").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_validCurrency_returns200() {
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_unknownCurrency_returns404() {
+        given().when().get("/v1/currency/XYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_invalidLength_returns400() {
+        given().when().get("/v1/currency/US").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_unknownName_returns404() {
+        given().when().get("/v1/name/NonExistentCountryName").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_unknownCode_returns404() {
+        given().when().get("/v1/callingcode/99999").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_unknownCapital_returns404() {
+        given().when().get("/v1/capital/NonExistentCapital").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_unknownRegion_returns404() {
+        given().when().get("/v1/region/NonExistentRegion").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_unknownSubregion_returns404() {
+        given().when().get("/v1/subregion/NonExistentSubregion").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_unknownLang_returns404() {
+        given().when().get("/v1/lang/NonExistentLang").then().statusCode(404);
+    }
+}

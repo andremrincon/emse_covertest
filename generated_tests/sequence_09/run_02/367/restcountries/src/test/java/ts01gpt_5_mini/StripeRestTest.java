@@ -1,0 +1,67 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_NoBody_ReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().contentType("application/json").when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_EmptyToken_ReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":100,\"token\":\"\"}";
+        Response response = given().contentType("application/json").body(body).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_WhitespaceToken_ReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String body = "{\"amount\":200,\"token\":\"   \"}";
+        Response response = given().contentType("application/json").body(body).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_ValidLookingToken_ReturnsAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String token = "valid-token-" + UUID.randomUUID().toString();
+        String body = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        Response response = given().contentType("application/json").body(body).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void contribute_NonEmptyToken_AuthFailureReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String token = "tok_visa_" + UUID.randomUUID().toString();
+        String body = "{\"amount\":300,\"token\":\"" + token + "\"}";
+        Response response = given().contentType("application/json").body(body).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+}

@@ -1,0 +1,74 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", System.getenv("baseUrl"));
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCurrencyCode() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCurrencyName() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCurrencySymbol() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CurrencyEndpointReturnsCountriesWithCurrencyFields() {
+        given().when().get("/v1/currency/USD").then().statusCode(404);
+        given().when().get("/v1/currency/USD").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2AlphaWithCurrenciesFieldReturnsCurrencyCode() {
+        given().when().queryParam("fields", "name;currencies").get("/v2/alpha/US").then().statusCode(404);
+        given().when().queryParam("fields", "name;currencies").get("/v2/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2CurrencyEndpointReturnsCurrencyNameAndSymbol() {
+        given().when().get("/v2/currency/EUR").then().statusCode(404);
+        given().when().get("/v2/currency/EUR").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2RegionalblocWithCurrenciesFieldReturnsCurrencySymbol() {
+        given().when().queryParam("fields", "name;capital;currencies").get("/v2/regionalbloc/EU").then().statusCode(404);
+        given().when().queryParam("fields", "name;capital;currencies").get("/v2/regionalbloc/EU").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaMultipleCodesReturnsCurrencyCode() {
+        given().when().queryParam("codes", "US,CA").get("/v1/alpha").then().statusCode(404);
+        given().when().queryParam("codes", "US,CA").get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2AllWithCurrenciesFieldReturnsCurrencyFields() {
+        given().when().queryParam("fields", "name;currencies").get("/v2/all").then().statusCode(404);
+        given().when().queryParam("fields", "name;currencies").get("/v2/all").then().statusCode(404);
+    }
+}

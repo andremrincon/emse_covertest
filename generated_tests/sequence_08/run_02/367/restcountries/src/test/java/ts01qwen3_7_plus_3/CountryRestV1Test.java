@@ -1,0 +1,171 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ValidCode_Returns200() {
+        Response response = given()
+            .pathParam("alphacode", "US")
+            .when()
+            .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_EmptyCodes_Returns400() {
+        Response response = given()
+            .queryParam("codes", "")
+            .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_ValidCodes_Returns200() {
+        Response response = given()
+            .queryParam("codes", "US,CA,MX")
+            .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFoundCodes_Returns404() {
+        Response response = given()
+            .queryParam("codes", "XX,YY,ZZ")
+            .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_MalformedCodes_Returns500() throws Exception {
+        String encoded = URLEncoder.encode("[\"US\", \"CA\"]", "UTF-8");
+        Response response = given()
+            .queryParam("codes", encoded)
+            .when()
+            .get("/v1/alpha");
+
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_ValidCurrency_Returns200() {
+        Response response = given()
+            .pathParam("currency", "USD")
+            .when()
+            .get("/v1/currency/{currency}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_NotFoundCurrency_Returns404() {
+        Response response = given()
+            .pathParam("currency", "XYZ")
+            .when()
+            .get("/v1/currency/{currency}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_ValidName_Returns200() {
+        Response response = given()
+            .pathParam("name", "France")
+            .when()
+            .get("/v1/name/{name}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_NotFoundName_Returns404() {
+        Response response = given()
+            .pathParam("name", "123")
+            .when()
+            .get("/v1/name/{name}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_ValidCode_Returns200() {
+        Response response = given()
+            .pathParam("callingcode", "1")
+            .when()
+            .get("/v1/callingcode/{callingcode}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_ValidCapital_Returns200() {
+        Response response = given()
+            .pathParam("capital", "London")
+            .when()
+            .get("/v1/capital/{capital}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_ValidRegion_Returns200() {
+        Response response = given()
+            .pathParam("region", "Europe")
+            .when()
+            .get("/v1/region/{region}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_ValidSubregion_Returns200() {
+        Response response = given()
+            .pathParam("subregion", "Western%20Europe")
+            .when()
+            .get("/v1/subregion/{subregion}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_ValidLanguage_Returns200() {
+        Response response = given()
+            .pathParam("lang", "es")
+            .when()
+            .get("/v1/lang/{lang}");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_NotFoundLanguage_Returns404() {
+        Response response = given()
+            .pathParam("lang", "123")
+            .when()
+            .get("/v1/lang/{lang}");
+
+        response.then().statusCode(404);
+    }
+}

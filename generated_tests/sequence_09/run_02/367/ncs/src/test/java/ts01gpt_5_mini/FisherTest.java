@@ -1,0 +1,58 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_b1_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 1, 1, 0.75);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_a1_bNot1_loopPath_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 3, 4, 0.75);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_aNot1_b1_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, 0.75);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_bothNot1_elseBranch_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 4, 0.0);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_invalidX_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/fisher/{m}/{n}/{x}", 10, 5, "abc");
+        act.then().statusCode(400);
+    }
+}

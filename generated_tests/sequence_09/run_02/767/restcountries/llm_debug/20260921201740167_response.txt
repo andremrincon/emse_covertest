@@ -1,0 +1,69 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_withValidAlphacode_returnsCorsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "US").then().header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_withInvalidFormat_alphacode123_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_withNonExistent_alphacodeTrue_returns404() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/{alphacode}", "True").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_queryCodes_validCodes_returnsAllowMethodsHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes={codes}", "US,CA,MX").then().header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Alpha_queryCodes_malformed_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha?codes={codes}", "123").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Currency_validCurrency_returnsCacheControlHeader() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/currency/{currency}", "USD").then().header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetV1Name_withFullTextParam_true_returnsCorsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/{name}?fullText={full}", "France", "true").then().header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testPostContribute_withPayload_returnsCorsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"currency\":\"USD\",\"token\":\"tok_test\"}";
+        given().contentType(ContentType.JSON).body(payload).when().post("/contribute").then().header("Access-Control-Allow-Origin", nullValue());
+    }
+}

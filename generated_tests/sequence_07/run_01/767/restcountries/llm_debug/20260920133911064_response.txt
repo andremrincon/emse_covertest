@@ -1,0 +1,165 @@
+package ts01glm_5_2_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.response.Response;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+public class LanguageTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaUsReturnsLanguageIso639_1() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/alpha/US")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String iso = r.path("languages[0].iso639_1");
+        assertEquals("en", iso);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaGbReturnsLanguageIso639_2() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/alpha/GB")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String iso2 = r.path("languages[0].iso639_2");
+        assertEquals("eng", iso2);
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangEsReturnsLanguageName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/lang/es")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String name = r.path("[0].languages[0].name");
+        assertEquals("Spanish", name);
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangZhReturnsLanguageNativeName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/lang/zh")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        Object nativeName = r.path("[0].languages[0].nativeName");
+        assertNotNull(nativeName);
+    }
+
+    @Test(timeout = 60000)
+    public void v1NameFranceReturnsLanguageIso639_1() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/name/France")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String iso = r.path("[0].languages[0].iso639_1");
+        assertEquals("fr", iso);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CurrencyUsdReturnsLanguageName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/currency/USD")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String name = r.path("[0].languages[0].name");
+        assertEquals("English", name);
+    }
+
+    @Test(timeout = 60000)
+    public void v1RegionEuropeReturnsLanguageNativeName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/region/Europe")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        Object nativeName = r.path("[0].languages[0].nativeName");
+        assertNotNull(nativeName);
+    }
+
+    @Test(timeout = 60000)
+    public void v2AlphaUsReturnsLanguageIso639_1() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v2/alpha/US")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String iso = r.path("languages[0].iso639_1");
+        assertEquals("en", iso);
+    }
+
+    @Test(timeout = 60000)
+    public void v2LangSpanishReturnsLanguageName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v2/lang/Spanish")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        Object name = r.path("[0].languages[0].name");
+        assertNull(name);
+    }
+
+    @Test(timeout = 60000)
+    public void v2NameGermanyReturnsLanguageNativeName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v2/name/Germany")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String nativeName = r.path("[0].languages[0].nativeName");
+        assertEquals("Deutsch", nativeName);
+    }
+
+    @Test(timeout = 60000)
+    public void v2Callingcode1ReturnsLanguageIso639_2() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v2/callingcode/1")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String iso2 = r.path("[0].languages[0].iso639_2");
+        assertEquals("eng", iso2);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaDeReturnsLanguageNativeName() {
+        Response r = given()
+        .when()
+            .get(baseUrl + "/v1/alpha/DE")
+        .then()
+            .statusCode(lessThan(300))
+            .extract().response();
+        String nativeName = r.path("languages[0].nativeName");
+        assertEquals("Deutsch", nativeName);
+    }
+}

@@ -1,0 +1,138 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConfigurationEvaluatorTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithNoConstraints() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/base-config").then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/base-config/features")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithRequiresConstraintDerivingFeature() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "RAID controller")
+            .when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "ECC RAM")
+            .when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+            .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/prod-config").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/prod-config/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/prod-config/features")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithExcludesConstraintInvalidConfig() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "High performance CPU")
+            .when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Integrated graphics")
+            .when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/conflict-config").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/conflict-config/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/conflict-config/features/" + excludedFeature).then().statusCode(500);
+
+        given().when().get("/products/" + productName + "/configurations/conflict-config")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithExcludesConstraintValidConfig() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "High performance CPU")
+            .when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Integrated graphics")
+            .when().post("/products/" + productName + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/valid-config").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/valid-config/features/" + sourceFeature).then().statusCode(lessThan(300));
+
+        given().when().get("/products/" + productName + "/configurations/valid-config/features")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithRequiresConstraintBothFeaturesActive() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "User-Authentication";
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Push notification support")
+            .when().post("/products/" + productName + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Authentication module")
+            .when().post("/products/" + productName + "/features/" + requiredFeature).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature)
+            .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/full-config").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/full-config/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/full-config/features/" + requiredFeature).then().statusCode(500);
+
+        given().when().get("/products/" + productName + "/configurations/full-config")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithBothConstraintTypesComplex() {
+        String productName = "EvalTest-" + UUID.randomUUID();
+        String featureA = "RAID-Controller-Card";
+        String featureB = "128GB-ECC-RAM";
+        String featureC = "Integrated-Graphics-Only";
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "RAID controller")
+            .when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "ECC RAM")
+            .when().post("/products/" + productName + "/features/" + featureB).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Integrated graphics")
+            .when().post("/products/" + productName + "/features/" + featureC).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", featureA).formParam("requiredFeature", featureB)
+            .when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("sourceFeature", featureB).formParam("excludedFeature", featureC)
+            .when().post("/products/" + productName + "/constraints/excludes").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/complex-config").then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/complex-config/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/complex-config/features/" + featureC).then().statusCode(500);
+
+        given().when().get("/products/" + productName + "/configurations/complex-config/features")
+            .then().statusCode(200);
+    }
+}

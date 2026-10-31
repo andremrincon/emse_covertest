@@ -1,0 +1,49 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i28_sA_coversI0TrueI1FalseI2FalseI3True() {
+        given()
+                .when()
+                .get("/api/notypevar/28/a")
+                .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i7_sWorld_coversI0FalseI1TrueI2TrueI3True() {
+        given()
+                .when()
+                .get("/api/notypevar/7/world")
+                .then()
+                .statusCode(200)
+                .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i0_sWorld_coversI0FalseI1FalseI2TrueI3False() {
+        given()
+                .when()
+                .get("/api/notypevar/0/world")
+                .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+}

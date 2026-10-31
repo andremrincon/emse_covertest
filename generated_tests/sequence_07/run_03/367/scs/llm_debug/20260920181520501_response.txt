@@ -1,0 +1,63 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private static final String BASE_URL = System.getProperty("base.url", "http://localhost:8080");
+
+    @BeforeClass
+    public static void setUpClass() {
+        RestAssured.baseURI = BASE_URL;
+        RestAssured.port = Integer.parseInt(System.getProperty("base.port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsEqualsFiveBranch() {
+        given().when().get("/api/costfuns/5/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/5/algorithm").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsNegativeIndexBranches() {
+        given().when().get("/api/costfuns/-500/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-400/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-333/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-334/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsPositiveIndexBranches() {
+        given().when().get("/api/costfuns/700/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/667/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/600/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/555/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsNotEqualsMinusFourBranch() {
+        given().when().get("/api/costfuns/-4/a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/0/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsStringBranches() {
+        given().when().get("/api/costfuns/1/baab").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/zzzz").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/ababba").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/abab").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/a").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfunsInvalidIntegerReturnsBadRequest() {
+        given().when().get("/api/costfuns/one/test").then().statusCode(400);
+    }
+}
+```

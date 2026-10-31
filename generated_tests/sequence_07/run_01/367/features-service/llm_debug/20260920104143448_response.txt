@@ -1,0 +1,228 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.LinkedHashMap;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uniqueProductName() {
+        return "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private static int doPost(String path) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.connect();
+        try {
+            return conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static int doDelete(String path) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setDoOutput(false);
+        conn.connect();
+        try {
+            return conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static int doPostForm(String path, Map<String, String> params) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        byte[] postData = buildFormData(params).getBytes("UTF-8");
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+        conn.setDoOutput(true);
+        conn.connect();
+        OutputStream os = null;
+        try {
+            os = conn.getOutputStream();
+            os.write(postData);
+            os.flush();
+            return conn.getResponseCode();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (Exception ignored) {
+                }
+            }
+            conn.disconnect();
+        }
+    }
+
+    private static String buildFormData(Map<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int code1 = doPost("/products/" + productName);
+        Assert.assertTrue(code1 < 300);
+        int code2 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertEquals(201, code2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_withDescription() throws Exception {
+        String productName = uniqueProductName();
+        int code1 = doPost("/products/" + productName);
+        Assert.assertTrue(code1 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("description", "Test description");
+        int code2 = doPostForm("/products/" + productName + "/features/FeatureB", params);
+        Assert.assertEquals(201, code2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_duplicate_throwsException() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertEquals(500, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c = doPost("/products/" + productName + "/features/FeatureE");
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureC");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doDelete("/products/" + productName + "/features/FeatureC");
+        Assert.assertEquals(204, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_featureActiveInConfiguration() throws Exception {
+        String productName = uniqueProductName();
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureD");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doPost("/products/" + productName + "/configurations/" + configName);
+        Assert.assertTrue(c3 < 300);
+        int c4 = doPost("/products/" + productName + "/configurations/" + configName + "/features/FeatureD");
+        Assert.assertTrue(c4 < 300);
+        int c5 = doDelete("/products/" + productName + "/features/FeatureD");
+        Assert.assertEquals(204, c5);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_featureNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doDelete("/products/" + productName + "/features/NonExistentFeature");
+        Assert.assertEquals(500, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c = doDelete("/products/" + productName + "/features/FeatureF");
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c0 = doPost("/products/" + productName);
+        Assert.assertTrue(c0 < 300);
+        int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/RequiredFeature");
+        Assert.assertTrue(c2 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "SourceFeature");
+        params.put("requiredFeature", "RequiredFeature");
+        int c3 = doPostForm("/products/" + productName + "/constraints/requires", params);
+        Assert.assertEquals(201, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "FeatureA");
+        params.put("requiredFeature", "FeatureB");
+        int c = doPostForm("/products/" + productName + "/constraints/requires", params);
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c0 = doPost("/products/" + productName);
+        Assert.assertTrue(c0 < 300);
+        int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/ExcludedFeature");
+        Assert.assertTrue(c2 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "SourceFeature");
+        params.put("excludedFeature", "ExcludedFeature");
+        int c3 = doPostForm("/products/" + productName + "/constraints/excludes", params);
+        Assert.assertEquals(201, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "FeatureA");
+        params.put("excludedFeature", "FeatureB");
+        int c = doPostForm("/products/" + productName + "/constraints/excludes", params);
+        Assert.assertEquals(500, c);
+    }
+}

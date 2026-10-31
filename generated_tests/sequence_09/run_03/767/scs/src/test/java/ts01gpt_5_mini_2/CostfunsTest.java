@@ -1,0 +1,53 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i5_s_baab_returns10() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 5, "baab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iMinus500_s_abab_returns6() {
+        given().when().get("/api/pat/{txt}", "The").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -500, "abab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i700_s_ababba_returns10() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "0", "4.5").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 700, "ababba").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iMinus4_s_abab_returns0() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -4, "abab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_i555_s_abab_returns6() {
+        given().when().get("/api/cookie/{name}/{val}/{site}", "session-id", "1", "localhost").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 555, "abab").then().body(equalTo("10"));
+    }
+}

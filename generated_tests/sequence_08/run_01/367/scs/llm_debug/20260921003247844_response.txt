@@ -1,0 +1,63 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testValidMaleTitles() {
+        String[] titles = {"mr", "dr", "sir", "rev", "rthon", "prof", "invalid"};
+        for (String title : titles) {
+            given().when().get("/api/title/male/" + title).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testValidFemaleTitles() {
+        String[] titles = {"mrs", "miss", "ms", "dr", "lady", "rev", "rthon", "prof", "invalid"};
+        for (String title : titles) {
+            given().when().get("/api/title/female/" + title).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testValidNoneTitles() {
+        String[] titles = {"dr", "rev", "rthon", "prof", "invalid"};
+        for (String title : titles) {
+            given().when().get("/api/title/none/" + title).then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidSex() {
+        String[] sexes = {"neuter", "unknown", "other"};
+        for (String sex : sexes) {
+            given().when().get("/api/title/" + sex + "/Smith").then().statusCode(200);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCaseInsensitivity() {
+        given().when().get("/api/title/MALE/MR").then().statusCode(200);
+        given().when().get("/api/title/Female/Mrs").then().statusCode(200);
+        given().when().get("/api/title/NONE/Dr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidTitleForValidSex() {
+        given().when().get("/api/title/male/invalid").then().statusCode(200);
+        given().when().get("/api/title/female/invalid").then().statusCode(200);
+        given().when().get("/api/title/none/invalid").then().statusCode(200);
+    }
+}

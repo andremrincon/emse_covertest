@@ -1,0 +1,92 @@
+```java
+package ts01glm_5_2_3;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class BessjTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl",
+                System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_nLessThan2_returns400() {
+        when()
+            .get(baseUrl + "/api/bessj/0/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_xZero_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/2/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_smallXGreaterThanN_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/2/5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_largeXGreaterThanN_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/2/10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeLargeXOddN_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_xLessThanOrEqualN_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/5/3.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_negativeSmallXOddN_returns200() {
+        when()
+            .get(baseUrl + "/api/bessj/3/-5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_invalidNType_returns400() {
+        when()
+            .get(baseUrl + "/api/bessj/abc/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void bessj_invalidXType_returns400() {
+        when()
+            .get(baseUrl + "/api/bessj/3/abc")
+        .then()
+            .statusCode(400);
+    }
+}
+```

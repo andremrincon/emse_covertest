@@ -1,0 +1,80 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv("APP_HOST");
+        if (host == null) host = "localhost";
+        String port = System.getenv("APP_PORT");
+        if (port == null) port = "8080";
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsUrl() {
+        given()
+            .pathParam("txt", "http://a/a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsDate() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsFpe() {
+        given()
+            .pathParam("txt", "12.34e+56")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNone() {
+        given()
+            .pathParam("txt", "hello")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNoneForSingleChar() {
+        given()
+            .pathParam("txt", "a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectReturnsNoneForFtpUrl() {
+        given()
+            .pathParam("txt", "ftp://b/c")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,71 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsFiveBranch() {
+        given()
+            .when()
+                .get("/api/costfuns/5/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessThanNegative444AndSEqualsBaab() {
+        given()
+            .when()
+                .get("/api/costfuns/-500/baab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIEqualsNegativeFourAndSEqualsAbab() {
+        given()
+            .when()
+                .get("/api/costfuns/-4/abab")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/700/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIGreaterEqual555ButNotGreaterThan666() {
+        given()
+            .when()
+                .get("/api/costfuns/600/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testILessEqualNegative333ButNotLessThanNegative444() {
+        given()
+            .when()
+                .get("/api/costfuns/-400/a")
+            .then()
+                .statusCode(200);
+    }
+}
+```

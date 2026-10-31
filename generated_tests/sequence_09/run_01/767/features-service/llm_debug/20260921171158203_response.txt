@@ -1,0 +1,55 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import java.util.UUID;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "test-product-" + uuid;
+        String configurationName = "cfg-" + uuid;
+        String featureName = "feat-" + uuid;
+        given().when().post("/products/{productName}", productName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesReturns200() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "prod-" + uuid;
+        String configurationName = "conf-" + uuid;
+        String featureName = "feature-" + uuid;
+        given().when().post("/products/{productName}", productName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationReturns204() {
+        String uuid = UUID.randomUUID().toString();
+        String productName = "p-" + uuid;
+        String configurationName = "c-" + uuid;
+        String featureName = "f-" + uuid;
+        given().when().post("/products/{productName}", productName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode((org.hamcrest.Matcher<? super Integer>) lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(500);
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName).then().statusCode(204);
+    }
+}

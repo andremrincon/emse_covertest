@@ -1,0 +1,65 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class EvaluationResultTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test
+    public void getConfiguration_triggersEvaluationResultConstruction_validCase() {
+        String productName = "EvalResultValid-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "default-config";
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "base-feature").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "base-feature").then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test
+    public void getConfigurationFeatures_triggersEvaluationResultConstruction_withRequiresConstraint() {
+        String productName = "EvalResultReq-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "standard";
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatureB").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/constraints/requires", productName)
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("requiredFeature", "FeatureB").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "FeatureA").then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(200);
+    }
+
+    @Test
+    public void getConfiguration_triggersEvaluationResultConstruction_withExcludesConstraint() {
+        String productName = "EvalResultExcl-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base";
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "Color-Black").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "Logo-WhiteOnBlack").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/constraints/excludes", productName)
+                .formParam("sourceFeature", "Color-Black")
+                .formParam("excludedFeature", "Logo-WhiteOnBlack").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "Color-Black").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, "Logo-WhiteOnBlack").then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(200);
+    }
+}

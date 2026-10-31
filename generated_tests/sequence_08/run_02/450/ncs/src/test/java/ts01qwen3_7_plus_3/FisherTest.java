@@ -1,0 +1,67 @@
+package ts01qwen3_7_plus_3;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+import org.junit.Test;
+
+public class FisherTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testFisherNormalCaseReturnsP() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/10/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOneReturnsOne() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/2/2/1e15")
+            .then()
+                .statusCode(200)
+                .body("value", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEquals1BEquals1() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/1/1/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEquals1BNot1LoopExecutes() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/1/4/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherANot1BEquals1() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/2/1/1.0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherANot1BNot1SecondLoopExecutes() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/fisher/4/4/1.0")
+            .then()
+                .statusCode(200);
+    }
+}

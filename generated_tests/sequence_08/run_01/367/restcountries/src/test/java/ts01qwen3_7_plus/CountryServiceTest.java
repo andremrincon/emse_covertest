@@ -1,0 +1,64 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_TwoLetterCode() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/lang/es")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_ThreeLetterCode() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/lang/eng")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_InvalidLength() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/lang/Spanish")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_ValidAcronym() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_InvalidAcronym() {
+        given()
+        .when()
+            .get(baseUrl + "/v2/regionalbloc/INVALID")
+        .then()
+            .statusCode(404);
+    }
+}

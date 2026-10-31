@@ -1,0 +1,50 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("API_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsNotFoundMessageForNumericName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsStatus500ForTrueName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/True");
+        act.then().body("status", equalTo(500));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsInternalServerErrorMessageForTrueName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/True");
+        act.then().body("message", equalTo("Internal Server Error"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameReturnsStatus404ForNumericName() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/123");
+        act.then().body("status", equalTo(404));
+    }
+}

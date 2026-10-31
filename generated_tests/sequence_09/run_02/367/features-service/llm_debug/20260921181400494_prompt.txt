@@ -1,0 +1,263 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_2.ProductTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddFeatureToProduct_status201 TYPE=FAILURE
+expected:<201> but was:<500>
+
+[2] METHOD=testDeleteConfigurationFeature_status204 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=testGetConfigurationFeatures_containsFeature TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=testGetFeaturesForProduct_containsFeature TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[5] METHOD=testAddFeatureToConfiguration_status201 TYPE=FAILURE
+expected:<201> but was:<500>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddFeatureToProduct_status201 FAILURE AT LINE 36
+java.lang.AssertionError: expected:<201> but was:<500>
+at ts01gpt_5_mini_2.ProductTest.testAddFeatureToProduct_status201(ProductTest.java:36)
+CODE CONTEXT:
+    33:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    34:         String featureName = "Blood Oxygen Sensor";
+    35:         Response resp = given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().extract().response();
+    36:         assertEquals(201, resp.getStatusCode());  ← FAILURE HERE
+    37:     }
+    38: 
+    39:     @Test(timeout = 60000)
+
+[2] METHOD=testDeleteConfigurationFeature_status204 FAILURE AT LINE 149
+java.lang.AssertionError:
+at ts01gpt_5_mini_2.ProductTest.testDeleteConfigurationFeature_status204(ProductTest.java:149)
+CODE CONTEXT:
+   146:         String configName = "Premium-Tier";
+   147:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   148:         String featureName = "Realtime-Analytics-Dashboard";
+   149:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   150:         Response resp = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().extract().response();
+   151:         assertEquals(204, resp.getStatusCode());
+   152:     }
+
+[3] METHOD=testGetConfigurationFeatures_containsFeature FAILURE AT LINE 116
+java.lang.AssertionError:
+at ts01gpt_5_mini_2.ProductTest.testGetConfigurationFeatures_containsFeature(ProductTest.java:116)
+CODE CONTEXT:
+   113:         String configName = "us-standard-16gb";
+   114:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   115:         String featureName = "fingerprint-scanner";
+   116:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));  ← FAILURE HERE
+   117:         Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().extract().response();
+   118:         String body = resp.asString();
+   119:         assertTrue(body.contains(featureName));
+
+[4] METHOD=testGetFeaturesForProduct_containsFeature FAILURE AT LINE 63
+java.lang.AssertionError:
+at ts01gpt_5_mini_2.ProductTest.testGetFeaturesForProduct_containsFeature(ProductTest.java:63)
+CODE CONTEXT:
+    60:         String productName = "AeroBook-Pro-15-" + UUID.randomUUID();
+    61:         given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+    62:         String featureName = "15.6-inch OLED Display";
+    63:         given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    64:         Response resp = given().when().get("/products/{productName}/features", productName).then().extract().response();
+    65:         String body = resp.asString();
+    66:         assertTrue(body.contains(featureName));
+
+[5] METHOD=testAddFeatureToConfiguration_status201 FAILURE AT LINE 106
+java.lang.AssertionError: expected:<201> but was:<500>
+at ts01gpt_5_mini_2.ProductTest.testAddFeatureToConfiguration_status201(ProductTest.java:106)
+CODE CONTEXT:
+   103:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   104:         String featureName = "distributed-training";
+   105:         Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().extract().response();
+   106:         assertEquals(201, resp.getStatusCode());  ← FAILURE HERE
+   107:     }
+   108: 
+   109:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_status201() {
+        String productName = "Smartwatch-Series-8-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String featureName = "Blood Oxygen Sensor";
+        Response resp = given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().extract().response();
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithDescription_status201() {
+        String productName = "Wireless-Earbuds-Pro-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String featureName = "ANC";
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").when().post("/products/{productName}/features/{featureName}", productName, featureName).then().extract().response();
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_status204() {
+        String productName = "SmartWatch-Pro-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String featureName = "heart-rate-monitor";
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", productName, featureName).then().extract().response();
+        assertEquals(204, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_containsFeature() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String featureName = "15.6-inch OLED Display";
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/features", productName).then().extract().response();
+        String body = resp.asString();
+        assertTrue(body.contains(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeatures_getProductHasFeaturesCount() {
+        String productName = "BuildWithFeatures-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String f1 = "Feature-One";
+        String f2 = "Feature-Two";
+        given().when().post("/products/{productName}/features/{featureName}", productName, f1).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, f2).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}", productName).then().extract().response();
+        List<?> features = resp.jsonPath().getList("features");
+        assertEquals(2, features.size());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_status201() {
+        String productName = "Enterprise-Server-X1-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").when().post("/products/{productName}/constraints/requires", productName).then().extract().response();
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_status201() {
+        String productName = "Laptop-Pro-15-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").when().post("/products/{productName}/constraints/excludes", productName).then().extract().response();
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_status201() {
+        String productName = "QuantumLeap-AI-Platform-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "standard-gpu-cluster";
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        String featureName = "distributed-training";
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().extract().response();
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_containsFeature() {
+        String productName = "ultra-laptop-x1-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "us-standard-16gb";
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        String featureName = "fingerprint-scanner";
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configName).then().extract().response();
+        String body = resp.asString();
+        assertTrue(body.contains(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct_status200() {
+        String productName = "Laptop-Pro-X15-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "us-standard-wifi";
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/configurations", productName).then().extract().response();
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_status200() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String featureName = "backlit-keyboard";
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded").formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.").when().put("/products/{productName}/features/{featureName}", productName, featureName).then().extract().response();
+        assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationFeature_status204() {
+        String productName = "QuantumLeap-AI-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String configName = "Premium-Tier";
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        String featureName = "Realtime-Analytics-Dashboard";
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).then().extract().response();
+        assertEquals(204, resp.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

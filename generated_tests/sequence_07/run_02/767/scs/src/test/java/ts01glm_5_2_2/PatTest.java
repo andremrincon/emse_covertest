@@ -1,0 +1,92 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getenv().getOrDefault("API_HOST", "localhost");
+        String port = System.getenv().getOrDefault("API_PORT", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+        RestAssured.urlEncodingEnabled = true;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseFoundAdjacentReturnsIndex() {
+        given()
+            .pathParam("txt", "ABABBABA")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundReverseFoundNonAdjacentReturnsIndex() {
+        given()
+            .pathParam("txt", "ABABXYZBABA")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatFoundAdjacentReturnsIndex() {
+        given()
+            .pathParam("txt", "BABAABAB")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatFoundNonAdjacentReturnsIndex() {
+        given()
+            .pathParam("txt", "BABAXYZABAB")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoReverseReturnsOne() {
+        given()
+            .pathParam("txt", "ABABXYZ")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundNoPatReturnsTwo() {
+        given()
+            .pathParam("txt", "BABAXYZ")
+            .pathParam("pat", "ABAB")
+        .when()
+            .get("/api/pat/{txt}/{pat}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("2"));
+    }
+}

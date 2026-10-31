@@ -1,0 +1,123 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyCode() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("USD"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencyName() {
+        given()
+                .when()
+                .get("/v1/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].name", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCurrencySymbol() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("USD"))
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("currencies[0].code", equalTo("USD"))
+                .body("currencies[0].name", notNullValue())
+                .body("currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", equalTo("EUR"))
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocEndpointReturnsCurrencyFields() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", notNullValue())
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesEndpointReturnsCurrencyFields() {
+        given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(200)
+                .body("[0].currencies[0].code", notNullValue())
+                .body("[0].currencies[0].name", notNullValue())
+                .body("[0].currencies[0].symbol", notNullValue());
+    }
+}
+```

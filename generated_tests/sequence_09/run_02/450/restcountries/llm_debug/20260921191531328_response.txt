@@ -1,0 +1,73 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setup() {
+        String envBase = System.getProperty("api.base");
+        if (envBase == null || envBase.isEmpty()) {
+            envBase = System.getenv().getOrDefault("API_BASE", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = envBase;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_TwoLetter_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_ThreeLetter_ShouldReturn200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().param("fields", "name;capital;population").when().get("/v2/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_V2_DuplicateCodes_ShouldReturn200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().param("codes", "US,US").when().get("/v2/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeList_V1_CodesList_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().param("codes", "US,CA").when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testFullTextSearch_AlternativeSpelling_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().param("fullText", "true").when().get("/v1/name/{name}", "United States of America").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubstringSearch_AltSpellingSubstring_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().param("fullText", "false").when().get("/v1/name/{name}", "States of America").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All_LoadJson_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Alpha_WithFields_ShouldReturn200() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        given().param("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Capital_NormalizedSubstring_ShouldReturn200() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+}

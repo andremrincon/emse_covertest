@@ -1,0 +1,55 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = Optional.ofNullable(System.getenv("API_BASE"))
+                .orElse(Optional.ofNullable(System.getProperty("api.base")).orElse("http://localhost:8080"));
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns2_whenCompareToGreaterThanZero() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox jumps over the lazy dog.").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 2, "world");
+        assertEquals("2", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns3_whenI6ProducesYGreaterThanX() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "15.5", "4.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 6, "a");
+        assertEquals("3", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testI0BranchExecuted_withI28_resultsIn3DueToFinalOverride() {
+        given().when().get("/api/filesuffix/{directory}/{file}", "/home/user/documents", "quarterly_report.docx").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 28, "a");
+        assertEquals("3", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testI1BranchExecuted_withI7_resultsIn3DueToFinalOverride() {
+        given().when().get("/api/text2txt/{word1}/{word2}/{word3}", "The", "quick", "brown").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 7, "a");
+        assertEquals("3", resp.asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testReturns0_whenNoConditionsMet() {
+        given().when().get("/api/title/{sex}/{title}", "male", "Smith").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/notypevar/{i}/{s}", 0, "a");
+        assertEquals("0", resp.asString());
+    }
+}

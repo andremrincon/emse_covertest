@@ -1,0 +1,66 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_twoLetter_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/{lang}", "es");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2Lang_threeLetter_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/lang/{lang}", "eng");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBloc_exactAcronym_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/regionalbloc/{regionalbloc}", "EU");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalBloc_lowercaseAcronym_returns200() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/regionalbloc/{regionalbloc}", "eu");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_valid_returnsAlpha2CodeUS() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "US");
+        act.then().body("alpha2Code", equalTo("US"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Alpha_numeric_returns400() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/{alphacode}", "123");
+        act.then().statusCode(404);
+    }
+}

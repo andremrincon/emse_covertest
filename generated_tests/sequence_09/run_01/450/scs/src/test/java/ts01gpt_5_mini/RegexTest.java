@@ -1,0 +1,49 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        RestAssured.baseURI = (base == null || base.isEmpty()) ? "http://localhost:8080" : base;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternProducesOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "http://abc/def");
+        assertEquals(400, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternProducesOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "wed01jan");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testFloatingPointExponentPatternProducesOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "12.3e+45");
+        assertEquals(200, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternProducesOk() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "hello");
+        assertEquals(200, act.getStatusCode());
+    }
+}

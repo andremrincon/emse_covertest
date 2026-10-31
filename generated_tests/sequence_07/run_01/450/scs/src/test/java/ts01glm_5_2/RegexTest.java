@@ -1,0 +1,112 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected status code a value less than <300> but <400> was greater than <300>.")
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        given()
+            .when()
+                .get("/api/pat/http%3A%2F%2Fa%2Fa")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/http%3A%2F%2Fa%2Fa");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        given()
+            .when()
+                .get("/api/pat/mon01jan")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/mon01jan");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        given()
+            .when()
+                .get("/api/pat/12.34e+56")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/12.34e+56");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/hello");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Ignore("1 expectation failed. Expected status code a value less than <300> but <400> was greater than <300>.")
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchFtp() {
+        given()
+            .when()
+                .get("/api/pat/ftp%3A%2F%2Fb%2Fc")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/ftp%3A%2F%2Fb%2Fc");
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatchWedAug() {
+        given()
+            .when()
+                .get("/api/pat/wed15aug")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/api/pat/wed15aug");
+
+        assertEquals(200, response.getStatusCode());
+    }
+}

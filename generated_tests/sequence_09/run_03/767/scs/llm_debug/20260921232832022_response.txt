@@ -1,0 +1,41 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testNotypevarReturns28WhenSumEquals56() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/{i}/{s}", 28, "any").then().body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotypevarReturns3WhenIIs7() {
+        given().when().get("/api/pat/{txt}", "The%20quick").then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/{i}/{s}", 7, "z").then().body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotypevarReturns2WhenCompareLessAndIIs5() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/notypevar/{i}/{s}", 5, "z").then().body(equalTo("2"));
+    }
+}

@@ -1,0 +1,55 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    private final String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testGetAllProducts() {
+        given()
+            .baseUri(baseUrl)
+        .when()
+            .get("/products")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddProduct() {
+        String productName = "Product-" + System.nanoTime();
+
+        given()
+            .baseUri(baseUrl)
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct() {
+        String productName = "ProductFeat-" + System.nanoTime();
+
+        given()
+            .baseUri(baseUrl)
+            .pathParam("productName", productName)
+        .when()
+            .post("/products/{productName}")
+        .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .baseUri(baseUrl)
+            .pathParam("productName", productName)
+        .when()
+            .get("/products/{productName}/features")
+        .then()
+            .statusCode(200);
+    }
+}

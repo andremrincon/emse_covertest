@@ -1,0 +1,67 @@
+```java
+package ts01qwen3_7_plus;
+
+import static io.restassured.RestAssured.given;
+import org.junit.Test;
+
+public class PatTest {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .when().get(BASE_URL + "/api/pat/abc/ab")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundOnly() {
+        given()
+            .when().get(BASE_URL + "/api/pat/ABABCD/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseAdjacent() {
+        given()
+            .when().get(BASE_URL + "/api/pat/ABABBABA/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndReverseNonAdjacent() {
+        given()
+            .when().get(BASE_URL + "/api/pat/ABABxxBABA/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundOnly() {
+        given()
+            .when().get(BASE_URL + "/api/pat/BABACAXXXX/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatAdjacent() {
+        given()
+            .when().get(BASE_URL + "/api/pat/BABAABAB/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseAndPatNonAdjacent() {
+        given()
+            .when().get(BASE_URL + "/api/pat/BABAxxABAB/ABAB")
+            .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherFound() {
+        given()
+            .when().get(BASE_URL + "/api/pat/XXXXXXXX/ABAB")
+            .then().statusCode(200);
+    }
+}
+```

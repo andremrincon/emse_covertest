@@ -1,0 +1,129 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_2.WrongProductConfigurationExceptionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=postFeature_with_malformed_featureName_should_return_500 TYPE=ERROR
+Path parameters were not correctly defined. Undefined path parameters are: "feature":"new-feature".
+
+[2] METHOD=getConfiguration_with_numeric_name_12345_should_return_500 TYPE=FAILURE
+expected:<500> but was:<200>
+
+[3] METHOD=postConfiguration_with_excessively_long_name_should_return_500 TYPE=FAILURE
+expected:<500> but was:<201>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=postFeature_with_malformed_featureName_should_return_500 FAILURE AT LINE 41
+at ts01gpt_5_mini_2.WrongProductConfigurationExceptionTest.postFeature_with_malformed_featureName_should_return_500(WrongProductConfigurationExceptionTest.java:41)
+CODE CONTEXT:
+    38:         String config = "standard-" + UUID.randomUUID().toString();
+    39:         given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+    40:         String maliciousFeatureName = "{\"feature\":\"new-feature\"}";
+    41:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, maliciousFeatureName);  ← FAILURE HERE
+    42:         Assert.assertEquals(500, act.getStatusCode());
+    43:     }
+    44: 
+
+[2] METHOD=getConfiguration_with_numeric_name_12345_should_return_500 FAILURE AT LINE 52
+java.lang.AssertionError: expected:<500> but was:<200>
+at ts01gpt_5_mini_2.WrongProductConfigurationExceptionTest.getConfiguration_with_numeric_name_12345_should_return_500(WrongProductConfigurationExceptionTest.java:52)
+CODE CONTEXT:
+    49:         String configName = "12345";
+    50:         given().when().post("/products/{productName}/configurations/{configurationName}", product, configName).then().statusCode(lessThan(300));
+    51:         Response act = given().when().get("/products/{productName}/configurations/{configurationName}", product, configName);
+    52:         Assert.assertEquals(500, act.getStatusCode());  ← FAILURE HERE
+    53:     }
+    54: }
+
+[3] METHOD=postConfiguration_with_excessively_long_name_should_return_500 FAILURE AT LINE 31
+java.lang.AssertionError: expected:<500> but was:<201>
+at ts01gpt_5_mini_2.WrongProductConfigurationExceptionTest.postConfiguration_with_excessively_long_name_should_return_500(WrongProductConfigurationExceptionTest.java:31)
+CODE CONTEXT:
+    28:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+    29:         String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+    30:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}", product, longConfigName);
+    31:         Assert.assertEquals(500, act.getStatusCode());  ← FAILURE HERE
+    32:     }
+    33: 
+    34:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            RestAssured.baseURI = env;
+        } else {
+            RestAssured.baseURI = System.getProperty("BASE_URL", System.getProperty("baseUrl", "http://localhost:8080"));
+        }
+        RestAssured.basePath = "/";
+    }
+
+    @Test(timeout = 60000)
+    public void postConfiguration_with_excessively_long_name_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String longConfigName = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}", product, longConfigName);
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void postFeature_with_malformed_featureName_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String config = "standard-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        String maliciousFeatureName = "{\"feature\":\"new-feature\"}";
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, maliciousFeatureName);
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void getConfiguration_with_numeric_name_12345_should_return_500() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String configName = "12345";
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configName).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", product, configName);
+        Assert.assertEquals(500, act.getStatusCode());
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

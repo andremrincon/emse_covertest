@@ -1,0 +1,64 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
+
+public class CalcTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", System.getenv().getOrDefault("baseUrl", "http://localhost:8080"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantOpsPiAndE() {
+        given().when().get("/api/calc/pi/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/pi/1/1").then().body(equalTo("3.141592653589793"));
+        given().when().get("/api/calc/e/0/0").then().body(equalTo("2.718281828459045"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOpsSqrtAndLog() {
+        given().when().get("/api/calc/sqrt/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sqrt/16/0").then().body(equalTo("4.0"));
+        given().when().get("/api/calc/log/1/0").then().body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOpsSineAndCosine() {
+        given().when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sine/0/0").then().body(equalTo("0.0"));
+        given().when().get("/api/calc/cosine/0/0").then().body(equalTo("1.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOpTangentAndBinaryPlus() {
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().body(equalTo("0.0"));
+        given().when().get("/api/calc/plus/10/5").then().body(equalTo("15.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryOpsSubtractAndMultiply() {
+        given().when().get("/api/calc/subtract/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/10/4").then().body(equalTo("6.0"));
+        given().when().get("/api/calc/multiply/3/4").then().body(equalTo("12.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryOpDivideAndDefaultBranch() {
+        given().when().get("/api/calc/divide/1/1").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/divide/20/4").then().body(equalTo("5.0"));
+        given().when().get("/api/calc/unknownop/5/5").then().body(equalTo("0.0"));
+    }
+}
+```

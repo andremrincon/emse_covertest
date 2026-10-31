@@ -1,0 +1,69 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CountryServiceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_EU_ReturnsCountries() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/v2/regionalbloc/EU");
+
+        assertEquals(200, response.getStatusCode());
+        response.then().body("size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_NonExistentBloc_Returns404() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/EU")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .when()
+                .get("/v2/regionalbloc/123");
+
+        assertEquals(404, response.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBloc_NAFTA_WithFields_ReturnsCountries() {
+        given()
+            .when()
+                .get("/v2/regionalbloc/NAFTA")
+            .then()
+                .statusCode(lessThan(300));
+
+        Response response = given()
+            .queryParam("fields", "name;capital;currencies")
+            .when()
+                .get("/v2/regionalbloc/NAFTA");
+
+        assertEquals(200, response.getStatusCode());
+        response.then().body("size()", greaterThan(0));
+    }
+}
+```

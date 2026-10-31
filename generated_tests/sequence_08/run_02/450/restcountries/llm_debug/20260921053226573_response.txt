@@ -1,0 +1,110 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1All() {
+        given()
+            .when()
+            .get("/v1/all")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1AlphaCode() {
+        given()
+            .when()
+            .get("/v1/alpha/{alphacode}", "US")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1AlphaCodes() {
+        given()
+            .queryParam("codes", "US,CA")
+            .when()
+            .get("/v1/alpha")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Currency() {
+        given()
+            .when()
+            .get("/v1/currency/{currency}", "USD")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Name() {
+        given()
+            .when()
+            .get("/v1/name/{name}", "France")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1CallingCode() {
+        given()
+            .when()
+            .get("/v1/callingcode/{callingcode}", "1")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Capital() {
+        given()
+            .when()
+            .get("/v1/capital/{capital}", "London")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Region() {
+        given()
+            .when()
+            .get("/v1/region/{region}", "Europe")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Subregion() {
+        given()
+            .when()
+            .get("/v1/subregion/{subregion}", "Western Europe")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsFilterOnV1Lang() {
+        given()
+            .when()
+            .get("/v1/lang/{lang}", "es")
+            .then()
+            .statusCode(200);
+    }
+}

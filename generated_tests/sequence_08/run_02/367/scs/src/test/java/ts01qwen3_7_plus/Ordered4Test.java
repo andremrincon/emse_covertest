@@ -1,0 +1,56 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testOrdered4_LengthOutOfBounds() {
+        given()
+            .when()
+                .get("/api/ordered4/a/b/c/d")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOrdered4_Increasing() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ddddd/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOrdered4_Decreasing() {
+        given()
+            .when()
+                .get("/api/ordered4/eeeee/ddddd/bbbbb/ccccc")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOrdered4_Unordered() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/aaaaa/ccccc")
+            .then()
+                .statusCode(200);
+    }
+}

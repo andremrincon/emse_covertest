@@ -1,0 +1,65 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns200_ForExampleAlgorithm() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 1, "algorithm");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns200_ForIEqualsFive() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 5, "a");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns200_ForNegativeIAndBaab() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", -500, "baab");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns400_ForNonIntegerI() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", "one", "test");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns500_ForStringIntegerOverflow() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 1, "integer_overflow");
+        resp.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_Returns200_ForZeroAndA() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/costfuns/{i}/{s}", 0, "a");
+        resp.then().statusCode(200);
+    }
+}

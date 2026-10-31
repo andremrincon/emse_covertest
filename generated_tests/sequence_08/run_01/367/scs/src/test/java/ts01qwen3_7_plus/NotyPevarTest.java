@@ -1,0 +1,59 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i0_true() {
+        given()
+            .pathParam("i", 28)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i1_true() {
+        given()
+            .pathParam("i", 7)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_i2_true() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "z")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevar_all_false() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/notypevar/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}

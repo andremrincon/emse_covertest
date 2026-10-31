@@ -1,0 +1,379 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String BASE_URI = "http://localhost:8080";
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        }
+        BASE_URI = baseUrl;
+    }
+
+    private static class Response {
+        int status;
+        String body;
+
+        Response(int status, String body) {
+            this.status = status;
+            this.body = body;
+        }
+    }
+
+    private Response get(String pathTemplate, String... params) {
+        return request("GET", pathTemplate, null, params);
+    }
+
+    private Response post(String pathTemplate, String... params) {
+        return request("POST", pathTemplate, null, params);
+    }
+
+    private Response delete(String pathTemplate, String... params) {
+        return request("DELETE", pathTemplate, null, params);
+    }
+
+    private Response postForm(String pathTemplate, Map<String, String> formParams, String... params) {
+        return request("POST", pathTemplate, formParams, params);
+    }
+
+    private Response request(String method, String pathTemplate, Map<String, String> formParams, String... params) {
+        try {
+            String path = formatPath(pathTemplate, params);
+            String urlString = joinBaseUriAndPath(BASE_URI, path);
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            if (formParams != null && !formParams.isEmpty()) {
+                StringBuilder formBody = new StringBuilder();
+                for (Map.Entry<String, String> e : formParams.entrySet()) {
+                    if (formBody.length() > 0) formBody.append("&");
+                    formBody.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                    formBody.append("=");
+                    formBody.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+                }
+                byte[] bytes = formBody.toString().getBytes("UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+                os.close();
+            } else {
+                if ("POST".equals(method) || "PUT".equals(method)) {
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Length", "0");
+                    OutputStream os = conn.getOutputStream();
+                    os.close();
+                }
+            }
+            int status = conn.getResponseCode();
+            InputStream is;
+            if (status >= 400) {
+                is = conn.getErrorStream();
+            } else {
+                is = conn.getInputStream();
+            }
+            String body = "";
+            if (is != null) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    sb.append(line);
+                }
+                in.close();
+                body = sb.toString();
+            }
+            conn.disconnect();
+            return new Response(status, body);
+        } catch (Exception e) {
+            Assert.fail("Request failed: " + e.getMessage());
+            return new Response(0, "");
+        }
+    }
+
+    private String formatPath(String template, String... params) {
+        String result = template;
+        try {
+            for (String p : params) {
+                result = result.replaceFirst("\\{[^}]*\\}", URLEncoder.encode(p, "UTF-8"));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    private String joinBaseUriAndPath(String base, String path) {
+        if (base.endsWith("/") && path.startsWith("/")) {
+            return base.substring(0, base.length() - 1) + path;
+        } else if (!base.endsWith("/") && !path.startsWith("/")) {
+            return base + "/" + path;
+        } else {
+            return base + path;
+        }
+    }
+
+    private void assertStatusLessThan(Response r, int threshold) {
+        Assert.assertTrue("Expected status < " + threshold + " but was " + r.status, r.status < threshold);
+    }
+
+    private void assertStatusEquals(Response r, int expected) {
+        Assert.assertEquals(expected, r.status);
+    }
+
+    private void assertStatusGreaterThanOrEqual(Response r, int threshold) {
+        Assert.assertTrue("Expected status >= " + threshold + " but was " + r.status, r.status >= threshold);
+    }
+
+    private void assertBodyIsEmptyArray(Response r) {
+        String b = r.body == null ? "" : r.body.trim();
+        boolean isEmptyArray = b.matches("^\\[\\s*\\]$");
+        Assert.assertTrue("Expected empty JSON array body but was: " + r.body, isEmptyArray);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withExistingConfigurations_returns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        assertStatusLessThan(r1, 300);
+        Response r2 = post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        assertStatusLessThan(r2, 300);
+
+        Response r3 = get("/products/{productName}/configurations", productName);
+        assertStatusEquals(r3, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withNoConfigurations_returns200EmptyList() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", productName);
+        assertStatusLessThan(r1, 300);
+
+        Response r2 = get("/products/{productName}/configurations", productName);
+        assertStatusEquals(r2, 200);
+        assertBodyIsEmptyArray(r2);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withActiveFeatures_returns200() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+
+        Response r = get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertStatusEquals(r, 200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withNoActiveFeatures_returns200EmptyList() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+
+        Response r = get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertStatusEquals(r, 200);
+        assertBodyIsEmptyArray(r);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_existingFeature_returns204() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+
+        Response r = delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusEquals(r, 204);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_nonExistentFeature_returns204() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "nonexistent-feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+
+        Response r = delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusEquals(r, 204);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_newFeature_returns201() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusEquals(r, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_duplicateFeature_throwsException() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusGreaterThanOrEqual(r, 400);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_viaAddFeature_validatesConfiguration() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusEquals(r, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_viaRemoveFeature_validatesConfiguration() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+
+        Response r = delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusEquals(r, 204);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_withRequiresConstraint_addingRequiredFeature() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "source-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "required-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, sourceFeature), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, requiredFeature), 300);
+
+        Response rConstraint = postForm("/products/{productName}/constraints/requires", mapOf("sourceFeature", sourceFeature, "requiredFeature", requiredFeature), productName);
+        assertStatusLessThan(rConstraint, 300);
+
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature), 300);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature);
+        assertStatusEquals(r, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_withExcludesConstraint_addingExcludedFeature() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "source-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "excluded-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, sourceFeature), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, excludedFeature), 300);
+
+        Response rConstraint = postForm("/products/{productName}/constraints/excludes", mapOf("sourceFeature", sourceFeature, "excludedFeature", excludedFeature), productName);
+        assertStatusLessThan(rConstraint, 300);
+
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature), 300);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature);
+        assertStatusEquals(r, 201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_nonExistentProduct_returns200EmptyList() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r = get("/products/{productName}/configurations", productName);
+        assertStatusEquals(r, 200);
+        assertBodyIsEmptyArray(r);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_nonExistentProduct_returnsError() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r = post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        assertStatusGreaterThanOrEqual(r, 400);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_afterAddAndRemove_verifyEmptyFeatures() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        assertStatusLessThan(post("/products/{productName}", productName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}", productName, configurationName), 300);
+        assertStatusLessThan(post("/products/{productName}/features/{featureName}", productName, featureName), 300);
+        assertStatusLessThan(post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+        assertStatusLessThan(delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName), 300);
+
+        Response r = get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        assertStatusEquals(r, 200);
+        assertBodyIsEmptyArray(r);
+    }
+
+    private static java.util.Map<String, String> mapOf(String k1, String v1, String k2, String v2) {
+        java.util.Map<String, String> m = new java.util.HashMap<String, String>();
+        m.put(k1, v1);
+        m.put(k2, v2);
+        return m;
+    }
+}

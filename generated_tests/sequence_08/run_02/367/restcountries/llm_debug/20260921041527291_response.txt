@@ -1,0 +1,60 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("test.base.uri", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOrigin() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/all");
+        response.then().header("Access-Control-Allow-Origin", equalTo((String) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethods() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/alpha/US");
+        response.then().header("Access-Control-Allow-Methods", equalTo((String) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowHeaders() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/currency/USD");
+        response.then().header("Access-Control-Allow-Headers", equalTo((String) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsCacheControl() {
+        given().when().get("/v1/name/France").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v1/name/France");
+        response.then().header("Cache-Control", equalTo((String) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowOriginV2() {
+        given().when().get("/v2/all").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/all");
+        response.then().header("Access-Control-Allow-Origin", equalTo((String) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsAllowMethodsV2() {
+        given().when().get("/v2/alpha/US").then().statusCode(lessThan(300));
+        Response response = given().when().get("/v2/alpha/US");
+        response.then().header("Access-Control-Allow-Methods", equalTo((String) null));
+    }
+}

@@ -1,0 +1,222 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    private String uniqueProduct() {
+        return "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueConfig() {
+        return "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String product = uniqueProduct();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + product + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testExcludesConstraintResponseContainsSourceFeature() {
+        String product = uniqueProduct();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + product + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testExcludesConstraintResponseContainsExcludedFeature() {
+        String product = uniqueProduct();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", sourceFeature)
+            .formParam("excludedFeature", excludedFeature)
+        .when()
+            .post("/products/" + product + "/constraints/excludes")
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetTypeViaProductRetrieval() {
+        String product = uniqueProduct();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + product)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateBothFeaturesActiveInvalid() {
+        String product = uniqueProduct();
+        String config = uniqueConfig();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config)
+        .then()
+            .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateOnlySourceActiveValid() {
+        String product = uniqueProduct();
+        String config = uniqueConfig();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config)
+        .then()
+            .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateOnlyExcludedActiveValid() {
+        String product = uniqueProduct();
+        String config = uniqueConfig();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config)
+        .then()
+            .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateNeitherActiveValid() {
+        String product = uniqueProduct();
+        String config = uniqueConfig();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + config).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        given()
+        .when()
+            .get("/products/" + product + "/configurations/" + config)
+        .then()
+            .body("valid", is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteExcludesConstraintById() {
+        String product = uniqueProduct();
+        String sourceFeature = "SrcF-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExcF-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/features/" + excludedFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("excludedFeature", excludedFeature)
+            .when().post("/products/" + product + "/constraints/excludes").then().statusCode(lessThan(300));
+
+        Number constraintId = given()
+            .when()
+            .get("/products/" + product)
+            .then()
+            .statusCode(lessThan(300))
+            .extract()
+            .path("constraints[0].id");
+
+        given()
+        .when()
+            .delete("/products/" + product + "/constraints/" + constraintId)
+        .then()
+            .statusCode(204);
+    }
+}

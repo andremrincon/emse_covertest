@@ -1,0 +1,58 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void init() {
+        RestAssured.baseURI = System.getProperty("api.base", System.getenv().getOrDefault("API_BASE", "http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_OddOdd_Returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/1/1/0.75");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_OddEven_MessagePresent() {
+        given().when().get("/api/remainder/17/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/1/6/0.0");
+        resp.then().body("message", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_EvenOdd_Returns200() {
+        given().when().get("/api/expint/3/2.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/10/5/0.75");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_EvenEven_Returns200() {
+        given().when().get("/api/gammq/5.5/2.3").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/10/6/0.75");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_LargeNegativeX_ExecutesPath() {
+        given().when().get("/api/bessj/3/2.5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/2/2/-1000.0");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisher_VeryLargeX_ExecutesPath() {
+        given().when().get("/api/triangle/1/1/1").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/fisher/1/1/1e6");
+        resp.then().statusCode(200);
+    }
+}

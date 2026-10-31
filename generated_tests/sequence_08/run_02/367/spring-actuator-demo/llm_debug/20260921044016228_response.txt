@@ -1,0 +1,65 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class SampleControllerTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithName() {
+        given()
+            .queryParam("name", "John+Smith")
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSayHelloWithoutName() {
+        given()
+        .when()
+            .get("/")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithZeroDelay() {
+        given()
+            .queryParam("delay", 0)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithNonZeroDelay() {
+        given()
+            .queryParam("delay", 1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401);
+    }
+
+    @Test(timeout = 60000)
+    public void testTimeConsumingAPIWithNegativeDelay() {
+        given()
+            .queryParam("delay", -1)
+        .when()
+            .get("/slowApi")
+        .then()
+            .statusCode(401);
+    }
+}

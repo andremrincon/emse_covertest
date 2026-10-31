@@ -1,0 +1,119 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        MockServer.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Excludes-" + uuid;
+        String featureA = "FeatureA-" + uuid;
+        String featureB = "FeatureB-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Requires-" + uuid;
+        String sourceFeature = "SourceFeature-" + uuid;
+        String requiredFeature = "RequiredFeature-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void multipleConstraintViolationsTriggerWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "TestProduct-Multi-" + uuid;
+        String featureA = "FeatA-" + uuid;
+        String featureB = "FeatB-" + uuid;
+        String featureC = "FeatC-" + uuid;
+        String configurationName = "Config-" + uuid;
+
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", productName, featureC).then().statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given()
+                .formParam("sourceFeature", featureC)
+                .formParam("requiredFeature", featureA)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureB).then().statusCodeLessThan(300);
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureC).then().statusCodeLessThan(300);
+
+        RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", productName, configurationName).then().statusCode(500);
+    }
+}

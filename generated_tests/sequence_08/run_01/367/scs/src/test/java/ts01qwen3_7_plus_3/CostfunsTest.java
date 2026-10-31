@@ -1,0 +1,73 @@
+package ts01qwen3_7_plus_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class CostfunsTest {
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i_equals_5() {
+        given()
+            .pathParam("i", 5)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i_less_than_minus_444() {
+        given()
+            .pathParam("i", -500)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i_greater_than_666() {
+        given()
+            .pathParam("i", 700)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_i_equals_minus_4() {
+        given()
+            .pathParam("i", -4)
+            .pathParam("s", "a")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_s_equals_baab() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "baab")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_s_compareTo_ababba() {
+        given()
+            .pathParam("i", 0)
+            .pathParam("s", "ababba")
+        .when()
+            .get("/api/costfuns/{i}/{s}")
+        .then()
+            .statusCode(200);
+    }
+}

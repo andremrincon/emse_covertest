@@ -1,0 +1,54 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @Test(timeout = 60000)
+    public void testCookieUseridValid() {
+        given().when().get("/api/cookie/userid/user1234/example.com").then().statusCode(lessThan(300));
+        
+        Response response = given()
+            .pathParam("name", "userid")
+            .pathParam("val", "user1234")
+            .pathParam("site", "example.com")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}");
+        
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionValid() {
+        given().when().get("/api/cookie/userid/user1234/example.com").then().statusCode(lessThan(300));
+        
+        Response response = given()
+            .pathParam("name", "session")
+            .pathParam("val", "am")
+            .pathParam("site", "abc.com")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}");
+        
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCookieSessionInvalid() {
+        given().when().get("/api/cookie/userid/user1234/example.com").then().statusCode(lessThan(300));
+        
+        Response response = given()
+            .pathParam("name", "session")
+            .pathParam("val", "pm")
+            .pathParam("site", "abc.com")
+        .when()
+            .get("/api/cookie/{name}/{val}/{site}");
+        
+        response.then().statusCode(200);
+    }
+}
+```

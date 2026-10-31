@@ -1,0 +1,79 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.anyOf;
+
+public class GammqTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("test.base.url");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGserSuccess() {
+        given()
+            .pathParam("a", 5.5)
+            .pathParam("x", 2.3)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserItmaxExceeded() {
+        given()
+            .pathParam("a", 1e10)
+            .pathParam("x", 1e10)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(anyOf(400, 500));
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfSuccess() {
+        given()
+            .pathParam("a", 0.001)
+            .pathParam("x", 1000.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfUnderflow() {
+        given()
+            .pathParam("a", 1e-20)
+            .pathParam("x", 1e-20 + 2.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidArguments() {
+        given()
+            .pathParam("a", -1.0)
+            .pathParam("x", 2.0)
+        .when()
+            .get("/api/gammq/{a}/{x}")
+        .then()
+            .statusCode(anyOf(400, 500));
+    }
+}
+```

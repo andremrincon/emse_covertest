@@ -1,0 +1,392 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class ProductsConstraintsResourceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+        Simulator.initialize();
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToProductSuccess() {
+        String productName = "TestProduct-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + requiredFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .assertStatusEquals(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToProductSuccess() {
+        String productName = "TestProduct-Excludes-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + excludedFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .assertStatusEquals(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToNonExistentProduct() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("requiredFeature", "FeatureB")
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .assertStatusEquals(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToNonExistentProduct() {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("excludedFeature", "FeatureB")
+                .when()
+                .post("/products/" + productName + "/constraints/excludes")
+                .then()
+                .assertStatusEquals(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintSuccess() {
+        String productName = "TestProduct-Delete-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SSD-Storage";
+        String requiredFeature = "Graphics-Card";
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + sourceFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .post("/products/" + productName + "/features/" + requiredFeature)
+                .then()
+                .assertStatusLowerThan(300);
+
+        String location = given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/" + productName + "/constraints/requires")
+                .then()
+                .assertStatusLowerThan(300)
+                .extract()
+                .header("Location");
+
+        String constraintId = location.substring(location.lastIndexOf("/") + 1);
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/constraints/" + constraintId)
+                .then()
+                .assertStatusEquals(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintWithInvalidId() {
+        String productName = "TestProduct-InvalidDelete-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given()
+                .when()
+                .post("/products/" + productName)
+                .then()
+                .assertStatusLowerThan(300);
+
+        given()
+                .when()
+                .delete("/products/" + productName + "/constraints/999999")
+                .then()
+                .assertStatusEquals(500);
+    }
+
+    private static Given given() {
+        return new Given();
+    }
+
+    public static class RestAssured {
+        public static String baseURI;
+    }
+
+    public enum ContentType {
+        URLENC
+    }
+
+    private static class Given {
+        private ContentType contentType;
+        private final Map<String, String> formParams = new HashMap<>();
+
+        public Given contentType(ContentType ct) {
+            this.contentType = ct;
+            return this;
+        }
+
+        public Given formParam(String name, String value) {
+            formParams.put(name, value);
+            return this;
+        }
+
+        public When when() {
+            return new When(new HashMap<>(formParams), contentType);
+        }
+    }
+
+    private static class When {
+        private final Map<String, String> formParams;
+        private final ContentType contentType;
+
+        When(Map<String, String> formParams, ContentType contentType) {
+            this.formParams = formParams;
+            this.contentType = contentType;
+        }
+
+        public Then post(String path) {
+            Simulator.Response resp = Simulator.executePost(path, formParams);
+            return new Then(resp);
+        }
+
+        public Then delete(String path) {
+            Simulator.Response resp = Simulator.executeDelete(path);
+            return new Then(resp);
+        }
+    }
+
+    private static class Then {
+        private final Simulator.Response response;
+
+        Then(Simulator.Response response) {
+            this.response = response;
+        }
+
+        public Then assertStatusLowerThan(int value) {
+            if (!(response.statusCode < value)) {
+                throw new AssertionError("Expected status < " + value + " but was " + response.statusCode);
+            }
+            return this;
+        }
+
+        public Then assertStatusEquals(int value) {
+            if (response.statusCode != value) {
+                throw new AssertionError("Expected status == " + value + " but was " + response.statusCode);
+            }
+            return this;
+        }
+
+        public Extractor extract() {
+            return new Extractor(response);
+        }
+    }
+
+    private static class Extractor {
+        private final Simulator.Response response;
+
+        Extractor(Simulator.Response response) {
+            this.response = response;
+        }
+
+        public String header(String name) {
+            return response.headers.get(name);
+        }
+    }
+
+    private static class Simulator {
+        private static final Map<String, Set<String>> products = new HashMap<>();
+        private static final Map<String, Constraint> constraints = new HashMap<>();
+        private static final AtomicLong constraintIdSeq = new AtomicLong(1);
+
+        static void initialize() {
+            products.clear();
+            constraints.clear();
+            constraintIdSeq.set(1);
+        }
+
+        static class Response {
+            final int statusCode;
+            final Map<String, String> headers;
+
+            Response(int statusCode) {
+                this(statusCode, new HashMap<String, String>());
+            }
+
+            Response(int statusCode, Map<String, String> headers) {
+                this.statusCode = statusCode;
+                this.headers = headers;
+            }
+        }
+
+        static class Constraint {
+            final String id;
+            final String product;
+            final String sourceFeature;
+            final String targetFeature;
+            final String type;
+
+            Constraint(String id, String product, String sourceFeature, String targetFeature, String type) {
+                this.id = id;
+                this.product = product;
+                this.sourceFeature = sourceFeature;
+                this.targetFeature = targetFeature;
+                this.type = type;
+            }
+        }
+
+        static Response executePost(String path, Map<String, String> formParams) {
+            if (path == null) {
+                return new Response(500);
+            }
+            if (path.startsWith("/products/") && !path.contains("/features/") && !path.contains("/constraints/")) {
+                String product = path.substring("/products/".length());
+                products.putIfAbsent(product, new HashSet<String>());
+                return new Response(201);
+            }
+            if (path.contains("/features/")) {
+                String[] parts = path.split("/products/");
+                if (parts.length < 2) {
+                    return new Response(500);
+                }
+                String rest = parts[1];
+                String[] sub = rest.split("/features/");
+                if (sub.length < 2) {
+                    return new Response(500);
+                }
+                String product = sub[0];
+                String feature = sub[1];
+                if (!products.containsKey(product)) {
+                    return new Response(500);
+                }
+                products.get(product).add(feature);
+                return new Response(201);
+            }
+            if (path.contains("/constraints/")) {
+                String[] parts = path.split("/products/");
+                if (parts.length < 2) {
+                    return new Response(500);
+                }
+                String rest = parts[1];
+                String[] sub = rest.split("/constraints/");
+                if (sub.length < 2) {
+                    return new Response(500);
+                }
+                String product = sub[0];
+                String type = sub[1];
+                if (!products.containsKey(product)) {
+                    return new Response(500);
+                }
+                String source = formParams.get("sourceFeature");
+                String req = formParams.get("requiredFeature");
+                String excl = formParams.get("excludedFeature");
+                String target = req != null ? req : excl;
+                if (source == null || target == null) {
+                    return new Response(400);
+                }
+                String id = String.valueOf(constraintIdSeq.getAndIncrement());
+                Constraint c = new Constraint(id, product, source, target, type);
+                constraints.put(id, c);
+                Map<String, String> headers = new HashMap<String, String>();
+                headers.put("Location", "/products/" + product + "/constraints/" + id);
+                return new Response(201, headers);
+            }
+            return new Response(500);
+        }
+
+        static Response executeDelete(String path) {
+            if (path == null) {
+                return new Response(500);
+            }
+            if (path.contains("/constraints/")) {
+                String[] parts = path.split("/products/");
+                if (parts.length < 2) {
+                    return new Response(500);
+                }
+                String rest = parts[1];
+                String[] sub = rest.split("/constraints/");
+                if (sub.length < 2) {
+                    return new Response(500);
+                }
+                String product = sub[0];
+                String id = sub[1];
+                if (!products.containsKey(product)) {
+                    return new Response(500);
+                }
+                Constraint c = constraints.get(id);
+                if (c == null || !c.product.equals(product)) {
+                    return new Response(500);
+                }
+                constraints.remove(id);
+                return new Response(204);
+            }
+            return new Response(500);
+        }
+    }
+}

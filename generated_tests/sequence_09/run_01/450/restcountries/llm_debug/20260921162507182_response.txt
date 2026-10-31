@@ -1,0 +1,62 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null) base = System.getenv("BASE_URL");
+        if (base == null) base = "http://localhost:8080/rest";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String json = "{\"amount\":1000,\"currency\":\"USD\",\"token\":\"" + "tok_" + UUID.randomUUID().toString() + "\"}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingTokenBadRequest() {
+        given().when().get("/v2").then().statusCode(lessThan(300));
+        String json = "{\"amount\":500,\"currency\":\"USD\"}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingAmountBadRequest() {
+        given().when().get("/v1/alpha?codes=US").then().statusCode(lessThan(300));
+        String json = "{\"currency\":\"USD\",\"token\":\"" + "tok_" + UUID.randomUUID().toString() + "\"}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidAmountTypeBadRequest() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        String json = "{\"amount\":\"abc\",\"currency\":\"USD\",\"token\":\"" + "tok_" + UUID.randomUUID().toString() + "\"}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAmountBadRequest() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        String json = "{\"amount\":-100,\"currency\":\"USD\",\"token\":\"" + "tok_" + UUID.randomUUID().toString() + "\"}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testEmptyPayloadBadRequest() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        String json = "{}";
+        given().contentType(ContentType.JSON).body(json).when().post("/contribute").then().statusCode(400);
+    }
+}

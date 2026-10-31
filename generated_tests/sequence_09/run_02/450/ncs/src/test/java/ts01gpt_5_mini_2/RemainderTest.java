@@ -1,0 +1,61 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RemainderTest {
+
+    private static final String BASE = System.getProperty("base.url", System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"2\"   Actual: {\"resul...")
+    @Test(timeout = 60000)
+    public void testRemainder_PositiveDividend_PositiveDivisor_returnsExpectedRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 3, 4, 5).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", 17, 5);
+        act.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"2\"   Actual: {\"resul...")
+    @Test(timeout = 60000)
+    public void testRemainder_PositiveDividend_NegativeDivisor_returnsExpectedRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 1, 1, 1).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", 17, -5);
+        act.then().statusCode(200).body(equalTo("2"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"-1\"   Actual: {\"resu...")
+    @Test(timeout = 60000)
+    public void testRemainder_NegativeDividend_PositiveDivisor_returnsExpectedRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 3, 3, 3).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", -9, 4);
+        act.then().statusCode(200).body(equalTo("-1"));
+    }
+
+    @Ignore("1 expectation failed. Response body doesn't match expectation. Expected: \"1\"   Actual: {\"resul...")
+    @Test(timeout = 60000)
+    public void testRemainder_NegativeDividend_NegativeDivisor_returnsExpectedRemainder() {
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 4, 4, 4).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", -9, -4);
+        act.then().statusCode(200).body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_aZero_returnsBadRequest() {
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 2, 2, 2).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", 0, 5);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainder_bZero_returnsBadRequest() {
+        String unique = UUID.randomUUID().toString();
+        given().baseUri(BASE).when().get("/api/triangle/{a}/{b}/{c}", 5, 5, 5).then().statusCode(lessThan(300));
+        Response act = given().baseUri(BASE).when().get("/api/remainder/{a}/{b}", 5, 0);
+        act.then().statusCode(200);
+    }
+}

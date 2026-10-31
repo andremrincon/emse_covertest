@@ -1,0 +1,550 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductConfigurationTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testActivateMultipleFeaturesExercisesActiveFeatureMultipleTimes TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[2] METHOD=testGetConfigurationExercisesAvailableFeaturesAndCollectFeatureNames TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[3] METHOD=testDeleteFeatureFromConfigurationExercisesDeactiveFeature TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[4] METHOD=testGetConfigurationWithActiveFeaturesExercisesAvailableAndActivedFeatures TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[5] METHOD=testGetConfigurationFeaturesAfterDeactivationExercisesHasActiveFeature TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[6] METHOD=testDeactivateOneOfMultipleFeaturesExercisesDeactiveAndHasActiveFeature TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[7] METHOD=testAvailableFeaturesWithMultipleProductFeaturesExercisesCollectFeatureNamesLoop TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[8] METHOD=testGetConfigurationFeaturesAfterActivationExercisesActivedFeaturesAndCollectFeatureNames TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+[9] METHOD=testAddFeatureToConfigurationExercisesActiveFeature TYPE=FAILURE
+Expected: a value less than <300>
+     but: <500> was greater than <300>
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testActivateMultipleFeaturesExercisesActiveFeatureMultipleTimes FAILURE AT LINE 270
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testActivateMultipleFeaturesExercisesActiveFeatureMultipleTimes(ProductConfigurationTest.java:270)
+CODE CONTEXT:
+   267:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   268: 
+   269:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   270:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   271: 
+   272:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   273:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[2] METHOD=testGetConfigurationExercisesAvailableFeaturesAndCollectFeatureNames FAILURE AT LINE 108
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testGetConfigurationExercisesAvailableFeaturesAndCollectFeatureNames(ProductConfigurationTest.java:108)
+CODE CONTEXT:
+   105:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   106: 
+   107:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   108:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   109: 
+   110:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   111:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[3] METHOD=testDeleteFeatureFromConfigurationExercisesDeactiveFeature FAILURE AT LINE 184
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testDeleteFeatureFromConfigurationExercisesDeactiveFeature(ProductConfigurationTest.java:184)
+CODE CONTEXT:
+   181:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   182: 
+   183:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   184:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   185: 
+   186:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   187:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[4] METHOD=testGetConfigurationWithActiveFeaturesExercisesAvailableAndActivedFeatures FAILURE AT LINE 332
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testGetConfigurationWithActiveFeaturesExercisesAvailableAndActivedFeatures(ProductConfigurationTest.java:332)
+CODE CONTEXT:
+   329:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   330: 
+   331:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   332:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   333: 
+   334:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   335:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[5] METHOD=testGetConfigurationFeaturesAfterDeactivationExercisesHasActiveFeature FAILURE AT LINE 206
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testGetConfigurationFeaturesAfterDeactivationExercisesHasActiveFeature(ProductConfigurationTest.java:206)
+CODE CONTEXT:
+   203:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   204: 
+   205:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   206:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   207: 
+   208:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   209:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[6] METHOD=testDeactivateOneOfMultipleFeaturesExercisesDeactiveAndHasActiveFeature FAILURE AT LINE 300
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testDeactivateOneOfMultipleFeaturesExercisesDeactiveAndHasActiveFeature(ProductConfigurationTest.java:300)
+CODE CONTEXT:
+   297:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   298: 
+   299:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   300:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   301: 
+   302:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   303:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[7] METHOD=testAvailableFeaturesWithMultipleProductFeaturesExercisesCollectFeatureNamesLoop FAILURE AT LINE 247
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testAvailableFeaturesWithMultipleProductFeaturesExercisesCollectFeatureNamesLoop(ProductConfigurationTest.java:247)
+CODE CONTEXT:
+   244:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   245: 
+   246:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+   247:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   248: 
+   249:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+   250:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[8] METHOD=testGetConfigurationFeaturesAfterActivationExercisesActivedFeaturesAndCollectFeatureNames FAILURE AT LINE 161
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testGetConfigurationFeaturesAfterActivationExercisesActivedFeaturesAndCollectFeatureNames(ProductConfigurationTest.java:161)
+CODE CONTEXT:
+   158:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   159: 
+   160:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   161:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   162: 
+   163:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   164:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+[9] METHOD=testAddFeatureToConfigurationExercisesActiveFeature FAILURE AT LINE 142
+java.lang.AssertionError:
+at ts01glm_5_2.ProductConfigurationTest.testAddFeatureToConfigurationExercisesActiveFeature(ProductConfigurationTest.java:142)
+CODE CONTEXT:
+   139:         MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+   140: 
+   141:         SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+   142:         MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));  ← FAILURE HERE
+   143: 
+   144:         SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+   145:         MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+
+public class ProductConfigurationTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setup() {
+        baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+    }
+
+    private static class SimpleResponse {
+        int statusCode;
+        String body;
+
+        SimpleResponse(int statusCode, String body) {
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+    }
+
+    private SimpleResponse sendRequest(String method, String pathTemplate, Object... args) throws IOException {
+        String path = buildPath(pathTemplate, args);
+        String urlStr = baseUrl + path;
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+        conn.setDoOutput(false);
+        int code;
+        String body = "";
+        try {
+            conn.connect();
+            code = conn.getResponseCode();
+            InputStream is = code >= 200 && code < 400 ? conn.getInputStream() : conn.getErrorStream();
+            if (is != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                body = sb.toString();
+                br.close();
+            }
+        } finally {
+            conn.disconnect();
+        }
+        return new SimpleResponse(code, body);
+    }
+
+    private String buildPath(String template, Object... args) throws IOException {
+        String result = template;
+        for (Object arg : args) {
+            int open = result.indexOf('{');
+            int close = result.indexOf('}', open);
+            if (open >= 0 && close > open) {
+                String encoded = URLEncoder.encode(String.valueOf(arg), "UTF-8");
+                result = result.substring(0, open) + encoded + result.substring(close + 1);
+            } else {
+                result = result + "/" + URLEncoder.encode(String.valueOf(arg), "UTF-8");
+            }
+        }
+        return result;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateConfigurationExercisesSetValidAndGetProduct() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationExercisesAvailableFeaturesAndCollectFeatureNames() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesEmptyExercisesActivedFeaturesWithEmptySet() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationExercisesActiveFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), equalTo(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesAfterActivationExercisesActivedFeaturesAndCollectFeatureNames() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), equalTo(200));
+        MatcherAssert.assertThat(r5.body.contains(featureName), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationExercisesDeactiveFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesAfterDeactivationExercisesHasActiveFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), lessThan(300));
+
+        SimpleResponse r6 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r6.statusCode), equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsListExercisesConfigurationRetrieval() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testAvailableFeaturesWithMultipleProductFeaturesExercisesCollectFeatureNamesLoop() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testActivateMultipleFeaturesExercisesActiveFeatureMultipleTimes() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), lessThan(300));
+
+        SimpleResponse r6 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature2);
+        MatcherAssert.assertThat(Integer.valueOf(r6.statusCode), lessThan(300));
+
+        SimpleResponse r7 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r7.statusCode), equalTo(200));
+        MatcherAssert.assertThat(r7.body.contains(feature1) && r7.body.contains(feature2), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeactivateOneOfMultipleFeaturesExercisesDeactiveAndHasActiveFeature() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature1 = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String feature2 = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, feature2);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), lessThan(300));
+
+        SimpleResponse r6 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature2);
+        MatcherAssert.assertThat(Integer.valueOf(r6.statusCode), lessThan(300));
+
+        SimpleResponse r7 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, feature1);
+        MatcherAssert.assertThat(Integer.valueOf(r7.statusCode), lessThan(300));
+
+        SimpleResponse r8 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r8.statusCode), equalTo(200));
+        MatcherAssert.assertThat(r8.body.contains(feature2) && !r8.body.contains(feature1), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationWithActiveFeaturesExercisesAvailableAndActivedFeatures() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), lessThan(300));
+
+        SimpleResponse r4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+        MatcherAssert.assertThat(Integer.valueOf(r4.statusCode), lessThan(300));
+
+        SimpleResponse r5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r5.statusCode), equalTo(200));
+        MatcherAssert.assertThat(r5.body.contains(configurationName), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationExercisesConfigurationLifecycle() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), equalTo(204));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesWithProductHavingNoFeaturesExercisesAvailableFeaturesEmpty() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        MatcherAssert.assertThat(Integer.valueOf(r1.statusCode), lessThan(300));
+
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r2.statusCode), lessThan(300));
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        MatcherAssert.assertThat(Integer.valueOf(r3.statusCode), equalTo(200));
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

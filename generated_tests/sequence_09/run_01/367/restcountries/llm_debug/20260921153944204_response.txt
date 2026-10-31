@@ -1,0 +1,52 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.trim().isEmpty()) {
+            base = System.getProperty("base.url", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withEmptyBody_returnsBadRequest() {
+        given().queryParam("codes", "US").when().get("/v1/alpha").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.JSON).body("").when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withBlankToken_returnsBadRequest() {
+        given().queryParam("codes", "US,CA").when().get("/v1/alpha").then().statusCode(lessThan(300));
+        String payload = "{\"token\":\"   \",\"amount\":100}";
+        Response act = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withValidToken_returnsAccepted() {
+        given().queryParam("codes", "US").when().get("/v1/alpha").then().statusCode(lessThan(300));
+        String payload = "{\"token\":\"tok_visa\",\"amount\":100}";
+        Response act = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        act.then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void postContribute_withNonBlankToken_whenStripeFails_returnsBadRequest() {
+        given().queryParam("codes", "US").when().get("/v1/alpha").then().statusCode(lessThan(300));
+        String payload = "{\"token\":\"invalid_token_for_stripe\",\"amount\":500}";
+        Response act = given().contentType(ContentType.JSON).body(payload).when().post("/contribute");
+        act.then().statusCode(400);
+    }
+}

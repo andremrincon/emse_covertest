@@ -1,0 +1,141 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsAccessControlAllowOriginOnV1All() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsAccessControlAllowMethodsOnV1Alpha() {
+        given()
+            .queryParam("codes", "US,CA,MX")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsAccessControlAllowHeadersOnV2All() {
+        given()
+            .when()
+                .get("/v2/all")
+            .then()
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCacheControlOnV2Alpha() {
+        given()
+            .pathParam("alphacode", "US")
+            .when()
+                .get("/v2/alpha/{alphacode}")
+            .then()
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOn404Response() {
+        given()
+            .pathParam("alphacode", "XYZ")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOn400Response() {
+        given()
+            .pathParam("alphacode", "123")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV2NameEndpoint() {
+        given()
+            .pathParam("name", "France")
+            .when()
+                .get("/v2/name/{name}")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV1RegionEndpoint() {
+        given()
+            .pathParam("region", "Europe")
+            .when()
+                .get("/v1/region/{region}")
+            .then()
+                .header("Access-Control-Allow-Methods", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV1CapitalEndpoint() {
+        given()
+            .pathParam("capital", "London")
+            .when()
+                .get("/v1/capital/{capital}")
+            .then()
+                .header("Cache-Control", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV2CurrencyEndpoint() {
+        given()
+            .pathParam("currency", "EUR")
+            .when()
+                .get("/v2/currency/{currency}")
+            .then()
+                .header("Access-Control-Allow-Headers", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV2RootEndpoint() {
+        given()
+            .when()
+                .get("/v2")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterAppliesHeadersOnV1CallingCodeEndpoint() {
+        given()
+            .pathParam("callingcode", "1")
+            .when()
+                .get("/v1/callingcode/{callingcode}")
+            .then()
+                .header("Access-Control-Allow-Origin", nullValue());
+    }
+}

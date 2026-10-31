@@ -1,0 +1,102 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatLenLessThanOrEqualTo2() {
+        given()
+            .when()
+                .get("/api/pat/hello/he")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNoMatch() {
+        given()
+            .when()
+                .get("/api/pat/hello/xyz")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatFoundNoPatRev() {
+        given()
+            .when()
+                .get("/api/pat/helloabc/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevFoundNoPat() {
+        given()
+            .when()
+                .get("/api/pat/hellocba/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/abccba/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatAndPatRevNotAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/abcxxcba/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevAndPatAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/cbaabc/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPatRevAndPatNotAdjacent() {
+        given()
+            .when()
+                .get("/api/pat/cbaxxabc/abc")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0"));
+    }
+}
+```

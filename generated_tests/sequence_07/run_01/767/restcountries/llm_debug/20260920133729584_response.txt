@@ -1,0 +1,156 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+        RestAssured.urlEncodingEnabled = true;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returnsCountry_whenValidCode() {
+        given()
+            .when()
+                .get("/v1/alpha/US")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returnsNotFound_whenCodeNotFound() {
+        given()
+            .when()
+                .get("/v1/alpha/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returnsBadRequest_whenCodeTooShort() {
+        given()
+            .when()
+                .get("/v1/alpha/A")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_returnsBadRequest_whenCodeTooLong() {
+        given()
+            .when()
+                .get("/v1/alpha/ABCD")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsBadRequest_whenCodesTooShort() {
+        given()
+            .queryParam("codes", "A")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsBadRequest_whenCodesTooLongNoSemicolon() {
+        given()
+            .queryParam("codes", "ABCD")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_returnsNotFound_whenCodesNotFound() {
+        given()
+            .queryParam("codes", "XX;YY;ZZ")
+            .when()
+                .get("/v1/alpha/")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returnsBadRequest_whenCurrencyWrongLength() {
+        given()
+            .when()
+                .get("/v1/currency/US")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_returnsNotFound_whenCurrencyNotFound() {
+        given()
+            .when()
+                .get("/v1/currency/XYZ")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_returnsNotFound_whenNameNotFound() {
+        given()
+            .when()
+                .get("/v1/name/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_returnsNotFound_whenCallingCodeNotFound() {
+        given()
+            .when()
+                .get("/v1/callingcode/99999")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_returnsNotFound_whenCapitalNotFound() {
+        given()
+            .when()
+                .get("/v1/capital/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_returnsNotFound_whenRegionNotFound() {
+        given()
+            .when()
+                .get("/v1/region/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_returnsNotFound_whenSubregionNotFound() {
+        given()
+            .when()
+                .get("/v1/subregion/123")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_returnsNotFound_whenLanguageNotFound() {
+        given()
+            .when()
+                .get("/v1/lang/123")
+            .then()
+                .statusCode(404);
+    }
+}

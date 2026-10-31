@@ -1,0 +1,81 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_unordered_whenStringsTooShort() {
+        given()
+            .when()
+                .get("/api/ordered4/a/b/c/d")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_unordered_whenStringsTooLong() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaaaaa/bbbbbbbb/cccccccc/dddddddd")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_increasing_whenAllLengthsFiveAndZGreaterThanYGreaterThanXGreaterThanW() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/bbbbb/ccccc/ddddd")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_decreasing_whenAllLengthsSixAndWGreaterThanXGreaterThanYGreaterThanZ() {
+        given()
+            .when()
+                .get("/api/ordered4/dddddd/cccccc/bbbbbb/aaaaaa")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_unordered_whenValidLengthsButNoOrdering() {
+        given()
+            .when()
+                .get("/api/ordered4/aaaaa/aaaaa/aaaaa/aaaaa")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_unordered_whenLengthsAtBoundarySixAndNoOrdering() {
+        given()
+            .when()
+                .get("/api/ordered4/zzzzzz/aaaaaa/zzzzzz/aaaaaa")
+            .then()
+                .statusCode(200)
+                .body(equalTo("unordered"));
+    }
+}

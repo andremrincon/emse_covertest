@@ -1,0 +1,52 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcConstantOperatorPi() {
+        given()
+            .when()
+                .get("/api/calc/pi/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(containsString("3.14159"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcBinaryOperatorPlus() {
+        given()
+            .when()
+                .get("/api/calc/plus/15.5/4.5")
+            .then()
+                .statusCode(200)
+                .body(equalTo("20.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcUnknownOperatorReturnsDefault() {
+        given()
+            .when()
+                .get("/api/calc/add/10/8")
+            .then()
+                .statusCode(200)
+                .body(equalTo("0.0"));
+    }
+}

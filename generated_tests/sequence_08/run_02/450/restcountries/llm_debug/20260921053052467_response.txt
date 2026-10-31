@@ -1,0 +1,102 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryServiceBaseTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CharMatch() {
+        given()
+            .pathParam("alphacode", "US")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha3CharMatch() {
+        given()
+            .pathParam("alphacode", "USA")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha2CharNoMatch() {
+        given()
+            .pathParam("alphacode", "ZZ")
+            .when()
+                .get("/v1/alpha/{alphacode}")
+            .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListValid() {
+        given()
+            .queryParam("codes", "US,CA")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCodeListDuplicate() {
+        given()
+            .queryParam("codes", "US,US")
+            .when()
+                .get("/v1/alpha")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchExactName() {
+        given()
+            .pathParam("name", "Germany")
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFulltextSearchAltSpelling() {
+        given()
+            .pathParam("name", "Federal Republic of Germany")
+            .queryParam("fullText", true)
+            .when()
+                .get("/v1/name/{name}")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLoadJsonTrigger() {
+        given()
+            .when()
+                .get("/v1/all")
+            .then()
+                .statusCode(200);
+    }
+}
+```

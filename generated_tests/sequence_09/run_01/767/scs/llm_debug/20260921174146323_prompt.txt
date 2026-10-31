@@ -1,0 +1,146 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini_2.PatTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=test_pat_long_text_triggers_500 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <400> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=test_pat_long_text_triggers_500 FAILURE AT LINE 86
+java.lang.AssertionError:
+at ts01gpt_5_mini_2.PatTest.test_pat_long_text_triggers_500(PatTest.java:86)
+CODE CONTEXT:
+    83:         }
+    84:         String txt = sb.toString();
+    85:         String pat = "pattern";
+    86:         given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));  ← FAILURE HERE
+    87:         Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+    88:         act.then().statusCode(500);
+    89:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            String e2 = System.getenv("BASE_URL");
+            RestAssured.baseURI = (e2 == null || e2.isEmpty()) ? "http://localhost:8080" : e2;
+        } else {
+            RestAssured.baseURI = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_single_char_pat_returns_200() {
+        given().when().get("/api/pat/{txt}/{pat}", "abcxyz", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", "abcxyz", "a");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_pat_only_returns_200() {
+        String txt = "xxPATxx";
+        String pat = "PAT";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_reverse_only_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "start" + patrev + "end";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_both_non_adjacent_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "xx" + pat + "middle" + patrev + "yy";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_palindrome_adjacent_returns_200() {
+        String pat = "ABA";
+        String txt = "pre" + pat + pat + "post";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_reverse_then_pat_adjacent_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "tok" + patrev + pat + "end";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_long_text_triggers_500() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 2000; i++) {
+            sb.append("longtextsegment");
+        }
+        String txt = sb.toString();
+        String pat = "pattern";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_single_txt_endpoint_returns_200() {
+        String txt = "The quick brown fox jumps over the lazy dog.";
+        given().when().get("/api/pat/{txt}", txt).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", txt);
+        act.then().statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

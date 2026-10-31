@@ -1,0 +1,49 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class StripeRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("test.base.uri", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeNullContribution() {
+        given()
+            .contentType("application/json;charset=utf-8")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeBlankToken() {
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body("{\"token\": \"   \"}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeStripeApiError() {
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body("{\"token\": \"tok_12345\", \"amount\": 500}")
+        .when()
+            .post("/contribute")
+        .then()
+            .statusCode(400);
+    }
+}
+```

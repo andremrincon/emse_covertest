@@ -1,0 +1,68 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_triggersDerivedFeatureEvaluation() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String configuration = "conf-" + uuid;
+        String featureA = "feat-A-" + uuid;
+        String featureB = "feat-B-" + uuid;
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + configuration).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/" + product + "/constraints/requires").then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/" + product + "/configurations/" + configuration + "/features/" + featureA);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureWithChainConstraints_causesRecursiveEvaluation() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod2-" + uuid;
+        String configuration = "conf2-" + uuid;
+        String featureA = "featChainA-" + uuid;
+        String featureB = "featChainB-" + uuid;
+        String featureC = "featChainC-" + uuid;
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + configuration).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureA).formParam("requiredFeature", featureB).when().post("/products/" + product + "/constraints/requires").then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", featureB).formParam("requiredFeature", featureC).when().post("/products/" + product + "/constraints/requires").then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/" + product + "/configurations/" + configuration + "/features/" + featureA);
+        assertEquals(201, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration_returnsNoContent() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod3-" + uuid;
+        String configuration = "conf3-" + uuid;
+        String feature = "featToDelete-" + uuid;
+        given().when().post("/products/" + product).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/" + product + "/configurations/" + configuration + "/features/" + feature).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/" + product + "/configurations/" + configuration + "/features/" + feature);
+        assertEquals(204, act.getStatusCode());
+    }
+}

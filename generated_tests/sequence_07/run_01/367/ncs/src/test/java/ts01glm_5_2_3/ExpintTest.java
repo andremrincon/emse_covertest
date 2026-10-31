@@ -1,0 +1,50 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN0PositiveX() {
+        RestAssured.given().when().get("/api/expint/0/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN2XZero() {
+        RestAssured.given().when().get("/api/expint/2/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN1SmallX() {
+        RestAssured.given().when().get("/api/expint/1/0.1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN3SmallX() {
+        RestAssured.given().when().get("/api/expint/3/0.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintN3LargeX() {
+        RestAssured.given().when().get("/api/expint/3/2.5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpintNegativeN() {
+        RestAssured.given().when().get("/api/expint/-1/2.5").then().statusCode(400);
+    }
+}

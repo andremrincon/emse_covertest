@@ -1,0 +1,44 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void init() {
+        String fromSys = System.getProperty("api.baseUrl");
+        String fromEnv = System.getenv("API_BASE_URL");
+        String base = Optional.ofNullable(fromSys).orElse(fromEnv);
+        RestAssured.baseURI = base != null ? base : "http://localhost:8080/rest";
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_1_v1Alpha_US() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_1", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetIso639_2_v1Alpha_US() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].iso639_2", equalTo("eng"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName_v1Alpha_US() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].name", equalTo("English"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetNativeName_v1Alpha_US() {
+        given().when().get("/v1/alpha/US").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/US").then().body("languages[0].nativeName", equalTo("English"));
+    }
+}

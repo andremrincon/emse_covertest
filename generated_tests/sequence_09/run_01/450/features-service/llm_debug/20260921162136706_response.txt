@@ -1,0 +1,92 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_add_requires_constraint_returns_201() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "Enterprise-Server-" + uuid;
+        String src = "RAID-Controller-" + uuid;
+        String req = "128GB-ECC-RAM-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_requires_constraint_response_contains_feature_names() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "Mobile-App-Basic-" + uuid;
+        String src = "Push-Notifications-" + uuid;
+        String req = "User-Authentication-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product);
+        assertEquals(201, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void test_evaluateConfiguration_adds_required_when_source_active() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "Server-X1-" + uuid;
+        String configuration = "production-" + uuid;
+        String src = "FeatureA-" + uuid;
+        String req = "FeatureB-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, src).then().statusCode(500);
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}", product, configuration);
+        assertTrue(resp.asString().contains(req));
+    }
+
+    @Test(timeout = 60000)
+    public void test_evaluateConfiguration_does_not_add_required_when_source_inactive() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "Server-Y1-" + uuid;
+        String configuration = "dev-" + uuid;
+        String src = "FeatureX-" + uuid;
+        String req = "FeatureY-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("requiredFeature", req)
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}", product, configuration);
+        assertFalse(resp.asString().contains(req));
+    }
+}

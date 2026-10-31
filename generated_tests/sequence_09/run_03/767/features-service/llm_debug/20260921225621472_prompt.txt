@@ -1,0 +1,227 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.ProductTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testAddFeatureToConfiguration_returns201 TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[2] METHOD=testGetProductFeatures_containsAddedFeature TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=testDeleteConfigurationFeature_returns204 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=testGetConfigurationFeatures_returns200 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testAddFeatureToConfiguration_returns201 FAILURE AT LINE 95
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.testAddFeatureToConfiguration_returns201(ProductTest.java:95)
+CODE CONTEXT:
+    92:         given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+    93:         given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+    94:         Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+    95:         act.then().statusCode(500);  ← FAILURE HERE
+    96:     }
+    97: 
+    98:     @Test(timeout = 60000)
+
+[2] METHOD=testGetProductFeatures_containsAddedFeature FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.testGetProductFeatures_containsAddedFeature(ProductTest.java:46)
+CODE CONTEXT:
+    43:         String productName = "prod-" + UUID.randomUUID().toString();
+    44:         String featureName = "Blood Oxygen Sensor-" + UUID.randomUUID().toString();
+    45:         given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+    46:         given().contentType(ContentType.URLENC).formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));  ← FAILURE HERE
+    47:         Response act = given().pathParam("productName", productName).when().get("/products/{productName}/features");
+    48:         act.then().body("featureName", hasItem(featureName));
+    49:     }
+
+[3] METHOD=testDeleteConfigurationFeature_returns204 FAILURE AT LINE 117
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.testDeleteConfigurationFeature_returns204(ProductTest.java:117)
+CODE CONTEXT:
+   114:         String featureName = "Realtime-Analytics-Dashboard-" + UUID.randomUUID().toString();
+   115:         given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+   116:         given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+   117:         given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));  ← FAILURE HERE
+   118:         Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+   119:         act.then().statusCode(204);
+   120:     }
+
+[4] METHOD=testGetConfigurationFeatures_returns200 FAILURE AT LINE 105
+java.lang.AssertionError:
+at ts01gpt_5_mini.ProductTest.testGetConfigurationFeatures_returns200(ProductTest.java:105)
+CODE CONTEXT:
+   102:         String featureName = "wifi-6e-" + UUID.randomUUID().toString();
+   103:         given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+   104:         given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+   105:         given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));  ← FAILURE HERE
+   106:         Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().get("/products/{productName}/configurations/{configurationName}/features");
+   107:         act.then().statusCode(200);
+   108:     }
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        String prop = System.getProperty("api.base.url");
+        RestAssured.baseURI = env != null ? env : (prop != null ? prop : "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateProductThenGetProduct_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).when().get("/products/{productName}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeatures_containsAddedFeature() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "Blood Oxygen Sensor-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).when().get("/products/{productName}/features");
+        act.then().body("featureName", hasItem(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "backlit-keyboard-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "initial").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.").pathParam("productName", productName).pathParam("featureName", featureName).when().put("/products/{productName}/features/{featureName}");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).formParam("description", "desc").pathParam("productName", productName).pathParam("featureName", featureName).when().post("/products/{productName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("featureName", featureName).when().delete("/products/{productName}/features/{featureName}");
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM").pathParam("productName", productName).when().post("/products/{productName}/constraints/requires");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraint_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC).formParam("sourceFeature", "CPU-i9-13900H").formParam("excludedFeature", "Integrated-Graphics-Only").pathParam("productName", productName).when().post("/products/{productName}/constraints/excludes");
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_returns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "distributed-training-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeatures_returns200() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "wifi-6e-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().get("/products/{productName}/configurations/{configurationName}/features");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfigurationFeature_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        String featureName = "Realtime-Analytics-Dashboard-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).pathParam("featureName", featureName).when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}");
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfiguration_returns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String configurationName = "config-" + UUID.randomUUID().toString();
+        given().pathParam("productName", productName).when().post("/products/{productName}").then().statusCode(lessThan(300));
+        given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().post("/products/{productName}/configurations/{configurationName}").then().statusCode(lessThan(300));
+        Response act = given().pathParam("productName", productName).pathParam("configurationName", configurationName).when().delete("/products/{productName}/configurations/{configurationName}");
+        act.then().statusCode(204);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

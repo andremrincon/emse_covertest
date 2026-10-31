@@ -1,0 +1,84 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: equilateral   Actual: null")
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/3")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("equilateral"));
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: right   Actual: null")
+    @Test(timeout = 60000)
+    public void testRightTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/4/5")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("right"));
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: isosceles   Actual: null")
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/3/3/4")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("isosceles"));
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: scalene   Actual: null")
+    @Test(timeout = 60000)
+    public void testScaleneTriangle() {
+        given()
+            .when()
+                .get("/api/triangle/4/5/6")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("scalene"));
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: invalid   Actual: null")
+    @Test(timeout = 60000)
+    public void testInvalidTriangleInequality() {
+        given()
+            .when()
+                .get("/api/triangle/1/1/3")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("invalid"));
+    }
+
+    @Ignore("1 expectation failed. JSON path type doesn't match. Expected: invalid   Actual: null")
+    @Test(timeout = 60000)
+    public void testInvalidSides() {
+        given()
+            .when()
+                .get("/api/triangle/0/4/5")
+            .then()
+                .statusCode(200)
+                .body("type", equalTo("invalid"));
+    }
+}

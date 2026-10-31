@@ -1,0 +1,77 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getProperty("api.base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationSuccess() throws Exception {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String configuration = "cfg-" + uuid;
+        String feature = "feat-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationFailureWithLongFeatureName() throws Exception {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String configuration = "cfg-" + uuid;
+        String longFeature = new String(new char[800]).replace('\0', 'x');
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, longFeature);
+        assertEquals(500, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccess() throws Exception {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String configuration = "cfg-" + uuid;
+        String feature = "feat-" + uuid;
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response createResp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        assertEquals(500, createResp.getStatusCode());
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        assertEquals(204, act.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFailureWithProblematicFeatureName() throws Exception {
+        String uuid = UUID.randomUUID().toString();
+        String product = "prod-" + uuid;
+        String configuration = "cfg-" + uuid;
+        String problematic = "feature-name-that-is-intentionally-made-very-long-to-exceed-potential-database-column-size-limits-or-other-internal-buffer-restrictions-leading-to-an-unhandled-server-side-exception-and-a-500-internal-server-error-response";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, problematic);
+        assertEquals(500, act.getStatusCode());
+    }
+}

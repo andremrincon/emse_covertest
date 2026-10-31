@@ -1,0 +1,380 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.*;
+
+public class WrongProductConfigurationExceptionTest {
+
+    private String baseUri;
+
+    @Before
+    public void setUp() {
+        baseUri = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void createRequiresConstraintExercisesSetIdAndSetForProduct() throws Exception {
+        String productName = "ReqConstraint-Product-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SourceFeature-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "RequiredFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        assertTrue(r3.statusCode < 300);
+
+        Response r4 = postForm("/products/{productName}/constraints/requires",
+                mapOf("sourceFeature", sourceFeature, "requiredFeature", requiredFeature),
+                productName);
+        assertEquals(201, r4.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintExercisesSetIdAndSetForProduct() throws Exception {
+        String productName = "ExclConstraint-Product-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "ExclSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "ExclTarget-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        assertTrue(r3.statusCode < 300);
+
+        Response r4 = postForm("/products/{productName}/constraints/excludes",
+                mapOf("sourceFeature", sourceFeature, "excludedFeature", excludedFeature),
+                productName);
+        assertEquals(201, r4.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithConstraintsExercisesGetId() throws Exception {
+        String productName = "GetProduct-Constraints-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "GetSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "GetRequired-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        assertTrue(r3.statusCode < 300);
+        Response r4 = postForm("/products/{productName}/constraints/requires",
+                mapOf("sourceFeature", sourceFeature, "requiredFeature", requiredFeature),
+                productName);
+        assertTrue(r4.statusCode < 300);
+
+        Response r5 = get("/products/{productName}", productName);
+        assertEquals(200, r5.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintExercisesGetId() throws Exception {
+        String productName = "DeleteConstraint-Product-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "DelSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "DelRequired-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, requiredFeature);
+        assertTrue(r3.statusCode < 300);
+        Response r4 = postForm("/products/{productName}/constraints/requires",
+                mapOf("sourceFeature", sourceFeature, "requiredFeature", requiredFeature),
+                productName);
+        assertTrue(r4.statusCode < 300);
+
+        Response r5 = get("/products/{productName}", productName);
+        assertTrue(r5.statusCode < 300);
+        Integer constraintId = extractConstraintId(r5.body);
+        assertNotNull(constraintId);
+
+        Response r6 = delete("/products/{productName}/constraints/{constraintId}", productName, constraintId);
+        assertEquals(204, r6.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void createRequiresConstraintOnNonExistentProductReturnsError() throws Exception {
+        String productName = "NonExistentProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "NonExSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "NonExRequired-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r = postForm("/products/{productName}/constraints/requires",
+                mapOf("sourceFeature", sourceFeature, "requiredFeature", requiredFeature),
+                productName);
+        assertEquals(500, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintOnNonExistentProductReturnsError() throws Exception {
+        String productName = "NonExExclProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "NonExExclSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "NonExExclTarget-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r = postForm("/products/{productName}/constraints/excludes",
+                mapOf("sourceFeature", sourceFeature, "excludedFeature", excludedFeature),
+                productName);
+        assertEquals(500, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteNonExistentConstraintReturnsError() throws Exception {
+        String productName = "DelNonExConstraint-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+
+        Response r2 = delete("/products/{productName}/constraints/{constraintId}", productName, 99999999L);
+        assertEquals(500, r2.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void createBothConstraintTypesOnSameProductExercisesSetIdAndSetForProduct() throws Exception {
+        String productName = "BothConstraints-Product-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "FeatureA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "FeatureB-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureC = "FeatureC-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, featureA);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, featureB);
+        assertTrue(r3.statusCode < 300);
+        Response r4 = post("/products/{productName}/features/{featureName}", null, productName, featureC);
+        assertTrue(r4.statusCode < 300);
+
+        Response r5 = postForm("/products/{productName}/constraints/requires",
+                mapOf("sourceFeature", featureA, "requiredFeature", featureB),
+                productName);
+        assertTrue(r5.statusCode < 300);
+
+        Response r6 = postForm("/products/{productName}/constraints/excludes",
+                mapOf("sourceFeature", featureA, "excludedFeature", featureC),
+                productName);
+        assertEquals(201, r6.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithExcludesConstraintExercisesGetId() throws Exception {
+        String productName = "GetExclProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "GetExclSource-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "GetExclTarget-" + UUID.randomUUID().toString().substring(0, 8);
+
+        Response r1 = post("/products/{productName}", null, productName);
+        assertTrue(r1.statusCode < 300);
+        Response r2 = post("/products/{productName}/features/{featureName}", null, productName, sourceFeature);
+        assertTrue(r2.statusCode < 300);
+        Response r3 = post("/products/{productName}/features/{featureName}", null, productName, excludedFeature);
+        assertTrue(r3.statusCode < 300);
+        Response r4 = postForm("/products/{productName}/constraints/excludes",
+                mapOf("sourceFeature", sourceFeature, "excludedFeature", excludedFeature),
+                productName);
+        assertTrue(r4.statusCode < 300);
+
+        Response r5 = get("/products/{productName}", productName);
+        assertEquals(200, r5.statusCode);
+    }
+
+    private Response post(String pathTemplate, String body, Object... pathArgs) throws Exception {
+        String path = formatPath(pathTemplate, pathArgs);
+        URL url = new URL(baseUri + path);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        if (body != null) {
+            byte[] out = body.getBytes("UTF-8");
+            con.setFixedLengthStreamingMode(out.length);
+            con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            con.connect();
+            try (DataOutputStream os = new DataOutputStream(con.getOutputStream())) {
+                os.write(out);
+            }
+        } else {
+            con.connect();
+        }
+        int status = safeGetResponseCode(con);
+        String resp = readResponse(con);
+        con.disconnect();
+        return new Response(status, resp);
+    }
+
+    private Response postForm(String pathTemplate, Map<String, String> formParams, Object... pathArgs) throws Exception {
+        String path = formatPath(pathTemplate, pathArgs);
+        URL url = new URL(baseUri + path);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        String formBody = buildFormBody(formParams);
+        byte[] out = formBody.getBytes("UTF-8");
+        con.setFixedLengthStreamingMode(out.length);
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        con.connect();
+        try (DataOutputStream os = new DataOutputStream(con.getOutputStream())) {
+            os.write(out);
+        }
+        int status = safeGetResponseCode(con);
+        String resp = readResponse(con);
+        con.disconnect();
+        return new Response(status, resp);
+    }
+
+    private Response get(String pathTemplate, Object... pathArgs) throws Exception {
+        String path = formatPath(pathTemplate, pathArgs);
+        URL url = new URL(baseUri + path);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.connect();
+        int status = safeGetResponseCode(con);
+        String resp = readResponse(con);
+        con.disconnect();
+        return new Response(status, resp);
+    }
+
+    private Response delete(String pathTemplate, Object... pathArgs) throws Exception {
+        String path = formatPath(pathTemplate, pathArgs);
+        URL url = new URL(baseUri + path);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("DELETE");
+        con.connect();
+        int status = safeGetResponseCode(con);
+        String resp = readResponse(con);
+        con.disconnect();
+        return new Response(status, resp);
+    }
+
+    private static String formatPath(String template, Object... args) {
+        String result = template;
+        for (Object arg : args) {
+            result = result.replaceFirst("\\{[^}]+\\}", urlEncodeSafe(String.valueOf(arg)));
+        }
+        return result;
+    }
+
+    private static String urlEncodeSafe(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private static String buildFormBody(Map<String, String> params) {
+        if (params == null || params.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) sb.append("&");
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey()));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue()));
+        }
+        return sb.toString();
+    }
+
+    private static Map<String, String> mapOf(String k1, String v1, String k2, String v2) {
+        java.util.HashMap<String, String> m = new java.util.HashMap<>();
+        m.put(k1, v1);
+        m.put(k2, v2);
+        return m;
+    }
+
+    private static int safeGetResponseCode(HttpURLConnection con) {
+        try {
+            return con.getResponseCode();
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private static String readResponse(HttpURLConnection con) {
+        try {
+            BufferedReader in;
+            try {
+                in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+            } catch (Exception e) {
+                if (con.getErrorStream() != null) {
+                    in = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                } else {
+                    return "";
+                }
+            }
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+                content.append("\n");
+            }
+            in.close();
+            return content.toString();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static Integer extractConstraintId(String json) {
+        if (json == null) return null;
+        Pattern p = Pattern.compile("\"constraints\"\\s*:\\s*\\[([^\\]]+)\\]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(json);
+        if (m.find()) {
+            String inside = m.group(1);
+            Pattern idPattern = Pattern.compile("\"id\"\\s*:\\s*(\\d+)");
+            Matcher idMatcher = idPattern.matcher(inside);
+            if (idMatcher.find()) {
+                try {
+                    return Integer.valueOf(idMatcher.group(1));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            Pattern altNumber = Pattern.compile("(\\d+)");
+            Matcher alt = altNumber.matcher(inside);
+            if (alt.find()) {
+                try {
+                    return Integer.valueOf(alt.group(1));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        } else {
+            Pattern idPattern = Pattern.compile("\"id\"\\s*:\\s*(\\d+)");
+            Matcher idMatcher = idPattern.matcher(json);
+            if (idMatcher.find()) {
+                try {
+                    return Integer.valueOf(idMatcher.group(1));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return null;
+    }
+
+    private static class Response {
+        final int statusCode;
+        final String body;
+
+        Response(int statusCode, String body) {
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+    }
+}

@@ -1,0 +1,77 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryServiceBaseTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.basePath = System.getProperty("basePath", "/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaTwoCharCodeNotFoundReturns404() {
+        given().when().get("/v1/alpha/ZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaThreeCharCodeNotFoundReturns404() {
+        given().when().get("/v1/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaTwoCharCodeFoundReturns200() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaThreeCharCodeFoundReturns200() {
+        given().when().get("/v1/alpha/USA").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeListNullCodesReturns400() {
+        given().when().get("/v1/alpha").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeListValidCodesReturns200() {
+        given().when().queryParam("codes", "US;CA;MX").get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCodeListWithNonExistentCodeReturns200() {
+        given().when().queryParam("codes", "US;ZZ;CA").get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearchAltSpellingMatchReturns200() {
+        given().when().queryParam("fullText", "true").get("/v1/name/{name}", "French Republic").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearchNameMatchReturns200() {
+        given().when().queryParam("fullText", "true").get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void fulltextSearchNoMatchReturns404() {
+        given().when().queryParam("fullText", "true").get("/v1/name/NonExistentCountryXYZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJsonViaV1AllReturns200() {
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void loadJsonViaV2AllReturns200() {
+        given().when().get("/v2/all").then().statusCode(200);
+    }
+}

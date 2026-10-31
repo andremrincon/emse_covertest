@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv().getOrDefault("BASE_URL", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternLengthTwoOrLess() {
+        given()
+            .when()
+            .get("/api/pat/hello/ab")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeitherPatternNorReverseFound() {
+        given()
+            .when()
+            .get("/api/pat/xyzxyz/abc")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseNotFound() {
+        given()
+            .when()
+            .get("/api/pat/hello/hel")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseFoundAdjacentPalindrome() {
+        given()
+            .when()
+            .get("/api/pat/ABCCBA/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatternFoundReverseFoundNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/ABCXYZCBA/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatternNotFound() {
+        given()
+            .when()
+            .get("/api/pat/CBAhello/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatternFoundAdjacentPalindrome() {
+        given()
+            .when()
+            .get("/api/pat/CBAABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testReverseFoundFirstPatternFoundNonAdjacent() {
+        given()
+            .when()
+            .get("/api/pat/CBAxyzABC/ABC")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSingleArgEndpointShortText() {
+        given()
+            .when()
+            .get("/api/pat/a")
+            .then()
+            .statusCode(200);
+    }
+}
+```

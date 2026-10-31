@@ -1,0 +1,44 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getenv("BASE_URL");
+        RestAssured.baseURI = baseUrl != null ? baseUrl : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarCase1() {
+        given()
+            .when()
+            .get("/api/notypevar/28/a")
+            .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarCase2() {
+        given()
+            .when()
+            .get("/api/notypevar/7/z")
+            .then()
+            .body(equalTo("3"));
+    }
+
+    @Test(timeout = 60000)
+    public void testNotyPevarCase3() {
+        given()
+            .when()
+            .get("/api/notypevar/4/z")
+            .then()
+            .body(equalTo("2"));
+    }
+}

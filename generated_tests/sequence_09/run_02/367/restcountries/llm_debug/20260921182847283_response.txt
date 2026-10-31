@@ -1,0 +1,44 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1_name_notFound_returnsMessageField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/123").then().body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1_name_true_triggersInternalServerError_status500() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/name/True").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1_region_notFound_returnsStatusField() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/region/123").then().body("status", equalTo(404));
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1_alpha_badFormat_returnsBadRequest_messageBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        given().when().get("/v1/alpha/123").then().statusCode(404);
+    }
+}

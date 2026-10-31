@@ -1,0 +1,345 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2_3.FeatureConstraintTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=deleteConstraintCoversGetId TYPE=ERROR
+Cannot invoke the path method because no content-type was present in the response and no default parser has been set.
+
+You can specify a default parser using e.g.:
+RestAssured.defaultParser = Parser.JSON;
+
+[2] METHOD=getConfigurationDetailsTriggersEvaluationWithBothConstraintTypes TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[3] METHOD=getConfigurationFeaturesTriggersConstraintEvaluation TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[4] METHOD=evaluateConfigurationWithRequiresConstraint TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[5] METHOD=deleteConstraintWithInvalidIdReturns500 TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <404>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=deleteConstraintCoversGetId FAILURE AT LINE 69
+at ts01glm_5_2_3.FeatureConstraintTest.deleteConstraintCoversGetId(FeatureConstraintTest.java:69)
+CODE CONTEXT:
+    66:                 .then()
+    67:                 .statusCode(lessThan(300))
+    68:                 .extract()
+    69:                 .path("id")) != null ? given()  ← FAILURE HERE
+    70:                 .formParam("sourceFeature", sourceFeature)
+    71:                 .formParam("requiredFeature", requiredFeature)
+    72:                 .when()
+
+[2] METHOD=getConfigurationDetailsTriggersEvaluationWithBothConstraintTypes FAILURE AT LINE 225
+java.lang.AssertionError:
+at ts01glm_5_2_3.FeatureConstraintTest.getConfigurationDetailsTriggersEvaluationWithBothConstraintTypes(FeatureConstraintTest.java:225)
+CODE CONTEXT:
+   222:                 .statusCode(lessThan(300));
+   223:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   224:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+   225:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(lessThan(300));  ← FAILURE HERE
+   226:         given()
+   227:                 .when()
+   228:                 .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+
+[3] METHOD=getConfigurationFeaturesTriggersConstraintEvaluation FAILURE AT LINE 179
+java.lang.AssertionError:
+at ts01glm_5_2_3.FeatureConstraintTest.getConfigurationFeaturesTriggersConstraintEvaluation(FeatureConstraintTest.java:179)
+CODE CONTEXT:
+   176:                 .statusCode(lessThan(300));
+   177:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   178:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+   179:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   180:         given()
+   181:                 .when()
+   182:                 .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+
+[4] METHOD=evaluateConfigurationWithRequiresConstraint FAILURE AT LINE 128
+java.lang.AssertionError:
+at ts01glm_5_2_3.FeatureConstraintTest.evaluateConfigurationWithRequiresConstraint(FeatureConstraintTest.java:128)
+CODE CONTEXT:
+   125:                 .statusCode(lessThan(300));
+   126:         given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+   127:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+   128:         given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, requiredFeature).then().statusCode(lessThan(300));  ← FAILURE HERE
+   129:         given()
+   130:                 .when()
+   131:                 .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+
+[5] METHOD=deleteConstraintWithInvalidIdReturns500 FAILURE AT LINE 195
+java.lang.AssertionError:
+at ts01glm_5_2_3.FeatureConstraintTest.deleteConstraintWithInvalidIdReturns500(FeatureConstraintTest.java:195)
+CODE CONTEXT:
+   192:                 .when()
+   193:                 .delete("/products/{productName}/constraints/{constraintId}", productName, "abc-def")
+   194:                 .then()
+   195:                 .statusCode(404);  ← FAILURE HERE
+   196:     }
+   197: 
+   198:     @Test(timeout = 60000)
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class FeatureConstraintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void createRequiresConstraintCoversSetForProductAndSetId() {
+        String productName = "req-const-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "RAID-Controller-Card";
+        String requiredFeature = "128GB-ECC-RAM";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void createExcludesConstraintCoversSetForProductAndSetId() {
+        String productName = "excl-const-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintCoversGetId() {
+        String productName = "del-const-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "User-Authentication";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        String constraintId = (given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300))
+                .extract()
+                .path("id")) != null ? given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300))
+                .extract()
+                .path("id").toString() : "1";
+        if (constraintId == null || "null".equals(constraintId)) {
+            constraintId = "1";
+        }
+        given()
+                .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, constraintId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void getProductWithConstraintsCoversGetIdAndGetType() {
+        String productName = "get-prod-const-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "SSD-Storage";
+        String requiredFeature = "Graphics-Card";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given()
+                .when()
+                .get("/products/{productName}", productName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithRequiresConstraint() {
+        String productName = "eval-req-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "production-config";
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, requiredFeature).then().statusCode(lessThan(300));
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithExcludesConstraint() {
+        String productName = "eval-excl-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "dev-config";
+        String sourceFeature = "Color-Black";
+        String excludedFeature = "Logo-White-On-Black";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeaturesTriggersConstraintEvaluation() {
+        String productName = "eval-features-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "base-config";
+        String sourceFeature = "Strap-Leather";
+        String excludedFeature = "OS-Home";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).then().statusCode(lessThan(300));
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}/features", productName, configName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintWithInvalidIdReturns500() {
+        String productName = "invalid-const-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given()
+                .when()
+                .delete("/products/{productName}/constraints/{constraintId}", productName, "abc-def")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationDetailsTriggersEvaluationWithBothConstraintTypes() {
+        String productName = "eval-both-product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "standard-config";
+        String featureA = "PSU-Redundant";
+        String featureB = "OS-Windows-11-Pro";
+        String featureC = "OS-Home";
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureC).then().statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", featureA)
+                .formParam("requiredFeature", featureB)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given()
+                .formParam("sourceFeature", featureA)
+                .formParam("excludedFeature", featureC)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).then().statusCode(lessThan(300));
+        given()
+                .when()
+                .get("/products/{productName}/configurations/{configurationName}", productName, configName)
+                .then()
+                .statusCode(200);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

@@ -1,0 +1,56 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
+
+public class EvaluationResultTest {
+
+    private static String base;
+
+    @BeforeClass
+    public static void init() {
+        base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureReturns201() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        String description = "Measures the oxygen saturation (SpO2) of your blood on demand.";
+        given().when().post(base + "/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post(base + "/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", description).when().post(base + "/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesContainsAddedFeature() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        given().when().post(base + "/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post(base + "/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().get(base + "/products/{productName}/features", productName).then().body("featureName", hasItem((Object) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String productName = "prod-" + UUID.randomUUID().toString();
+        String featureName = "feature-" + UUID.randomUUID().toString();
+        given().when().post(base + "/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post(base + "/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(lessThan(300));
+        given().when().delete(base + "/products/{productName}/features/{featureName}", productName, featureName).then().statusCode(204);
+    }
+}

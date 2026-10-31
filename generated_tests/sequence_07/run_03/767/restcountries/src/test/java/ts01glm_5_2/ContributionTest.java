@@ -1,0 +1,176 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
+public class ContributionTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithValidAmountAndTokenTest() {
+        String payload = "{\"amount\":1000,\"token\":\"tok_visa\",\"currency\":\"usd\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithAmountOnlyTest() {
+        String payload = "{\"amount\":500}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithTokenOnlyTest() {
+        String payload = "{\"token\":\"tok_mastercard\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithZeroAmountTest() {
+        String payload = "{\"amount\":0,\"token\":\"tok_visa\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithNegativeAmountTest() {
+        String payload = "{\"amount\":-100,\"token\":\"tok_visa\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyBodyTest() {
+        String payload = "{}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithEmptyTokenTest() {
+        String payload = "{\"amount\":1000,\"token\":\"\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithNullTokenTest() {
+        String payload = "{\"amount\":1000,\"token\":null}";
+
+        given()
+                .contentType(ContentType.JSON)
+        .when()
+                .body(payload)
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithLargeAmountTest() {
+        String payload = "{\"amount\":99999999,\"token\":\"tok_visa\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithExtraFieldsTest() {
+        String payload = "{\"amount\":2500,\"token\":\"tok_visa\",\"currency\":\"usd\",\"description\":\"test contribution\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithStringAmountTest() {
+        String payload = "{\"amount\":\"1000\",\"token\":\"tok_visa\"}";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+
+    @Test(timeout = 60000)
+    public void contributeWithMalformedJsonTest() {
+        String payload = "{amount:1000,token:\"tok_visa\"";
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+        .when()
+                .post("/contribute")
+        .then()
+                .statusCode(anyOf(is(202), is(400), is(500)));
+    }
+}

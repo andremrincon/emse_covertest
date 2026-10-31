@@ -1,0 +1,79 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEndpointReturnsLanguageData() {
+        given().when().get("/v1/lang/es").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEndpointWithChineseLanguage() {
+        given().when().get("/v1/lang/zh").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEndpointWithInvalidLanguageReturns404() {
+        given().when().get("/v1/lang/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointReturnsLanguageData() {
+        given().when().get("/v2/lang/Spanish").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointWithEnglishLanguage() {
+        given().when().get("/v2/lang/English").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointWithInvalidLanguageReturns404() {
+        given().when().get("/v2/lang/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsLanguageFields() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameEndpointReturnsLanguageFields() {
+        given().when().get("/v1/name/France").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameEndpointReturnsLanguageFields() {
+        given().when().get("/v2/name/Germany").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsLanguageFields() {
+        given().when().get("/v2/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllEndpointReturnsLanguageData() {
+        given().when().get("/v1/all").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllEndpointReturnsLanguageData() {
+        given().when().get("/v2/all").then().statusCode(404);
+    }
+}

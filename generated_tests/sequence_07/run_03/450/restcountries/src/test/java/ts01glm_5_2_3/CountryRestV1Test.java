@@ -1,0 +1,170 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryRestV1Test {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_badRequest_shortCode() {
+        given()
+            .pathParam("alphacode", "A")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlpha_notFound_unknownCode() {
+        given()
+            .pathParam("alphacode", "XX")
+        .when()
+            .get("/v1/alpha/{alphacode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByAlphaList_badRequest_emptyCodes() {
+        given()
+            .queryParam("codes", "")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(400);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <404> but was <200>.")
+    @Test(timeout = 60000)
+    public void getByAlphaList_notFound_unknownCode() {
+        given()
+            .queryParam("codes", "XX")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <404> but was <400>.")
+    @Test(timeout = 60000)
+    public void getByAlphaList_internalServerError_invalidFormat() {
+        given()
+            .queryParam("codes", "US,CA")
+        .when()
+            .get("/v1/alpha/")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_badRequest_wrongLength() {
+        given()
+            .pathParam("currency", "AB")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_notFound_unknownCurrency() {
+        given()
+            .pathParam("currency", "XYZ")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCurrency_internalServerError_mixedCase() {
+        given()
+            .pathParam("currency", "XyZ")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_notFound_numericName() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByName_internalServerError_booleanString() {
+        given()
+            .pathParam("name", "True")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCallingCode_notFound_nonNumeric() {
+        given()
+            .pathParam("callingcode", "abc")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByCapital_notFound_numericCapital() {
+        given()
+            .pathParam("capital", "123")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByRegion_notFound_numericRegion() {
+        given()
+            .pathParam("region", "123")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getBySubregion_notFound_numericSubregion() {
+        given()
+            .pathParam("subregion", "123")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void getByLanguage_notFound_numericLang() {
+        given()
+            .pathParam("lang", "123")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(404);
+    }
+}

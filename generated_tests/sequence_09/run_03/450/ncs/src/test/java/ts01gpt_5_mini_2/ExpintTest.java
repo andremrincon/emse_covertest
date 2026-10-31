@@ -1,0 +1,63 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.nullValue;
+
+public class ExpintTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_n0_nonzeroX_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/0/2.5");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_n2_x0_returns200() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/2/0.0");
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_continuedFraction_branch_returnsResultField() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/3/2.5");
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_series_branch_returnsResultField() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/3/0.1");
+        resp.then().body("result", nullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_negativeN_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/-1/2.5");
+        resp.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExpint_xZero_nZero_returns400() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response resp = given().when().get("/api/expint/0/0.0");
+        resp.then().statusCode(400);
+    }
+}

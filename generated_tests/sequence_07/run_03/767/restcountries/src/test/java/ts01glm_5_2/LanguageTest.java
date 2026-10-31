@@ -1,0 +1,87 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1LangEndpointReturnsLanguageFields() {
+        given().when().get("/v1/lang/es").then().statusCode(200).body("[0]['languages'][0]['iso639_1']", equalTo("es"));
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1LangEndpointReturnsIso639_2Field() {
+        given().when().get("/v1/lang/es").then().statusCode(200).body("[0]['languages'][0]['iso639_2']", equalTo("spa"));
+    }
+
+    @Ignore("The parameter \"name\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1LangEndpointReturnsLanguageNameField() {
+        given().when().get("/v1/lang/es").then().statusCode(200).body("[0]['languages'][0]['name']", equalTo("Spanish"));
+    }
+
+    @Ignore("The parameter \"nativeName\" was used but not defined. Define parameters using the JsonPath.param...")
+    @Test(timeout = 60000)
+    public void testV1LangEndpointReturnsLanguageNativeNameField() {
+        given().when().get("/v1/lang/zh").then().statusCode(200).body("[0]['languages'][0]['nativeName']", notNullValue());
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsLanguageFields() {
+        given().when().get("/v1/alpha/US").then().statusCode(200).body("languages[0]['iso639_1']", equalTo("en"));
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1NameEndpointReturnsLanguageFields() {
+        given().when().get("/v1/name/France").then().statusCode(200).body("[0]['languages'][0]['iso639_2']", equalTo("fra"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointReturnsLanguageFields() {
+        given().when().get("/v2/lang/Spanish").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsLanguageFields() {
+        given().when().get("/v2/alpha/US").then().statusCode(200).body("languages[0]['iso639_1']", equalTo("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameEndpointReturnsLanguageNativeName() {
+        given().when().get("/v2/name/Germany").then().statusCode(200).body("[0]['languages'][0]['nativeName']", equalTo("Deutsch"));
+    }
+
+    @Ignore("The parameter \"iso639_1\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1AllEndpointReturnsLanguageFields() {
+        given().when().get("/v1/all").then().statusCode(200).body("[0]['languages'][0]['iso639_1']", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllEndpointReturnsLanguageFields() {
+        given().when().get("/v2/all").then().statusCode(200).body("[0]['languages'][0]['name']", notNullValue());
+    }
+
+    @Ignore("The parameter \"iso639_2\" was used but not defined. Define parameters using the JsonPath.params(...")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsLanguageFields() {
+        given().when().get("/v1/currency/USD").then().statusCode(200).body("[0]['languages'][0]['iso639_2']", equalTo("eng"));
+    }
+}

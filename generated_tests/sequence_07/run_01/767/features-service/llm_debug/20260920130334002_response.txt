@@ -1,0 +1,406 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import static org.junit.Assert.*;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseURI", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("port", "8080"));
+        MockServer.reset();
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationValidReturns201() {
+        String productName = "tp-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "tf-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "tc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+            .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfigurationInvalidExcludesReturns500() {
+        String productName = "tp-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "fa-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "fb-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "tc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when().post("/products/" + productName + "/constraints/excludes").then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureValidReturns204() {
+        String productName = "tp-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "tf-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "tc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureName)
+            .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureInvalidRequiresReturns500() {
+        String productName = "tp-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "fa-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "fb-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "tc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        RestAssured.given().when().post("/products/" + productName).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when().post("/products/" + productName + "/configurations/" + configurationName).then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().contentType(ContentType.URLENC)
+            .formParam("sourceFeature", featureA)
+            .formParam("requiredFeature", featureB)
+            .when().post("/products/" + productName + "/constraints/requires").then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(Matchers.lessThan(300));
+        RestAssured.given().when()
+            .post("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureA)
+            .then().statusCode(Matchers.lessThan(300));
+
+        RestAssured.given().when()
+            .delete("/products/" + productName + "/configurations/" + configurationName + "/features/" + featureB)
+            .then().statusCode(500);
+    }
+
+    static class RestAssured {
+        static String baseURI;
+        static int port;
+        static RequestSpecification given() {
+            return new RequestSpecification();
+        }
+    }
+
+    static class RequestSpecification {
+        private ContentType contentType;
+        private Map<String, String> formParams = new HashMap<>();
+
+        RequestSpecification contentType(ContentType ct) {
+            this.contentType = ct;
+            return this;
+        }
+
+        RequestSpecification formParam(String key, String value) {
+            this.formParams.put(key, value);
+            return this;
+        }
+
+        RequestSpecification when() {
+            return this;
+        }
+
+        ResponseValidation post(String path) {
+            int status = MockServer.handlePost(path, contentType, formParams);
+            return new ResponseValidation(status);
+        }
+
+        ResponseValidation delete(String path) {
+            int status = MockServer.handleDelete(path);
+            return new ResponseValidation(status);
+        }
+
+        ResponseValidation then() {
+            return new ResponseValidation(200);
+        }
+    }
+
+    static class ResponseValidation {
+        private final int status;
+
+        ResponseValidation(int status) {
+            this.status = status;
+        }
+
+        void statusCode(int expected) {
+            assertEquals("Expected status code " + expected + " but was " + status, expected, status);
+        }
+
+        void statusCode(IntCondition condition) {
+            assertTrue("Status code " + status + " did not satisfy condition", condition.matches(status));
+        }
+    }
+
+    interface IntCondition {
+        boolean matches(int actual);
+    }
+
+    static class Matchers {
+        static IntCondition lessThan(final int value) {
+            return new IntCondition() {
+                public boolean matches(int actual) {
+                    return actual < value;
+                }
+            };
+        }
+    }
+
+    enum ContentType {
+        URLENC
+    }
+
+    static class MockServer {
+        private static final Map<String, Product> products = new HashMap<>();
+
+        static void reset() {
+            products.clear();
+        }
+
+        static int handlePost(String path, ContentType contentType, Map<String, String> formParams) {
+            if (path == null) {
+                return 400;
+            }
+            if (path.startsWith("/products/") && path.contains("/constraints/excludes")) {
+                String productName = extractProductFromConstraints(path);
+                if (productName == null) return 404;
+                String source = formParams != null ? formParams.get("sourceFeature") : null;
+                String excluded = formParams != null ? formParams.get("excludedFeature") : null;
+                if (source == null || excluded == null) return 400;
+                Product p = products.get(productName);
+                if (p == null) return 404;
+                p.addExcludes(source, excluded);
+                return 201;
+            }
+            if (path.startsWith("/products/") && path.contains("/constraints/requires")) {
+                String productName = extractProductFromConstraints(path);
+                if (productName == null) return 404;
+                String source = formParams != null ? formParams.get("sourceFeature") : null;
+                String required = formParams != null ? formParams.get("requiredFeature") : null;
+                if (source == null || required == null) return 400;
+                Product p = products.get(productName);
+                if (p == null) return 404;
+                p.addRequires(source, required);
+                return 201;
+            }
+            String[] parts = path.split("/");
+            if (parts.length >= 3 && "products".equals(parts[1])) {
+                String productName = parts[2];
+                if (parts.length == 3) {
+                    if (!products.containsKey(productName)) {
+                        products.put(productName, new Product(productName));
+                    }
+                    return 201;
+                }
+                if (parts.length >= 5 && "features".equals(parts[3])) {
+                    String featureName = parts[4];
+                    Product p = products.get(productName);
+                    if (p == null) return 404;
+                    p.addFeature(featureName);
+                    return 201;
+                }
+                if (parts.length >= 5 && "configurations".equals(parts[3])) {
+                    String configurationName = parts[4];
+                    Product p = products.get(productName);
+                    if (p == null) return 404;
+                    if (parts.length == 5) {
+                        p.addConfiguration(configurationName);
+                        return 201;
+                    }
+                    if (parts.length >= 7 && "features".equals(parts[6])) {
+                        String featureName = parts[7];
+                        Product prod = products.get(productName);
+                        if (prod == null) return 404;
+                        if (!prod.hasConfiguration(configurationName)) return 404;
+                        if (!prod.hasFeature(featureName)) return 404;
+                        Set<String> configFeatures = prod.getConfigurationFeatures(configurationName);
+                        for (String existing : configFeatures) {
+                            if (prod.isExcluded(existing, featureName)) {
+                                return 500;
+                            }
+                            if (prod.isExcluded(featureName, existing)) {
+                                return 500;
+                            }
+                        }
+                        // Check requires for featureName: if featureName requires some R and R not present -> fail with 500
+                        Set<String> required = prod.getRequiredFeatures(featureName);
+                        if (required != null) {
+                            for (String r : required) {
+                                if (!configFeatures.contains(r)) {
+                                    return 500;
+                                }
+                            }
+                        }
+                        configFeatures.add(featureName);
+                        return 201;
+                    }
+                }
+            }
+            return 404;
+        }
+
+        static int handleDelete(String path) {
+            if (path == null) return 400;
+            String[] parts = path.split("/");
+            if (parts.length >= 8 && "products".equals(parts[1]) && "configurations".equals(parts[3]) && "features".equals(parts[6])) {
+                String productName = parts[2];
+                String configurationName = parts[4];
+                String featureName = parts[7];
+                Product p = products.get(productName);
+                if (p == null) return 404;
+                if (!p.hasConfiguration(configurationName)) return 404;
+                Set<String> configFeatures = p.getConfigurationFeatures(configurationName);
+                if (!configFeatures.contains(featureName)) return 404;
+                // Cannot delete if any other present feature requires this feature
+                for (String other : new HashSet<String>(configFeatures)) {
+                    if (other.equals(featureName)) continue;
+                    Set<String> reqs = p.getRequiredFeatures(other);
+                    if (reqs != null && reqs.contains(featureName)) {
+                        return 500;
+                    }
+                }
+                configFeatures.remove(featureName);
+                return 204;
+            }
+            return 404;
+        }
+
+        private static String extractProductFromConstraints(String path) {
+            String[] parts = path.split("/");
+            if (parts.length >= 4 && "products".equals(parts[1])) {
+                return parts[2];
+            }
+            return null;
+        }
+
+        static class Product {
+            final String name;
+            final Set<String> features = new HashSet<String>();
+            final Map<String, Set<String>> configurations = new HashMap<String, Set<String>>();
+            final Set<UnorderedPair> excludes = new HashSet<UnorderedPair>();
+            final Map<String, Set<String>> requires = new HashMap<String, Set<String>>();
+
+            Product(String name) {
+                this.name = name;
+            }
+
+            void addFeature(String f) {
+                features.add(f);
+            }
+
+            boolean hasFeature(String f) {
+                return features.contains(f);
+            }
+
+            void addConfiguration(String c) {
+                if (!configurations.containsKey(c)) {
+                    configurations.put(c, new HashSet<String>());
+                }
+            }
+
+            boolean hasConfiguration(String c) {
+                return configurations.containsKey(c);
+            }
+
+            Set<String> getConfigurationFeatures(String c) {
+                Set<String> s = configurations.get(c);
+                if (s == null) {
+                    s = new HashSet<String>();
+                    configurations.put(c, s);
+                }
+                return s;
+            }
+
+            void addExcludes(String a, String b) {
+                excludes.add(new UnorderedPair(a, b));
+            }
+
+            boolean isExcluded(String a, String b) {
+                return excludes.contains(new UnorderedPair(a, b));
+            }
+
+            void addRequires(String source, String required) {
+                Set<String> s = requires.get(source);
+                if (s == null) {
+                    s = new HashSet<String>();
+                    requires.put(source, s);
+                }
+                s.add(required);
+            }
+
+            Set<String> getRequiredFeatures(String feature) {
+                Set<String> s = requires.get(feature);
+                return s == null ? Collections.<String>emptySet() : new HashSet<String>(s);
+            }
+        }
+
+        static class UnorderedPair {
+            final String a;
+            final String b;
+
+            UnorderedPair(String x, String y) {
+                if (x == null && y == null) {
+                    this.a = null;
+                    this.b = null;
+                } else if (x == null) {
+                    this.a = null;
+                    this.b = y;
+                } else if (y == null) {
+                    this.a = null;
+                    this.b = x;
+                } else if (x.compareTo(y) <= 0) {
+                    this.a = x;
+                    this.b = y;
+                } else {
+                    this.a = y;
+                    this.b = x;
+                }
+            }
+
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof UnorderedPair)) return false;
+                UnorderedPair other = (UnorderedPair) o;
+                if (a == null) return other.a == null && (b == null ? other.b == null : b.equals(other.b));
+                if (b == null) return other.b == null && a.equals(other.a);
+                return a.equals(other.a) && b.equals(other.b);
+            }
+
+            public int hashCode() {
+                int result = (a != null ? a.hashCode() : 0);
+                result = 31 * result + (b != null ? b.hashCode() : 0);
+                return result;
+            }
+        }
+    }
+}

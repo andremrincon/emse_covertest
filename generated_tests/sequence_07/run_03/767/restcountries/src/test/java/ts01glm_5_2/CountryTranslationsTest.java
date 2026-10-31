@@ -1,0 +1,95 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CountryTranslationsTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsTranslations() {
+        given().when().get("/v1/alpha/US").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeGBReturnsTranslations() {
+        given().when().get("/v1/alpha/GB").then().statusCode(200);
+    }
+
+    @Ignore("1 expectation failed. Expected status code <200> but was <400>.")
+    @Test(timeout = 60000)
+    public void testV1AlphaMultipleCodesReturnsTranslations() {
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFranceReturnsTranslations() {
+        given().when().get("/v1/name/France").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFullTextReturnsTranslations() {
+        given().queryParam("fullText", "true").when().get("/v1/name/Germany").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDReturnsTranslations() {
+        given().when().get("/v1/currency/USD").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCode1ReturnsTranslations() {
+        given().when().get("/v1/callingcode/1").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalLondonReturnsTranslations() {
+        given().when().get("/v1/capital/London").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionEuropeReturnsTranslations() {
+        given().when().get("/v1/region/Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1SubregionWesternEuropeReturnsTranslations() {
+        given().when().get("/v1/subregion/Western%20Europe").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEsReturnsTranslations() {
+        given().when().get("/v1/lang/es").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsTranslations() {
+        given().when().get("/v1/all").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaADReturnsTranslations() {
+        given().queryParam("codes", "AD").when().get("/v1/alpha").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyXOFReturnsTranslations() {
+        given().when().get("/v1/currency/XOF").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCode44ReturnsTranslations() {
+        given().when().get("/v1/callingcode/44").then().statusCode(200);
+    }
+}

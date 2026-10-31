@@ -1,0 +1,38 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1NameNotFound_returnsMessage() {
+        given().when().get("/v1/alpha?codes={codes}", "US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/{name}", "123");
+        act.then().statusCode(404).body("message", equalTo("Not Found"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_v1NameServerError_returnsStatus() {
+        given().when().get("/v1/alpha?codes={codes}", "US").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/{name}", "True");
+        act.then().statusCode(404).body("status", equalTo(404));
+    }
+}

@@ -1,0 +1,73 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+    
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+    
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+    
+    @Test(timeout = 60000)
+    public void testUserIdWithUserPrefixLongValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testUserIdWithNonUserPrefixLongValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/test1234/example.com")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValue() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abc/example.com")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSessionAmAbcCom() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testSessionAmWrongSite() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/xyz.com")
+            .then()
+                .statusCode(200);
+    }
+    
+    @Test(timeout = 60000)
+    public void testNeitherUserIdNorSession() {
+        given()
+            .when()
+                .get("/api/cookie/other/val/site.com")
+            .then()
+                .statusCode(200);
+    }
+}
+```

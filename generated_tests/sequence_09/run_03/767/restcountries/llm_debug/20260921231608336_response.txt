@@ -1,0 +1,83 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginOnV1AlphaByCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha/US");
+        act.then().header("Access-Control-Allow-Origin", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsOnV1AlphaQuery() {
+        given().when().get("/v2?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha?codes=US,CA,MX");
+        act.then().header("Access-Control-Allow-Methods", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersOnCurrencyEndpoint() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/currency/USD");
+        act.then().header("Access-Control-Allow-Headers", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlHeaderOnNameFullText() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/name/France?fullText=true");
+        act.then().header("Cache-Control", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeaderOnRootGet() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/");
+        act.then().header("Access-Control-Allow-Origin", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowMethodsHeaderOnCallingCode() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/callingcode/1");
+        act.then().header("Access-Control-Allow-Methods", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testCacheControlOnV2AlphaWithFields() {
+        given().when().get("/v2?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha/US?fields=name;capital;population");
+        act.then().header("Cache-Control", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAllowHeadersOnV2AlphaMultipleCodes() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v2/alpha?codes=US,CA,MX&fields=name;capital;population");
+        act.then().header("Access-Control-Allow-Headers", (String) null);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaBadRequestReturns400AndFilterExecuted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response act = given().when().get("/v1/alpha?codes=123");
+        act.then().statusCode(200);
+    }
+}

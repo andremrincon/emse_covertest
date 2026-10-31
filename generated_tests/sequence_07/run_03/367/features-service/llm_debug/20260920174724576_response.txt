@@ -1,0 +1,47 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterNonOptionsRequestExecutesChain() {
+        String productName = "CORS-Test-Product-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        Response response = given().when().get("/products/{productName}/features", productName);
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterOptionsRequestSkipsChain() {
+        Response response = given().when().options("/products");
+        response.then().header("Access-Control-Allow-Origin", equalTo("*"));
+        response.then().header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"));
+        response.then().header("Access-Control-Allow-Headers", equalTo("x-requested-with"));
+        response.then().header("Access-Control-Max-Age", equalTo("3600"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterSetsCorsHeadersOnGetRequest() {
+        Response response = given().when().get("/products");
+        response.then().header("Access-Control-Allow-Origin", equalTo("*"));
+        response.then().header("Access-Control-Allow-Methods", equalTo("POST, PUT, GET, OPTIONS, DELETE"));
+        response.then().header("Access-Control-Allow-Headers", equalTo("x-requested-with"));
+        response.then().header("Access-Control-Max-Age", equalTo("3600"));
+    }
+}
+```

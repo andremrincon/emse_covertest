@@ -1,0 +1,92 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class Ordered4Test {
+
+    @Test(timeout = 60000)
+    public void testSubjectIncreasing() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "ddddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("increasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDecreasing() {
+        given()
+            .pathParam("w", "ddddd")
+            .pathParam("x", "ccccc")
+            .pathParam("z", "aaaaa")
+            .pathParam("y", "bbbbb")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("decreasing"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUnorderedValid() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "bbbbb")
+            .pathParam("y", "aaaaa")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidW() {
+        given()
+            .pathParam("w", "aaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "ddddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidX() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbb")
+            .pathParam("z", "ddddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectInvalidZ() {
+        given()
+            .pathParam("w", "aaaaa")
+            .pathParam("x", "bbbbb")
+            .pathParam("z", "dddd")
+            .pathParam("y", "ccccc")
+        .when()
+            .get("/api/ordered4/{w}/{x}/{z}/{y}")
+        .then()
+            .statusCode(200)
+            .body(equalTo("unordered"));
+    }
+}

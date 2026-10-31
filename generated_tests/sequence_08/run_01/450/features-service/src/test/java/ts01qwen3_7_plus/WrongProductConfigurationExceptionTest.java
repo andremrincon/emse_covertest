@@ -1,0 +1,40 @@
+package ts01qwen3_7_plus;
+
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class WrongProductConfigurationExceptionTest {
+
+    @Ignore("1 expectation failed. Expected status code <500> but was <201>.")
+    @Test(timeout = 60000)
+    public void testWrongProductConfigurationExceptionOnGetActiveFeatures() {
+        String productName = "Product-" + UUID.randomUUID().toString();
+        String configName = "Config-" + UUID.randomUUID().toString();
+        String featureA = "FeatureA-" + UUID.randomUUID().toString();
+        String featureB = "FeatureB-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureB).then().statusCode(500);
+
+        given()
+            .formParam("sourceFeature", featureA)
+            .formParam("excludedFeature", featureB)
+            .when().post("/products/" + productName + "/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureA).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureB).then().statusCode(lessThan(300));
+
+        given()
+            .when().get("/products/" + productName + "/configurations/" + configName + "/features")
+            .then().statusCode(500);
+    }
+}

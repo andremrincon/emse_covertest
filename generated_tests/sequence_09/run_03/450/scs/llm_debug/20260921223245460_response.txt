@@ -1,0 +1,49 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("test.server");
+        if (base == null || base.isEmpty()) base = System.getenv("TEST_SERVER");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        BASE = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleTitleMatchesMr() {
+        String seed = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/pat/{txt}", seed).then().statusCode(lessThan(300));
+        when().get(BASE + "/api/title/{sex}/{title}", "Male", "MR").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleTitleMatchesDr() {
+        String seed = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/pat/{txt}", seed).then().statusCode(lessThan(300));
+        when().get(BASE + "/api/title/{sex}/{title}", "FEMALE", "Dr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneSexMatchesProf() {
+        String seed = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/pat/{txt}", seed).then().statusCode(lessThan(300));
+        when().get(BASE + "/api/title/{sex}/{title}", "none", "PROF").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleWithNonMatchingTitle() {
+        String seed = UUID.randomUUID().toString();
+        given().when().get(BASE + "/api/pat/{txt}", seed).then().statusCode(lessThan(300));
+        when().get(BASE + "/api/title/{sex}/{title}", "male", "Jones").then().statusCode(200);
+    }
+}

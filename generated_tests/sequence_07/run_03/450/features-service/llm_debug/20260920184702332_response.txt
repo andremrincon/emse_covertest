@@ -1,0 +1,110 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterGetRequestNonOptionsPath() {
+        String productName = "AeroBook-Pro-15-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/{productName}/features", productName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterOptionsRequestExercisesElseBranch() {
+        Response response = given().when().options("/products");
+
+        assertNotNull(response);
+        assertTrue(response.getStatusCode() < 500);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPostRequestNonOptionsPath() {
+        String productName = "Smartwatch-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "BloodOxygenSensor-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("description", "Measures the oxygen saturation of your blood on demand.")
+                .when()
+                .post("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterPutRequestNonOptionsPath() {
+        String productName = "AeroBook-Pro-15-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "backlit-keyboard-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "Initial description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when()
+                .put("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterDeleteRequestNonOptionsPath() {
+        String productName = "SmartWatch-Pro-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "heart-rate-monitor-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().formParam("description", "Heart rate monitoring")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        Response response = given().when()
+                .delete("/products/{productName}/features/{featureName}", productName, featureName);
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void doFilterSetsCorsHeadersOnResponse() {
+        String productName = "USB-C-Adapter-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/{productName}", productName);
+
+        response.then().statusCode(200);
+        String allowOrigin = response.getHeader("Access-Control-Allow-Origin");
+        assertNotNull(allowOrigin);
+        assertTrue(allowOrigin.equals("*"));
+    }
+}
+```

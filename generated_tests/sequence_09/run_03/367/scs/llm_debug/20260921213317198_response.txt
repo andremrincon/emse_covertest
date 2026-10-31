@@ -1,0 +1,52 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Ordered4Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("test.server");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("TEST_SERVER");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrderReturns200() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/ordered4/apple/banana/datee/cherry");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrderReturns200() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/ordered4/zzzzz/yyyyy/wwwww/xxxxx");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedOrderReturns200() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/ordered4/apple/delta/bravo/charl");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidLengthsReturn500() {
+        given().when().get("/api/pat/a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/ordered4/apple/a/cherry/dog");
+        act.then().statusCode(200);
+    }
+}

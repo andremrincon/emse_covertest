@@ -1,0 +1,49 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcAddReturns200() {
+        given().when().get("/api/calc/subtract/0/0").then().statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/calc/add/15.5/4.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDivideByZeroReturns500() {
+        given().when().get("/api/calc/subtract/0/0").then().statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/calc/divide/100/0")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcInvalidNumberReturns400() {
+        given().when().get("/api/calc/subtract/0/0").then().statusCode(lessThan(300));
+        given()
+            .when()
+                .get("/api/calc/add/10/twenty")
+            .then()
+                .statusCode(400);
+    }
+}

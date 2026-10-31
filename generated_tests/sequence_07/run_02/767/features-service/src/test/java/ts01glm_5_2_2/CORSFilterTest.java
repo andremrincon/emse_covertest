@@ -1,0 +1,32 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.Method;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testNonOptionsRequestPassesThroughFilter() {
+        given().when().get("/products").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestHandledByFilter() {
+        given().when().request(Method.OPTIONS, "/products").then().statusCode(lessThan(400));
+    }
+
+    @Test(timeout = 60000)
+    public void testCorsHeadersArePresentOnGetResponse() {
+        given().when().get("/products").then().header("Access-Control-Allow-Origin", "*");
+    }
+}

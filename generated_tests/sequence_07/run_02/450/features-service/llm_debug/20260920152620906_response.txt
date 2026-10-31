@@ -1,0 +1,139 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureCoversWithNameAndSetters() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGettersAndHydration() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/features", productName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureCoversSetDescription() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Initial description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Updated description")
+                .when().put("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEquals() {
+        String productName = "Product-" + UUID.randomUUID();
+        String configurationName = "Config-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddSameFeatureToConfigurationCoversEqualsTrue() {
+        String productName = "Product-" + UUID.randomUUID();
+        String configurationName = "Config-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversGetProduct() {
+        String productName = "Product-" + UUID.randomUUID();
+        String configurationName = "Config-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversDeletion() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("description", "Test description")
+                .when().post("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(lessThan(300));
+
+        given().when().delete("/products/{productName}/features/{featureName}", productName, featureName)
+                .then().statusCode(204);
+    }
+}
+```

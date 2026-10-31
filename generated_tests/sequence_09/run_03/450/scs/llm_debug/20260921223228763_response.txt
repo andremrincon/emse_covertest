@@ -1,0 +1,70 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void init() throws Exception {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        java.net.URL u = new java.net.URL(base);
+        RestAssured.baseURI = u.getProtocol() + "://" + u.getHost();
+        int port = u.getPort();
+        if (port == -1) {
+            if ("http".equals(u.getProtocol())) port = 80;
+            else if ("https".equals(u.getProtocol())) port = 443;
+        }
+        RestAssured.port = port;
+    }
+
+    @Test(timeout = 60000)
+    public void test_userid_valid_returns_1() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String uid = UUID.randomUUID().toString().replace("-", "");
+        String name = "UserId";
+        String val = "User" + uid + "X";
+        String site = "Example.COM";
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", name, val, site);
+        resp.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_userid_nonmatching_prefix_returns_0() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String uid = UUID.randomUUID().toString().replace("-", "");
+        String name = "userid";
+        String val = "Notu" + uid;
+        String site = "localhost";
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", name, val, site);
+        resp.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_session_exact_match_returns_1() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String name = "SESSION";
+        String val = "am";
+        String site = "ABC.COM";
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", name, val, site);
+        resp.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void test_session_else_branch_returns_2() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String name = "session";
+        String val = "am";
+        String site = "example.com";
+        Response resp = given().when().get("/api/cookie/{name}/{val}/{site}", name, val, site);
+        resp.then().body(equalTo("2"));
+    }
+}

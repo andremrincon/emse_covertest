@@ -1,0 +1,158 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "ReqTest-" + uuid;
+        String featureA = "SrcFeature-" + uuid;
+        String featureB = "ReqFeature-" + uuid;
+        String configName = "Config-" + uuid;
+
+        given().pathParam("productName", productName)
+            .when().post("/products/{productName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureA)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureB)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .contentType(ContentType.URLENC)
+            .body("sourceFeature=" + featureA + "&requiredFeature=" + featureB)
+            .when().post("/products/{productName}/constraints/requires")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("configurationName", configName)
+            .when().post("/products/{productName}/configurations/{configurationName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureA)
+            .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when().get("/products/{productName}/configurations/{configurationName}/features")
+            .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationTriggersWrongProductConfigurationException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "ExclTest-" + uuid;
+        String featureA = "SrcFeature-" + uuid;
+        String featureB = "ExclFeature-" + uuid;
+        String configName = "Config-" + uuid;
+
+        given().pathParam("productName", productName)
+            .when().post("/products/{productName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureA)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureB)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .contentType(ContentType.URLENC)
+            .body("sourceFeature=" + featureA + "&excludedFeature=" + featureB)
+            .when().post("/products/{productName}/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("configurationName", configName)
+            .when().post("/products/{productName}/configurations/{configurationName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureA)
+            .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureB)
+            .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when().get("/products/{productName}/configurations/{configurationName}")
+            .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void excludesConstraintViolationOnFeaturesEndpointTriggersException() {
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        String productName = "ExclTest2-" + uuid;
+        String featureA = "SrcFeature-" + uuid;
+        String featureB = "ExclFeature-" + uuid;
+        String configName = "Config-" + uuid;
+
+        given().pathParam("productName", productName)
+            .when().post("/products/{productName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureA)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("featureName", featureB)
+            .when().post("/products/{productName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .contentType(ContentType.URLENC)
+            .body("sourceFeature=" + featureA + "&excludedFeature=" + featureB)
+            .when().post("/products/{productName}/constraints/excludes")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName).pathParam("configurationName", configName)
+            .when().post("/products/{productName}/configurations/{configurationName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureA)
+            .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .pathParam("featureName", featureB)
+            .when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}")
+            .then().statusCode(lessThan(300));
+
+        given().pathParam("productName", productName)
+            .pathParam("configurationName", configName)
+            .when().get("/products/{productName}/configurations/{configurationName}/features")
+            .then().statusCode(500);
+    }
+}

@@ -1,0 +1,58 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TitleTest {
+
+    @BeforeClass
+    public static void setup() {
+        String cfg = System.getProperty("BASE_URL");
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = System.getenv("BASE_URL");
+        }
+        if (cfg == null || cfg.isEmpty()) {
+            cfg = "http://localhost:8080";
+        }
+        RestAssured.baseURI = cfg;
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleMrReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "male", "mr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleMrsReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "female", "mrs").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNoneDrReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "none", "dr").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNeuterJonesReturns500() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "neuter", "Jones").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMaleProfReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "male", "prof").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFemaleDrReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        given().when().get("/api/title/{sex}/{title}", "female", "dr").then().statusCode(200);
+    }
+}

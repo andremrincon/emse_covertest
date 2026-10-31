@@ -1,0 +1,129 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductCreated201() {
+        String product = "Smartwatch-Series-" + UUID.randomUUID();
+        String feature = "Blood Oxygen Sensor";
+        String desc = "Measures the oxygen saturation (SpO2) of your blood on demand.";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", desc)
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductServerError500() {
+        String product = "Gaming-PC-Tower";
+        String feature = "Liquid Cooling";
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "desc")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureOfProduct200() {
+        String product = "AeroBook-Pro-" + UUID.randomUUID();
+        String feature = "backlit-keyboard";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "initial")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when().put("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureOfProduct204() {
+        String product = "SmartWatch-Pro-" + UUID.randomUUID();
+        String feature = "heart-rate-monitor";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("description", "v1")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct200() {
+        String product = "AeroBook-Pro-15-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", product)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration201() {
+        String product = "QuantumLeap-AI-Platform-" + UUID.randomUUID();
+        String config = "standard-gpu-cluster";
+        String feature = "distributed-training";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeatures200() {
+        String product = "ultra-laptop-x1-" + UUID.randomUUID();
+        String config = "us-standard-16gb";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", product, config)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration204() {
+        String product = "QuantumLeap-AI-" + UUID.randomUUID();
+        String config = "Premium-Tier";
+        String feature = "Realtime-Analytics-Dashboard";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, feature)
+                .then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraint201() {
+        String product = "Enterprise-Server-X1-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded").formParam("sourceFeature", "RAID-Controller-Card").formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", product)
+                .then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConfiguration204() {
+        String product = "nexus-dashboard-" + UUID.randomUUID();
+        String config = "production-us-east";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}", product, config)
+                .then().statusCode(204);
+    }
+}

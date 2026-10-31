@@ -1,0 +1,128 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    private String enc(String s) throws Exception {
+        return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_Success() throws Exception {
+        String product = "Smartwatch-" + UUID.randomUUID();
+        String feature = "Blood Oxygen Sensor";
+        String p = enc(product);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", p, f).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct_ServerError_LongFeatureName() throws Exception {
+        String product = "Product-" + UUID.randomUUID();
+        String feature = "a_feature_name_that_is_extremely_long_and_exceeds_the_likely_database_column_width_limit_for_storing_feature_names_which_could_cause_an_unhandled_sql_exception_or_a_buffer_overflow_if_the_server_side_code_is_not_robustly_written_to_handle_such_long_inputs";
+        String p = enc(product);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", p, f).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature_Success() throws Exception {
+        String product = "AeroBook-" + UUID.randomUUID();
+        String feature = "backlit-keyboard";
+        String p = enc(product);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", p, f).then().statusCode(lessThan(300));
+        given().formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.").when().put("/products/{productName}/features/{featureName}", p, f).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature_Success() throws Exception {
+        String product = "SmartWatch-" + UUID.randomUUID();
+        String feature = "heart-rate-monitor";
+        String p = enc(product);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", p, f).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/features/{featureName}", p, f).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_Success() throws Exception {
+        String product = "USB-C-Dongle-" + UUID.randomUUID();
+        String feature = "16GB LPDDR5 RAM";
+        String p = enc(product);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", p, f).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", p).then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesForProduct_ServerError_BadProductName() throws Exception {
+        String product = "product/with/slashes";
+        String p = enc(product);
+        given().when().post("/products/{productName}", enc("setup-"+UUID.randomUUID())).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/features", p).then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration_Success() throws Exception {
+        String product = "QuantumLeap-" + UUID.randomUUID();
+        String config = "standard-gpu-cluster";
+        String feature = "distributed-training";
+        String p = enc(product);
+        String c = enc(config);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", p, c).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", p, c, f).then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration_Success() throws Exception {
+        String product = "IoT-Sensor-" + UUID.randomUUID();
+        String config = "Premium-Tier";
+        String feature = "Realtime-Analytics-Dashboard";
+        String p = enc(product);
+        String c = enc(config);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", p, c).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", p, c, f).then().statusCode(lessThan(300));
+        given().when().delete("/products/{productName}/configurations/{configurationName}/features/{featureName}", p, c, f).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationActivedFeatures_Success() throws Exception {
+        String product = "ultra-laptop-x1-" + UUID.randomUUID();
+        String config = "us-standard-16gb";
+        String feature = "fingerprint-scanner";
+        String p = enc(product);
+        String c = enc(config);
+        String f = enc(feature);
+        given().when().post("/products/{productName}", p).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", p, c).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", p, c, f).then().statusCode(lessThan(300));
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", p, c).then().statusCode(200);
+    }
+}

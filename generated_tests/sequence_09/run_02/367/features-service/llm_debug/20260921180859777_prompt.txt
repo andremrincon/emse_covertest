@@ -1,0 +1,157 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01gpt_5_mini.CORSFilterTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testOptionsPreflightReturns200_andCorsHeadersSet TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+[2] METHOD=testAddFeatureToConfigurationReturns201 TYPE=FAILURE
+1 expectation failed.
+Expected status code <201> but was <500>.
+
+[3] METHOD=testAddFeatureToProductReturns201 TYPE=FAILURE
+1 expectation failed.
+Expected status code a value less than <300> but <500> was greater than <300>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testOptionsPreflightReturns200_andCorsHeadersSet FAILURE AT LINE 35
+java.lang.AssertionError:
+at ts01gpt_5_mini.CORSFilterTest.testOptionsPreflightReturns200_andCorsHeadersSet(CORSFilterTest.java:35)
+CODE CONTEXT:
+    32:     @Test(timeout = 60000)
+    33:     public void testOptionsPreflightReturns200_andCorsHeadersSet() {
+    34:         String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+    35:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));  ← FAILURE HERE
+    36:         Response act = given().header("Origin", "http://example.com")
+    37:                 .header("Access-Control-Request-Method", "POST")
+    38:                 .when().options("/products/{productName}/features/{featureName}", product, "Blood Oxygen Sensor");
+
+[2] METHOD=testAddFeatureToConfigurationReturns201 FAILURE AT LINE 76
+java.lang.AssertionError:
+at ts01gpt_5_mini.CORSFilterTest.testAddFeatureToConfigurationReturns201(CORSFilterTest.java:76)
+CODE CONTEXT:
+    73:                 .then().statusCode(lessThan(300));
+    74:         Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+    75:                 product, configuration, feature);
+    76:         act.then().statusCode(500);  ← FAILURE HERE
+    77:     }
+    78: }
+
+[3] METHOD=testAddFeatureToProductReturns201 FAILURE AT LINE 46
+java.lang.AssertionError:
+at ts01gpt_5_mini.CORSFilterTest.testAddFeatureToProductReturns201(CORSFilterTest.java:46)
+CODE CONTEXT:
+    43:     public void testAddFeatureToProductReturns201() {
+    44:         String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+    45:         String feature = "Blood Oxygen Sensor";
+    46:         given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));  ← FAILURE HERE
+    47:         Response act = given().contentType("application/x-www-form-urlencoded")
+    48:                 .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+    49:                 .when().post("/products/{productName}/features/{featureName}", product, feature);
+
+    CURRENT TEST CODE:
+    package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE", System.getenv("API_BASE"));
+        if (base == null || base.trim().isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesNonOptionsInvokesFilter_andReturns200() {
+        String product = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/features", product);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsPreflightReturns200_andCorsHeadersSet() {
+        String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().header("Origin", "http://example.com")
+                .header("Access-Control-Request-Method", "POST")
+                .when().options("/products/{productName}/features/{featureName}", product, "Blood Oxygen Sensor");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductReturns201() {
+        String product = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+        String feature = "Blood Oxygen Sensor";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when().post("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureReturns204() {
+        String product = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        String feature = "heart-rate-monitor-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("description", "temporary feature")
+                .when().post("/products/{productName}/features/{featureName}", product, feature)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        act.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationReturns201() {
+        String product = "QuantumLeap-AI-Platform-" + UUID.randomUUID().toString();
+        String configuration = "standard-gpu-cluster-" + UUID.randomUUID().toString();
+        String feature = "distributed-training";
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration)
+                .then().statusCode(lessThan(300));
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}",
+                product, configuration, feature);
+        act.then().statusCode(500);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

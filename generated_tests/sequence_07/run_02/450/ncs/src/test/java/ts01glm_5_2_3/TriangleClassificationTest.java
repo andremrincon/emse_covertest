@@ -1,0 +1,67 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TriangleClassificationTest {
+
+    @Before
+    public void setUp() {
+        String host = System.getProperty("server.host", "localhost");
+        String port = System.getProperty("server.port", "8080");
+        RestAssured.baseURI = "http://" + host + ":" + port;
+    }
+
+    @Test(timeout = 60000)
+    public void testScaleneTriangle() {
+        given()
+            .get("/api/triangle/3/4/5")
+        .then()
+            .body("triangleType", equalTo((Object) null));
+    }
+
+    @Test(timeout = 60000)
+    public void testEquilateralTriangle() {
+        given()
+            .get("/api/triangle/1/1/1")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testIsoscelesTriangle() {
+        given()
+            .get("/api/triangle/3/3/4")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testZeroEdgeNotTriangle() {
+        given()
+            .get("/api/triangle/0/1/1")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testInequalityViolationMaxA() {
+        given()
+            .get("/api/triangle/5/1/2")
+        .then()
+            .statusCode(lessThan(300));
+    }
+
+    @Test(timeout = 60000)
+    public void testInequalityViolationMaxC() {
+        given()
+            .get("/api/triangle/1/2/5")
+        .then()
+            .statusCode(lessThan(300));
+    }
+}

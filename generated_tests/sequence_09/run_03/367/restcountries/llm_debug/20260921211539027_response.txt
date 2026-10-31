@@ -1,0 +1,128 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV1Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByAlpha_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/{code}", "US");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByAlpha_badRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/alpha/{code}", "123");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByAlphaList_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "US,CA").when().get("/v1/alpha/");
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByAlphaList_emptyCodes_badRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("codes", "").when().get("/v1/alpha/");
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCurrency_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/{currency}", "USD");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCurrency_badRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/currency/{currency}", "123");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByName_success_fullText_false() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().queryParam("fullText", "false").when().get("/v1/name/{name}", "France");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByName_notFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/name/{name}", "123");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCallingCode_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/callingcode/{callingcode}", "1");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCallingCode_notFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/callingcode/{callingcode}", "99999");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCapital_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/capital/{capital}", "London");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByCapital_notFound() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/capital/{capital}", "123");
+        res.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByRegion_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/region/{region}", "Europe");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getBySubregion_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/subregion/{subregion}", "Western Europe");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_getByLanguage_success() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response res = given().when().get("/v1/lang/{lang}", "es");
+        res.then().statusCode(200);
+    }
+}

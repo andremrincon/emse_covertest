@@ -1,0 +1,76 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import org.junit.Before;
+import org.junit.Test;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("server.url", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodeReturnsCountryWithLanguages() {
+        given().when().get("/v1/alpha/US").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1AlphaByCodesReturnsCountriesWithLanguages() {
+        given().queryParam("codes", "US,CA,MX").when().get("/v1/alpha").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1NameReturnsCountriesWithLanguages() {
+        given().when().get("/v1/name/France").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1LangReturnsCountriesWithLanguages() {
+        given().when().get("/v1/lang/es").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CurrencyReturnsCountriesWithLanguages() {
+        given().when().get("/v1/currency/USD").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CallingCodeReturnsCountriesWithLanguages() {
+        given().when().get("/v1/callingcode/1").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1CapitalReturnsCountriesWithLanguages() {
+        given().when().get("/v1/capital/London").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1RegionReturnsCountriesWithLanguages() {
+        given().when().get("/v1/region/Europe").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v1SubregionReturnsCountriesWithLanguages() {
+        given().pathParam("subregion", "Western%20Europe").when().get("/v1/subregion/{subregion}").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2LangReturnsCountriesWithLanguages() {
+        given().when().get("/v2/lang/Spanish").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2NameReturnsCountriesWithLanguages() {
+        given().when().get("/v2/name/Germany").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void v2AlphaWithFieldsReturnsCountryWithLanguages() {
+        given().queryParam("fields", "name;capital;population").when().get("/v2/alpha/US").then().statusCode(404);
+    }
+}

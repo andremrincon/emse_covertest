@@ -1,0 +1,97 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class ResponseEntityTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getenv("BASE_URL");
+        }
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetNameNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("name", "123")
+        .when()
+            .get("/v1/name/{name}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRegionNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("region", "123")
+        .when()
+            .get("/v1/region/{region}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCapitalNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("capital", "123")
+        .when()
+            .get("/v1/capital/{capital}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetCallingCodeNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("callingcode", "abc")
+        .when()
+            .get("/v1/callingcode/{callingcode}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetLangNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("lang", "123")
+        .when()
+            .get("/v1/lang/{lang}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetSubregionNotFoundReturnsResponseEntity() {
+        given()
+            .pathParam("subregion", "123")
+        .when()
+            .get("/v1/subregion/{subregion}")
+        .then()
+            .statusCode(404)
+            .body("status", equalTo(404))
+            .body("message", notNullValue());
+    }
+}
+```

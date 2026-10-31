@@ -1,0 +1,72 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class DateParseTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseMonJan() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/mon/jan");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseTueFeb() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/tue/feb");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseWedMar() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/wed/mar");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayApr() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/xyz/apr");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseFriMay() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/fri/may");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDateParseInvalidDayJun() {
+        Response response = given()
+                .when()
+                .get("/api/dateparse/abc/jun");
+        response.then().statusCode(200);
+    }
+}
+```

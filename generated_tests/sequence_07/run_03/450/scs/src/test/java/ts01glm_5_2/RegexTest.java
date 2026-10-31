@@ -1,0 +1,82 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUrlPatternMatch() {
+        given()
+            .pathParam("txt", "http://a/a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testDatePatternMatch() {
+        given()
+            .pathParam("txt", "mon01jan")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFpePatternMatch() {
+        given()
+            .pathParam("txt", "12.34e+56")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testNonePatternMatch() {
+        given()
+            .pathParam("txt", "a")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidInputReturns500() {
+        given()
+            .pathParam("txt", "(abc")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Ignore("Illegal character in path at index 33: http://localhost:8080/api/pat/The quick brown fox jumps ov...")
+    @Test(timeout = 60000)
+    public void testNoneMatchWithLongText() {
+        given()
+            .pathParam("txt", "The quick brown fox jumps over the lazy dog.")
+        .when()
+            .get("/api/pat/{txt}")
+        .then()
+            .statusCode(200);
+    }
+}

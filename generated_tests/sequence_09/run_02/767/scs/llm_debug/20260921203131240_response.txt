@@ -1,0 +1,44 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+import java.util.Optional;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+public class CalcTest {
+    private static String BASE;
+
+    @BeforeClass
+    public static void init() {
+        BASE = Optional.ofNullable(System.getProperty("baseUrl"))
+                .orElse(Optional.ofNullable(System.getenv("BASE_URL")).orElse("http://localhost:8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testPlusOperationReturnsExpectedBody() {
+        Response health = given().when().get(BASE + "/api/pat/a");
+        assertThat(health.getStatusCode(), lessThan(300));
+        Response resp = given().when().get(BASE + "/api/calc/plus/15.5/4.5");
+        Assert.assertEquals("20.0", resp.getBody().asString());
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroReturnsServerErrorStatus() {
+        Response health = given().when().get(BASE + "/api/pat/a");
+        assertThat(health.getStatusCode(), lessThan(300));
+        Response resp = given().when().get(BASE + "/api/calc/divide/100/0");
+        Assert.assertEquals(200, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void testPiConstantReturnsPiValueBody() {
+        Response health = given().when().get(BASE + "/api/pat/a");
+        assertThat(health.getStatusCode(), lessThan(300));
+        Response resp = given().when().get(BASE + "/api/calc/pi/0/0");
+        Assert.assertEquals(Double.toString(Math.PI), resp.getBody().asString());
+    }
+}

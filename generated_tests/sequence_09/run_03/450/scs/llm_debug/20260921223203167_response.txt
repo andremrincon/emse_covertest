@@ -1,0 +1,70 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.Arrays;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class DateParseTest {
+
+    private static final String BASE;
+    static {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        BASE = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_mon_jan_returns_200() {
+        String[] months = {"jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"};
+        for (String m : months) {
+            given().when().get(BASE + "/api/dateparse/mon/" + m).then().statusCode(lessThan(300));
+        }
+        Response act = given().when().get(BASE + "/api/dateparse/mon/jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Monday_mar_returns_500() {
+        Arrays.asList("mon","tue","wed","thur","fri","sat","sun").forEach(d -> {
+            given().when().get(BASE + "/api/dateparse/" + d + "/mar").then().statusCode(lessThan(300));
+        });
+        Response act = given().when().get(BASE + "/api/dateparse/Monday/mar");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void test_tuesday_August_returns_200() {
+        Arrays.asList("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec").forEach(m -> {
+            given().when().get(BASE + "/api/dateparse/tue/" + m).then().statusCode(lessThan(300));
+        });
+        Response act = given().when().get(BASE + "/api/dateparse/tuesday/August");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_wed_MAR_returns_200() {
+        given().when().get(BASE + "/api/dateparse/wed/mar").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/dateparse/wed/MAR");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Superday_Movember_returns_500() {
+        given().when().get(BASE + "/api/dateparse/mon/dec").then().statusCode(lessThan(300));
+        given().when().get(BASE + "/api/dateparse/tue/nov").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE + "/api/dateparse/Superday/Movember");
+        act.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void test_sun_dec_returns_200() {
+        Arrays.asList("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec").forEach(m -> {
+            given().when().get(BASE + "/api/dateparse/sun/" + m).then().statusCode(lessThan(300));
+        });
+        Response act = given().when().get(BASE + "/api/dateparse/sun/dec");
+        act.then().statusCode(200);
+    }
+}

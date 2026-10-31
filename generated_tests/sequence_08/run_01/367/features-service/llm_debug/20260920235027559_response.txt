@@ -1,0 +1,43 @@
+package ts01qwen3_7_plus_2;
+
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureSuccessfully() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String configName = "Conf-" + UUID.randomUUID().toString();
+        String featureName = "Feat-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName).then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureWithConstraintViolation() {
+        String productName = "Prod-" + UUID.randomUUID().toString();
+        String configName = "Conf-" + UUID.randomUUID().toString();
+        String feature1 = "Feat1-" + UUID.randomUUID().toString();
+        String feature2 = "Feat2-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + feature2).then().statusCode(lessThan(300));
+
+        given().formParam("sourceFeature", feature1).formParam("requiredFeature", feature2).when().post("/products/" + productName + "/constraints/requires").then().statusCode(lessThan(300));
+
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(500);
+
+        given().when().delete("/products/" + productName + "/configurations/" + configName + "/features/" + feature2).then().statusCode(400);
+    }
+}

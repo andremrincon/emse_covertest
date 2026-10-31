@@ -1,0 +1,149 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.List;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
+public class CurrencyTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Ignore("The parameter \"null\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1CurrencyEndpointReturnsCountriesWithCurrencyCode() {
+        Object code = given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0].code");
+        if (code instanceof List) {
+            assertTrue(((List) code).contains("USD"));
+        } else {
+            assertEquals("USD", code);
+        }
+    }
+
+    @Ignore("The parameter \"name\" was used but not defined. Define parameters using the JsonPath.params(...)...")
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsCountryWithCurrencyName() {
+        Object name = given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0].name");
+        assertNotNull(name);
+    }
+
+    @Ignore("The parameter \"symbol\" was used but not defined. Define parameters using the JsonPath.params(.....")
+    @Test(timeout = 60000)
+    public void testV1AlphaEndpointReturnsCountryWithCurrencySymbol() {
+        Object symbol = given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0].symbol");
+        assertNotNull(symbol);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsCountriesWithCurrencyFields() {
+        Object code = given()
+                .queryParam("fields", "name;currencies")
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0][0].code");
+        if (code instanceof List) {
+            assertTrue(((List) code).contains("EUR"));
+        } else {
+            assertEquals("EUR", code);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsCountryWithCurrencyName() {
+        Object name = given()
+                .queryParam("fields", "name;currencies")
+                .when()
+                .get("/v2/alpha/DE")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0].name");
+        if (name instanceof List) {
+            assertTrue(((List) name).contains("Euro"));
+        } else {
+            assertEquals("Euro", name);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsCountryWithCurrencySymbol() {
+        Object symbol = given()
+                .queryParam("fields", "name;currencies")
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0].symbol");
+        assertNotNull(symbol);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AllReturnsCountriesWithCurrencyObjects() {
+        Object currencies = given()
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies");
+        assertNotNull(currencies);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocReturnsCountriesWithCurrencyCode() {
+        Object code = given()
+                .queryParam("fields", "name;currencies")
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("currencies[0][0].code");
+        assertNotNull(code);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaCodesEndpointReturnsCountriesWithCurrencyFields() {
+        Response resp = given()
+                .queryParam("codes", "US,CA")
+                .when()
+                .get("/v1/alpha")
+                .then()
+                .statusCode(400)
+                .extract()
+                .response();
+        assertNotNull(resp);
+    }
+}

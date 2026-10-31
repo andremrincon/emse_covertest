@@ -1,0 +1,220 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ProductsConfigurationFeaturesResourceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        baseUrl = url;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_validResult_returns201() throws Exception {
+        String productName = "test-prod-add-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-add-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-add-valid-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", new String[]{productName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, featureName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[]{productName, configurationName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, featureName}, null);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_invalidResult_throwsException() throws Exception {
+        String productName = "test-prod-add-invalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-add-invalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "src-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "exc-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", new String[]{productName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, sourceFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, excludedFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[]{productName, configurationName}, null);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        code = sendRequest("POST", "/products/{productName}/constraints/excludes", new String[]{productName}, form);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, sourceFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, excludedFeature}, null);
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_validResult_returns204() throws Exception {
+        String productName = "test-prod-del-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-del-valid-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "test-feature-del-valid-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", new String[]{productName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, featureName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[]{productName, configurationName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, featureName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, featureName}, null);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeature_invalidResult_throwsException() throws Exception {
+        String productName = "test-prod-del-invalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "test-config-del-invalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "req-src-" + UUID.randomUUID().toString().substring(0, 8);
+        String requiredFeature = "req-feat-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int code;
+
+        code = sendRequest("POST", "/products/{productName}", new String[]{productName}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, sourceFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[]{productName, requiredFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[]{productName, configurationName}, null);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        code = sendRequest("POST", "/products/{productName}/constraints/requires", new String[]{productName}, form);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, sourceFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, requiredFeature}, null);
+        Assert.assertTrue(code < 300);
+
+        code = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[]{productName, configurationName, requiredFeature}, null);
+        Assert.assertEquals(500, code);
+    }
+
+    private static int sendRequest(String method, String pathTemplate, String[] templateArgs, Map<String, String> formParams) throws IOException {
+        String path = buildPath(pathTemplate, templateArgs);
+        URL url = new URL(concatUrl(baseUrl, path));
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
+            if (formParams != null && !formParams.isEmpty()) {
+                conn.setDoOutput(true);
+                String formBody = buildFormBody(formParams);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(formBody.getBytes("UTF-8").length));
+                BufferedWriter writer = null;
+                try {
+                    writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"));
+                    writer.write(formBody);
+                    writer.flush();
+                } finally {
+                    if (writer != null) {
+                        try {
+                            writer.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            } else {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                byte[] empty = new byte[0];
+                conn.setRequestProperty("Content-Length", "0");
+                try {
+                    conn.getOutputStream().write(empty);
+                } catch (IOException ignored) {
+                }
+            }
+        }
+        int code;
+        try {
+            code = conn.getResponseCode();
+        } catch (IOException e) {
+            try {
+                code = conn.getResponseCode();
+            } catch (IOException ex) {
+                throw e;
+            }
+        }
+        conn.disconnect();
+        return code;
+    }
+
+    private static String buildPath(String template, String[] args) throws UnsupportedEncodingException {
+        if (template == null) {
+            return "";
+        }
+        if (args == null || args.length == 0) {
+            return template;
+        }
+        String result = template;
+        Pattern p = Pattern.compile("\\{[^}]+\\}");
+        for (String arg : args) {
+            Matcher m = p.matcher(result);
+            if (m.find()) {
+                String encoded = URLEncoder.encode(arg, "UTF-8");
+                result = result.substring(0, m.start()) + encoded + result.substring(m.end());
+            }
+        }
+        return result;
+    }

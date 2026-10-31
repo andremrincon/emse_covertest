@@ -1,0 +1,84 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_ShortPattern_returns200() {
+        given().when().get("/api/pat/{txt}", "health-check").then().statusCode(lessThan(300));
+        String txt = "abc";
+        String pat = "a";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_PatternFound_returns200() {
+        given().when().get("/api/pat/{txt}", "The quick brown fox").then().statusCode(lessThan(300));
+        String txt = "ABABCABAB";
+        String pat = "ABAB";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_ReverseFound_returns200() {
+        given().when().get("/api/pat/{txt}", "ping").then().statusCode(lessThan(300));
+        String txt = "xxCBAyy";
+        String pat = "ABC";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_BothFound_nonAdjacent_returns200() {
+        given().when().get("/api/pat/{txt}", "setup").then().statusCode(lessThan(300));
+        String txt = "ABCxxCBA";
+        String pat = "ABC";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_Palindrome_patThenReverse_adjacent_returns200() {
+        given().when().get("/api/pat/{txt}", "ready").then().statusCode(lessThan(300));
+        String txt = "ABCCBA";
+        String pat = "ABC";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_Palindrome_reverseThenPat_adjacent_returns200() {
+        given().when().get("/api/pat/{txt}", "init").then().statusCode(lessThan(300));
+        String txt = "CBAABC";
+        String pat = "ABC";
+        Response resp = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        resp.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_Pat_SimpleTextEndpoint_returnsExpectedBody() {
+        given().when().get("/api/pat/{txt}", "ping-body-" + UUID.randomUUID().toString()).then().statusCode(lessThan(300));
+        String txt = "The quick brown fox jumps over the lazy dog.";
+        Response resp = given().when().get("/api/pat/{txt}", txt);
+        resp.then().body(equalTo("Input text processed successfully."));
+    }
+}

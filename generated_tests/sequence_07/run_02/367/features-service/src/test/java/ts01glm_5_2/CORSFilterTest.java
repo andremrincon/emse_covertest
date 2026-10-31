@@ -1,0 +1,101 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        RestAssured.baseURI = System.getProperty("rest.baseURI", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("rest.port", "8080"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetRequestPassesThroughCORSFilter_1() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testOptionsRequestHandledByCORSFilter_1() {
+        given()
+            .when()
+                .options("/products")
+            .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+
+    @Test(timeout = 60000)
+    public void testPostRequestPassesThroughCORSFilter_1() {
+        String productName = "Product-" + UUID.randomUUID();
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testPutRequestPassesThroughCORSFilter_1() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + featureName)
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .contentType(ContentType.URLENC)
+            .formParam("description", "Updated description")
+            .when()
+                .put("/products/" + productName + "/features/" + featureName)
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteRequestPassesThroughCORSFilter_1() {
+        String productName = "Product-" + UUID.randomUUID();
+        String featureName = "Feature-" + UUID.randomUUID();
+        given()
+            .when()
+                .post("/products/" + productName)
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .post("/products/" + productName + "/features/" + featureName)
+            .then()
+                .statusCode(lessThan(300));
+        given()
+            .when()
+                .delete("/products/" + productName + "/features/" + featureName)
+            .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testCORSHeadersAreSetOnResponse_1() {
+        given()
+            .when()
+                .get("/products")
+            .then()
+                .header("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+    }
+}

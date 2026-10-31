@@ -1,0 +1,46 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsPiString() {
+        String[] ops = {"e","sqrt","log","sine","cosine","tangent","plus","subtract","multiply","divide"};
+        for (String op : ops) {
+            given().when().get("/api/calc/{op}/{arg1}/{arg2}", op, "15.5", "4.5").then().statusCode(lessThan(300));
+        }
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "pi", "0", "0");
+        act.then().body(equalTo("3.141592653589793"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOpReturnsZero() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "add", "15.5", "4.5").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "unknownOp", "10", "2");
+        act.then().body(equalTo("0.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProducesServerError() {
+        given().when().get("/api/calc/{op}/{arg1}/{arg2}", "multiply", "2", "8").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/calc/{op}/{arg1}/{arg2}", "divide", "100", "0");
+        act.then().statusCode(500);
+    }
+}

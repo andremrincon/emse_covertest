@@ -1,0 +1,71 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.uri");
+        if (base == null || base.isEmpty()) base = System.getenv("BASE_URI");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testPiReturnsPi() {
+        given().when().get("/api/calc/e/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sqrt/4/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/1/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/plus/1/2").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/5/3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/2/3").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/divide/10/2").then().statusCode(lessThan(300));
+        given().when().get("/api/pat/TheQuickBrown").then().statusCode(lessThan(300));
+        given().when().get("/api/cookie/" + UUID.randomUUID().toString() + "/" + UUID.randomUUID().toString() + "/localhost").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/pi/0/0").then().statusCode(200).body(equalTo(Double.toString(Math.PI)));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubtractReturnsCorrectBody() {
+        given().when().get("/api/cookie/" + UUID.randomUUID().toString() + "/val/" + "example.com").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/subtract/15.5/4.5").then().statusCode(200).body(equalTo("11.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidNumberFormatProduces400() {
+        given().when().get("/api/pat/abc").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/add/10/twenty").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testDivideByZeroProduces500() {
+        given().when().get("/api/cookie/" + UUID.randomUUID().toString() + "/1/localhost").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/divide/100/0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testMultiplyAndOtherUnaryCoveredInArrangeButCheckMultiplyBody() {
+        given().when().get("/api/pat/sampletext").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/multiply/6/7").then().statusCode(200).body(equalTo("42.0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryFunctionsReturnExpectedForKnownInputs() {
+        given().when().get("/api/calc/sqrt/9/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/log/1/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/cosine/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/tangent/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/calc/sqrt/9/0").then().statusCode(200).body(equalTo("3.0"));
+    }
+}

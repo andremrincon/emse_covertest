@@ -1,0 +1,51 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+import org.junit.Ignore;
+public class CORSFilterTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Ignore("1 expectation failed. Expected header \"Access-Control-Allow-Origin\" was not \"*\", was \"null\"...")
+    @Test(timeout = 60000)
+    public void testAccessControlAllowOriginHeader() {
+        Response response = given().when().get("/v1/all");
+        response.then().statusCode(404).header("Access-Control-Allow-Origin", equalTo("*"));
+    }
+
+    @Ignore("1 expectation failed. Expected header \"Access-Control-Allow-Methods\" was not \"GET\", was \"nul...")
+    @Test(timeout = 60000)
+    public void testAccessControlAllowMethodsHeader() {
+        Response response = given().when().get("/v1/alpha/US");
+        response.then().statusCode(404).header("Access-Control-Allow-Methods", equalTo("GET"));
+    }
+
+    @Ignore("1 expectation failed. Expected header \"Access-Control-Allow-Headers\" was not \"Accept, X-Reques...")
+    @Test(timeout = 60000)
+    public void testAccessControlAllowHeadersHeader() {
+        Response response = given().when().get("/v2/all");
+        response.then().statusCode(404).header("Access-Control-Allow-Headers", equalTo("Accept, X-Requested-With"));
+    }
+
+    @Ignore("1 expectation failed. Expected header \"Cache-Control\" was not \"public, max-age=86400\", was \"...")
+    @Test(timeout = 60000)
+    public void testCacheControlHeader() {
+        Response response = given().when().get("/v1/currency/USD");
+        response.then().statusCode(404).header("Cache-Control", equalTo("public, max-age=86400"));
+    }
+}

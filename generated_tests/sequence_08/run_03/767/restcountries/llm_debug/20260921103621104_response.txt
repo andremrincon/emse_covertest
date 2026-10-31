@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class LanguageTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = System.getProperty("base.url", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Alpha() {
+        Response response = given()
+                .pathParam("alphacode", "US")
+                .when()
+                .get("/v1/alpha/{alphacode}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV1Lang() {
+        Response response = given()
+                .pathParam("lang", "es")
+                .when()
+                .get("/v1/lang/{lang}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Alpha() {
+        Response response = given()
+                .pathParam("alphacode", "US")
+                .when()
+                .get("/v2/alpha/{alphacode}");
+
+        response.then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testLanguageSettersViaV2Lang() {
+        Response response = given()
+                .pathParam("lang", "Spanish")
+                .when()
+                .get("/v2/lang/{lang}");
+
+        response.then().statusCode(404);
+    }
+}

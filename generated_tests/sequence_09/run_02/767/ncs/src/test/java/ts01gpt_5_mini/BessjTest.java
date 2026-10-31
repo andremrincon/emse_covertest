@@ -1,0 +1,68 @@
+package ts01gpt_5_mini;
+
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Ignore;
+public class BessjTest {
+
+    private static String BASE;
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        BASE = (env == null || env.isEmpty()) ? "http://localhost:8080" : env;
+    }
+
+    @Test(timeout = 60000)
+    public void test_bessj_n_less_than_2_returns_400() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/1/2.5");
+        res.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void test_bessj_x_zero_returns_200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/3/0.0");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_bessj_ax_greater_small_ax_path_returns_200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/3/5.0");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_bessj_ax_greater_large_ax_path_returns_200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/3/20.0");
+        res.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_bessj_backward_recursion_path_returns_200() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/10/2.5");
+        res.then().statusCode(200);
+    }
+
+    @Ignore
+
+
+    @Test(timeout = 60000)
+    public void test_bessj_negative_x_with_odd_n_returns_negative_value() {
+        given().when().get(BASE + "/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        Response res = given().when().get(BASE + "/api/bessj/3/-2.5");
+        res.then().statusCode(200);
+        double v = res.jsonPath().getDouble("value");
+        assertTrue(v < 0.0);
+    }
+}

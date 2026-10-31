@@ -1,0 +1,108 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+public class CurrencyTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        String envUrl = System.getenv("BASE_URL");
+        baseUrl = envUrl != null ? envUrl : System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSD() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEUR() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaUS() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaUS() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1All() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/all")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2All() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFrance() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameGermany() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testV1Callingcode1() {
+        RestAssured.given()
+                .baseUri(baseUrl)
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200);
+    }
+}
+```

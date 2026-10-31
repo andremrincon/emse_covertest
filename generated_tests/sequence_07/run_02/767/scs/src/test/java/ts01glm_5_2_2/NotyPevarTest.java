@@ -1,0 +1,44 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class NotyPevarTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_xPlusYEquals56Branch() {
+        given()
+            .when()
+                .get("/api/notypevar/28/a")
+            .then()
+                .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_hello7ConcatenationBranch() {
+        given()
+            .when()
+                .get("/api/notypevar/7/zzzz")
+            .then()
+                .statusCode(equalTo(200));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_noBranchHitReturnsZero() {
+        given()
+            .when()
+                .get("/api/notypevar/5/a")
+            .then()
+                .statusCode(equalTo(200));
+    }
+}

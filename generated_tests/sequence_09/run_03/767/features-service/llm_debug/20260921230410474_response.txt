@@ -1,0 +1,55 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("API_BASE_URL", System.getenv("API_BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("base.url", System.getenv("BASE_URL"));
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void createConfigurationWithExcessivelyLongNameProducesServerError() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String longConfig = "a-very-long-configuration-name-that-exceeds-the-maximum-allowed-length-and-could-potentially-cause-a-buffer-overflow-or-database-truncation-error-leading-to-an-internal-server-error-because-the-system-was-not-designed-to-handle-such-long-inputs-gracefully";
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}", product, longConfig);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void addingFeatureWithProblematicNameToConfigurationReturnsServerError() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String configuration = "standard-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        String problematicFeature = "{\"feature\":\"new-feature\"}";
+        Response resp = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, problematicFeature);
+        assertEquals(500, resp.getStatusCode());
+    }
+
+    @Test(timeout = 60000)
+    public void deleteExistingFeatureFromProductReturnsNoContent() {
+        String product = "prod-" + UUID.randomUUID();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        String feature = "feature-" + UUID.randomUUID();
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        Response resp = given().when().delete("/products/{productName}/features/{featureName}", product, feature);
+        assertEquals(204, resp.getStatusCode());
+    }
+}

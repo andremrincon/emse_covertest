@@ -1,0 +1,65 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class StripeRestTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeNullBodyReturnsBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        Response response = given().contentType("application/json").body("").when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeEmptyTokenReturnsBadRequest() {
+        given().when().get("/v2/all?fields=name;capital;region;population;flag").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"\"}";
+        Response response = given().contentType("application/json").body(payload).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWhitespaceTokenReturnsBadRequest() {
+        given().when().get("/v2?fields=name;capital;population;region").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":250,\"token\":\"   \"}";
+        Response response = given().contentType("application/json").body(payload).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeValidTokenReturnsAccepted() {
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().statusCode(lessThan(300));
+        String token = "tok_success_" + UUID.randomUUID().toString();
+        String payload = "{\"amount\":500,\"token\":\"" + token + "\"}";
+        Response response = given().contentType("application/json").body(payload).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeTokenThatCausesChargeExceptionReturnsBadRequest() {
+        given().when().get("/v1/currency/USD").then().statusCode(lessThan(300));
+        String token = "tok_fail_" + UUID.randomUUID().toString();
+        String payload = "{\"amount\":750,\"token\":\"" + token + "\"}";
+        Response response = given().contentType("application/json").body(payload).when().post("/contribute");
+        response.then().statusCode(400);
+    }
+}

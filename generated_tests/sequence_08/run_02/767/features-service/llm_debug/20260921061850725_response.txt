@@ -1,0 +1,50 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithNonOptionsMethod() {
+        String productName = "AeroBook-Pro-15";
+
+        given()
+                .when()
+                .get("/products/{productName}/features", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .get("/products/{productName}/features", productName)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDoFilterWithOptionsMethod() {
+        String productName = "AeroBook-Pro-15";
+
+        given()
+                .when()
+                .options("/products/{productName}/features", productName)
+                .then()
+                .statusCode(lessThan(300));
+
+        given()
+                .when()
+                .options("/products/{productName}/features", productName)
+                .then()
+                .header("Access-Control-Allow-Origin", "*");
+    }
+}

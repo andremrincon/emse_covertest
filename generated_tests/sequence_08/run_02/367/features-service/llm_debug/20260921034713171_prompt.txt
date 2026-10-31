@@ -1,0 +1,235 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01qwen3_7_plus.FeatureTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: ERROR
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testCreateFeatureSameNameDifferentProduct TYPE=ERROR
+Illegal character in path at index 99: http://localhost:8080/products/Gaming-PC-Tower-32d4460b-9fba-440c-abb5-b09b1ab80a8d/features/Liquid Cooling-fad5fc30-e8b1-4f3b-b3b9-72f9d046d977
+
+[2] METHOD=testCreateFeature TYPE=ERROR
+Illegal character in path at index 41: http://localhost:8080/products/Smartwatch Series 8-0ef37224-cdad-4ade-be43-a779d932ac30
+
+[3] METHOD=testGetFeatures TYPE=ERROR
+Illegal character in path at index 100: http://localhost:8080/products/AeroBook-Pro-15-a28be70e-b572-46fa-aded-54993f271be3/features/Backlit Keyboard-1ac4b40c-9bca-40dc-9500-a91fa6510665
+
+[4] METHOD=testCreateFeatureWithEmptyName TYPE=FAILURE
+1 expectation failed.
+Expected status code <500> but was <405>.
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testCreateFeatureSameNameDifferentProduct FAILURE AT LINE 84
+java.net.URISyntaxException: Illegal character in path at index 99: http://localhost:8080/products/Gaming-PC-Tower-32d4460b-9fba-440c-abb5-b09b1ab80a8d/features/Liquid Cooling-fad5fc30-e8b1-4f3b-b3b9-72f9d046d977
+at ts01qwen3_7_plus.FeatureTest.testCreateFeatureSameNameDifferentProduct(FeatureTest.java:84)
+CODE CONTEXT:
+    81: 
+    82:         given().when().post("/products/" + productName1).then().statusCode(lessThan(300));
+    83:         given().when().post("/products/" + productName2).then().statusCode(lessThan(300));
+    84:         given().when().post("/products/" + productName1 + "/features/" + featureName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    85: 
+    86:         Response response = given().when().post("/products/" + productName2 + "/features/" + featureName);
+    87: 
+
+[2] METHOD=testCreateFeature FAILURE AT LINE 25
+java.net.URISyntaxException: Illegal character in path at index 41: http://localhost:8080/products/Smartwatch Series 8-0ef37224-cdad-4ade-be43-a779d932ac30
+at ts01qwen3_7_plus.FeatureTest.testCreateFeature(FeatureTest.java:25)
+CODE CONTEXT:
+    22:         String productName = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+    23:         String featureName = "Blood Oxygen Sensor-" + UUID.randomUUID().toString();
+    24: 
+    25:         given().when().post("/products/" + productName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    26: 
+    27:         Response response = given()
+    28:                 .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+
+[3] METHOD=testGetFeatures FAILURE AT LINE 41
+java.net.URISyntaxException: Illegal character in path at index 100: http://localhost:8080/products/AeroBook-Pro-15-a28be70e-b572-46fa-aded-54993f271be3/features/Backlit Keyboard-1ac4b40c-9bca-40dc-9500-a91fa6510665
+at ts01qwen3_7_plus.FeatureTest.testGetFeatures(FeatureTest.java:41)
+CODE CONTEXT:
+    38:         String featureName = "Backlit Keyboard-" + UUID.randomUUID().toString();
+    39: 
+    40:         given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+    41:         given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));  ← FAILURE HERE
+    42: 
+    43:         Response response = given().when().get("/products/" + productName + "/features");
+    44: 
+
+[4] METHOD=testCreateFeatureWithEmptyName FAILURE AT LINE 141
+java.lang.AssertionError:
+at ts01qwen3_7_plus.FeatureTest.testCreateFeatureWithEmptyName(FeatureTest.java:141)
+CODE CONTEXT:
+   138: 
+   139:         Response response = given().when().post("/products/" + productName + "/features/");
+   140: 
+   141:         response.then().statusCode(405);  ← FAILURE HERE
+   142:     }
+   143: }
+
+    CURRENT TEST CODE:
+    package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("BASE_URL", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeature() {
+        String productName = "Smartwatch Series 8-" + UUID.randomUUID().toString();
+        String featureName = "Blood Oxygen Sensor-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("description", "Measures the oxygen saturation (SpO2) of your blood on demand.")
+                .when()
+                .post("/products/" + productName + "/features/" + featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeatures() {
+        String productName = "AeroBook-Pro-15-" + UUID.randomUUID().toString();
+        String featureName = "Backlit Keyboard-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + productName + "/features");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfiguration() {
+        String productName = "QuantumLeap-AI-Platform-" + UUID.randomUUID().toString();
+        String configName = "standard-gpu-cluster-" + UUID.randomUUID().toString();
+        String featureName = "distributed-training-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/configurations/" + configName).then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateDuplicateFeature() {
+        String productName = "Wireless-Earbuds-Pro-" + UUID.randomUUID().toString();
+        String featureName = "ANC-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName + "/features/" + featureName);
+
+        response.then().statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureSameNameDifferentProduct() {
+        String productName1 = "Gaming-PC-Tower-" + UUID.randomUUID().toString();
+        String productName2 = "UltraBook-Z1-" + UUID.randomUUID().toString();
+        String featureName = "Liquid Cooling-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName1).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName2).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName1 + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName2 + "/features/" + featureName);
+
+        response.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeature() {
+        String productName = "EcoTablet-10-" + UUID.randomUUID().toString();
+        String featureName = "stylus-support-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given()
+                .formParam("description", "RGB backlit keyboard with customizable zones and per-key lighting.")
+                .when()
+                .put("/products/" + productName + "/features/" + featureName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeature() {
+        String productName = "SmartWatch-Pro-" + UUID.randomUUID().toString();
+        String featureName = "heart-rate-monitor-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().delete("/products/" + productName + "/features/" + featureName);
+
+        response.then().statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithFeatures() {
+        String productName = "USB-C-Dongle-" + UUID.randomUUID().toString();
+        String featureName = "Fingerprint-Reader-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+        given().when().post("/products/" + productName + "/features/" + featureName).then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/products/" + productName);
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureWithEmptyName() {
+        String productName = "Workstation-Z8-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/" + productName).then().statusCode(lessThan(300));
+
+        Response response = given().when().post("/products/" + productName + "/features/");
+
+        response.then().statusCode(405);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

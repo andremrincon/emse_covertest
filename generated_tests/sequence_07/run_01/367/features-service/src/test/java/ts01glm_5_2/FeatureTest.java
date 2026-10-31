@@ -1,0 +1,345 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.UUID;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+public class FeatureTest {
+
+    private static String baseURI;
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            baseURI = env;
+        } else {
+            baseURI = "http://localhost:8080";
+        }
+    }
+
+    private String formatPath(String template, String... params) {
+        String result = template;
+        for (String p : params) {
+            result = result.replaceFirst("\\{[^/{}]*\\}", urlEncode(p));
+        }
+        return result;
+    }
+
+    private String urlEncode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private int sendRequest(String method, String pathTemplate, String[] pathParams, Map<String, String> formParams) throws IOException {
+        String path = formatPath(pathTemplate, pathParams);
+        URL url = new URL(baseURI + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        if (formParams != null && (method.equals("POST") || method.equals("PUT"))) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            String body = toFormUrlEncoded(formParams);
+            byte[] out = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(out.length));
+            OutputStream os = conn.getOutputStream();
+            try {
+                os.write(out);
+                os.flush();
+            } finally {
+                try { os.close(); } catch (Exception ex) {}
+            }
+        }
+        int code;
+        try {
+            code = conn.getResponseCode();
+            InputStream is = null;
+            try {
+                if (code >= 200 && code < 400) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+                if (is != null) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                    while (br.readLine() != null) {}
+                    try { br.close(); } catch (Exception ex) {}
+                }
+            } finally {
+                try { if (is != null) is.close(); } catch (Exception ex) {}
+            }
+        } finally {
+            conn.disconnect();
+        }
+        return code;
+    }
+
+    private String toFormUrlEncoded(Map<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        Iterator<Entry<String, String>> it = params.entrySet().iterator();
+        while (it.hasNext()) {
+            Entry<String, String> e = it.next();
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append('=');
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            if (it.hasNext()) sb.append('&');
+        }
+        return sb.toString();
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeatureCoversSetNameAndSetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertEquals(201, code2);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetFeaturesCoversGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code2 < 300);
+            int code3 = sendRequest("GET", "/products/{productName}/features", new String[] { productName }, null);
+            assertEquals(200, code3);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form1 = new LinkedHashMap<String, String>();
+            form1.put("description", "Original description");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form1);
+            assertTrue(code2 < 300);
+            Map<String, String> form2 = new LinkedHashMap<String, String>();
+            form2.put("description", "Updated description");
+            int code3 = sendRequest("PUT", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form2);
+            assertEquals(200, code3);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationCoversEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null);
+            assertTrue(code2 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code3 < 300);
+            int code4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertEquals(201, code4);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationFeaturesCoversEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null);
+            assertTrue(code2 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code3 < 300);
+            int code4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertTrue(code4 < 300);
+            int code5 = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", new String[] { productName, configName }, null);
+            assertEquals(200, code5);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfigurationCoversEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null);
+            assertTrue(code2 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code3 < 300);
+            int code4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertTrue(code4 < 300);
+            int code5 = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertEquals(204, code5);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureCoversEqualsSameName() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form1 = new LinkedHashMap<String, String>();
+            form1.put("description", "First description");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form1);
+            assertTrue(code2 < 300);
+            Map<String, String> form2 = new LinkedHashMap<String, String>();
+            form2.put("description", "Second description");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form2);
+            assertEquals(500, code3);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToConfigurationTwiceCoversEqualsSameObject() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String configName = "TestConfig-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", new String[] { productName, configName }, null);
+            assertTrue(code2 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code3 < 300);
+            int code4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertTrue(code4 < 300);
+            int code5 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", new String[] { productName, configName, featureName }, null);
+            assertEquals(500, code5);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateFeaturesWithDifferentNamesCoversEqualsDifferentNames() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName1 = "FeatureA-" + UUID.randomUUID().toString();
+        String featureName2 = "FeatureB-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form1 = new LinkedHashMap<String, String>();
+            form1.put("description", "Description A");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName1 }, form1);
+            assertTrue(code2 < 300);
+            Map<String, String> form2 = new LinkedHashMap<String, String>();
+            form2.put("description", "Description B");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName2 }, form2);
+            assertEquals(201, code3);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testSameFeatureNameDifferentProductsCoversEqualsDifferentProducts() {
+        String productName1 = "ProductA-" + UUID.randomUUID().toString();
+        String productName2 = "ProductB-" + UUID.randomUUID().toString();
+        String featureName = "SharedFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName1 }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("POST", "/products/{productName}", new String[] { productName2 }, null);
+            assertTrue(code2 < 300);
+            Map<String, String> formA = new LinkedHashMap<String, String>();
+            formA.put("description", "Description for product A");
+            int code3 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName1, featureName }, formA);
+            assertTrue(code3 < 300);
+            Map<String, String> formB = new LinkedHashMap<String, String>();
+            formB.put("description", "Description for product B");
+            int code4 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName2, featureName }, formB);
+            assertEquals(201, code4);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureCoversEquals() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        String featureName = "TestFeature-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            Map<String, String> form = new LinkedHashMap<String, String>();
+            form.put("description", "Test description");
+            int code2 = sendRequest("POST", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, form);
+            assertTrue(code2 < 300);
+            int code3 = sendRequest("DELETE", "/products/{productName}/features/{featureName}", new String[] { productName, featureName }, null);
+            assertEquals(204, code3);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductCoversGetProduct() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString();
+        try {
+            int code1 = sendRequest("POST", "/products/{productName}", new String[] { productName }, null);
+            assertTrue(code1 < 300);
+            int code2 = sendRequest("GET", "/products/{productName}", new String[] { productName }, null);
+            assertEquals(200, code2);
+        } catch (IOException e) {
+            fail("IOException: " + e.getMessage());
+        }
+    }
+}

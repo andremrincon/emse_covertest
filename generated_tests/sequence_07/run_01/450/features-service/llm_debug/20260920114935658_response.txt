@@ -1,0 +1,140 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.http.ContentType;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsConstraintsResourceTest {
+
+    private static final String BASE_URI = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProductReturns201() {
+        String productName = "req-product-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID();
+
+        given().when().post(BASE_URI + "/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + requiredFeature)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post(BASE_URI + "/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProductWithUnknownProductReturns500() {
+        String productName = "no-req-product-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID();
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post(BASE_URI + "/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProductReturns201() {
+        String productName = "excl-product-" + UUID.randomUUID();
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID();
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID();
+
+        given().when().post(BASE_URI + "/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + excludedFeature)
+                .then().statusCode(lessThan(300));
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post(BASE_URI + "/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProductWithUnknownProductReturns500() {
+        String productName = "no-excl-product-" + UUID.randomUUID();
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID();
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID();
+
+        given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post(BASE_URI + "/products/" + productName + "/constraints/excludes")
+                .then()
+                .statusCode(500);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintReturns204() {
+        String productName = "del-product-" + UUID.randomUUID();
+        String sourceFeature = "RAID-Controller-Card-" + UUID.randomUUID();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID();
+
+        given().when().post(BASE_URI + "/products/" + productName).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + sourceFeature)
+                .then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC).when()
+                .post(BASE_URI + "/products/" + productName + "/features/" + requiredFeature)
+                .then().statusCode(lessThan(300));
+
+        String location = given()
+                .contentType(ContentType.URLENC)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post(BASE_URI + "/products/" + productName + "/constraints/requires")
+                .then()
+                .statusCode(lessThan(300))
+                .extract().header("Location");
+
+        String constraintId = location.substring(location.lastIndexOf('/') + 1);
+
+        given()
+                .when()
+                .delete(BASE_URI + "/products/" + productName + "/constraints/" + constraintId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteConstraintWithUnknownProductReturns500() {
+        String productName = "no-del-product-" + UUID.randomUUID();
+
+        given()
+                .when()
+                .delete(BASE_URI + "/products/" + productName + "/constraints/1")
+                .then()
+                .statusCode(500);
+    }
+}
+```

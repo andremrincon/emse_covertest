@@ -1,0 +1,166 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CountryRestV2Test {
+
+    private static final String BASE_URL = "http://localhost:8080/rest";
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaValidCodeWithFields() {
+        given()
+            .queryParam("fields", "name;capital;population")
+        .when()
+            .get("/v2/alpha/US")
+        .then()
+            .statusCode(200)
+            .body("name", equalTo("United States of America"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaInvalidCode() {
+        given()
+        .when()
+            .get("/v2/alpha/1")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListValidCodesWithFields() {
+        given()
+            .queryParam("codes", "US,CA")
+            .queryParam("fields", "name;capital")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaListInvalidCodes() {
+        given()
+            .queryParam("codes", "1")
+        .when()
+            .get("/v2/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyValid() {
+        given()
+        .when()
+            .get("/v2/currency/EUR")
+        .then()
+            .statusCode(200)
+            .body("[0].name", equalTo("Åland Islands"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrencyInvalid() {
+        given()
+        .when()
+            .get("/v2/currency/123")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameValid() {
+        given()
+        .when()
+            .get("/v2/name/Germany")
+        .then()
+            .statusCode(200)
+            .body("[0].name", equalTo("Germany"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByNameNotFound() {
+        given()
+        .when()
+            .get("/v2/name/Atlantis")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCodeValid() {
+        given()
+        .when()
+            .get("/v2/callingcode/1")
+        .then()
+            .statusCode(200)
+            .body("[0].name", equalTo("American Samoa"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapitalValid() {
+        given()
+        .when()
+            .get("/v2/capital/Paris")
+        .then()
+            .statusCode(200)
+            .body("[0].name", equalTo("France"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionValid() {
+        given()
+        .when()
+            .get("/v2/region/Europe")
+        .then()
+            .statusCode(200)
+            .body("[0].region", equalTo("Europe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubRegionValid() {
+        given()
+        .when()
+            .get("/v2/subregion/Western Europe")
+        .then()
+            .statusCode(200)
+            .body("[0].subregion", equalTo("Western Europe"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguageValid() {
+        given()
+        .when()
+            .get("/v2/lang/Spanish")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByDemonymValid() {
+        given()
+        .when()
+            .get("/v2/demonym/American")
+        .then()
+            .statusCode(200)
+            .body("[0].name", equalTo("United States Minor Outlying Islands"));
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegionalBlocValid() {
+        given()
+        .when()
+            .get("/v2/regionalbloc/EU")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,272 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.*;
+
+public class WrongProductConfigurationExceptionTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl",
+            System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doGetTriggersCorsFilterChain() {
+        RestAssured.given()
+        .when()
+            .get("/products")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doOptionsTriggersCorsFilterElseBranch() {
+        RestAssured.given()
+        .when()
+            .request(Method.OPTIONS, "/products")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doPostTriggersCorsFilterChain() {
+        String productName = "CORS-Post-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void doPutTriggersCorsFilterChain() {
+        String productName = "CORS-Put-" + UUID.randomUUID();
+        String featureName = "cors-feature-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("description", "Updated description via PUT")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doDeleteTriggersCorsFilterChain() {
+        String productName = "CORS-Del-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeadersAreSetByFilter() {
+        RestAssured.given()
+        .when()
+            .get("/products")
+        .then()
+            .headerEquals("Access-Control-Allow-Origin", "*");
+    }
+}
+
+class RestAssured {
+    public static String baseURI = "http://localhost:8080";
+    public static RequestSpecification given() {
+        return new RequestSpecification();
+    }
+}
+
+enum Method {
+    GET, POST, PUT, DELETE, OPTIONS
+}
+
+class RequestSpecification {
+    private final Map<String, String> formParams = new LinkedHashMap<>();
+    public RequestSpecification formParam(String name, String value) {
+        formParams.put(name, value);
+        return this;
+    }
+    public When when() {
+        return new When(this);
+    }
+    Map<String, String> getFormParams() {
+        return formParams;
+    }
+}
+
+class When {
+    private final RequestSpecification spec;
+    When(RequestSpecification spec) {
+        this.spec = spec;
+    }
+    public Then get(String path) {
+        return requestInternal(Method.GET, path, spec.getFormParams());
+    }
+    public Then post(String path) {
+        return requestInternal(Method.POST, path, spec.getFormParams());
+    }
+    public Then put(String path) {
+        return requestInternal(Method.PUT, path, spec.getFormParams());
+    }
+    public Then delete(String path) {
+        return requestInternal(Method.DELETE, path, spec.getFormParams());
+    }
+    public Then request(Method method, String path) {
+        return requestInternal(method, path, spec.getFormParams());
+    }
+    private Then requestInternal(Method method, String path, Map<String, String> formParams) {
+        HttpResponse resp = executeHttp(method, path, formParams);
+        return new Then(resp);
+    }
+    private HttpResponse executeHttp(Method method, String path, Map<String, String> formParams) {
+        HttpURLConnection conn = null;
+        int status = -1;
+        Map<String, List<String>> headers = new HashMap<>();
+        StringBuilder body = new StringBuilder();
+        try {
+            String base = RestAssured.baseURI == null ? "" : RestAssured.baseURI;
+            String full = combine(base, path);
+            URL url = new URL(full);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method.name());
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            if ((method == Method.POST || method == Method.PUT) && formParams != null && !formParams.isEmpty()) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                String payload = buildForm(formParams);
+                byte[] out = payload.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", String.valueOf(out.length));
+                OutputStream os = conn.getOutputStream();
+                os.write(out);
+                os.flush();
+                os.close();
+            }
+            status = conn.getResponseCode();
+            headers = conn.getHeaderFields();
+            InputStream is;
+            if (status >= 200 && status < 400) {
+                is = conn.getInputStream();
+            } else {
+                is = conn.getErrorStream();
+            }
+            if (is != null) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    body.append(line).append('\n');
+                }
+                reader.close();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("HTTP request failed: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return new HttpResponse(status, headers, body.toString());
+    }
+    private String combine(String base, String path) {
+        if (path == null) path = "";
+        if (base.endsWith("/") && path.startsWith("/")) {
+            return base + path.substring(1);
+        } else if (!base.endsWith("/") && !path.startsWith("/")) {
+            return base + "/" + path;
+        } else {
+            return base + path;
+        }
+    }
+    private String buildForm(Map<String, String> params) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (sb.length() > 0) sb.append("&");
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+}
+
+class HttpResponse {
+    private final int statusCode;
+    private final Map<String, List<String>> headers;
+    private final String body;
+    HttpResponse(int statusCode, Map<String, List<String>> headers, String body) {
+        this.statusCode = statusCode;
+        this.headers = headers != null ? headers : new HashMap<String, List<String>>();
+        this.body = body;
+    }
+    int getStatusCode() {
+        return statusCode;
+    }
+    Map<String, List<String>> getHeaders() {
+        return headers;
+    }
+    String getBody() {
+        return body;
+    }
+}
+
+class Then {
+    private final HttpResponse response;
+    Then(HttpResponse response) {
+        this.response = response;
+    }
+    public Then statusCode(int expected) {
+        Assert.assertEquals("Unexpected status code", expected, response.getStatusCode());
+        return this;
+    }
+    public Then statusCodeLessThan(int upperExclusive) {
+        Assert.assertTrue("Expected status code < " + upperExclusive + " but was " + response.getStatusCode(),
+                response.getStatusCode() < upperExclusive);
+        return this;
+    }
+    public Then headerEquals(String name, String expected) {
+        String actual = getFirstHeaderValue(name);
+        Assert.assertEquals("Header " + name + " did not match", expected, actual);
+        return this;
+    }
+    private String getFirstHeaderValue(String name) {
+        if (name == null) return null;
+        for (Map.Entry<String, List<String>> e : response.getHeaders().entrySet()) {
+            if (e.getKey() == null) continue;
+            if (e.getKey().equalsIgnoreCase(name)) {
+                List<String> vals = e.getValue();
+                if (vals != null && !vals.isEmpty()) return vals.get(0);
+                return null;
+            }
+        }
+        return null;
+    }
+}

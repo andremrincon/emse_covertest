@@ -1,0 +1,97 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class PatTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getProperty("baseUrl");
+        if (env == null || env.isEmpty()) {
+            String e2 = System.getenv("BASE_URL");
+            RestAssured.baseURI = (e2 == null || e2.isEmpty()) ? "http://localhost:8080" : e2;
+        } else {
+            RestAssured.baseURI = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_single_char_pat_returns_200() {
+        given().when().get("/api/pat/{txt}/{pat}", "abcxyz", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", "abcxyz", "a");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_pat_only_returns_200() {
+        String txt = "xxPATxx";
+        String pat = "PAT";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_reverse_only_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "start" + patrev + "end";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_both_non_adjacent_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "xx" + pat + "middle" + patrev + "yy";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_palindrome_adjacent_returns_200() {
+        String pat = "ABA";
+        String txt = "pre" + pat + pat + "post";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_reverse_then_pat_adjacent_returns_200() {
+        String pat = "ABC";
+        String patrev = "CBA";
+        String txt = "tok" + patrev + pat + "end";
+        given().when().get("/api/pat/{txt}/{pat}", txt, pat).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_long_text_triggers_500() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 2000; i++) {
+            sb.append("longtextsegment");
+        }
+        String txt = sb.toString();
+        String pat = "pattern";
+        Response act = given().when().get("/api/pat/{txt}/{pat}", txt, pat);
+        act.then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void test_pat_single_txt_endpoint_returns_200() {
+        String txt = "The quick brown fox jumps over the lazy dog.";
+        given().when().get("/api/pat/{txt}", txt).then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", txt);
+        act.then().statusCode(200);
+    }
+}

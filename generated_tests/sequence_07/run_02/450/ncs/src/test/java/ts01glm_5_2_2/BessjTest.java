@@ -1,0 +1,116 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class BessjTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2ThrowsException() {
+        given()
+                .pathParam("n", 1)
+                .pathParam("x", 2.5)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNSmallBranch() {
+        given()
+                .pathParam("n", 2)
+                .pathParam("x", 5.0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxGreaterThanNLargeBranch() {
+        given()
+                .pathParam("n", 2)
+                .pathParam("x", 10.0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXLargeBranchOddN() {
+        given()
+                .pathParam("n", 3)
+                .pathParam("x", -10.0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZero() {
+        given()
+                .pathParam("n", 3)
+                .pathParam("x", 0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxLessThanOrEqualN() {
+        given()
+                .pathParam("n", 5)
+                .pathParam("x", 2.5)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjInvalidNType() {
+        given()
+                .pathParam("n", "abc")
+                .pathParam("x", 2.5)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXSmallBranchEvenN() {
+        given()
+                .pathParam("n", 2)
+                .pathParam("x", -5.0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXSmallBranchOddN() {
+        given()
+                .pathParam("n", 3)
+                .pathParam("x", -5.0)
+                .when()
+                .get("/api/bessj/{n}/{x}")
+                .then()
+                .statusCode(200);
+    }
+}

@@ -1,0 +1,72 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NotyPevarTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_xPlusYEquals56() {
+        given()
+            .when()
+                .get("/api/notypevar/28/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_xsPlusYEqualsHello7() {
+        given()
+            .when()
+                .get("/api/notypevar/7/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_xsCompareToSLessThanZero() {
+        given()
+            .when()
+                .get("/api/notypevar/0/world")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_allConditionsFalse() {
+        given()
+            .when()
+                .get("/api/notypevar/5/hello")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_invalidIntegerInput() {
+        given()
+            .when()
+                .get("/api/notypevar/abc/valid-string")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_integerOverflowInput() {
+        given()
+            .when()
+                .get("/api/notypevar/2147483648/valid-string")
+            .then()
+                .statusCode(400);
+    }
+}

@@ -1,0 +1,98 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
+public class ConstraintExcludesTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("api.base");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("API_BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String source = "src-" + UUID.randomUUID().toString();
+        String excluded = "excl-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint_withOnlySource_returns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String source = "onlysrc-" + UUID.randomUUID().toString();
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", source)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationWithBothFeatures_isInvalid_andContainsErrorMessage() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String source = "feature-src-" + UUID.randomUUID().toString();
+        String excluded = "feature-excl-" + UUID.randomUUID().toString();
+        String expectedMessage = String.format("Feauture %s can not be active when feature %s is active", excluded, source);
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excluded).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        act.then().body(containsString(expectedMessage));
+    }
+
+    @Test(timeout = 60000)
+    public void testConfigurationWithOnlySource_doesNotContainErrorMessage() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "cfg-" + UUID.randomUUID().toString();
+        String source = "feature-src-" + UUID.randomUUID().toString();
+        String excluded = "feature-excl-" + UUID.randomUUID().toString();
+        String expectedMessage = String.format("Feauture %s can not be active when feature %s is active", excluded, source);
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, source).then().statusCode(lessThan(300));
+        given().contentType(ContentType.URLENC)
+                .formParam("sourceFeature", source)
+                .formParam("excludedFeature", excluded)
+                .when()
+                .post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        act.then().body(not(containsString(expectedMessage)));
+    }
+}

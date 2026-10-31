@@ -1,0 +1,53 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void subject_returnsUrl_whenTextMatchesUrlPattern() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "http://a/a")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void subject_returnsDate_whenTextMatchesDatePattern() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "mon01jan")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void subject_returnsFpe_whenTextMatchesFpePattern() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "0.0e-12")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void subject_returnsNone_whenTextMatchesNoPattern() {
+        given()
+            .when()
+                .get("/api/pat/{txt}", "hello")
+            .then()
+                .statusCode(200);
+    }
+}
+```

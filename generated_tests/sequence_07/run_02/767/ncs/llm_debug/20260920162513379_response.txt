@@ -1,0 +1,72 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class NcsRestTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("base.url", "http://localhost");
+        RestAssured.port = Integer.parseInt(System.getProperty("server.port", "8080"));
+        RestAssured.basePath = "";
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherCatchBlockWithInvalidM() {
+        given()
+            .when()
+                .get("/api/fisher/8/5/0.75")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherCatchBlockWithInvalidX() {
+        given()
+            .when()
+                .get("/api/fisher/10/5/0.5")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherBoundaryMExceeds1000() {
+        given()
+            .when()
+                .get("/api/fisher/1001/5/0.75")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBoundaryAExceedsLimit() {
+        given()
+            .when()
+                .get("/api/remainder/10001/5")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBoundaryBExceedsLimit() {
+        given()
+            .when()
+                .get("/api/remainder/17/10001")
+            .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderBoundaryANegativeExceedsLimit() {
+        given()
+            .when()
+                .get("/api/remainder/-10001/5")
+            .then()
+                .statusCode(400);
+    }
+}

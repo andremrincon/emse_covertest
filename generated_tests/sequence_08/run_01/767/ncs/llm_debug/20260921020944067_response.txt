@@ -1,0 +1,80 @@
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RemainderTest {
+
+    static {
+        RestAssured.baseURI = System.getProperty("test.base.url", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositivePositive() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderPositiveNegative() {
+        given()
+            .pathParam("a", 17)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativePositive() {
+        given()
+            .pathParam("a", -5)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderNegativeNegative() {
+        given()
+            .pathParam("a", -5)
+            .pathParam("b", -5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderZeroA() {
+        given()
+            .pathParam("a", 0)
+            .pathParam("b", 5)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemainderZeroB() {
+        given()
+            .pathParam("a", 5)
+            .pathParam("b", 0)
+        .when()
+            .get("/api/remainder/{a}/{b}")
+        .then()
+            .statusCode(200);
+    }
+}

@@ -1,0 +1,48 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class FisherTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBOdd() {
+        given().when().get("/api/fisher/1/1/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAOddBEven() {
+        given().when().get("/api/fisher/1/2/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBOdd() {
+        given().when().get("/api/fisher/2/1/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherAEvenBEven() {
+        given().when().get("/api/fisher/2/2/0.75").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPGreaterThanOne() {
+        given().when().get("/api/fisher/1/3/1000.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFisherPLessThanZero() {
+        given().when().get("/api/fisher/10/1/0.001").then().statusCode(200);
+    }
+}
+```

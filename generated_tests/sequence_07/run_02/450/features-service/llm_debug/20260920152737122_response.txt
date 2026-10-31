@@ -1,0 +1,328 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConfigurationsServiceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+    }
+
+    private static class SimpleResponse {
+        final int statusCode;
+        final String body;
+
+        SimpleResponse(int statusCode, String body) {
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+    }
+
+    private String buildPath(String pathTemplate, String... params) throws Exception {
+        String result = pathTemplate;
+        for (String p : params) {
+            String encoded = URLEncoder.encode(p, "UTF-8");
+            result = result.replaceFirst("\\{[^/}]+\\}", encoded);
+        }
+        return result;
+    }
+
+    private SimpleResponse sendRequest(String method, String pathTemplate, String... params) {
+        try {
+            String path = buildPath(pathTemplate, params);
+            String urlStr = baseUrl + path;
+            URL url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(60000);
+            if ("POST".equals(method) || "PUT".equals(method)) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                String body = "";
+                byte[] out = body.getBytes("UTF-8");
+                conn.setFixedLengthStreamingMode(out.length);
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(out);
+                }
+            }
+            int status = conn.getResponseCode();
+            InputStream is;
+            try {
+                if (status >= 400) {
+                    is = conn.getErrorStream();
+                } else {
+                    is = conn.getInputStream();
+                }
+            } catch (Exception e) {
+                is = null;
+            }
+            StringBuilder sb = new StringBuilder();
+            if (is != null) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line).append("\n");
+                    }
+                }
+            }
+            String respBody = sb.toString().trim();
+            conn.disconnect();
+            return new SimpleResponse(status, respBody);
+        } catch (Exception e) {
+            return new SimpleResponse(500, "");
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withExistingConfigurations_returnsNames() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        assertTrue(r1.statusCode < 300);
+        SimpleResponse r2 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertTrue(r2.statusCode < 300);
+
+        SimpleResponse r3 = sendRequest("GET", "/products/{productName}/configurations", productName);
+        assertEquals(200, r3.statusCode);
+        assertTrue(r3.body.contains(configName));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_withNoConfigurations_returnsEmptyList() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        SimpleResponse r1 = sendRequest("POST", "/products/{productName}", productName);
+        assertTrue(r1.statusCode < 300);
+
+        SimpleResponse r2 = sendRequest("GET", "/products/{productName}/configurations", productName);
+        assertEquals(200, r2.statusCode);
+        String body = r2.body.trim();
+        assertTrue(body.equals("[]") || body.equals(""));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withActiveFeatures_returnsFeatureNames() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        assertEquals(200, r.statusCode);
+        assertTrue(r.body.contains(featureName));
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationActivedFeaturesNames_withNoActiveFeatures_returnsEmptyList() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", productName, configName);
+        assertEquals(200, r.statusCode);
+        String body = r.body.trim();
+        assertTrue(body.equals("[]") || body.equals(""));
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_addsFeatureSuccessfully() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        assertEquals(201, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureFromConfiguration_duplicateFeature_throwsException() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        assertEquals(500, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_removesFeatureSuccessfully() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        assertEquals(204, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_viaAddFeature_setsValidFlag() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+
+        assertEquals(201, sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertEquals(200, r.statusCode);
+        String noSpaces = r.body.replaceAll("\\s+", "");
+        assertTrue(noSpaces.contains("\"valid\":true"));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_viaRemoveFeature_setsValidFlag() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode < 300);
+
+        assertEquals(204, sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName).statusCode);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertEquals(200, r.statusCode);
+        String noSpaces = r.body.replaceAll("\\s+", "");
+        assertTrue(noSpaces.contains("\"valid\":true"));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_withExcludesConstraint_setsInvalidFlag() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureA).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureB).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/constraints/excludes", productName, featureA, featureB).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).statusCode < 300);
+
+        assertEquals(201, sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).statusCode);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertEquals(200, r.statusCode);
+        String noSpaces = r.body.replaceAll("\\s+", "");
+        assertTrue(noSpaces.contains("\"valid\":false"));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_withRequiresConstraint_setsInvalidFlag() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureA).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureB).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/constraints/requires", productName, featureA, featureB).statusCode < 300);
+
+        assertEquals(201, sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).statusCode);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertEquals(200, r.statusCode);
+        String noSpaces = r.body.replaceAll("\\s+", "");
+        assertTrue(noSpaces.contains("\"valid\":false"));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateAndUpdateConfiguration_withRequiresConstraintSatisfied_setsValidFlag() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureA).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureB).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/constraints/requires", productName, featureA, featureB).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureA).statusCode < 300);
+
+        assertEquals(201, sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureB).statusCode);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", productName, configName);
+        assertEquals(200, r.statusCode);
+        String noSpaces = r.body.replaceAll("\\s+", "");
+        assertTrue(noSpaces.contains("\"valid\":true"));
+    }
+
+    @Test(timeout = 60000)
+    public void removeFeatureFromConfiguration_featureNotActive_stillSucceeds() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "feat-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/features/{featureName}", productName, featureName).statusCode < 300);
+
+        SimpleResponse r = sendRequest("DELETE", "/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, featureName);
+        assertEquals(204, r.statusCode);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationsNamesForProduct_multipleConfigurations_returnsAllNames() {
+        String productName = "test-prod-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName1 = "config1-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        String configName2 = "config2-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+
+        assertTrue(sendRequest("POST", "/products/{productName}", productName).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName1).statusCode < 300);
+        assertTrue(sendRequest("POST", "/products/{productName}/configurations/{configurationName}", productName, configName2).statusCode < 300);
+
+        SimpleResponse r = sendRequest("GET", "/products/{productName}/configurations", productName);
+        assertEquals(200, r.statusCode);
+        assertTrue(r.body.contains(configName1));
+        assertTrue(r.body.contains(configName2));
+    }
+}

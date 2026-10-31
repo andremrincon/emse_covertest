@@ -1,0 +1,107 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.containsString;
+
+public class CountryRestV2Test {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getProperty("restassured.baseuri");
+        }
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("RESTASSURED_BASEURI");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080/rest";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_validFields_returns200() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha/US?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_invalidShortAlpha_returns400() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha/1").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha/ZZZ").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_validCodes_returns200() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha?codes=US,CA,MX").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_badCodes_returns400() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha?codes=123").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha?codes=true").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_invalidLength_returns400() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/currency/12").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_valid_returns200() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/currency/EUR?fields=name;capital;population").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_fullTextTrue_returns200() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/name/France?fullText=true").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_notFound_returns404() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/name/123").then().statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountry_fieldsFiltering_returnsFilteredJson() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha/US?fields=name;capital").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testParsedCountries_fieldsFiltering_returnsArrayFiltered() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().get("/v2/alpha?codes=US,CA&fields=name;capital").then().body(containsString("\"name\""));
+    }
+
+    @Test(timeout = 60000)
+    public void testPost_onV2_returns405() {
+        given().when().get("/v2").then().statusCode(404);
+        given().when().post("/v2").then().statusCode(405);
+    }
+}

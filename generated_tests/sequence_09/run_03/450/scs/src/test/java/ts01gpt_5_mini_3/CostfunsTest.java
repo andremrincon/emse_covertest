@@ -1,0 +1,58 @@
+package ts01gpt_5_mini_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("baseUrl");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+            if (base == null || base.isEmpty()) {
+                base = "http://localhost:8080";
+            }
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_i_equals_5_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/5/algorithm").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_i_less_than_minus_444_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-500/algorithm").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_i_greater_than_666_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/700/algorithm").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_s_equal_baab_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/0/baab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_i_negative_four_and_s_greater_compare_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/-4/zzzzzz").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void test_costfuns_with_s_equal_ababba_compare_greater_or_equal_returns_200() {
+        given().when().get("/api/pat/The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/1/ababba").then().statusCode(200);
+    }
+}

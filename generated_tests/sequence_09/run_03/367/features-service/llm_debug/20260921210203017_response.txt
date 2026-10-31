@@ -1,0 +1,49 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void init() {
+        String base = System.getProperty("baseUrl", System.getenv("BASE_URL"));
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintReturns201() {
+        String productName = "prod-requires-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String sourceFeature = "RAID-Controller-" + UUID.randomUUID().toString();
+        String requiredFeature = "128GB-ECC-RAM-" + UUID.randomUUID().toString();
+        RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature)
+                .when()
+                .post("/products/{productName}/constraints/requires", productName)
+                .then()
+                .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String productName = "prod-excludes-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        String sourceFeature = "CPU-i9-13900H-" + UUID.randomUUID().toString();
+        String excludedFeature = "Integrated-Graphics-Only-" + UUID.randomUUID().toString();
+        RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature)
+                .when()
+                .post("/products/{productName}/constraints/excludes", productName)
+                .then()
+                .statusCode(201);
+    }
+}

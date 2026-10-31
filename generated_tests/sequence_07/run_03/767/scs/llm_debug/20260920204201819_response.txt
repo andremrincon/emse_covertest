@@ -1,0 +1,84 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CookieTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongUserPrefixReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user12345/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithShortValueReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/user/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUserIdWithLongNonUserPrefixReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/userid/abcdefg/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithAmAndAbcComReturnsOne() {
+        given()
+            .when()
+                .get("/api/cookie/session/am/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSessionWithNonMatchingValueReturnsTwo() {
+        given()
+            .when()
+                .get("/api/cookie/session/pm/abc.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownNameReturnsZero() {
+        given()
+            .when()
+                .get("/api/cookie/other/value/example.com")
+            .then()
+                .statusCode(200)
+                .body(containsString("0"));
+    }
+}
+```

@@ -1,0 +1,163 @@
+```java
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CountryRestV1Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080/rest");
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = BASE_URL;
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Valid() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/{alphacode}", "US")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlpha_Invalid() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha/{alphacode}", "A")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Found() {
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("codes", "US")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_NotFound() {
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("codes", "XX;YY")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByAlphaList_Invalid() {
+        given()
+            .contentType(ContentType.JSON)
+            .queryParam("codes", "A")
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/currency/{currency}", "USD")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCurrency_Invalid() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/currency/{currency}", "US")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByName_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/name/{name}", "France")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCallingCode_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/callingcode/{callingcode}", "1")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByCapital_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/capital/{capital}", "London")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByRegion_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/region/{region}", "Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetBySubregion_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/subregion/{subregion}", "Western Europe")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetByLanguage_Found() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/lang/{lang}", "es")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testIsEmpty_Null() {
+        given()
+            .contentType(ContentType.JSON)
+        .when()
+            .get("/v1/alpha")
+        .then()
+            .statusCode(400);
+    }
+}
+```

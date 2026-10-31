@@ -1,0 +1,67 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CalcTest {
+
+    static {
+        RestAssured.baseURI = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testConstants() {
+        String[] ops = {"pi", "e"};
+        String[] expected = {"3.141592653589793", "2.718281828459045"};
+        for (int i = 0; i < ops.length; i++) {
+            given().when().get("/api/calc/" + ops[i] + "/0/0").then().body(equalTo(expected[i]));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUnary1() {
+        String[] ops = {"sqrt", "log"};
+        String[] args = {"100", "10"};
+        String[] expected = {"10.0", "2.302585092994046"};
+        for (int i = 0; i < ops.length; i++) {
+            given().when().get("/api/calc/" + ops[i] + "/" + args[i] + "/0").then().body(equalTo(expected[i]));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testUnary2() {
+        String[] ops = {"sine", "cosine", "tangent"};
+        String[] expected = {"0.0", "1.0", "0.0"};
+        for (int i = 0; i < ops.length; i++) {
+            given().when().get("/api/calc/" + ops[i] + "/0/0").then().body(equalTo(expected[i]));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBinary1() {
+        String[] ops = {"plus", "subtract"};
+        String[] expected = {"15.0", "5.0"};
+        for (int i = 0; i < ops.length; i++) {
+            given().when().get("/api/calc/" + ops[i] + "/10/5").then().body(equalTo(expected[i]));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testBinary2() {
+        String[] ops = {"multiply", "divide"};
+        String[] expected = {"50.0", "2.0"};
+        for (int i = 0; i < ops.length; i++) {
+            given().when().get("/api/calc/" + ops[i] + "/10/5").then().body(equalTo(expected[i]));
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testFallThrough() {
+        given().when().get("/api/calc/unknown/0/0").then().body(equalTo("0.0"));
+    }
+}
+```

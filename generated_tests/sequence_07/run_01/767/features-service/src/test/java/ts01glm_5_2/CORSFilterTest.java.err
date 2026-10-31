@@ -1,0 +1,99 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.*;
+
+public class CORSFilterTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl",
+            System.getenv().getOrDefault("BASE_URL", "http://localhost:8080"));
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void doGetTriggersCorsFilterChain() {
+        RestAssured.given()
+        .when()
+            .get("/products")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doOptionsTriggersCorsFilterElseBranch() {
+        RestAssured.given()
+        .when()
+            .request(Method.OPTIONS, "/products")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doPostTriggersCorsFilterChain() {
+        String productName = "CORS-Post-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void doPutTriggersCorsFilterChain() {
+        String productName = "CORS-Put-" + UUID.randomUUID();
+        String featureName = "cors-feature-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("description", "Test feature description")
+        .when()
+            .post("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+            .formParam("description", "Updated description via PUT")
+        .when()
+            .put("/products/" + productName + "/features/" + featureName)
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void doDeleteTriggersCorsFilterChain() {
+        String productName = "CORS-Del-" + UUID.randomUUID();
+        RestAssured.given()
+        .when()
+            .post("/products/" + productName)
+        .then()
+            .statusCodeLessThan(300);
+        RestAssured.given()
+        .when()
+            .delete("/products/" + productName)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void corsHeadersAreSetByFilter() {
+        RestAssured.given()
+        .when()
+            .get("/products")
+        .then()
+            .headerEquals("Access-Control-Allow-Origin", "*");
+    }
+}

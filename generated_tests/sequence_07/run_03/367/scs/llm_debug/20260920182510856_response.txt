@@ -1,0 +1,49 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertNotNull;
+
+public class CalcTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcPlusBinaryOperation() {
+        given().when().get("/api/calc/plus/15.5/4.5").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/calc/plus/15.5/4.5");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcSqrtUnaryOperation() {
+        given().when().get("/api/calc/sqrt/16.0/0.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/calc/sqrt/16.0/0.0");
+
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCalcDivideByZero() {
+        given().when().get("/api/calc/plus/10.0/5.0").then().statusCode(lessThan(300));
+
+        Response response = given().when().get("/api/calc/divide/100.0/0.0");
+
+        response.then().statusCode(500);
+    }
+}
+```

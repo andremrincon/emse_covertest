@@ -1,0 +1,117 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class GammqTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testGserConvergencePath() {
+        given()
+                .pathParam("a", 5.5)
+                .pathParam("x", 2.3)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfConvergencePath() {
+        given()
+                .pathParam("a", 0.001)
+                .pathParam("x", 1000.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserXZeroPath() {
+        given()
+                .pathParam("a", 5.5)
+                .pathParam("x", 0.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testExeInvalidA() {
+        given()
+                .pathParam("a", -1.0)
+                .pathParam("x", 2.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExeInvalidX() {
+        given()
+                .pathParam("a", 5.5)
+                .pathParam("x", -1.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidParameterType() {
+        given()
+                .pathParam("a", "abc")
+                .pathParam("x", 2.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGserITMAXExceeded() {
+        given()
+                .pathParam("a", 1e15)
+                .pathParam("x", 1e15)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfITMAXExceeded() {
+        given()
+                .pathParam("a", 1e15)
+                .pathParam("x", 1e15 + 2)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testGcfAnotherValidCombination() {
+        given()
+                .pathParam("a", 3.0)
+                .pathParam("x", 5.0)
+        .when()
+                .get("/api/gammq/{a}/{x}")
+        .then()
+                .statusCode(200);
+    }
+}
+```

@@ -1,0 +1,99 @@
+```java
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class BessjTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNLessThan2() {
+        given()
+        .when()
+            .get("/api/bessj/0/2.5")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxZero() {
+        given()
+        .when()
+            .get("/api/bessj/3/0.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxAboveNSmallBessel() {
+        given()
+        .when()
+            .get("/api/bessj/3/5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxAboveNLargeBessel() {
+        given()
+        .when()
+            .get("/api/bessj/3/10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXOddN() {
+        given()
+        .when()
+            .get("/api/bessj/3/-10.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjNegativeXEvenN() {
+        given()
+        .when()
+            .get("/api/bessj/4/-5.0")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxBelowNDownwardRecurrence() {
+        given()
+        .when()
+            .get("/api/bessj/5/2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjAxBelowNNegativeXOddN() {
+        given()
+        .when()
+            .get("/api/bessj/5/-2.5")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBessjDownwardRecurrenceBignoBranch() {
+        given()
+        .when()
+            .get("/api/bessj/20/0.1")
+        .then()
+            .statusCode(200);
+    }
+}
+```

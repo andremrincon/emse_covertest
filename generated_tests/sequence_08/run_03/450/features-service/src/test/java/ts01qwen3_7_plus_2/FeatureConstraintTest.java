@@ -1,0 +1,61 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class FeatureConstraintTest {
+
+    private String productName;
+    private String feature1;
+    private String feature2;
+
+    @Before
+    public void setUp() {
+        String envUrl = System.getenv("BASE_URL");
+        if (envUrl != null && !envUrl.isEmpty()) {
+            RestAssured.baseURI = envUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+
+        String uuid = UUID.randomUUID().toString();
+        productName = "Prod-" + uuid;
+        feature1 = "Feat1-" + uuid;
+        feature2 = "Feat2-" + uuid;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateRequiresConstraintToCoverSetId() {
+        given()
+            .when()
+            .post("/products/{productName}", productName)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, feature1)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .when()
+            .post("/products/{productName}/features/{featureName}", productName, feature2)
+            .then()
+            .statusCode(lessThan(300));
+
+        given()
+            .formParam("sourceFeature", feature1)
+            .formParam("requiredFeature", feature2)
+            .when()
+            .post("/products/{productName}/constraints/requires", productName)
+            .then()
+            .statusCode(201);
+    }
+}

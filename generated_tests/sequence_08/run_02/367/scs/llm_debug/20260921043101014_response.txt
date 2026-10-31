@@ -1,0 +1,56 @@
+```java
+package ts01qwen3_7_plus_3;
+
+import io.restassured.response.Response;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class CostfunsTest {
+
+    private final String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEquals5() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/5/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iLessThanMinus444() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/-500/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iGreaterThan666() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/700/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_iEqualsMinus4() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/-4/a");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsBaab() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/0/baab");
+        response.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testCostfuns_sEqualsAbab() {
+        given().when().get(baseUrl + "/api/costfuns/0/a").then().statusCode(lessThan(300));
+        Response response = given().when().get(baseUrl + "/api/costfuns/0/abab");
+        response.then().statusCode(200);
+    }
+}
+```

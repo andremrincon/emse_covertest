@@ -1,0 +1,323 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.LinkedHashMap;
+
+public class WrongProductConfigurationExceptionTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = "http://localhost:8080";
+        }
+        if (env.endsWith("/")) {
+            env = env.substring(0, env.length() - 1);
+        }
+        baseUrl = env;
+    }
+
+    private static int sendRequest(String method, String path, String contentType, byte[] body) throws IOException {
+        String full = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+        URL url = new URL(full);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(60000);
+        conn.setReadTimeout(60000);
+        if (contentType != null) {
+            conn.setRequestProperty("Content-Type", contentType);
+        }
+        if (body != null && (method.equals("POST") || method.equals("PUT") || method.equals("PATCH"))) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Length", String.valueOf(body.length));
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                os.write(body);
+                os.flush();
+            } finally {
+                if (os != null) {
+                    try { os.close(); } catch (IOException ignored) {}
+                }
+            }
+        }
+        int code;
+        InputStream is = null;
+        try {
+            code = conn.getResponseCode();
+            is = conn.getInputStream();
+            byte[] buffer = new byte[1024];
+            while (is.read(buffer) != -1) {
+            }
+        } catch (IOException e) {
+            try {
+                code = conn.getResponseCode();
+                InputStream es = conn.getErrorStream();
+                if (es != null) {
+                    byte[] buffer = new byte[1024];
+                    try {
+                        while (es.read(buffer) != -1) {
+                        }
+                    } finally {
+                        try { es.close(); } catch (IOException ignored) {}
+                    }
+                }
+            } catch (IOException e2) {
+                throw e;
+            }
+        } finally {
+            if (is != null) {
+                try { is.close(); } catch (IOException ignored) {}
+            }
+            conn.disconnect();
+        }
+        return code;
+    }
+
+    private static byte[] encodeForm(Map<String, String> params) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString().getBytes("UTF-8");
+    }
+
+    private static int post(String path) throws IOException {
+        return sendRequest("POST", path, null, null);
+    }
+
+    private static int postForm(String path, Map<String, String> form) throws IOException {
+        byte[] body = encodeForm(form);
+        return sendRequest("POST", path, "application/x-www-form-urlencoded", body);
+    }
+
+    private static int putForm(String path, Map<String, String> form) throws IOException {
+        byte[] body = encodeForm(form);
+        return sendRequest("PUT", path, "application/x-www-form-urlencoded", body);
+    }
+
+    private static int delete(String path) throws IOException {
+        return sendRequest("DELETE", path, null, null);
+    }
+
+    private static int get(String path) throws IOException {
+        return sendRequest("GET", path, null, null);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProduct() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        int code = post("/products/" + productName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "Test description");
+        int code2 = postForm("/products/" + productName + "/features/" + featureName, form);
+        Assert.assertEquals(201, code2);
+    }
+
+    @Test(timeout = 60000)
+    public void testRemoveFeatureFromProduct() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        int c1 = post("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = post("/products/" + productName + "/features/" + featureName);
+        Assert.assertTrue(c2 < 300);
+
+        int code = delete("/products/" + productName + "/features/" + featureName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameFound() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+
+        int code = post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testFindProductFeatureByNameNotFound() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+
+        int code = post("/products/" + productName + "/configurations/" + configName + "/features/NonExistent" + UUID.randomUUID());
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedTrueAndAddRequiresConstraint() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String requiredFeature = "req-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + sourceFeature) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + requiredFeature) < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        int code = postForm("/products/" + productName + "/constraints/requires", form);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testHasFeatureNamedFalse() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + sourceFeature) < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", "NonExistent-" + UUID.randomUUID());
+        int code = postForm("/products/" + productName + "/constraints/requires", form);
+        Assert.assertEquals(500, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureConstraintExcludes() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String sourceFeature = "src-" + UUID.randomUUID();
+        String excludedFeature = "exc-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + sourceFeature) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + excludedFeature) < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        int code = postForm("/products/" + productName + "/constraints/excludes", form);
+        Assert.assertEquals(201, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testBuildWithFeaturesViaGetConfigFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName) < 300);
+
+        int code = get("/products/" + productName + "/configurations/" + configName + "/features");
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductFeaturesAfterAdd() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+
+        int code = get("/products/" + productName + "/features");
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testUpdateFeatureDescription() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("description", "Updated description text");
+        int code = putForm("/products/" + productName + "/features/" + featureName, form);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromConfiguration() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName) < 300);
+
+        int code = delete("/products/" + productName + "/configurations/" + configName + "/features/" + featureName);
+        Assert.assertEquals(204, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationDetails() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName + "/features/" + featureName) < 300);
+
+        int code = get("/products/" + productName + "/configurations/" + configName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetConfigurationsForProduct() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        String configName = "conf-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/configurations/" + configName) < 300);
+
+        int code = get("/products/" + productName + "/configurations");
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductByNameWithFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+
+        int code = get("/products/" + productName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteProductWithFeatures() throws Exception {
+        String productName = "prod-" + UUID.randomUUID();
+        String featureName = "feat-" + UUID.randomUUID();
+        Assert.assertTrue(post("/products/" + productName) < 300);
+        Assert.assertTrue(post("/products/" + productName + "/features/" + featureName) < 300);
+
+        int code = delete("/products/" + productName);
+        Assert.assertEquals(204, code);
+    }
+}

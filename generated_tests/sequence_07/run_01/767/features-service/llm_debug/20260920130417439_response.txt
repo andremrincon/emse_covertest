@@ -1,0 +1,325 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.Scanner;
+
+public class WrongProductConfigurationExceptionTest {
+
+    private String baseURI;
+
+    @Before
+    public void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env != null && !env.isEmpty()) {
+            baseURI = env;
+        } else {
+            baseURI = "http://localhost:8080";
+        }
+    }
+
+    private String formatPath(String template, Object... values) {
+        String s = template;
+        for (Object v : values) {
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(String.valueOf(v), "UTF-8");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            s = s.replaceFirst("\\{[^}]+\\}", encoded);
+        }
+        return s;
+    }
+
+    private int httpPost(String pathTemplate, String contentType, String body, Object... pathParams) throws IOException {
+        String fullPath = baseURI + formatPath(pathTemplate, pathParams);
+        URL url = new URL(fullPath);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            conn.setDoOutput(true);
+            if (body != null) {
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", String.valueOf(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    os.close();
+                }
+            } else {
+                conn.setRequestProperty("Content-Length", "0");
+                try {
+                    OutputStream os = conn.getOutputStream();
+                    os.close();
+                } catch (IOException ignore) {
+                }
+            }
+            int code = conn.getResponseCode();
+            drainStream(conn);
+            return code;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private int httpGet(String pathTemplate, Object... pathParams) throws IOException {
+        String fullPath = baseURI + formatPath(pathTemplate, pathParams);
+        URL url = new URL(fullPath);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            int code = conn.getResponseCode();
+            drainStream(conn);
+            return code;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private String buildForm(Map<String, String> form) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : form.entrySet()) {
+            if (!first) sb.append("&");
+            first = false;
+            try {
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                sb.append("=");
+                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        return sb.toString();
+    }
+
+    private void drainStream(HttpURLConnection conn) {
+        InputStream is = null;
+        try {
+            try {
+                is = conn.getInputStream();
+            } catch (IOException e) {
+                is = conn.getErrorStream();
+            }
+            if (is != null) {
+                Scanner s = new Scanner(is, "UTF-8");
+                while (s.hasNextLine()) {
+                    s.nextLine();
+                }
+                s.close();
+            }
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithNoConstraints() throws Exception {
+        String productName = "eval-no-constraints-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithRequiresConstraintNoDerivedFeatures() throws Exception {
+        String productName = "eval-req-noderived-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, sourceFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, requiredFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        String body = buildForm(form);
+        code = httpPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", body, productName);
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithRequiresConstraintProducingDerivedFeatures() throws Exception {
+        String productName = "eval-req-derived-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+        String sourceFeature = "FeatureA";
+        String requiredFeature = "FeatureB";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, sourceFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, requiredFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("requiredFeature", requiredFeature);
+        String body = buildForm(form);
+        code = httpPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", body, productName);
+        Assert.assertTrue(code < 300);
+
+        code = httpPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configurationName, sourceFeature);
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithExcludesConstraintInvalidResult() throws Exception {
+        String productName = "eval-excl-invalid-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+        String sourceFeature = "FeatureX";
+        String excludedFeature = "FeatureY";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, sourceFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, excludedFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form = new HashMap<String, String>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        String body = buildForm(form);
+        code = httpPost("/products/{productName}/constraints/excludes", "application/x-www-form-urlencoded", body, productName);
+        Assert.assertTrue(code < 300);
+
+        code = httpPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configurationName, sourceFeature);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configurationName, excludedFeature);
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithChainedRequiresConstraintsRecursiveDerived() throws Exception {
+        String productName = "eval-chained-req-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureA");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureB");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureC");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form1 = new HashMap<String, String>();
+        form1.put("sourceFeature", "FeatureA");
+        form1.put("requiredFeature", "FeatureB");
+        String body1 = buildForm(form1);
+        code = httpPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", body1, productName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form2 = new HashMap<String, String>();
+        form2.put("sourceFeature", "FeatureB");
+        form2.put("requiredFeature", "FeatureC");
+        String body2 = buildForm(form2);
+        code = httpPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", body2, productName);
+        Assert.assertTrue(code < 300);
+
+        code = httpPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configurationName, "FeatureA");
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateConfigurationWithBothRequiresAndExcludesConstraints() throws Exception {
+        String productName = "eval-both-constraints-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base-config";
+
+        int code;
+        code = httpPost("/products/{productName}", null, null, productName);
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureA");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureB");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/features/{featureName}", null, null, productName, "FeatureC");
+        Assert.assertTrue(code < 300);
+        code = httpPost("/products/{productName}/configurations/{configurationName}", null, null, productName, configurationName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form1 = new HashMap<String, String>();
+        form1.put("sourceFeature", "FeatureA");
+        form1.put("requiredFeature", "FeatureB");
+        String body1 = buildForm(form1);
+        code = httpPost("/products/{productName}/constraints/requires", "application/x-www-form-urlencoded", body1, productName);
+        Assert.assertTrue(code < 300);
+
+        Map<String, String> form2 = new HashMap<String, String>();
+        form2.put("sourceFeature", "FeatureA");
+        form2.put("excludedFeature", "FeatureC");
+        String body2 = buildForm(form2);
+        code = httpPost("/products/{productName}/constraints/excludes", "application/x-www-form-urlencoded", body2, productName);
+        Assert.assertTrue(code < 300);
+
+        code = httpPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configurationName, "FeatureA");
+        Assert.assertTrue(code < 300);
+
+        code = httpGet("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        Assert.assertEquals(200, code);
+    }
+}

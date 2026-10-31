@@ -1,0 +1,61 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("base.url", System.getenv("BASE_URL"));
+        if (RestAssured.baseURI == null || RestAssured.baseURI.isEmpty()) {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithFpeInputReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "15.5e+04");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithDateInputReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "mon12jan");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithUrlInputReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "http://a/b");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithNoneInputReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "xyz");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithTextAndPatternReturns200() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}/{pat}", "ABABCABAB", "ABAB");
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPatWithMalformedRegexReturns500() {
+        given().when().get("/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get("/api/pat/{txt}", "(abc");
+        act.then().statusCode(500);
+    }
+}

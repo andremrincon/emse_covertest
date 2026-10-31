@@ -1,0 +1,68 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class Ordered4Test {
+    @BeforeClass
+    public static void setUp() {
+        String base = System.getenv("BASE_URL");
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given().when()
+            .get("/api/ordered4/apple/banana/zebra/mango")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given().when()
+            .get("/api/ordered4/zebra/mango/apple/banana")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengths() {
+        given().when()
+            .get("/api/ordered4/apple/zebra/mango/peach")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthCheckFailsAtZ() {
+        given().when()
+            .get("/api/ordered4/zebra/banana/abcd/mango")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testLengthCheckFailsAllShort() {
+        given().when()
+            .get("/api/ordered4/99/100/9/10")
+            .then()
+            .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testPartialElseIfEvaluation() {
+        given().when()
+            .get("/api/ordered4/zebra/apple/apple/zebra")
+            .then()
+            .statusCode(200);
+    }
+}
+```

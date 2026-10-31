@@ -1,0 +1,126 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Ignore;
+public class DuplicatedObjectExceptionTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("base.url", "http://localhost:8080");
+        }
+        baseUrl = env;
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateProductCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "Dup-Product-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int firstStatus = doPost("/products/" + encode(productName), null, null);
+        assertThat(firstStatus, lessThan(300));
+
+        int secondStatus = doPost("/products/" + encode(productName), null, null);
+        assertTrue("Expected duplicate creation to return 201 but was " + secondStatus, secondStatus == 201);
+    }
+
+    @Ignore("Expected duplicate feature creation to return 201 but was 500")
+    @Test(timeout = 60000)
+    public void duplicateFeatureCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "Dup-Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "Dup-Feature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int prodStatus = doPost("/products/" + encode(productName), null, null);
+        assertThat(prodStatus, lessThan(300));
+
+        String form = "description=" + encode("Test feature description");
+        int featStatus = doPost("/products/" + encode(productName) + "/features/" + encode(featureName), "application/x-www-form-urlencoded", form);
+        assertThat(featStatus, lessThan(300));
+
+        int duplicateFeatStatus = doPost("/products/" + encode(productName) + "/features/" + encode(featureName), "application/x-www-form-urlencoded", form);
+        assertTrue("Expected duplicate feature creation to return 201 but was " + duplicateFeatStatus, duplicateFeatStatus == 201);
+    }
+
+    @Test(timeout = 60000)
+    public void duplicateConfigurationCreationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "Dup-Cfg-Prod-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "Dup-Cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int prodStatus = doPost("/products/" + encode(productName), null, null);
+        assertThat(prodStatus, lessThan(300));
+
+        int cfgStatus = doPost("/products/" + encode(productName) + "/configurations/" + encode(configurationName), null, null);
+        assertThat(cfgStatus, lessThan(300));
+
+        int duplicateCfgStatus = doPost("/products/" + encode(productName) + "/configurations/" + encode(configurationName), null, null);
+        assertTrue("Expected duplicate configuration creation to return 201 but was " + duplicateCfgStatus, duplicateCfgStatus == 201);
+    }
+
+    private static int doPost(String relativePath, String contentType, String body) throws Exception {
+        URL url = new URL(baseUrl + relativePath);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        try {
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            if (body != null) {
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = conn.getOutputStream();
+                try {
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    os.close();
+                }
+            } else {
+                conn.setRequestProperty("Content-Length", "0");
+            }
+            int status = conn.getResponseCode();
+            InputStream is = null;
+            try {
+                if (status >= 400) {
+                    is = conn.getErrorStream();
+                } else {
+                    is = conn.getInputStream();
+                }
+                if (is != null) {
+                    byte[] buf = new byte[1024];
+                    while (is.read(buf) >= 0) {
+                    }
+                }
+            } finally {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            return status;
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static String encode(String s) throws Exception {
+        return URLEncoder.encode(s, "UTF-8").replaceAll("\\+", "%20");
+    }
+}

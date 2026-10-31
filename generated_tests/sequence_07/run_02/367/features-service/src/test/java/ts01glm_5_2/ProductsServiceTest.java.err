@@ -1,0 +1,291 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.UUID;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Scanner;
+
+public class ProductsServiceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+    }
+
+    private String uniqueProductName() {
+        return "test-prod-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueFeatureName() {
+        return "test-feat-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String uniqueConfigName() {
+        return "test-cfg-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String buildPath(String template, Object... args) {
+        String result = template;
+        for (Object arg : args) {
+            int start = result.indexOf('{');
+            int end = result.indexOf('}', start);
+            if (start == -1 || end == -1) {
+                break;
+            }
+            String encoded = urlEncode(String.valueOf(arg));
+            result = result.substring(0, start) + encoded + result.substring(end + 1);
+        }
+        return result;
+    }
+
+    private String urlEncode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private int sendRequest(String method, String pathTemplate, Map<String, String> formParams, Object... pathArgs) throws IOException {
+        String path = buildPath(pathTemplate, pathArgs);
+        String fullUrl = baseUrl + path;
+        URL url = new URL(fullUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        if ("POST".equalsIgnoreCase(method) && formParams != null && !formParams.isEmpty()) {
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            String body = formEncode(formParams);
+            byte[] bytes = body.getBytes("UTF-8");
+            conn.setRequestProperty("Content-Length", String.valueOf(bytes.length));
+            OutputStream os = null;
+            try {
+                os = conn.getOutputStream();
+                os.write(bytes);
+                os.flush();
+            } finally {
+                if (os != null) {
+                    try { os.close(); } catch (IOException ignored) {}
+                }
+            }
+        }
+        int status;
+        try {
+            status = conn.getResponseCode();
+            InputStream is = (status >= 200 && status < 400) ? conn.getInputStream() : conn.getErrorStream();
+            if (is != null) {
+                try {
+                    Scanner s = new Scanner(is, "UTF-8");
+                    while (s.hasNextLine()) {
+                        s.nextLine();
+                    }
+                    s.close();
+                } finally {
+                    try { is.close(); } catch (IOException ignored) {}
+                }
+            }
+        } finally {
+            conn.disconnect();
+        }
+        return status;
+    }
+
+    private String formEncode(Map<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(urlEncode(e.getKey())).append("=").append(urlEncode(e.getValue()));
+        }
+        return sb.toString();
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToProductSuccess() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+
+        int status1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(status1 < 300);
+
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("description", "Test feature description");
+        int status2 = sendRequest("POST", "/products/{productName}/features/{featureName}", params, productName, featureName);
+        Assert.assertEquals(201, status2);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddDuplicateFeatureReturnsError() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+
+        int s1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(s1 < 300);
+
+        Map<String, String> p1 = new LinkedHashMap<String, String>();
+        p1.put("description", "First description");
+        int s2 = sendRequest("POST", "/products/{productName}/features/{featureName}", p1, productName, featureName);
+        Assert.assertTrue(s2 < 300);
+
+        Map<String, String> p2 = new LinkedHashMap<String, String>();
+        p2.put("description", "Second description");
+        int s3 = sendRequest("POST", "/products/{productName}/features/{featureName}", p2, productName, featureName);
+        Assert.assertEquals(500, s3);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureActiveInConfiguration() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+        String configName = uniqueConfigName();
+
+        int s1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(s1 < 300);
+
+        Map<String, String> p1 = new LinkedHashMap<String, String>();
+        p1.put("description", "Test feature");
+        int s2 = sendRequest("POST", "/products/{productName}/features/{featureName}", p1, productName, featureName);
+        Assert.assertTrue(s2 < 300);
+
+        int s3 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", null, productName, configName);
+        Assert.assertTrue(s3 < 300);
+
+        int s4 = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, productName, configName, featureName);
+        Assert.assertTrue(s4 < 300);
+
+        int s5 = sendRequest("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        Assert.assertEquals(204, s5);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureNotInAnyConfiguration() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+
+        int s1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(s1 < 300);
+
+        Map<String, String> p1 = new LinkedHashMap<String, String>();
+        p1.put("description", "Test feature");
+        int s2 = sendRequest("POST", "/products/{productName}/features/{featureName}", p1, productName, featureName);
+        Assert.assertTrue(s2 < 300);
+
+        int s3 = sendRequest("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        Assert.assertEquals(204, s3);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintSuccess() throws Exception {
+        String productName = uniqueProductName();
+        String sourceFeature = uniqueFeatureName();
+        String requiredFeature = uniqueFeatureName();
+
+        int s1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(s1 < 300);
+
+        Map<String, String> p1 = new LinkedHashMap<String, String>();
+        p1.put("description", "Source feature");
+        int s2 = sendRequest("POST", "/products/{productName}/features/{featureName}", p1, productName, sourceFeature);
+        Assert.assertTrue(s2 < 300);
+
+        Map<String, String> p2 = new LinkedHashMap<String, String>();
+        p2.put("description", "Required feature");
+        int s3 = sendRequest("POST", "/products/{productName}/features/{featureName}", p2, productName, requiredFeature);
+        Assert.assertTrue(s3 < 300);
+
+        Map<String, String> p3 = new LinkedHashMap<String, String>();
+        p3.put("sourceFeature", sourceFeature);
+        p3.put("requiredFeature", requiredFeature);
+        int s4 = sendRequest("POST", "/products/{productName}/constraints/requires", p3, productName);
+        Assert.assertEquals(201, s4);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintSuccess() throws Exception {
+        String productName = uniqueProductName();
+        String sourceFeature = uniqueFeatureName();
+        String excludedFeature = uniqueFeatureName();
+
+        int s1 = sendRequest("POST", "/products/{productName}", null, productName);
+        Assert.assertTrue(s1 < 300);
+
+        Map<String, String> p1 = new LinkedHashMap<String, String>();
+        p1.put("description", "Source feature");
+        int s2 = sendRequest("POST", "/products/{productName}/features/{featureName}", p1, productName, sourceFeature);
+        Assert.assertTrue(s2 < 300);
+
+        Map<String, String> p2 = new LinkedHashMap<String, String>();
+        p2.put("description", "Excluded feature");
+        int s3 = sendRequest("POST", "/products/{productName}/features/{featureName}", p2, productName, excludedFeature);
+        Assert.assertTrue(s3 < 300);
+
+        Map<String, String> p3 = new LinkedHashMap<String, String>();
+        p3.put("sourceFeature", sourceFeature);
+        p3.put("excludedFeature", excludedFeature);
+        int s4 = sendRequest("POST", "/products/{productName}/constraints/excludes", p3, productName);
+        Assert.assertEquals(201, s4);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddFeatureToNonExistentProduct() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+
+        Map<String, String> p = new LinkedHashMap<String, String>();
+        p.put("description", "Test feature");
+        int s = sendRequest("POST", "/products/{productName}/features/{featureName}", p, productName, featureName);
+        Assert.assertEquals(500, s);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteFeatureFromNonExistentProduct() throws Exception {
+        String productName = uniqueProductName();
+        String featureName = uniqueFeatureName();
+
+        int s = sendRequest("DELETE", "/products/{productName}/features/{featureName}", null, productName, featureName);
+        Assert.assertEquals(500, s);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintToNonExistentProduct() throws Exception {
+        String productName = uniqueProductName();
+
+        Map<String, String> p = new LinkedHashMap<String, String>();
+        p.put("sourceFeature", "FeatureA");
+        p.put("requiredFeature", "FeatureB");
+        int s = sendRequest("POST", "/products/{productName}/constraints/requires", p, productName);
+        Assert.assertEquals(500, s);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintToNonExistentProduct() throws Exception {
+        String productName = uniqueProductName();
+
+        Map<String, String> p = new LinkedHashMap<String, String>();
+        p.put("sourceFeature", "FeatureA");
+        p.put("excludedFeature", "FeatureB");
+        int s = sendRequest("POST", "/products/{productName}/constraints/excludes", p, productName);
+        Assert.assertEquals(500, s);
+    }
+}

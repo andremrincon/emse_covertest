@@ -1,0 +1,64 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ContributionTest {
+
+    @BeforeClass
+    public static void init() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080/rest");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testValidContributionAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":100,\"token\":\"" + UUID.randomUUID().toString() + "\"}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(202);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingTokenBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":50}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMissingAmountBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"token\":\"" + UUID.randomUUID().toString() + "\"}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testNegativeAmountBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":-5,\"token\":\"" + UUID.randomUUID().toString() + "\"}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testMalformedJsonBadRequest() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{ this is : not json ";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testExtraFieldsAccepted() {
+        given().when().get("/v1/all").then().statusCode(lessThan(300));
+        String payload = "{\"amount\":10,\"token\":\"" + UUID.randomUUID().toString() + "\",\"currency\":\"USD\",\"note\":\"thanks\"}";
+        given().contentType("application/json").body(payload).when().post("/contribute").then().statusCode(202);
+    }
+}

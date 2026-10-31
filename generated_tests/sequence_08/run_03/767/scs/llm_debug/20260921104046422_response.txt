@@ -1,0 +1,54 @@
+```java
+package ts01qwen3_7_plus;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class CalcTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testConstantOperators() {
+        given().when().get("/api/calc/pi/1.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/e/1.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnaryOperators() {
+        given().when().get("/api/calc/sqrt/4.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/log/10.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/sine/0.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/cosine/0.0/1.0").then().statusCode(200);
+        given().when().get("/api/calc/tangent/0.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryAddSubtractOperators() {
+        given().when().get("/api/calc/plus/5.0/3.0").then().statusCode(200);
+        given().when().get("/api/calc/subtract/5.0/3.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testBinaryMultiplyDivideOperators() {
+        given().when().get("/api/calc/multiply/5.0/3.0").then().statusCode(200);
+        given().when().get("/api/calc/divide/6.0/2.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnknownOperator() {
+        given().when().get("/api/calc/unknown/1.0/1.0").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testInvalidArguments() {
+        given().when().get("/api/calc/plus/abc/1.0").then().statusCode(400);
+    }
+}
+```

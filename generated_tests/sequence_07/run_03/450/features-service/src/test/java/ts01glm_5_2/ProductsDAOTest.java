@@ -1,0 +1,132 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class ProductsDAOTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaRequiresEndpoint() {
+        String productName = "TestReq-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "RAID-Controller-Card").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "128GB-ECC-RAM").then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "RAID-Controller-Card")
+            .param("requiredFeature", "128GB-ECC-RAM");
+
+        req.when()
+            .post("/products/{productName}/constraints/requires", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testInsertConstraintViaExcludesEndpoint() {
+        String productName = "TestExc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "CPU-i9-13900H").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "Integrated-Graphics-Only").then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "CPU-i9-13900H")
+            .param("excludedFeature", "Integrated-Graphics-Only");
+
+        req.when()
+            .post("/products/{productName}/constraints/excludes", productName)
+        .then()
+            .statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithRequiresConstraint() {
+        String productName = "TestDelReq-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "RAID-Controller-Card").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "128GB-ECC-RAM").then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "RAID-Controller-Card")
+            .param("requiredFeature", "128GB-ECC-RAM");
+
+        req.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/{productName}", productName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithExcludesConstraint() {
+        String productName = "TestDelExc-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "CPU-i9-13900H").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "Integrated-Graphics-Only").then().statusCode(lessThan(300));
+
+        RequestSpecification req = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "CPU-i9-13900H")
+            .param("excludedFeature", "Integrated-Graphics-Only");
+
+        req.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/{productName}", productName)
+            .then()
+            .statusCode(204);
+    }
+
+    @Test(timeout = 60000)
+    public void testDeleteConstraintsForProductWithMultipleConstraints() {
+        String productName = "TestDelMulti-" + UUID.randomUUID().toString().substring(0, 8);
+
+        given().when().post("/products/{productName}", productName).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatureA").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatureB").then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", productName, "FeatureC").then().statusCode(lessThan(300));
+
+        RequestSpecification req1 = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "FeatureA")
+            .param("requiredFeature", "FeatureB");
+
+        req1.when().post("/products/{productName}/constraints/requires", productName).then().statusCode(lessThan(300));
+
+        RequestSpecification req2 = RestAssured.given()
+            .contentType(ContentType.URLENC)
+            .param("sourceFeature", "FeatureA")
+            .param("excludedFeature", "FeatureC");
+
+        req2.when().post("/products/{productName}/constraints/excludes", productName).then().statusCode(lessThan(300));
+
+        given()
+            .when()
+            .delete("/products/{productName}", productName)
+            .then()
+            .statusCode(204);
+    }
+}

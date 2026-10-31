@@ -1,0 +1,264 @@
+package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class ConstraintExcludesTest {
+
+    private String baseUri;
+
+    @Before
+    public void setUp() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            baseUri = "http://localhost:8080";
+        } else {
+            baseUri = env;
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraint() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertEquals(201, doFormPost("/products/{productName}/constraints/excludes", form, productName).status);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateBothFeaturesActive() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatA" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "FeatB" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(doFormPost("/products/{productName}/constraints/excludes", form, productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}", productName, configName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).status < 300);
+
+        Response r = doGet("/products/{productName}/configurations/{configurationName}", productName, configName);
+        Boolean valid = extractValid(r.body);
+        Assert.assertNotNull(valid);
+        Assert.assertEquals(false, valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateOnlySourceActive() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatA" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "FeatB" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(doFormPost("/products/{productName}/constraints/excludes", form, productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}", productName, configName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, sourceFeature).status < 300);
+
+        Response r = doGet("/products/{productName}/configurations/{configurationName}", productName, configName);
+        Boolean valid = extractValid(r.body);
+        Assert.assertNotNull(valid);
+        Assert.assertEquals(true, valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateOnlyExcludedActive() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatA" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "FeatB" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(doFormPost("/products/{productName}/constraints/excludes", form, productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}", productName, configName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configName, excludedFeature).status < 300);
+
+        Response r = doGet("/products/{productName}/configurations/{configurationName}", productName, configName);
+        Boolean valid = extractValid(r.body);
+        Assert.assertNotNull(valid);
+        Assert.assertEquals(true, valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testEvaluateNeitherFeatureActive() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "FeatA" + UUID.randomUUID().toString().substring(0, 8);
+        String excludedFeature = "FeatB" + UUID.randomUUID().toString().substring(0, 8);
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(doFormPost("/products/{productName}/constraints/excludes", form, productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/configurations/{configurationName}", productName, configName).status < 300);
+
+        Response r = doGet("/products/{productName}/configurations/{configurationName}", productName, configName);
+        Boolean valid = extractValid(r.body);
+        Assert.assertNotNull(valid);
+        Assert.assertEquals(true, valid);
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductWithExcludesConstraint() {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String sourceFeature = "CPU-i9-13900H";
+        String excludedFeature = "Integrated-Graphics-Only";
+
+        Assert.assertTrue(doPost("/products/{productName}", productName).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, sourceFeature).status < 300);
+        Assert.assertTrue(doPost("/products/{productName}/features/{featureName}", productName, excludedFeature).status < 300);
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("sourceFeature", sourceFeature);
+        form.put("excludedFeature", excludedFeature);
+        Assert.assertTrue(doFormPost("/products/{productName}/constraints/excludes", form, productName).status < 300);
+
+        Response r = doGet("/products/{productName}", productName);
+        Assert.assertEquals(200, r.status);
+    }
+
+    private Response doPost(String pathTemplate, String... params) {
+        return sendRequest("POST", pathTemplate, null, null, params);
+    }
+
+    private Response doFormPost(String pathTemplate, Map<String, String> formParams, String... params) {
+        String body = buildFormBody(formParams);
+        return sendRequest("POST", pathTemplate, body, "application/x-www-form-urlencoded", params);
+    }
+
+    private Response doGet(String pathTemplate, String... params) {
+        return sendRequest("GET", pathTemplate, null, null, params);
+    }
+
+    private String buildFormBody(Map<String, String> formParams) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            boolean first = true;
+            for (Map.Entry<String, String> e : formParams.entrySet()) {
+                if (!first) sb.append('&');
+                first = false;
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                sb.append('=');
+                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return sb.toString();
+    }
+
+    private Response sendRequest(String method, String pathTemplate, String body, String contentType, String... params) {
+        HttpURLConnection con = null;
+        try {
+            String formatted = formatPath(pathTemplate, params);
+            URL url = new URL(baseUri + formatted);
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod(method);
+            con.setConnectTimeout(15000);
+            con.setReadTimeout(15000);
+            if (contentType != null) {
+                con.setRequestProperty("Content-Type", contentType);
+            }
+            if (body != null && ("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method))) {
+                con.setDoOutput(true);
+                byte[] out = body.getBytes("UTF-8");
+                con.setRequestProperty("Content-Length", String.valueOf(out.length));
+                OutputStream os = con.getOutputStream();
+                os.write(out);
+                os.flush();
+                os.close();
+            }
+            int status = con.getResponseCode();
+            InputStream is = status >= 400 ? con.getErrorStream() : con.getInputStream();
+            String resp = "";
+            if (is != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                br.close();
+                resp = sb.toString();
+            }
+            return new Response(status, resp);
+        } catch (Exception e) {
+            if (con != null) {
+                try {
+                    int status = con.getResponseCode();
+                    InputStream is = con.getErrorStream();
+                    String resp = "";
+                    if (is != null) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        try {
+                            while ((line = br.readLine()) != null) {
+                                sb.append(line);
+                            }
+                        } catch (Exception ex) {
+                        }
+                        resp = sb.toString();
+                    }
+                    return new Response(status, resp);
+                } catch (Exception ex) {
+                    throw new RuntimeException(e);
+                }
+            }
+            throw new RuntimeException(e);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
+    }
+
+    private String formatPath(String template, String... params) {
+        try {
+            String result = template;
+            for (String p : params) {
+                result = result.replaceFirst("\\{[^/}]+}", URLEncoder.encode(p, "UTF-8"));
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }

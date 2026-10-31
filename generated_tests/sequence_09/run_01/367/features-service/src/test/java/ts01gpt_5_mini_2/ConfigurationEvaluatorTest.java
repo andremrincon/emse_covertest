@@ -1,0 +1,72 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.hasItem;
+
+public class ConfigurationEvaluatorTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base", "http://localhost:8080");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToConfiguration_shouldReturn201() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "QuantumLeap-AI-Platform-" + uuid;
+        String configuration = "standard-gpu-cluster-" + uuid;
+        String feature = "distributed-training";
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+
+        Response act = given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void getConfigurationFeatures_afterAddingFeature_shouldReturn200() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "ultra-laptop-x1-" + uuid;
+        String configuration = "us-standard-16gb-" + uuid;
+        String feature = "wifi-6e";
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, feature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, feature).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration);
+        act.then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void requiresConstraint_triggersDerivedFeature_inConfigurationFeatures() {
+        String uuid = UUID.randomUUID().toString();
+        String product = "Enterprise-Server-X1-" + uuid;
+        String configuration = "production-" + uuid;
+        String sourceFeature = "RAID-Controller-Card-" + uuid;
+        String requiredFeature = "128GB-ECC-RAM-" + uuid;
+
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, sourceFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/features/{featureName}", product, requiredFeature).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}", product, configuration).then().statusCode(lessThan(300));
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, configuration, sourceFeature).then().statusCode(lessThan(300));
+        given().formParam("sourceFeature", sourceFeature).formParam("requiredFeature", requiredFeature).when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+
+        Response act = given().when().get("/products/{productName}/configurations/{configurationName}/features", product, configuration);
+        act.then().statusCode(200).body("", hasItem(sourceFeature));
+    }
+}

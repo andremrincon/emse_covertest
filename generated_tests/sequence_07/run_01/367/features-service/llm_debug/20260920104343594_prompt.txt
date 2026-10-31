@@ -1,0 +1,303 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.WrongProductConfigurationExceptionTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=testExcludesConstraintViolationOnGetActiveFeatures TYPE=FAILURE
+
+
+[2] METHOD=testRequiresConstraintViolationOnGetConfiguration TYPE=FAILURE
+
+
+[3] METHOD=testExcludesConstraintViolationOnGetConfiguration TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=testExcludesConstraintViolationOnGetActiveFeatures FAILURE AT LINE 111
+java.lang.AssertionError
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.testExcludesConstraintViolationOnGetActiveFeatures(WrongProductConfigurationExceptionTest.java:111)
+CODE CONTEXT:
+   108:         Assert.assertTrue(rc < 300);
+   109: 
+   110:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+   111:         Assert.assertTrue(rc < 300);  ← FAILURE HERE
+   112: 
+   113:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+   114:         Assert.assertTrue(rc < 300);
+
+[2] METHOD=testRequiresConstraintViolationOnGetConfiguration FAILURE AT LINE 77
+java.lang.AssertionError
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.testRequiresConstraintViolationOnGetConfiguration(WrongProductConfigurationExceptionTest.java:77)
+CODE CONTEXT:
+    74:         Assert.assertTrue(rc < 300);
+    75: 
+    76:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+    77:         Assert.assertTrue(rc < 300);  ← FAILURE HERE
+    78: 
+    79:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+    80:         Assert.assertTrue(rc < 300);
+
+[3] METHOD=testExcludesConstraintViolationOnGetConfiguration FAILURE AT LINE 40
+java.lang.AssertionError
+at ts01glm_5_2.WrongProductConfigurationExceptionTest.testExcludesConstraintViolationOnGetConfiguration(WrongProductConfigurationExceptionTest.java:40)
+CODE CONTEXT:
+    37:         Assert.assertTrue(rc < 300);
+    38: 
+    39:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+    40:         Assert.assertTrue(rc < 300);  ← FAILURE HERE
+    41: 
+    42:         rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+    43:         Assert.assertTrue(rc < 300);
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.util.UUID;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+public class WrongProductConfigurationExceptionTest {
+
+    private String baseUrl;
+
+    @Before
+    public void setUp() {
+        String env = System.getenv("BASE_URL");
+        baseUrl = env != null ? env : "http://localhost:8080";
+    }
+
+    @Test(timeout = 60000)
+    public void testExcludesConstraintViolationOnGetConfiguration() throws Exception {
+        String productName = "test-excl-get-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int rc;
+
+        rc = sendRequest("POST", "/products/{productName}", null, null, productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", null, null, productName, configName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configName, featureB);
+        Assert.assertTrue(rc < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", featureA);
+        form.put("excludedFeature", featureB);
+        rc = sendRequest("POST", "/products/{productName}/constraints/excludes", form, "application/x-www-form-urlencoded", productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", null, null, productName, configName);
+        Assert.assertEquals(500, rc);
+    }
+
+    @Test(timeout = 60000)
+    public void testRequiresConstraintViolationOnGetConfiguration() throws Exception {
+        String productName = "test-req-get-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int rc;
+
+        rc = sendRequest("POST", "/products/{productName}", null, null, productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", null, null, productName, configName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", featureA);
+        form.put("requiredFeature", featureB);
+        rc = sendRequest("POST", "/products/{productName}/constraints/requires", form, "application/x-www-form-urlencoded", productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("GET", "/products/{productName}/configurations/{configurationName}", null, null, productName, configName);
+        Assert.assertEquals(500, rc);
+    }
+
+    @Test(timeout = 60000)
+    public void testExcludesConstraintViolationOnGetActiveFeatures() throws Exception {
+        String productName = "test-excl-feat-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureA = "featA-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureB = "featB-" + UUID.randomUUID().toString().substring(0, 8);
+        String configName = "cfg-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int rc;
+
+        rc = sendRequest("POST", "/products/{productName}", null, null, productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/features/{featureName}", null, null, productName, featureB);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}", null, null, productName, configName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configName, featureA);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("POST", "/products/{productName}/configurations/{configurationName}/features/{featureName}", null, null, productName, configName, featureB);
+        Assert.assertTrue(rc < 300);
+
+        Map<String, String> form = new LinkedHashMap<String, String>();
+        form.put("sourceFeature", featureA);
+        form.put("excludedFeature", featureB);
+        rc = sendRequest("POST", "/products/{productName}/constraints/excludes", form, "application/x-www-form-urlencoded", productName);
+        Assert.assertTrue(rc < 300);
+
+        rc = sendRequest("GET", "/products/{productName}/configurations/{configurationName}/features", null, null, productName, configName);
+        Assert.assertEquals(500, rc);
+    }
+
+    private int sendRequest(String method, String pathTemplate, Map<String, String> formParams, String contentType, Object... pathArgs) {
+        String path = buildPath(pathTemplate, pathArgs);
+        try {
+            if ("GET".equalsIgnoreCase(method) && formParams != null && !formParams.isEmpty()) {
+                String query = buildForm(formParams);
+                if (path.contains("?")) {
+                    path += "&" + query;
+                } else {
+                    path += "?" + query;
+                }
+            }
+            URL url = new URL(baseUrl + path);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(30000);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            if (formParams != null && !"GET".equalsIgnoreCase(method)) {
+                String body = buildForm(formParams);
+                byte[] bytes = body.getBytes("UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                OutputStream os = null;
+                try {
+                    os = conn.getOutputStream();
+                    os.write(bytes);
+                    os.flush();
+                } finally {
+                    if (os != null) {
+                        try { os.close(); } catch (IOException ignored) {}
+                    }
+                }
+            }
+            int rc = conn.getResponseCode();
+            InputStream is = null;
+            try {
+                if (rc >= 200 && rc < 400) {
+                    is = conn.getInputStream();
+                } else {
+                    is = conn.getErrorStream();
+                }
+                if (is != null) {
+                    byte[] buf = new byte[1024];
+                    while (is.read(buf) != -1) { }
+                }
+            } finally {
+                if (is != null) {
+                    try { is.close(); } catch (IOException ignored) {}
+                }
+                conn.disconnect();
+            }
+            return rc;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String buildPath(String template, Object... args) {
+        String result = template;
+        for (Object arg : args) {
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(String.valueOf(arg), "UTF-8");
+            } catch (Exception e) {
+                encoded = String.valueOf(arg);
+            }
+            result = result.replaceFirst("\\{[^/]+\\}", encoded);
+        }
+        return result;
+    }
+
+    private String buildForm(Map<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            try {
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+                sb.append("=");
+                sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+            } catch (Exception ex) {
+                sb.append(e.getKey()).append("=").append(e.getValue());
+            }
+        }
+        return sb.toString();
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

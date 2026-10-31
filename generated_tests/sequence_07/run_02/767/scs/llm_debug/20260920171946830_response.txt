@@ -1,0 +1,78 @@
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+import static org.hamcrest.Matchers.*;
+
+public class TitleTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            baseUrl = "http://localhost:8080";
+        }
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordTwoReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/two/anything/anything")
+            .then()
+                .statusCode(200)
+                .body(equalTo("2"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordForReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/for/anything/anything")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtWordFourReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/four/anything/anything")
+            .then()
+                .statusCode(200)
+                .body(equalTo("4"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtSeeYouReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/see/you/anything")
+            .then()
+                .statusCode(200)
+                .body(equalTo("cu"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtByTheWayReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/by/the/way")
+            .then()
+                .statusCode(200)
+                .body(equalTo("btw"));
+    }
+
+    @Test(timeout = 60000)
+    public void testText2TxtAreReturnsAbbreviation() {
+        RestAssured.given()
+            .when()
+                .get("/api/text2txt/are/anything/anything")
+            .then()
+                .statusCode(200)
+                .body(equalTo("r"));
+    }
+}

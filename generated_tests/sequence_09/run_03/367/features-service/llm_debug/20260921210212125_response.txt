@@ -1,0 +1,116 @@
+package ts01gpt_5_mini_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.hamcrest.MatcherAssert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.is;
+
+public class ConstraintRequiresTest {
+
+    @BeforeClass
+    public static void setupClass() {
+        String base = System.getProperty("api.baseUrl");
+        if (base == null || base.isEmpty()) base = System.getenv("API_BASE_URL");
+        if (base == null || base.isEmpty()) base = "http://localhost:8080";
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testCreateExcludesConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", product);
+        MatcherAssert.assertThat(resp.getStatusCode(), is(201));
+    }
+
+    @Test(timeout = 60000)
+    public void testBothActiveFeaturesMakeConfigurationInvalid() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String src = "src-" + UUID.randomUUID().toString();
+        String excl = "excl-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, src).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excl).then().statusCode(lessThan(300));
+        RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        MatcherAssert.assertThat(act.jsonPath().getBoolean("valid"), is(false));
+    }
+
+    @Test(timeout = 60000)
+    public void testOnlySourceActiveConfigurationRemainsValid() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String src = "src-" + UUID.randomUUID().toString();
+        String excl = "excl-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, src).then().statusCode(lessThan(300));
+        RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        MatcherAssert.assertThat(act.jsonPath().getBoolean("valid"), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testOnlyExcludedActiveConfigurationRemainsValid() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String config = "conf-" + UUID.randomUUID().toString();
+        String src = "src-" + UUID.randomUUID().toString();
+        String excl = "excl-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, src).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/features/{featureName}", product, excl).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}", product, config).then().statusCode(lessThan(300));
+        RestAssured.given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", product, config, excl).then().statusCode(lessThan(300));
+        RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = RestAssured.given().when().get("/products/{productName}/configurations/{configurationName}", product, config);
+        MatcherAssert.assertThat(act.jsonPath().getBoolean("valid"), is(true));
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintExcludesSourceFeatureReturnedMatchesPosted() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String src = "src-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", src)
+                .formParam("excludedFeature", "some-excl")
+                .when().post("/products/{productName}/constraints/excludes", product);
+        MatcherAssert.assertThat(resp.jsonPath().getString("sourceFeature"), is(src));
+    }
+
+    @Test(timeout = 60000)
+    public void testConstraintExcludesExcludedFeatureReturnedMatchesPosted() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        String excl = "excl-" + UUID.randomUUID().toString();
+        RestAssured.given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response resp = RestAssured.given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "some-src")
+                .formParam("excludedFeature", excl)
+                .when().post("/products/{productName}/constraints/excludes", product);
+        MatcherAssert.assertThat(resp.jsonPath().getString("excludedFeature"), is(excl));
+    }
+}

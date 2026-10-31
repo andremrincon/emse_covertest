@@ -1,0 +1,140 @@
+```java
+package ts01glm_5_2_3;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1AlphaByCodeGBReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/alpha/GB")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFranceReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1NameFullTextReturnsLanguageFields() {
+        given()
+                .queryParam("fullText", "true")
+                .when()
+                .get("/v1/name/France")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangEsReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/lang/es")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1LangZhReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/lang/zh")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CurrencyUSDReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/currency/USD")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CallingCode1ReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1CapitalLondonReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/capital/London")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV1RegionEuropeReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v1/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangSpanishReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameGermanyReturnsLanguageFields() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("[0].languages", notNullValue());
+    }
+}
+```

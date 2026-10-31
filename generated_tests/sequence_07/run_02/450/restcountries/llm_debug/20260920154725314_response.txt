@@ -1,0 +1,143 @@
+```java
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+public class LanguageTest {
+
+    @BeforeClass
+    public static void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080/rest");
+        RestAssured.baseURI = baseUrl;
+    }
+
+    @Test(timeout = 60000)
+    public void testV2LangEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/lang/Spanish")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("es"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2NameEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/name/Germany")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/alpha/US")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AllEndpointReturnsLanguageData() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/all")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CurrencyEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/currency/EUR")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2CallingcodeEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/callingcode/1")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/region/Europe")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2SubregionEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/subregion/Western Europe")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2DemonymEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/demonym/American")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RegionalblocEndpointReturnsLanguageData() {
+        given()
+                .when()
+                .get("/v2/regionalbloc/EU")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("de"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2AlphaCodesEndpointReturnsLanguageData() {
+        given()
+                .queryParam("codes", "US,CA")
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2/alpha")
+                .then()
+                .statusCode(200)
+                .body("languages.iso639_1", hasItem("en"));
+    }
+
+    @Test(timeout = 60000)
+    public void testV2RootEndpointReturnsLanguageData() {
+        given()
+                .queryParam("fields", "name;languages")
+                .when()
+                .get("/v2")
+                .then()
+                .statusCode(200)
+                .body("languages", notNullValue());
+    }
+}
+```

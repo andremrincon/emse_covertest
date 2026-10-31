@@ -1,0 +1,147 @@
+package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ProductsConstraintsResourceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateProductThrowsDuplicatedObjectException() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int first = post("/products/{productName}", (Object) productName);
+        assertTrue(first < 300);
+
+        int second = post("/products/{productName}", (Object) productName);
+        assertEquals(500, second);
+    }
+
+    @Test(timeout = 60000)
+    public void creatingDuplicateConfigurationThrowsDuplicatedObjectException() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "TestConfig-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int p = post("/products/{productName}", (Object) productName);
+        assertTrue(p < 300);
+
+        int c1 = post("/products/{productName}/configurations/{configurationName}", (Object) productName, configurationName);
+        assertTrue(c1 < 300);
+
+        int c2 = post("/products/{productName}/configurations/{configurationName}", (Object) productName, configurationName);
+        assertEquals(500, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void addingDuplicateFeatureThrowsDuplicatedObjectException() throws Exception {
+        String productName = "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+        String featureName = "TestFeature-" + UUID.randomUUID().toString().substring(0, 8);
+
+        int p = post("/products/{productName}", (Object) productName);
+        assertTrue(p < 300);
+
+        int f1 = postForm("/products/{productName}/features/{featureName}", createForm("description", "Test description"), productName, featureName);
+        assertTrue(f1 < 300);
+
+        int f2 = postForm("/products/{productName}/features/{featureName}", createForm("description", "Test description"), productName, featureName);
+        assertEquals(500, f2);
+    }
+
+    private static int post(String pathTemplate, Object... pathParams) throws IOException {
+        String path = buildPath(pathTemplate, pathParams);
+        URL url = new URL(ensureBaseUrl() + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.connect();
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private static int postForm(String pathTemplate, Map<String, String> formParams, Object... pathParams) throws IOException {
+        String path = buildPath(pathTemplate, pathParams);
+        URL url = new URL(ensureBaseUrl() + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        String body = encodeForm(formParams);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"));
+        writer.write(body);
+        writer.flush();
+        writer.close();
+        int code = conn.getResponseCode();
+        conn.disconnect();
+        return code;
+    }
+
+    private static String ensureBaseUrl() {
+        if (baseUrl.endsWith("/")) {
+            return baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl;
+    }
+
+    private static String buildPath(String template, Object... values) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        Pattern p = Pattern.compile("\\{[^}]+}");
+        Matcher m = p.matcher(template);
+        int idx = 0;
+        int last = 0;
+        while (m.find()) {
+            sb.append(template, last, m.start());
+            if (idx < values.length) {
+                sb.append(URLEncoder.encode(String.valueOf(values[idx]), "UTF-8"));
+            } else {
+                sb.append(m.group());
+            }
+            idx++;
+            last = m.end();
+        }
+        sb.append(template.substring(last));
+        return sb.toString();
+    }
+
+    private static Map<String, String> createForm(String key, String value) {
+        java.util.HashMap<String, String> map = new java.util.HashMap<String, String>();
+        map.put(key, value);
+        return map;
+    }
+
+    private static String encodeForm(Map<String, String> form) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : form.entrySet()) {
+            if (!first) {
+                sb.append('&');
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append('=');
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+}

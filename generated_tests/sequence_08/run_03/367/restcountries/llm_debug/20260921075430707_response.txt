@@ -1,0 +1,46 @@
+package ts01qwen3_7_plus_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CurrencyTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("BASE_URL", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testSetCode() {
+        given()
+            .pathParam("currency", "EUR")
+        .when()
+            .get("/v2/currency/{currency}")
+        .then()
+            .body("currencies[0].code", equalTo("EUR"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetName() {
+        given()
+            .pathParam("currency", "USD")
+        .when()
+            .get("/v1/currency/{currency}")
+        .then()
+            .body("currencies[0].name", equalTo("United States dollar"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSetSymbol() {
+        given()
+            .pathParam("alphacode", "US")
+        .when()
+            .get("/v2/alpha/{alphacode}")
+        .then()
+            .body("currencies[0].symbol", equalTo("$"));
+    }
+}

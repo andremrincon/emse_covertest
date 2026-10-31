@@ -1,0 +1,58 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class StripeRestTest {
+
+    @Before
+    public void setup() {
+        String baseUri = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080/rest";
+        RestAssured.baseURI = baseUri;
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithMissingToken() {
+        String endpoint = "/contribute";
+        String requestBody = "{\"amount\": 100}";
+
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body(requestBody)
+        .when()
+            .post(endpoint)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithBlankToken() {
+        String endpoint = "/contribute";
+        String requestBody = "{\"token\": \"   \", \"amount\": 100}";
+
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body(requestBody)
+        .when()
+            .post(endpoint)
+        .then()
+            .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testContributeWithValidTokenFormat() {
+        String endpoint = "/contribute";
+        String requestBody = "{\"token\": \"tok_1234567890abcdef\", \"amount\": 500}";
+
+        given()
+            .contentType("application/json;charset=utf-8")
+            .body(requestBody)
+        .when()
+            .post(endpoint)
+        .then()
+            .statusCode(400);
+    }
+}

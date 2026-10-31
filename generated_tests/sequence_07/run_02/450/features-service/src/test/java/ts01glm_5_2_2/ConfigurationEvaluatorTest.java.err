@@ -1,0 +1,152 @@
+package ts01glm_5_2_2;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertTrue;
+
+public class ConfigurationEvaluatorTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            RestAssured.baseURI = baseUrl;
+        } else {
+            RestAssured.baseURI = "http://localhost:8080";
+        }
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithNoConstraintsReturnsActiveFeatures() {
+        String productName = "EvalTest-NoConstraints-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "default-config";
+        String featureName = "FeatureA-" + UUID.randomUUID().toString().substring(0, 6);
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureName);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureName);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithExcludesConstraintSatisfied() {
+        String productName = "EvalTest-ExcludesOk-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base";
+        String sourceFeature = "CPU-i9";
+        String excludedFeature = "Integrated-Graphics";
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature);
+        given().when().post("/products/{productName}/constraints/excludes", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithExcludesConstraintViolated() {
+        String productName = "EvalTest-ExcludesBad-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base";
+        String sourceFeature = "SSD-Storage";
+        String excludedFeature = "HDD-Storage";
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        given().when().post("/products/{productName}/features/{featureName}", productName, excludedFeature);
+        given().when().post("/products/{productName}/constraints/excludes", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("excludedFeature", excludedFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, excludedFeature);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithRequiresConstraintProducesDerivedFeature() {
+        String productName = "EvalTest-Requires-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "standard";
+        String sourceFeature = "RAID-Controller";
+        String requiredFeature = "128GB-ECC-RAM";
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature);
+        given().when().post("/products/{productName}/constraints/requires", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature);
+
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        resp.then().statusCode(200);
+        List<String> features = resp.jsonPath().getList("");
+        assertTrue(features != null && features.contains(requiredFeature));
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithRequiresConstraintAlreadySatisfied() {
+        String productName = "EvalTest-ReqSat-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "base";
+        String sourceFeature = "Push-Notifications";
+        String requiredFeature = "User-Authentication";
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, sourceFeature);
+        given().when().post("/products/{productName}/features/{featureName}", productName, requiredFeature);
+        given().when().post("/products/{productName}/constraints/requires", productName)
+                .formParam("sourceFeature", sourceFeature)
+                .formParam("requiredFeature", requiredFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, sourceFeature);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, requiredFeature);
+
+        given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName)
+                .then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void evaluateConfigurationWithChainedRequiresProducesMultipleDerivedFeatures() {
+        String productName = "EvalTest-Chained-" + UUID.randomUUID().toString().substring(0, 8);
+        String configurationName = "prod";
+        String featureA = "FeatureA-" + UUID.randomUUID().toString().substring(0, 6);
+        String featureB = "FeatureB-" + UUID.randomUUID().toString().substring(0, 6);
+        String featureC = "FeatureC-" + UUID.randomUUID().toString().substring(0, 6);
+
+        given().when().post("/products/{productName}", productName);
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureA);
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureB);
+        given().when().post("/products/{productName}/features/{featureName}", productName, featureC);
+        given().when().post("/products/{productName}/constraints/requires", productName)
+                .formParam("sourceFeature", featureA)
+                .formParam("requiredFeature", featureB);
+        given().when().post("/products/{productName}/constraints/requires", productName)
+                .formParam("sourceFeature", featureB)
+                .formParam("requiredFeature", featureC);
+        given().when().post("/products/{productName}/configurations/{configurationName}", productName, configurationName);
+        given().when().post("/products/{productName}/configurations/{configurationName}/features/{featureName}", productName, configurationName, featureA);
+
+        Response resp = given().when().get("/products/{productName}/configurations/{configurationName}/features", productName, configurationName);
+        resp.then().statusCode(200);
+        List<String> features = resp.jsonPath().getList("");
+        assertTrue(features != null && features.contains(featureB));
+        assertTrue(features != null && features.contains(featureC));
+    }
+}

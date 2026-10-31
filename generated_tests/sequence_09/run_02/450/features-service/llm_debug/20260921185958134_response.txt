@@ -1,0 +1,84 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Before;
+import org.junit.Test;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThan;
+
+public class FeatureConstraintTest {
+
+    @Before
+    public void setup() {
+        String url = System.getProperty("baseUrl");
+        if (url == null || url.isEmpty()) {
+            url = System.getenv("BASE_URL");
+        }
+        if (url == null || url.isEmpty()) {
+            url = "http://localhost:8080";
+        }
+        RestAssured.baseURI = url;
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresConstraintReturns201() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "RAID-Controller-Card")
+                .formParam("requiredFeature", "128GB-ECC-RAM")
+                .when().post("/products/{productName}/constraints/requires", product);
+        act.then().statusCode(201);
+    }
+
+    @Test(timeout = 60000)
+    public void testAddExcludesConstraintBodyContainsId() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        Response act = given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "CPU-i9-13900H")
+                .formParam("excludedFeature", "Integrated-Graphics-Only")
+                .when().post("/products/{productName}/constraints/excludes", product);
+        act.then().body("id", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductIncludesConstraintIdAfterAddingRequires() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "Push-Notifications")
+                .formParam("requiredFeature", "User-Authentication")
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        act.then().body("constraints[0].id", notNullValue());
+    }
+
+    @Test(timeout = 60000)
+    public void testGetProductConstraintsSizeAfterAddingExcludes() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "Color-Black")
+                .formParam("excludedFeature", "Logo-White-On-Black")
+                .when().post("/products/{productName}/constraints/excludes", product).then().statusCode(lessThan(300));
+        Response act = given().when().get("/products/{productName}", product);
+        act.then().body("constraints.size()", greaterThan(0));
+    }
+
+    @Test(timeout = 60000)
+    public void testAddRequiresThenDeleteProductDoesNotError() {
+        String product = "prod-" + UUID.randomUUID().toString();
+        given().when().post("/products/{productName}", product).then().statusCode(lessThan(300));
+        given().contentType("application/x-www-form-urlencoded")
+                .formParam("sourceFeature", "FeatureA")
+                .formParam("requiredFeature", "FeatureB")
+                .when().post("/products/{productName}/constraints/requires", product).then().statusCode(lessThan(300));
+        Response act = given().when().delete("/products/{productName}", product);
+        act.then().statusCode(204);
+    }
+}

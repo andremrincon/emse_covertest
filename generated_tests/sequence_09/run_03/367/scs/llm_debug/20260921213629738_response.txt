@@ -1,0 +1,63 @@
+package ts01gpt_5_mini_3;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import io.restassured.RestAssured;
+import java.util.UUID;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.lessThan;
+
+public class Text2TxtTest {
+
+    @BeforeClass
+    public static void setup() {
+        String env = System.getenv("API_BASE_URL");
+        if (env == null || env.isEmpty()) {
+            env = System.getProperty("api.base.url", "http://localhost:8080");
+        }
+        RestAssured.baseURI = env;
+    }
+
+    @Test(timeout = 60000)
+    public void testSeeYou_returns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "two", "one", "three").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "you", "a", "b").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "and", "b", "c").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "see", "you", "later").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testByTheWay_returns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "for", "x", "y").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "are", "you", "ok").then().statusCode(lessThan(300));
+        given().when().get("/api/pat/{txt}", "The%20quick%20brown%20fox").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "by", "the", "way").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testTwo_returns200() {
+        given().when().get("/api/pat/{txt}", "sample").then().statusCode(lessThan(300));
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "two", "arg"+uid, "arg2").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testFor_returns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "four", "alpha", "beta").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "for", "quick", "brown").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testYou_returns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "and", "x", "y").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "hello", "world", "again").then().statusCode(lessThan(300));
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "you", "are", "here").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testAnd_returns200() {
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "see", "you", "now").then().statusCode(lessThan(300));
+        String uid = UUID.randomUUID().toString();
+        given().when().get("/api/text2txt/{w}/{x}/{y}", "and", "val"+uid, "oth").then().statusCode(200);
+    }
+}

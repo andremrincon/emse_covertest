@@ -1,0 +1,45 @@
+package ts01qwen3_7_plus_3;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+
+public class NotFoundExceptionMapperTest {
+
+    @Before
+    public void setUp() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080/rest");
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperAlphaCode() {
+        given()
+                .pathParam("alphacode", "XYZ")
+                .when()
+                .get("/v1/alpha/{alphacode}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperName() {
+        given()
+                .pathParam("name", "123")
+                .when()
+                .get("/v1/name/{name}")
+                .then()
+                .statusCode(404);
+    }
+
+    @Test(timeout = 60000)
+    public void testNotFoundExceptionMapperCurrency() {
+        given()
+                .pathParam("currency", "@#$")
+                .when()
+                .get("/v1/currency/{currency}")
+                .then()
+                .statusCode(404);
+    }
+}

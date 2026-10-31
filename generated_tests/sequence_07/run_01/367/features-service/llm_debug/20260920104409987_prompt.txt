@@ -1,0 +1,350 @@
+Fix the following Java test that is failing during execution.
+
+    TEST CLASS: ts01glm_5_2.ProductsServiceTest
+    TARGET JAVA VERSION: 1.8
+    FAILURE TYPE: FAILURE
+    REPAIR MODE: REGRESSION_MODE=TRUE
+
+    ERROR MESSAGE:
+    [1] METHOD=deleteFeatureOfProduct_featureActiveInConfiguration TYPE=FAILURE
+
+
+[2] METHOD=addRequiresConstraintToProduct_success TYPE=FAILURE
+
+
+[3] METHOD=addFeatureToProduct_success TYPE=FAILURE
+expected:<201> but was:<500>
+
+[4] METHOD=addFeatureToProduct_duplicate_throwsException TYPE=FAILURE
+
+
+[5] METHOD=deleteFeatureOfProduct_success TYPE=FAILURE
+
+
+[6] METHOD=addExcludesConstraintToProduct_success TYPE=FAILURE
+
+
+    FAILURE CONTEXT (focused stack frames and code lines near the failing assertion):
+    [1] METHOD=deleteFeatureOfProduct_featureActiveInConfiguration FAILURE AT LINE 152
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.deleteFeatureOfProduct_featureActiveInConfiguration(ProductsServiceTest.java:152)
+CODE CONTEXT:
+   149:         int c1 = doPost("/products/" + productName);
+   150:         Assert.assertTrue(c1 < 300);
+   151:         int c2 = doPost("/products/" + productName + "/features/FeatureD");
+   152:         Assert.assertTrue(c2 < 300);  ← FAILURE HERE
+   153:         int c3 = doPost("/products/" + productName + "/configurations/" + configName);
+   154:         Assert.assertTrue(c3 < 300);
+   155:         int c4 = doPost("/products/" + productName + "/configurations/" + configName + "/features/FeatureD");
+
+[2] METHOD=addRequiresConstraintToProduct_success FAILURE AT LINE 183
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addRequiresConstraintToProduct_success(ProductsServiceTest.java:183)
+CODE CONTEXT:
+   180:         int c0 = doPost("/products/" + productName);
+   181:         Assert.assertTrue(c0 < 300);
+   182:         int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+   183:         Assert.assertTrue(c1 < 300);  ← FAILURE HERE
+   184:         int c2 = doPost("/products/" + productName + "/features/RequiredFeature");
+   185:         Assert.assertTrue(c2 < 300);
+   186:         Map<String, String> params = new LinkedHashMap<String, String>();
+
+[3] METHOD=addFeatureToProduct_success FAILURE AT LINE 102
+java.lang.AssertionError: expected:<201> but was:<500>
+at ts01glm_5_2.ProductsServiceTest.addFeatureToProduct_success(ProductsServiceTest.java:102)
+CODE CONTEXT:
+    99:         int code1 = doPost("/products/" + productName);
+   100:         Assert.assertTrue(code1 < 300);
+   101:         int code2 = doPost("/products/" + productName + "/features/FeatureA");
+   102:         Assert.assertEquals(201, code2);  ← FAILURE HERE
+   103:     }
+   104: 
+   105:     @Test(timeout = 60000)
+
+[4] METHOD=addFeatureToProduct_duplicate_throwsException FAILURE AT LINE 122
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addFeatureToProduct_duplicate_throwsException(ProductsServiceTest.java:122)
+CODE CONTEXT:
+   119:         int c1 = doPost("/products/" + productName);
+   120:         Assert.assertTrue(c1 < 300);
+   121:         int c2 = doPost("/products/" + productName + "/features/FeatureA");
+   122:         Assert.assertTrue(c2 < 300);  ← FAILURE HERE
+   123:         int c3 = doPost("/products/" + productName + "/features/FeatureA");
+   124:         Assert.assertEquals(500, c3);
+   125:     }
+
+[5] METHOD=deleteFeatureOfProduct_success FAILURE AT LINE 140
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.deleteFeatureOfProduct_success(ProductsServiceTest.java:140)
+CODE CONTEXT:
+   137:         int c1 = doPost("/products/" + productName);
+   138:         Assert.assertTrue(c1 < 300);
+   139:         int c2 = doPost("/products/" + productName + "/features/FeatureC");
+   140:         Assert.assertTrue(c2 < 300);  ← FAILURE HERE
+   141:         int c3 = doDelete("/products/" + productName + "/features/FeatureC");
+   142:         Assert.assertEquals(204, c3);
+   143:     }
+
+[6] METHOD=addExcludesConstraintToProduct_success FAILURE AT LINE 209
+java.lang.AssertionError
+at ts01glm_5_2.ProductsServiceTest.addExcludesConstraintToProduct_success(ProductsServiceTest.java:209)
+CODE CONTEXT:
+   206:         int c0 = doPost("/products/" + productName);
+   207:         Assert.assertTrue(c0 < 300);
+   208:         int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+   209:         Assert.assertTrue(c1 < 300);  ← FAILURE HERE
+   210:         int c2 = doPost("/products/" + productName + "/features/ExcludedFeature");
+   211:         Assert.assertTrue(c2 < 300);
+   212:         Map<String, String> params = new LinkedHashMap<String, String>();
+
+    CURRENT TEST CODE:
+    package ts01glm_5_2;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Assert;
+
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.UUID;
+import java.util.LinkedHashMap;
+
+public class ProductsServiceTest {
+
+    private static String baseUrl;
+
+    @BeforeClass
+    public static void setUp() {
+        baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    private String uniqueProductName() {
+        return "TestProduct-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private static int doPost(String path) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.connect();
+        try {
+            return conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static int doDelete(String path) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setDoOutput(false);
+        conn.connect();
+        try {
+            return conn.getResponseCode();
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private static int doPostForm(String path, Map<String, String> params) throws Exception {
+        URL url = new URL(baseUrl + path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        byte[] postData = buildFormData(params).getBytes("UTF-8");
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+        conn.setDoOutput(true);
+        conn.connect();
+        OutputStream os = null;
+        try {
+            os = conn.getOutputStream();
+            os.write(postData);
+            os.flush();
+            return conn.getResponseCode();
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (Exception ignored) {
+                }
+            }
+            conn.disconnect();
+        }
+    }
+
+    private static String buildFormData(Map<String, String> params) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            if (!first) {
+                sb.append("&");
+            }
+            first = false;
+            sb.append(URLEncoder.encode(e.getKey(), "UTF-8"));
+            sb.append("=");
+            sb.append(URLEncoder.encode(e.getValue(), "UTF-8"));
+        }
+        return sb.toString();
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int code1 = doPost("/products/" + productName);
+        Assert.assertTrue(code1 < 300);
+        int code2 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertEquals(201, code2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_withDescription() throws Exception {
+        String productName = uniqueProductName();
+        int code1 = doPost("/products/" + productName);
+        Assert.assertTrue(code1 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("description", "Test description");
+        int code2 = doPostForm("/products/" + productName + "/features/FeatureB", params);
+        Assert.assertEquals(201, code2);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_duplicate_throwsException() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doPost("/products/" + productName + "/features/FeatureA");
+        Assert.assertEquals(500, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addFeatureToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c = doPost("/products/" + productName + "/features/FeatureE");
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureC");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doDelete("/products/" + productName + "/features/FeatureC");
+        Assert.assertEquals(204, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_featureActiveInConfiguration() throws Exception {
+        String productName = uniqueProductName();
+        String configName = "config-" + UUID.randomUUID().toString().substring(0, 8);
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/FeatureD");
+        Assert.assertTrue(c2 < 300);
+        int c3 = doPost("/products/" + productName + "/configurations/" + configName);
+        Assert.assertTrue(c3 < 300);
+        int c4 = doPost("/products/" + productName + "/configurations/" + configName + "/features/FeatureD");
+        Assert.assertTrue(c4 < 300);
+        int c5 = doDelete("/products/" + productName + "/features/FeatureD");
+        Assert.assertEquals(204, c5);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_featureNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c1 = doPost("/products/" + productName);
+        Assert.assertTrue(c1 < 300);
+        int c2 = doDelete("/products/" + productName + "/features/NonExistentFeature");
+        Assert.assertEquals(500, c2);
+    }
+
+    @Test(timeout = 60000)
+    public void deleteFeatureOfProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        int c = doDelete("/products/" + productName + "/features/FeatureF");
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c0 = doPost("/products/" + productName);
+        Assert.assertTrue(c0 < 300);
+        int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/RequiredFeature");
+        Assert.assertTrue(c2 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "SourceFeature");
+        params.put("requiredFeature", "RequiredFeature");
+        int c3 = doPostForm("/products/" + productName + "/constraints/requires", params);
+        Assert.assertEquals(201, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addRequiresConstraintToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "FeatureA");
+        params.put("requiredFeature", "FeatureB");
+        int c = doPostForm("/products/" + productName + "/constraints/requires", params);
+        Assert.assertEquals(500, c);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_success() throws Exception {
+        String productName = uniqueProductName();
+        int c0 = doPost("/products/" + productName);
+        Assert.assertTrue(c0 < 300);
+        int c1 = doPost("/products/" + productName + "/features/SourceFeature");
+        Assert.assertTrue(c1 < 300);
+        int c2 = doPost("/products/" + productName + "/features/ExcludedFeature");
+        Assert.assertTrue(c2 < 300);
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "SourceFeature");
+        params.put("excludedFeature", "ExcludedFeature");
+        int c3 = doPostForm("/products/" + productName + "/constraints/excludes", params);
+        Assert.assertEquals(201, c3);
+    }
+
+    @Test(timeout = 60000)
+    public void addExcludesConstraintToProduct_productNotFound() throws Exception {
+        String productName = uniqueProductName();
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("sourceFeature", "FeatureA");
+        params.put("excludedFeature", "FeatureB");
+        int c = doPostForm("/products/" + productName + "/constraints/excludes", params);
+        Assert.assertEquals(500, c);
+    }
+}
+
+    You are repairing the test to match the CURRENT API IMPLEMENTATION BEHAVIOR observed at runtime.
+
+    Mandatory rules:
+    1. Keep the same test class and test method names.
+    2. Do NOT add @Ignore, @Disabled, comments, sleeps, or weakened placeholder assertions.
+    3. Prefer the smallest code change that makes the test pass against the current implementation.
+    4. You MAY update statusCode assertions when the failure shows the implementation returns a different status.
+    5. You MAY update expected response-body values, JSON path assertions, request payload values, or request parameters when the failure proves the implementation behavior differs from the current assertion.
+    6. If a failure says Expected status code <X> but was <Y>, update the assertion to the single concrete observed status Y.
+    7. NEVER broaden assertions with anyOf(...), oneOf(...), logical OR, ranges, or multiple acceptable status codes/values.
+    8. If a failure says an expected value differs from the actual runtime value, update the assertion to the single observed runtime value and preserve validation of the same field.
+    9. When multiple failures are listed, fix all of them in the same returned class.
+    10. Preserve or improve coverage intent. Do not delete test methods unless the code becomes uncompilable otherwise.
+    11. Return a fully compilable Java test class.
+    12. AAA PATTERN — setup calls (ARRANGE) must use statusCode(lessThan(300)) instead of exact codes.
+        Only the ACT call (the one directly testing the target behavior) should have an exact statusCode assertion.
+        If the current code uses exact statusCode in setup calls, change those to statusCode(lessThan(300)).
+        Ensure `import static org.hamcrest.Matchers.lessThan;` is present.
+    13. Do NOT use Java APIs newer than TARGET JAVA VERSION. If TARGET JAVA VERSION is below 11, do not use String.repeat or any Java 11+ method.
+
+    Return ONLY the complete corrected Java test class code, without explanations or markdown formatting.

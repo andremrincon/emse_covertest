@@ -1,0 +1,53 @@
+package ts01gpt_5_mini;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CostfunsTest {
+
+    @BeforeClass
+    public static void setup() {
+        String base = System.getProperty("base.url");
+        if (base == null || base.isEmpty()) {
+            base = System.getenv("BASE_URL");
+        }
+        if (base == null || base.isEmpty()) {
+            base = "http://localhost:8080";
+        }
+        RestAssured.baseURI = base;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEquals5_sBaab_returns10() {
+        given().when().get("/api/pat/healthcheck").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 5, "baab").then().body(equalTo("10"));
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iLessThanMinus444_returns200() {
+        given().when().get("/api/pat/The").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -500, "aaa").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualMinus333_returns200() {
+        given().when().get("/api/calc/add/0/0").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -333, "ababba").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iGreaterThan666_returns200() {
+        given().when().get("/api/cookie/session-id/1/example.com").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", 700, "abab").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubject_iEqualsMinus4_sEqualsAbab_returns0() {
+        given().when().get("/api/text2txt/The/quick/brown").then().statusCode(lessThan(300));
+        given().when().get("/api/costfuns/{i}/{s}", -4, "abab").then().body(equalTo("10"));
+    }
+}

@@ -1,0 +1,78 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.Before;
+import org.junit.Test;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class RegexTest {
+
+    @Before
+    public void setUp() {
+        String baseUrl = System.getProperty("baseUrl", "http://localhost:8080");
+        RestAssured.baseURI = baseUrl;
+        RestAssured.urlEncodingEnabled = true;
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatch() {
+        String txt = "http://a/a";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatch() {
+        String txt = "mon01jan";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectFpeMatch() {
+        String txt = "12.34e+56";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectNoneMatch() {
+        String txt = "hello";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectUrlMatchWithFtp() {
+        String txt = "ftp://b-x/c_d";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(400);
+    }
+
+    @Test(timeout = 60000)
+    public void testSubjectDateMatchWithThur() {
+        String txt = "thur99dec";
+        given()
+                .when()
+                .get("/api/pat/{txt}", txt)
+                .then()
+                .statusCode(200);
+    }
+}

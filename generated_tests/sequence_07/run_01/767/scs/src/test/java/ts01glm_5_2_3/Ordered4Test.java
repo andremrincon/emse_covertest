@@ -1,0 +1,63 @@
+package ts01glm_5_2_3;
+
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+
+public class Ordered4Test {
+
+    private static final String BASE_URL = System.getProperty("baseUrl", "http://localhost:8080");
+
+    @Test(timeout = 60000)
+    public void testIncreasingOrder() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/apple/berry/zebra/mango")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testDecreasingOrder() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/zebra/mango/apple/berry")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedWithValidLengths() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/apple/zebra/mango/berry")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedXTooShort() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/apple/yaks/mango/berry")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedYTooLong() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/apple/berry/mango/bananas")
+            .then()
+                .statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testUnorderedZTooShort() {
+        given()
+            .when()
+                .get(BASE_URL + "/api/ordered4/apple/berry/cats/mango")
+            .then()
+                .statusCode(200);
+    }
+}

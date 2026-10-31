@@ -1,0 +1,55 @@
+package ts01gpt_5_mini_2;
+
+import org.junit.Test;
+import io.restassured.response.Response;
+import java.util.UUID;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.equalTo;
+
+public class CookieTest {
+    private static final String BASE_URL;
+    static {
+        String v = System.getProperty("api.base.url");
+        if (v == null) v = System.getenv("API_BASE_URL");
+        if (v == null) v = "http://localhost:8080";
+        BASE_URL = v;
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_long_value_starting_user_returns_1() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String unique = "user" + UUID.randomUUID().toString().replace("-", "").substring(0,8);
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", unique, "example.com");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_value_length_six_returns_0() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", "user12", "localhost");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void userid_with_long_value_not_starting_user_returns_0() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        String val = "abcd" + UUID.randomUUID().toString().replace("-", "").substring(0,6);
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "userid", val, "example.com");
+        act.then().body(equalTo("0"));
+    }
+
+    @Test(timeout = 60000)
+    public void session_with_am_and_abc_com_returns_1() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "session", "am", "abc.com");
+        act.then().body(equalTo("1"));
+    }
+
+    @Test(timeout = 60000)
+    public void session_with_other_values_returns_2() {
+        given().when().get(BASE_URL + "/api/pat/{txt}", "a").then().statusCode(lessThan(300));
+        Response act = given().when().get(BASE_URL + "/api/cookie/{name}/{val}/{site}", "session", "bm", "other.com");
+        act.then().body(equalTo("2"));
+    }
+}

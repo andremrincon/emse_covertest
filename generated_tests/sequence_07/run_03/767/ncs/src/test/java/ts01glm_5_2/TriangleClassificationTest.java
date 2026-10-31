@@ -1,0 +1,51 @@
+package ts01glm_5_2;
+
+import io.restassured.RestAssured;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.lessThan;
+
+public class TriangleClassificationTest {
+
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = System.getProperty("baseUrl", "http://localhost:8080");
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyNonPositiveEdge() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/0/4/5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangleMaxA() {
+        given().when().get("/api/triangle/2/3/4").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/5/1/2").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangleMaxB() {
+        given().when().get("/api/triangle/3/4/5").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/1/5/2").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyInvalidTriangleMaxC() {
+        given().when().get("/api/triangle/4/5/6").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/1/2/5").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyIsoscelesTriangle() {
+        given().when().get("/api/triangle/7/8/9").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/4/4/3").then().statusCode(200);
+    }
+
+    @Test(timeout = 60000)
+    public void testClassifyScaleneTriangle() {
+        given().when().get("/api/triangle/10/10/10").then().statusCode(lessThan(300));
+        given().when().get("/api/triangle/3/4/5").then().statusCode(200);
+    }
+}
